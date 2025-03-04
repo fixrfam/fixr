@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "jsx": "react",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "skipLibCheck": true,
+
+        "paths": {
+            "@/*": ["./*"]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        "./node_modules",
+        "./node_modules/*",
+        "./node_modules/@types/node/index.d.ts"
+    ],
+    "watchOptions": {
+        "watchFile": "fixedPollingInterval"
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "name": "@repo/schemas",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "tsc --watch",
+        "build": "tsc"
+    },
+    "exports": {
+        "./account": {
+            "types": "./src/account.ts",
+            "default": "./dist/account.js"
+        },
+        "./auth": {
+            "types": "./src/auth.ts",
+            "default": "./dist/auth.js"
+        },
+        "./credentials": {
+            "types": "./src/credentials.ts",
+            "default": "./dist/credentials.js"
+        },
+        "./utils": {
+            "types": "./src/utils.ts",
+            "default": "./dist/utils.js"
+        }
+    },
+    "devDependencies": {
+        "zod": "latest",
+        "@repo/typescript-config": "*",
+        "@types/eslint": "^8.56.5",
+        "@types/node": "^20.11.24",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "zod": "latest"
+    }
+}

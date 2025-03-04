@@ -1,0 +1,28 @@
+{
+    "name": "turbo",
+    "private": true,
+    "scripts": {
+        "build": "dotenv -- turbo build",
+        "dev": "dotenv -- turbo dev --parallel --no-daemon",
+        "lint": "dotenv -- turbo lint",
+        "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
+        "migrate": "dotenv -- turbo run migrate",
+        "generate": "dotenv -- turbo run generate"
+    },
+    "devDependencies": {
+        "prettier": "^3.2.5",
+        "turbo": "^2.3.3",
+        "typescript": "5.5.4"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "packageManager": "npm@10.2.3",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "dependencies": {
+        "dotenv-cli": "^8.0.0"
+    }
+}

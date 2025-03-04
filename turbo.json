@@ -1,0 +1,32 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "ui": "tui",
+    "daemon": false,
+    "globalEnv": ["REDIS_PASSWORD", "DB_URL"],
+    "tasks": {
+        "build": {
+            "dependsOn": ["^build"],
+            "inputs": ["$TURBO_DEFAULT$", ".env*"],
+            "outputs": [".next/**", "!.next/cache/**"]
+        },
+        "lint": {
+            "dependsOn": ["^lint"],
+            "env": ["REDIS_PASSWORD", "FOO"]
+        },
+        "check-types": {
+            "dependsOn": ["^check-types"]
+        },
+        "generate": {
+            "dependsOn": ["^generate"]
+        },
+        "migrate": {
+            "dependsOn": ["^generate"]
+        },
+        "dev": {
+            "dependsOn": ["^migrate"],
+            "cache": false,
+            "persistent": true,
+            "env": ["CHOKIDAR_USEPOLLING=TRUE"]
+        }
+    }
+}

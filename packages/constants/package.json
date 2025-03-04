@@ -1,0 +1,27 @@
+{
+    "name": "@repo/constants",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "tsc --watch",
+        "build": "tsc"
+    },
+    "exports": {
+        "./app": {
+            "types": "./src/app.ts",
+            "default": "./dist/app.js"
+        },
+        "./cookies": {
+            "types": "./src/cookies.ts",
+            "default": "./dist/cookies.js"
+        }
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "*",
+        "@types/eslint": "^8.56.5",
+        "@types/node": "^20.11.24",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {}
+}
