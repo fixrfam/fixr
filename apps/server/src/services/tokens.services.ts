@@ -67,24 +67,15 @@ export async function createOneTimeToken({
 }) {
     const token = generateOneTimeToken();
 
-    const [tokenData] = await db
-        .insert(oneTimeTokens)
-        .values({
-            token: token,
-            userId: userId,
-            tokenType: tokenType,
-            relatesTo: email,
-            expiresAt: new Date(Date.now() + 30 * 60 * 1000),
-        })
-        .returning({
-            id: oneTimeTokens.id,
-            token: oneTimeTokens.token,
-            tokenType: oneTimeTokens.tokenType,
-            relatesTo: oneTimeTokens.relatesTo,
-            userId: oneTimeTokens.userId,
-            createdAt: oneTimeTokens.createdAt,
-            expiresAt: oneTimeTokens.expiresAt,
-        });
+    await db.insert(oneTimeTokens).values({
+        token: token,
+        userId: userId,
+        tokenType: tokenType,
+        relatesTo: email,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
+
+    const tokenData = await queryOneTimeToken(token);
 
     return tokenData;
 }

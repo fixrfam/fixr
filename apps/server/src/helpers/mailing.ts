@@ -4,8 +4,34 @@ import { renderEmail as renderDeletionEmail } from "../emails/AccountDeletion";
 import { renderEmail as renderVerificationEmail } from "../emails/Verification";
 import { renderEmail as renderPasswordResetEmail } from "../emails/PasswordReset";
 import { env } from "../env";
+import nodemailer from "nodemailer";
 
-export async function sendAccountVerificationEmail({
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASSWORD,
+    },
+});
+
+const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `${APP_NAME} - Mailing <${env.EMAIL_USER}>`,
+            to,
+            subject,
+            html,
+        });
+
+        console.log(`Email sent to ${to}: ${info.messageId}`);
+        return info;
+    } catch (error) {
+        console.error(`Failed to send email to ${to}:`, error);
+        throw error;
+    }
+};
+
+export const sendAccountVerificationEmail = async ({
     to,
     verificationUrl,
     displayName,
@@ -13,29 +39,14 @@ export async function sendAccountVerificationEmail({
     to: string;
     verificationUrl: string;
     displayName: string;
-}) {
-    const appName = APP_NAME;
-    const emailDomain = env.EMAIL_DOMAIN;
-
-    const { data, error } = await resend.emails.send({
-        from: `${appName} - Auth <no-reply@${emailDomain}>`,
-        to: [to],
+}) =>
+    sendEmail({
+        to,
         subject: `Verify your email, @${displayName}!`,
-        html: renderVerificationEmail({
-            verificationUrl: verificationUrl,
-            displayName: displayName,
-            appName,
-        }),
+        html: renderVerificationEmail({ verificationUrl, displayName, appName: APP_NAME }),
     });
 
-    if (error) {
-        return console.error({ error });
-    }
-
-    return data;
-}
-
-export async function sendAccountDeletionEmail({
+export const sendAccountDeletionEmail = async ({
     to,
     verificationUrl,
     displayName,
@@ -43,29 +54,14 @@ export async function sendAccountDeletionEmail({
     to: string;
     verificationUrl: string;
     displayName: string;
-}) {
-    const appName = APP_NAME;
-    const emailDomain = env.EMAIL_DOMAIN;
-
-    const { data, error } = await resend.emails.send({
-        from: `${appName} - Auth <no-reply@${emailDomain}>`,
-        to: [to],
+}) =>
+    sendEmail({
+        to,
         subject: `${displayName}'s account delete confirmation.`,
-        html: renderDeletionEmail({
-            verificationUrl: verificationUrl,
-            displayName: displayName,
-            appName,
-        }),
+        html: renderDeletionEmail({ verificationUrl, displayName, appName: APP_NAME }),
     });
 
-    if (error) {
-        return console.error({ error });
-    }
-
-    return data;
-}
-
-export async function sendPasswordResetEmail({
+export const sendPasswordResetEmail = async ({
     to,
     verificationUrl,
     displayName,
@@ -73,28 +69,12 @@ export async function sendPasswordResetEmail({
     to: string;
     verificationUrl: string;
     displayName: string;
-}) {
-    const appName = APP_NAME;
-    const emailDomain = env.EMAIL_DOMAIN;
-
-    const { data, error } = await resend.emails.send({
-        from: `${appName} - Auth <no-reply@${emailDomain}>`,
-        to: [to],
+}) =>
+    sendEmail({
+        to,
         subject: `Change your password, @${displayName}!`,
-        html: renderPasswordResetEmail({
-            verificationUrl: verificationUrl,
-            displayName: displayName,
-            appName,
-        }),
+        html: renderPasswordResetEmail({ verificationUrl, displayName, appName: APP_NAME }),
     });
 
-    if (error) {
-        return console.error({ error });
-    }
-
-    return data;
-}
-
-export function emailDisplayName(email: string) {
-    return email.split("@")[0];
-}
+// Extracts display name from an email
+export const emailDisplayName = (email: string) => email.split("@")[0];

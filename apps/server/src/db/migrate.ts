@@ -2,8 +2,9 @@ import postgres from "postgres";
 import chalk from "chalk";
 import path from "path";
 
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { drizzle } from "drizzle-orm/mysql2";
+import { migrate } from "drizzle-orm/mysql2/migrator";
+import mysql from "mysql2/promise";
 
 import { env } from "../env";
 
@@ -11,7 +12,7 @@ const dbUrl = env.DB_URL.replace("postgres:5432", "localhost:5432");
 
 (async () => {
     console.log("Connecting to database:", dbUrl);
-    const connection = postgres(dbUrl, { max: 1 });
+    const connection = await mysql.createConnection(dbUrl);
     const db = drizzle(connection, { logger: true });
 
     console.log("Migrations folder:", path.resolve("drizzle"));

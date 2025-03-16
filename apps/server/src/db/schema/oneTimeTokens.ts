@@ -1,23 +1,23 @@
-import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { mysqlEnum, mysqlTable, varchar, timestamp } from "drizzle-orm/mysql-core";
 
-import { createId } from '@paralleldrive/cuid2';
+import { createId } from "@paralleldrive/cuid2";
 
-import { users } from './users';
+import { users } from "./users";
 
-export const ottTypeEnum = pgEnum("ott_type", [
+export const ottTypeEnum = mysqlEnum("ott_type", [
     "confirmation",
     "password_reset",
     "account_deletion",
 ]);
 
-export const oneTimeTokens = pgTable("one_time_tokens", {
-    id: text("id")
+export const oneTimeTokens = mysqlTable("one_time_tokens", {
+    id: varchar("id", { length: 255 })
         .$defaultFn(() => createId())
         .primaryKey(),
-    token: text("token").notNull().unique(),
-    tokenType: ottTypeEnum("token_type").notNull(),
-    relatesTo: text("relates_to"),
-    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    tokenType: ottTypeEnum.notNull(),
+    relatesTo: varchar("relates_to", { length: 255 }),
+    userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     expiresAt: timestamp("expires_at").notNull(),
 });

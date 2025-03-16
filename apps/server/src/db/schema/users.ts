@@ -1,16 +1,16 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, mysqlTable, varchar, timestamp } from "drizzle-orm/mysql-core";
 
 import { createId } from "@paralleldrive/cuid2";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-    id: text("id")
+export const users = mysqlTable("users", {
+    id: varchar("id", { length: 255 })
         .$defaultFn(() => createId())
         .primaryKey(),
-    email: text("email").unique().notNull(),
-    displayName: text("display_name"),
-    passwordHash: text("password_hash").notNull(),
+    email: varchar("email", { length: 255 }).unique().notNull(),
+    displayName: varchar("display_name", { length: 255 }),
+    passwordHash: varchar("password_hash", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     verified: boolean("verified").default(false).notNull(),
 });

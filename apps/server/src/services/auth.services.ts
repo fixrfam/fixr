@@ -6,6 +6,7 @@ import { createUserSchema } from "@repo/schemas/auth";
 import { z } from "zod";
 import { userCacheKey } from "../helpers/cache";
 import { redis } from "../config/redis";
+import { queryUserById } from "./account.services";
 
 export async function queryUserByEmail(email: string) {
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
@@ -37,12 +38,10 @@ export async function queryTokenData(token: string) {
 export async function createUser(
     user: Omit<z.infer<typeof createUserSchema>, "password"> & { passwordHash: string }
 ) {
-    const [newUser] = await db.insert(users).values(user).returning({
-        id: users.id,
-        email: users.email,
-        displayName: users.displayName,
-        createdAt: users.createdAt,
-    });
+    const [created] = await db.insert(users).values(user).$returningId();
+
+    const newUser = await queryUserById(created.id);
+
     return newUser;
 }
 

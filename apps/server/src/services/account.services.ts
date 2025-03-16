@@ -23,15 +23,12 @@ export async function queryUserById(id: string) {
 }
 
 export async function updateUserById(data: z.infer<typeof editAccountSchema>, id: string) {
-    const [updated] = await db.update(users).set(data).where(eq(users.id, id)).returning({
-        id: users.id,
-        displayName: users.displayName,
-        email: users.email,
-        createdAt: users.createdAt,
-    });
+    await db.update(users).set(data).where(eq(users.id, id));
 
     const cacheKey = userCacheKey(id);
     await redis.del(cacheKey);
 
-    return updated;
+    const updatedUser = await queryUserById(id);
+
+    return updatedUser;
 }

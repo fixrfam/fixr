@@ -1,15 +1,15 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, varchar, timestamp } from "drizzle-orm/mysql-core";
 
 import { createId } from "@paralleldrive/cuid2";
 
 import { users } from "./users";
 
-export const refreshTokens = pgTable("refresh_tokens", {
-    id: text("id")
+export const refreshTokens = mysqlTable("refresh_tokens", {
+    id: varchar("id", { length: 255 })
         .$defaultFn(() => createId())
         .primaryKey(),
-    token: text("token").notNull().unique(),
-    userId: text("user_id")
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    userId: varchar("user_id", { length: 255 })
         .references(() => users.id, { onDelete: "cascade" })
         .notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
