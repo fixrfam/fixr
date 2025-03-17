@@ -11,13 +11,13 @@ export const ottTypeEnum = mysqlEnum("ott_type", [
 ]);
 
 export const oneTimeTokens = mysqlTable("one_time_tokens", {
-    id: varchar("id", { length: 255 })
+    id: varchar("id", { length: 25 })
         .$defaultFn(() => createId())
         .primaryKey(),
-    token: varchar("token", { length: 255 }).notNull().unique(),
+    token: varchar("token", { length: 128 }).notNull().unique(),
     tokenType: ottTypeEnum.notNull(),
     relatesTo: varchar("relates_to", { length: 255 }),
-    userId: varchar("user_id", { length: 255 }).references(() => users.id, { onDelete: "cascade" }),
+    userId: varchar("user_id", { length: 25 }).references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     expiresAt: timestamp("expires_at").notNull(),
 });

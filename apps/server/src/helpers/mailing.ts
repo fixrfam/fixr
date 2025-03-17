@@ -1,5 +1,4 @@
 import { APP_NAME } from "@repo/constants/app";
-import { resend } from "../config/resend";
 import { renderEmail as renderDeletionEmail } from "../emails/AccountDeletion";
 import { renderEmail as renderVerificationEmail } from "../emails/Verification";
 import { renderEmail as renderPasswordResetEmail } from "../emails/PasswordReset";
