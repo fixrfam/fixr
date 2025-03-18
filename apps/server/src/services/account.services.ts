@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "../db/connection";
-import { users, userSelectSchema } from "../db/schema";
+import { db } from "@repo/db/connection";
+import { users, userSelectSchema } from "@repo/db/schema";
 import { editAccountSchema } from "@repo/schemas/account";
 import { redis } from "../config/redis";
 import { CACHE_TTL, userCacheKey } from "../helpers/cache";

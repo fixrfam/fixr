@@ -9,9 +9,7 @@
         "test": "dotenv -- vitest",
         "start": "dotenv -- tsx src/server.ts",
         "dev": "dotenv -- tsx watch src/server.ts",
-        "build": "dotenv -- tsup src",
-        "migrate": "dotenv -- tsx src/db/migrate.ts",
-        "generate": "dotenv -- drizzle-kit generate"
+        "build": "dotenv -- tsup src"
     },
     "keywords": [],
     "author": "",
@@ -38,6 +36,7 @@
         "@repo/constants": "*",
         "@repo/schemas": "*",
         "@repo/typescript-config": "*",
+        "@repo/db": "*",
         "@scalar/fastify-api-reference": "^1.25.108",
         "@types/bcrypt": "^5.0.2",
         "@types/nodemailer": "^6.4.17",
