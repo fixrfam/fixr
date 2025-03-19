@@ -1,8 +1,8 @@
 import { and, eq, gte, sql } from "drizzle-orm";
 import { FastifyReply } from "fastify";
 
-import { db } from "../db/connection";
-import { oneTimeTokens, refreshTokens, users } from "../db/schema";
+import { db } from "@repo/db/connection";
+import { oneTimeTokens, refreshTokens, users } from "@repo/db/schema";
 import { generateOneTimeToken } from "../helpers/tokens";
 import { cookieKey } from "@repo/constants/cookies";
 

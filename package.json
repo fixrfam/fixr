@@ -6,8 +6,9 @@
         "dev": "dotenv -- turbo dev --parallel --no-daemon",
         "lint": "dotenv -- turbo lint",
         "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
-        "migrate": "dotenv -- turbo run migrate",
-        "generate": "dotenv -- turbo run generate"
+        "migrate": "dotenv -- turbo run migrate --filter=@repo/db",
+        "generate": "dotenv -- turbo run generate --filter=@repo/db",
+        "db:studio": "dotenv -- turbo run studio --filter=@repo/db"
     },
     "devDependencies": {
         "prettier": "^3.2.5",

@@ -22,6 +22,9 @@
         "migrate": {
             "dependsOn": ["^generate"]
         },
+        "studio": {
+            "dependsOn": []
+        },
         "dev": {
             "dependsOn": ["^migrate"],
             "cache": false,

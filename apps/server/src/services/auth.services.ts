@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "../db/connection";
-import { refreshTokens, users } from "../db/schema";
+import { db } from "@repo/db/connection";
+import { refreshTokens, users } from "@repo/db/schema";
 import { createUserSchema } from "@repo/schemas/auth";
 import { z } from "zod";
 import { userCacheKey } from "../helpers/cache";
