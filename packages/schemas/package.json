@@ -23,6 +23,14 @@
         "./utils": {
             "types": "./src/utils.ts",
             "default": "./dist/utils.js"
+        },
+        "./organizations": {
+            "types": "./src/organizations.ts",
+            "default": "./dist/organizations.js"
+        },
+        "./common": {
+            "types": "./src/common.ts",
+            "default": "./dist/common.js"
         }
     },
     "devDependencies": {

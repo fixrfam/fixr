@@ -1,17 +1,19 @@
 import { z } from "zod";
 
+export const passwordSchema = z
+    .string({ required_error: "Password is required." })
+    .min(8)
+    .max(128)
+    .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {
+        message:
+            "Password needs to contain one uppercase character, one lowercase character, one number, one special character and be at least 8 length.",
+    });
+
 export const createUserSchema = z.object({
     email: z
         .string({ required_error: "Email is required." })
         .email({ message: "Invalid email address" }),
-    password: z
-        .string({ required_error: "Password is required." })
-        .min(8)
-        .max(128)
-        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {
-            message:
-                "Password needs to contain one uppercase character, one lowercase character, one number, one special character and be at least 8 length.",
-        }),
+    password: passwordSchema,
     displayName: z
         .string()
         .transform((value) => (value.trim() === "" ? undefined : value)) // Handle empty strings

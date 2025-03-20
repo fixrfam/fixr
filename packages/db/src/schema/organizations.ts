@@ -1,7 +1,7 @@
 import { mysqlTable, varchar, timestamp, text } from "drizzle-orm/mysql-core";
 
 import { createId } from "@paralleldrive/cuid2";
-import { createSelectSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const organizations = mysqlTable("organizations", {
@@ -21,3 +21,5 @@ export const organizations = mysqlTable("organizations", {
 export const organizationSelectSchema = createSelectSchema(organizations, {
     createdAt: z.coerce.date(),
 });
+
+export const organizationInsertSchema = createInsertSchema(organizations);
