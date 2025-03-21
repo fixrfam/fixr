@@ -1,17 +1,17 @@
 import {
     getEmployeeByCpf,
-    getOrganizationByCnpj,
+    getCompanyByCnpj,
     getUserByEmail,
-    getOrganizationBySubdomain,
+    getCompanyBySubdomain,
     createOrgWithAdmin,
-} from "@/lib/services/organizations";
+} from "@/lib/services/companies";
 import { apiResponse, tryCatch } from "@/lib/utils";
 import { unmask } from "@repo/constants/masks";
-import { createOrganizationSchema } from "@repo/schemas/organizations";
+import { createCompanySchema } from "@repo/schemas/companies";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-    const { data, error } = await tryCatch(createOrganizationSchema.parseAsync(await req.json()));
+    const { data, error } = await tryCatch(createCompanySchema.parseAsync(await req.json()));
 
     if (error)
         return NextResponse.json(
@@ -31,13 +31,14 @@ export async function POST(req: NextRequest) {
         owner_cpf: unmask.cpf(data.owner_cpf),
     };
 
-    const [existingEmployee, existingOrganization, existingEmail, existingSubdomain] =
-        await Promise.all([
+    const [existingEmployee, existingCompany, existingEmail, existingSubdomain] = await Promise.all(
+        [
             getEmployeeByCpf(formatted.owner_cpf),
-            getOrganizationByCnpj(formatted.cnpj),
+            getCompanyByCnpj(formatted.cnpj),
             getUserByEmail(formatted.owner_email),
-            getOrganizationBySubdomain(formatted.subdomain),
-        ]);
+            getCompanyBySubdomain(formatted.subdomain),
+        ]
+    );
 
     if (existingEmployee)
         return NextResponse.json(
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
             { status: 409 }
         );
 
-    if (existingOrganization)
+    if (existingCompany)
         return NextResponse.json(
             apiResponse({
                 status: 409,
@@ -93,8 +94,8 @@ export async function POST(req: NextRequest) {
         apiResponse({
             status: 201,
             error: null,
-            code: "organization_create_success",
-            message: "Organization created successfully.",
+            code: "company_create_success",
+            message: "Company created successfully.",
             data: null,
         }),
         { status: 201 }

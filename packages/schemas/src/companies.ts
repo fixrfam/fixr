@@ -2,7 +2,7 @@ import { z } from "zod";
 import { passwordSchema } from "./auth";
 import { cnpj, cpf } from "./common";
 
-export const createOrganizationSchema = z.object({
+export const createCompanySchema = z.object({
     name: z
         .string()
         .min(3, { message: "Name must be at least 3 characters long." })

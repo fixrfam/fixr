@@ -32,18 +32,18 @@ const data = {
     ],
     navMain: [
         {
-            title: "Organizações",
-            url: "/dash/organizations",
+            title: "Empresas",
+            url: "/dash/companies",
             icon: Building2,
             isActive: true,
             items: [
                 {
                     title: "Lista",
-                    url: "/dash/organizations",
+                    url: "/dash/companies",
                 },
                 {
                     title: "Nova",
-                    url: "/dash/organizations/new",
+                    url: "/dash/companies/new",
                 },
             ],
         },
@@ -69,8 +69,6 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { isLoaded, user } = useUser();
-
-    console.log(user);
 
     return (
         <Sidebar collapsible='icon' {...props}>

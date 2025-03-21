@@ -4,7 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { users } from "./users";
-import { organizations } from "./organizations";
+import { companies } from "./companies";
 
 export const rolesEnum = mysqlEnum("roles", ["admin", "manager", "employee"]);
 
@@ -20,8 +20,8 @@ export const employees = mysqlTable("employees", {
     userId: varchar("user_id", { length: 25 })
         .references(() => users.id) // Cannot cascade here because it would break business logic
         .notNull(),
-    organizationId: varchar("organization_id", { length: 25 })
-        .references(() => organizations.id, { onDelete: "cascade" })
+    companyId: varchar("company_id", { length: 25 })
+        .references(() => companies.id, { onDelete: "cascade" })
         .notNull(),
 });
 

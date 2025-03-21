@@ -14,7 +14,7 @@ export default function Home() {
                         Painel de administrador
                     </h1>
                     <p className='traking-tight text-muted-foreground'>
-                        Crie organizações, admins e configure as empresas de nossos clientes.
+                        Crie empresas, admins e configure os negócios de nossos clientes.
                     </p>
                     <span className='inline-flex items-center gap-1 text-xs text-muted-foreground/50'>
                         <Lock className='size-3' />

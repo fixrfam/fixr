@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { useMaskito } from "@maskito/react";
 import { cnpj, cpf, unmask } from "@repo/constants/masks";
 import { messages, defaultMessages } from "@repo/constants/messages";
-import { createOrganizationSchema } from "@repo/schemas/organizations";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown, Dices } from "lucide-react";
 import { generateRandomPassword, tryCatch } from "@/lib/utils";
@@ -25,10 +24,11 @@ import PasswordInput from "@/components/ui/password-input";
 import { toast } from "@pheralb/toast";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ApiResponse } from "@repo/schemas/utils";
+import { createCompanySchema } from "@repo/schemas/companies";
 
-export function CreateOrg() {
-    const form = useForm<z.infer<typeof createOrganizationSchema>>({
-        resolver: zodResolver(createOrganizationSchema),
+export function CreateCompany() {
+    const form = useForm<z.infer<typeof createCompanySchema>>({
+        resolver: zodResolver(createCompanySchema),
         defaultValues: {
             name: "",
             cnpj: "",
@@ -40,10 +40,8 @@ export function CreateOrg() {
         mode: "all",
     });
 
-    async function onSubmit(values: z.infer<typeof createOrganizationSchema>) {
-        console.log(values);
-
-        const formatted: z.infer<typeof createOrganizationSchema> = {
+    async function onSubmit(values: z.infer<typeof createCompanySchema>) {
+        const formatted: z.infer<typeof createCompanySchema> = {
             ...values,
             subdomain: values.subdomain.toLowerCase(),
             cnpj: unmask.cnpj(values.cnpj),
@@ -51,7 +49,7 @@ export function CreateOrg() {
         };
 
         const { data: response, error } = await tryCatch<AxiosResponse<ApiResponse>>(
-            axios.post("/api/organizations", formatted)
+            axios.post("/api/companies", formatted)
         );
 
         if (error && error instanceof AxiosError) {
@@ -88,7 +86,7 @@ export function CreateOrg() {
                     name='name'
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Nome da organização *</FormLabel>
+                            <FormLabel>Nome da empresa *</FormLabel>
                             <FormControl>
                                 <Input placeholder='Acme Inc.' {...field} />
                             </FormControl>

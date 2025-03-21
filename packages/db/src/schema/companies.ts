@@ -4,7 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const organizations = mysqlTable("organizations", {
+export const companies = mysqlTable("companies", {
     id: varchar("id", { length: 25 })
         .$defaultFn(() => createId())
         .primaryKey(),
@@ -18,8 +18,8 @@ export const organizations = mysqlTable("organizations", {
 /**
  * Here we override the createdAt with a coerce so a date coming, for example, as a string, gets converted into a real Date()
  */
-export const organizationSelectSchema = createSelectSchema(organizations, {
+export const organizationSelectSchema = createSelectSchema(companies, {
     createdAt: z.coerce.date(),
 });
 
-export const organizationInsertSchema = createInsertSchema(organizations);
+export const organizationInsertSchema = createInsertSchema(companies);

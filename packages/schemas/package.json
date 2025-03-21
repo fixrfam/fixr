@@ -24,9 +24,9 @@
             "types": "./src/utils.ts",
             "default": "./dist/utils.js"
         },
-        "./organizations": {
-            "types": "./src/organizations.ts",
-            "default": "./dist/organizations.js"
+        "./companies": {
+            "types": "./src/companies.ts",
+            "default": "./dist/companies.js"
         },
         "./common": {
             "types": "./src/common.ts",

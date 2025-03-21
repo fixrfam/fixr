@@ -9,15 +9,15 @@ export default function Page() {
             <DashHeader title='Fixr - Admin' description='Painel de administrador' />
             <div className='flex gap-2'>
                 <Button asChild variant={"outline"}>
-                    <Link href='/dash/organizations/new'>
+                    <Link href='/dash/companies/new'>
                         <Plus />
-                        Criar nova organização
+                        Criar nova empresa
                     </Link>
                 </Button>
                 <Button asChild variant={"outline"}>
-                    <Link href='/dash/organizations'>
+                    <Link href='/dash/companies'>
                         <List />
-                        Ver organizações
+                        Ver empresas
                     </Link>
                 </Button>
             </div>

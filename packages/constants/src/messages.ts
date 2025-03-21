@@ -24,9 +24,9 @@ export const messages: Record<string, Message> = {
         title: "Subdomínio em uso.",
         description: "Esse domínio já foi selecionado por outra empresa.",
     },
-    organization_create_success: {
+    company_create_success: {
         title: "Sucesso!",
-        description: "Organização criada com sucesso.",
+        description: "Empresa criada com sucesso.",
     },
 };
 
