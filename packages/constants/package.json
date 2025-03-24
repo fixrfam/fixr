@@ -15,6 +15,14 @@
         "./cookies": {
             "types": "./src/cookies.ts",
             "default": "./dist/cookies.js"
+        },
+        "./masks": {
+            "types": "./src/masks.ts",
+            "default": "./dist/masks.js"
+        },
+        "./messages": {
+            "types": "./src/messages.ts",
+            "default": "./dist/messages.js"
         }
     },
     "devDependencies": {

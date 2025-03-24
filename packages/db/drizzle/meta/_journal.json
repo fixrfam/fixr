@@ -8,6 +8,13 @@
       "when": 1742181123111,
       "tag": "0000_gifted_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1742437797841,
+      "tag": "0001_fast_joseph",
+      "breakpoints": true
     }
   ]
 }
