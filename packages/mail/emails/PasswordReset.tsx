@@ -22,16 +22,16 @@ interface EmailProps {
 
 const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
 
-export const VerificationEmail = ({ displayName, appName, verificationUrl }: EmailProps) => (
+export const PasswordReset = ({ displayName, appName, verificationUrl }: EmailProps) => (
     <Html>
         <Head />
-        <Preview>{displayName}, Confirm your email!</Preview>
+        <Preview>Change your password, {displayName}!</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Img src={`/public/logo.png`} width='31' height='25' alt='' />
 
                 <Text style={title}>
-                    <strong>{displayName}</strong>, your new account is just one step away.
+                    Oops! Forgot your password, <strong>{displayName}</strong>?
                 </Text>
 
                 <Section style={section}>
@@ -39,26 +39,27 @@ export const VerificationEmail = ({ displayName, appName, verificationUrl }: Ema
                         Hey <strong>{displayName}</strong>!
                     </Text>
                     <Text style={text}>
-                        You have registered a new account on <Link>{appName}</Link>, click the
-                        button below to confirm your identity.
+                        You requested a "forgot my password" credentials reset for an account at{" "}
+                        <Link>{appName}</Link>, registered with this email. Click the button below
+                        to change your password.
                     </Text>
 
                     <Button style={button} href={verificationUrl} target='_blank'>
-                        Verify email
+                        Change my password
                     </Button>
                 </Section>
 
-                <Text style={footer}>If you haven't registered, please ignore this email.</Text>
+                <Text style={footer}>If you haven't requested it, please ignore this email.</Text>
             </Container>
         </Body>
     </Html>
 );
 
-VerificationEmail.PreviewProps = {
+PasswordReset.PreviewProps = {
     displayName: "alanturing",
 } as EmailProps;
 
-export default VerificationEmail;
+export default PasswordReset;
 
 const main = {
     backgroundColor: "#ffffff",
@@ -115,7 +116,7 @@ const footer = {
     marginTop: "60px",
 };
 
-export function renderEmail({
+export async function renderEmail({
     verificationUrl,
     displayName,
     appName,
@@ -123,10 +124,10 @@ export function renderEmail({
     verificationUrl: string;
     displayName: string;
     appName: string;
-}): string {
+}): Promise<string> {
     try {
-        return render(
-            <VerificationEmail
+        return await render(
+            <PasswordReset
                 verificationUrl={verificationUrl}
                 displayName={displayName}
                 appName={appName}

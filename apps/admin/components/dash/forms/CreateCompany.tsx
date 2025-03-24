@@ -18,15 +18,18 @@ import { useMaskito } from "@maskito/react";
 import { cnpj, cpf, unmask } from "@repo/constants/masks";
 import { messages, defaultMessages } from "@repo/constants/messages";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown, Dices } from "lucide-react";
+import { ChevronsUpDown, Dices, Loader2, Plus } from "lucide-react";
 import { generateRandomPassword, tryCatch } from "@/lib/utils";
 import PasswordInput from "@/components/ui/password-input";
 import { toast } from "@pheralb/toast";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ApiResponse } from "@repo/schemas/utils";
 import { createCompanySchema } from "@repo/schemas/companies";
+import { useState } from "react";
 
 export function CreateCompany() {
+    const [loading, setLoading] = useState(false);
+
     const form = useForm<z.infer<typeof createCompanySchema>>({
         resolver: zodResolver(createCompanySchema),
         defaultValues: {
@@ -41,6 +44,8 @@ export function CreateCompany() {
     });
 
     async function onSubmit(values: z.infer<typeof createCompanySchema>) {
+        setLoading(true);
+
         const formatted: z.infer<typeof createCompanySchema> = {
             ...values,
             subdomain: values.subdomain.toLowerCase(),
@@ -48,26 +53,30 @@ export function CreateCompany() {
             owner_cpf: unmask.cpf(values.owner_cpf),
         };
 
-        const { data: response, error } = await tryCatch<AxiosResponse<ApiResponse>>(
-            axios.post("/api/companies", formatted)
-        );
+        try {
+            const { data: response, error } = await tryCatch<AxiosResponse<ApiResponse>>(
+                axios.post("/api/companies", formatted)
+            );
 
-        if (error && error instanceof AxiosError) {
-            const message = messages[error.response?.data.code] ?? defaultMessages.error;
+            if (error && error instanceof AxiosError) {
+                const message = messages[error.response?.data.code] ?? defaultMessages.error;
 
-            toast.error({
+                toast.error({
+                    text: message.title,
+                    description: message.description,
+                });
+                return;
+            }
+
+            const message = messages[response?.data.code as string] ?? defaultMessages.success;
+
+            toast.success({
                 text: message.title,
                 description: message.description,
             });
-            return;
+        } finally {
+            setLoading(false);
         }
-
-        const message = messages[response?.data.code as string] ?? defaultMessages.success;
-
-        toast.success({
-            text: message.title,
-            description: message.description,
-        });
     }
 
     const cnpjMask = useMaskito({ options: { mask: cnpj } });
@@ -222,8 +231,12 @@ export function CreateCompany() {
                         />
                     </CollapsibleContent>
                 </Collapsible>
-                <Button type='submit' disabled={!form.formState.isValid} className='w-full'>
-                    Criar
+                <Button
+                    type='submit'
+                    disabled={!form.formState.isValid || loading}
+                    className='w-full'
+                >
+                    Criar {!loading ? <Plus /> : <Loader2 className='animate-spin' />}
                 </Button>
             </form>
         </Form>

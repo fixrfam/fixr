@@ -2,7 +2,7 @@
     "$schema": "https://turbo.build/schema.json",
     "ui": "tui",
     "daemon": false,
-    "globalEnv": ["REDIS_PASSWORD", "DB_URL"],
+    "globalEnv": ["REDIS_PASSWORD", "DB_URL", "FRONTEND_URL", "EMAIL_USER", "EMAIL_PASSWORD"],
     "tasks": {
         "build": {
             "dependsOn": ["^build"],

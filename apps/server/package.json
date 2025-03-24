@@ -35,6 +35,7 @@
         "@react-email/render": "0.0.17",
         "@repo/constants": "*",
         "@repo/schemas": "*",
+        "@repo/mail": "*",
         "@repo/typescript-config": "*",
         "@repo/db": "*",
         "@scalar/fastify-api-reference": "^1.25.108",

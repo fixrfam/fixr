@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "rootDir": "./",
+        "outDir": "./dist",
+        "declaration": true,
+        "composite": true,
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "bundler",
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "jsx": "react",
+        "skipLibCheck": true,
+        "esModuleInterop": true
+    },
+    "include": ["./**/*.ts", "./**/*.tsx"],
+    "exclude": ["node_modules", "./node_modules", "./node_modules/*", "dist"]
+}

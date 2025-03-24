@@ -4,7 +4,9 @@ import { z } from "zod";
 import { apiResponse } from "@/src/helpers/response";
 
 import { hashPassword } from "../../helpers/hash-password";
-import { emailDisplayName, sendAccountVerificationEmail } from "../../helpers/mailing";
+import { sendAccountVerificationEmail, emailDisplayName } from "@repo/mail/services";
+import { APP_NAME } from "@repo/constants/app";
+
 import { createUserSchema } from "@repo/schemas/auth";
 import { createUser, deleteUser, queryUserByEmail } from "../../services/auth.services";
 import { createOneTimeToken } from "../../services/tokens.services";
@@ -56,8 +58,13 @@ export async function registerHandler({
 
     await sendAccountVerificationEmail({
         to: newUser.email,
+        appName: APP_NAME,
         verificationUrl: verificationUrl,
         displayName: newUser.displayName ?? emailDisplayName(newUser.email),
+        credentials: {
+            email_user: env.EMAIL_USER,
+            email_pass: env.EMAIL_PASSWORD,
+        },
     }).catch(async () => {
         await deleteUser(newUser.id);
 

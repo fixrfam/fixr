@@ -63,6 +63,7 @@ Begin by configuring your environment. Rename and update the provided `.env.exam
 - **Global secrets:** [.env.example](.env.example) for DB, Redis, etc.
 - **API secrets:** [apps/server/.env.example](apps/server/.env.example) for JWT signing keys and API keys.
 - **Next.js variables:** [apps/web/.env.example](apps/web/.env.example).
+- **Admin dashboard secrets:** [apps/admin/.env.example](apps/admin/.env.example).
 
 Next, spin up your Postgres and Redis databases with Docker Compose:
 
