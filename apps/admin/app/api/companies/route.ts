@@ -7,6 +7,8 @@ import {
 } from "@/lib/services/companies";
 import { apiResponse, tryCatch } from "@/lib/utils";
 import { unmask } from "@repo/constants/masks";
+import { APP_NAME } from "@repo/constants/app";
+import { sendInviteEmail, emailDisplayName } from "@repo/mail/services";
 import { createCompanySchema } from "@repo/schemas/companies";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -89,6 +91,18 @@ export async function POST(req: NextRequest) {
         );
 
     await createOrgWithAdmin(data);
+    await sendInviteEmail({
+        to: data.owner_email,
+        appName: APP_NAME,
+        companyName: data.name,
+        ctaUrl: `${process.env.FRONTEND_URL}/auth/login`,
+        displayName: `Admin - ${emailDisplayName(data.owner_email)}`,
+        password: data.owner_password,
+        credentials: {
+            email_user: process.env.EMAIL_USER as string,
+            email_pass: process.env.EMAIL_PASSWORD as string,
+        },
+    });
 
     return NextResponse.json(
         apiResponse({

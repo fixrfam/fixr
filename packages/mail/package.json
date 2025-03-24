@@ -1,0 +1,32 @@
+{
+    "name": "@repo/mail",
+    "version": "0.1.10",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "studio": "email dev",
+        "export": "email export"
+    },
+    "exports": {
+        "./services": {
+            "types": "./services/mailing.ts",
+            "default": "./dist/services/mailing.js"
+        }
+    },
+    "dependencies": {
+        "@react-email/components": "0.0.34",
+        "@react-email/tailwind": "1.0.4",
+        "@repo/constants": "*",
+        "@types/node": "^20.11.24",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
+        "typescript": "^5.3.3"
+    },
+    "devDependencies": {
+        "@types/react": "19.0.1",
+        "@types/react-dom": "19.0.1",
+        "react-email": "3.0.7"
+    }
+}

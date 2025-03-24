@@ -9,10 +9,10 @@ import {
     Img,
     Link,
     Preview,
+    render,
     Section,
     Text,
 } from "@react-email/components";
-import { render } from "@react-email/render";
 
 interface EmailProps {
     displayName: string;
@@ -20,46 +20,44 @@ interface EmailProps {
     verificationUrl: string;
 }
 
-const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
-
-export const PasswordReset = ({ displayName, appName, verificationUrl }: EmailProps) => (
+export const AccountDeletionEmail = ({ displayName, appName, verificationUrl }: EmailProps) => (
     <Html>
         <Head />
-        <Preview>Change your password, {displayName}!</Preview>
+        <Preview>{displayName}, confirm your account deletion.</Preview>
         <Body style={main}>
             <Container style={container}>
                 <Img src={`/public/logo.png`} width='31' height='25' alt='' />
 
-                <Text style={title}>
-                    Oops! Forgot your password, <strong>{displayName}</strong>?
-                </Text>
+                <Text style={title}>Account deletion confirmation</Text>
 
                 <Section style={section}>
                     <Text style={text}>
-                        Hey <strong>{displayName}</strong>!
+                        Hey <strong>{displayName}</strong>.
                     </Text>
                     <Text style={text}>
-                        You requested a "forgot my password" credentials reset for an account at{" "}
-                        <Link>{appName}</Link>, registered with this email. Click the button below
-                        to change your password.
+                        You requested account deletion on (<Link>{appName}</Link>). By clicking the
+                        button below, your account will be <strong>permanently deleted</strong> with
+                        all associated data.
+                    </Text>
+
+                    <Text style={text}>
+                        <strong>This action is irreversible.</strong>
                     </Text>
 
                     <Button style={button} href={verificationUrl} target='_blank'>
-                        Change my password
+                        Delete account
                     </Button>
                 </Section>
 
-                <Text style={footer}>If you haven't requested it, please ignore this email.</Text>
+                <Text style={footer}>
+                    If you haven't requested deletion, please ignore this email.
+                </Text>
             </Container>
         </Body>
     </Html>
 );
 
-PasswordReset.PreviewProps = {
-    displayName: "alanturing",
-} as EmailProps;
-
-export default PasswordReset;
+export default AccountDeletionEmail;
 
 const main = {
     backgroundColor: "#ffffff",
@@ -93,7 +91,7 @@ const text = {
 
 const button = {
     fontSize: "14px",
-    backgroundColor: "#000000",
+    backgroundColor: "#d12a2a",
     color: "#fff",
     lineHeight: 1.5,
     borderRadius: "0.5em",
@@ -116,7 +114,7 @@ const footer = {
     marginTop: "60px",
 };
 
-export function renderEmail({
+export async function renderEmail({
     verificationUrl,
     displayName,
     appName,
@@ -124,17 +122,12 @@ export function renderEmail({
     verificationUrl: string;
     displayName: string;
     appName: string;
-}): string {
-    try {
-        return render(
-            <PasswordReset
-                verificationUrl={verificationUrl}
-                displayName={displayName}
-                appName={appName}
-            />
-        );
-    } catch (error) {
-        console.error("Failed to render email", error);
-        throw new Error(`Failed to render email ${error}`);
-    }
+}): Promise<string> {
+    return await render(
+        <AccountDeletionEmail
+            verificationUrl={verificationUrl}
+            displayName={displayName}
+            appName={appName}
+        />
+    );
 }

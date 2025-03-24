@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
-import { emailDisplayName, sendAccountDeletionEmail } from "../../helpers/mailing";
+import { emailDisplayName, sendAccountDeletionEmail } from "@repo/mail/services";
+import { APP_NAME } from "@repo/constants/app";
 import { queryUserById } from "../../services/account.services";
 import { deleteUser } from "../../services/auth.services";
 import {
@@ -54,8 +55,13 @@ export async function requestAccountDeletionHandler({
 
     await sendAccountDeletionEmail({
         to: user.email,
+        appName: APP_NAME,
         verificationUrl: verificationUrl,
         displayName: user.displayName ?? emailDisplayName(user.email),
+        credentials: {
+            email_user: env.EMAIL_USER,
+            email_pass: env.EMAIL_PASSWORD,
+        },
     });
 
     return response.status(201).send(
