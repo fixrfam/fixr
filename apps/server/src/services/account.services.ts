@@ -1,34 +1,52 @@
-import { eq } from "drizzle-orm";
+import { jwtPayload } from "@repo/schemas/auth";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@repo/db/connection";
-import { users, userSelectSchema } from "@repo/db/schema";
-import { editAccountSchema } from "@repo/schemas/account";
+import { clients, companies, employees, users } from "@repo/db/schema";
 import { redis } from "../config/redis";
-import { CACHE_TTL, userCacheKey } from "../helpers/cache";
+import { accountCacheKey, CACHE_TTL } from "../helpers/cache";
+import { accountSchema } from "@repo/schemas/account";
 
-export async function queryUserById(id: string) {
-    const cacheKey = userCacheKey(id);
+export async function queryAccountById(id: string) {
+    const cacheKey = accountCacheKey(id);
     const cached = await redis.get(cacheKey);
 
     if (cached) {
-        return userSelectSchema.parse(JSON.parse(cached));
+        return accountSchema.parse(JSON.parse(cached));
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [account] = await db
+        .select({
+            id: users.id,
+            email: users.email,
+            displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+            cpf: sql`COALESCE(${employees.cpf}, ${clients.cpf})`,
+            phone: sql`COALESCE(${employees.phone}, ${clients.phone})`,
+            profileType: sql`CASE
+                          WHEN ${employees.id} IS NOT NULL THEN 'employee'
+                          WHEN ${clients.id} IS NOT NULL THEN 'client'
+                          ELSE 'unknown'
+                        END`,
+            company: sql`CASE
+              WHEN ${employees.id} IS NOT NULL THEN JSON_OBJECT(
+                'id', ${companies.id},
+                'name', ${companies.name},
+                'subdomain', ${companies.subdomain},
+                'role', ${employees.role}
+              )
+              ELSE NULL
+            END`,
+            createdAt: users.createdAt,
+        })
+        .from(users)
+        .leftJoin(employees, eq(employees.userId, users.id))
+        .leftJoin(clients, eq(clients.userId, users.id))
+        .leftJoin(companies, eq(companies.id, employees.companyId))
+        .where(eq(users.id, id))
+        .limit(1);
 
-    await redis.set(cacheKey, JSON.stringify(user), "EX", CACHE_TTL);
+    await redis.set(cacheKey, JSON.stringify(account), "EX", CACHE_TTL);
 
-    return user;
-}
-
-export async function updateUserById(data: z.infer<typeof editAccountSchema>, id: string) {
-    await db.update(users).set(data).where(eq(users.id, id));
-
-    const cacheKey = userCacheKey(id);
-    await redis.del(cacheKey);
-
-    const updatedUser = await queryUserById(id);
-
-    return updatedUser;
+    return accountSchema.parse(account);
 }

@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 
 import { emailDisplayName, sendAccountDeletionEmail } from "@repo/mail/services";
 import { APP_NAME } from "@repo/constants/app";
-import { queryUserById } from "../../services/account.services";
+import { queryAccountById } from "../../services/account.services";
 import { deleteUser } from "../../services/auth.services";
 import {
     createOneTimeToken,
@@ -41,11 +41,11 @@ export async function requestAccountDeletionHandler({
         }
     }
 
-    const user = await queryUserById(userId);
+    const account = await queryAccountById(userId);
 
     const oneTimeToken = await createOneTimeToken({
         userId: userId,
-        email: user.email,
+        email: account.email,
         tokenType: "account_deletion",
     });
 
@@ -54,10 +54,10 @@ export async function requestAccountDeletionHandler({
     const verificationUrl = `${request.protocol}://${request.host}/account/confirm-deletion?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
 
     await sendAccountDeletionEmail({
-        to: user.email,
+        to: account.email,
         appName: APP_NAME,
         verificationUrl: verificationUrl,
-        displayName: user.displayName ?? emailDisplayName(user.email),
+        displayName: account.displayName ?? emailDisplayName(account.email),
         credentials: {
             email_user: env.EMAIL_USER,
             email_pass: env.EMAIL_PASSWORD,
@@ -98,6 +98,7 @@ export async function confirmAccountDeletionHandler({
             })
         );
     }
+
     if (oneTimeToken.expiresAt < new Date()) {
         return response.status(410).send(
             apiResponse({
@@ -109,6 +110,7 @@ export async function confirmAccountDeletionHandler({
             })
         );
     }
+
     if (oneTimeToken.tokenType !== "account_deletion") {
         return response.status(400).send(
             apiResponse({

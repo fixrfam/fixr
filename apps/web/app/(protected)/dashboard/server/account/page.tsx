@@ -3,14 +3,14 @@ import { Settings } from "@/components/account/settings";
 import { SignOutButton } from "@/components/auth/signout-button";
 import { Button } from "@/components/ui/button";
 import { axios } from "@/lib/auth/axios";
-import { nonSensitiveUser } from "@repo/schemas/auth";
+import { accountSchema } from "@repo/schemas/account";
 import { ApiResponse } from "@repo/schemas/utils";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
 export default async function ServerPage() {
-    const res = await axios.get<ApiResponse<z.infer<typeof nonSensitiveUser>>>("/account");
+    const res = await axios.get<ApiResponse<z.infer<typeof accountSchema>>>("/account");
 
     const content = res.data.data;
 
@@ -42,7 +42,7 @@ export default async function ServerPage() {
                     </div>
                 </div>
                 <div className='w-full space-y-6'>
-                    <Settings displayName={content?.displayName ?? ""} />
+                    <Settings />
                 </div>
             </div>
         </div>

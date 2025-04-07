@@ -6,26 +6,10 @@ import {
 } from "../settings-card";
 import { ChangePassword } from "./change-password";
 import { DeleteAccount } from "./delete-account";
-import { EditDisplayName } from "./edit-display-name";
 
-export function Settings({ displayName }: { displayName: string }) {
+export function Settings() {
     return (
         <>
-            <SettingsCard className='w-full' id='name_change'>
-                <SettingsCardTitle>Display name</SettingsCardTitle>
-                <SettingsCardContent className='space-y-4'>
-                    <p className='text-sm'>
-                        This is your public display name that will be shown to others through the
-                        app.
-                    </p>
-                    <EditDisplayName displayName={displayName} />
-                </SettingsCardContent>
-                <SettingsCardFooter>
-                    <p className='text-sm text-muted-foreground'>
-                        Please note that this can be changed at any time.
-                    </p>
-                </SettingsCardFooter>
-            </SettingsCard>
             <SettingsCard className='w-full' id='password_change'>
                 <SettingsCardTitle>Change Password</SettingsCardTitle>
                 <SettingsCardContent className='space-y-4'>

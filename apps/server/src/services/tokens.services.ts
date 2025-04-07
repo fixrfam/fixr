@@ -94,7 +94,6 @@ export async function queryOneTimeToken(token: string) {
                 id: users.id,
                 email: users.email,
                 createdAt: users.createdAt,
-                displayName: users.displayName,
             },
         })
         .from(oneTimeTokens)

@@ -15,6 +15,13 @@
       "when": 1742437797841,
       "tag": "0001_fast_joseph",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1743969301174,
+      "tag": "0002_eminent_doomsday",
+      "breakpoints": true
     }
   ]
 }
