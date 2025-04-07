@@ -1,19 +1,26 @@
 import { z } from "zod";
+import { employeeRoles } from "./employee";
 
-export const editAccountSchema = z
+export const accountSchema = z
     .object({
-        displayName: z
-            .string()
-            .min(3, { message: "Must be at least 3 characters long." })
-            .max(64, { message: "Oops! Too long..." })
+        id: z.string().cuid2(),
+        email: z.string().email({ message: "Invalid email address" }),
+        displayName: z.string().min(3).max(100).nullable(),
+        cpf: z.string().length(11),
+        phone: z.string().length(11).nullable(),
+        profileType: z.union([z.literal("client"), z.literal("employee")]),
+        company: z
+            .object({
+                id: z.string().cuid2(),
+                name: z.string(),
+                subdomain: z.string(),
+                role: employeeRoles,
+            })
             .optional(),
+        createdAt: z.coerce.date(),
     })
-    .refine(
-        (data: { [key: string]: string }) =>
-            Object.keys(data).some((key) => data[key] !== undefined),
-        {
-            message: "At least one field must be provided",
-        }
+    .describe(
+        "The account object, contains only non-sentitive data. User password will **NEVER** be returned in responses, not even in hashed format."
     );
 
 export const confirmAccountDeletionSchema = z.object({

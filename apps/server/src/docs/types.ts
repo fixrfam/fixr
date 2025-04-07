@@ -1,5 +1,5 @@
-import { FastifySchema } from 'fastify';
-import { Primitive, z } from 'zod';
+import { FastifySchema } from "fastify";
+import { z } from "zod";
 
 export type RouteDoc = FastifySchema;
 

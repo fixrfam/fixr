@@ -6,8 +6,8 @@ import { apiResponse } from "@/src/helpers/response";
 
 import { signJWT } from "../../helpers/jwt";
 import { generateRefreshToken } from "../../helpers/tokens";
-import { loginUserSchema, nonSensitiveUser } from "@repo/schemas/auth";
-import { queryUserByEmail } from "../../services/auth.services";
+import { jwtPayload, loginUserSchema } from "@repo/schemas/auth";
+import { queryJWTPayloadByUserId, queryUserByEmail } from "../../services/auth.services";
 import { setJWTCookie, setRefreshToken } from "../../services/tokens.services";
 
 export async function loginHandler({
@@ -19,6 +19,7 @@ export async function loginHandler({
 }) {
     const email = body.email.toLowerCase();
     //First check if the user exists
+
     const user = await queryUserByEmail(email);
 
     if (!user) {
@@ -60,9 +61,11 @@ export async function loginHandler({
         );
     }
 
+    const payload = await queryJWTPayloadByUserId(user.id);
+
     //If the password is valid, sign the JWT and set the new refresh token
     const token = signJWT({
-        payload: nonSensitiveUser.parse(user),
+        payload: jwtPayload.parse(payload),
     });
 
     const refreshToken = generateRefreshToken();

@@ -1,4 +1,3 @@
-import { oneTimeTokens } from "./../db/schema/oneTimeTokens";
 import { FastifySchema } from "fastify";
 import {
     changePasswordAuthenticatedSchema as changePasswordAuthenticatedBody,

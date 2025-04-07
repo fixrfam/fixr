@@ -27,10 +27,10 @@ import { credentialsRoutes } from "./routes/credentials.routes";
 import { apiDescription } from "./docs/main";
 import { join } from "path";
 import { cwd } from "process";
-import { nonSensitiveUser } from "@repo/schemas/auth";
 import { apiResponse } from "./helpers/response";
 import { apiResponseSchema } from "@repo/schemas/utils";
 import { APP_NAME } from "@repo/constants/app";
+import { accountSchema } from "@repo/schemas/account";
 
 const envToLogger = {
     development: {
@@ -90,7 +90,7 @@ server.register(fastifySwagger, {
     transformObject: createJsonSchemaTransformObject({
         schemas: {
             Response: apiResponseSchema,
-            User: nonSensitiveUser,
+            User: accountSchema,
         },
     }),
 });
@@ -99,10 +99,7 @@ server.register(fastifySwagger, {
 server.register(scalarUi, {
     routePrefix: "/docs",
     configuration: {
-        // title: "Our API Reference",
-        spec: {
-            url: "/reference/json",
-        },
+        url: "/reference/json",
         metaData: {
             title: `Docs - ${APP_NAME} API`,
         },

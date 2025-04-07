@@ -9,7 +9,6 @@ export const users = mysqlTable("users", {
         .$defaultFn(() => createId())
         .primaryKey(),
     email: varchar("email", { length: 255 }).unique().notNull(),
-    displayName: varchar("display_name", { length: 100 }),
     passwordHash: varchar("password_hash", { length: 128 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     verified: boolean("verified").default(false).notNull(),

@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { queryUserById } from "../services/account.services";
+import { queryUserById } from "../services/auth.services";
 import { apiResponse, httpStatusCodes } from "../helpers/response";
 
 interface FastifyErrorLike extends Error {

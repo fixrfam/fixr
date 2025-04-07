@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 export const apiDescription = `
 # Introduction
 

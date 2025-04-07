@@ -1,8 +1,7 @@
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "./types";
 import { z } from "zod";
-import { editAccountSchema as editAccountBodySchema } from "@repo/schemas/account";
-import { nonSensitiveUser } from "@repo/schemas/auth";
+import { accountSchema } from "@repo/schemas/account";
 
 const getAccountSchema: FastifySchema = {
     tags: ["Account"],
@@ -21,32 +20,8 @@ const getAccountSchema: FastifySchema = {
             error: null,
             code: "get_account_success",
             message: "Account retrieved successfully.",
-            data: nonSensitiveUser,
+            data: accountSchema,
         }).describe("Account retrieved successfully."),
-    },
-    security: [{ JWT: [] }],
-};
-
-const editAccountSchema: FastifySchema = {
-    tags: ["Account"],
-    description: "Edit account data. You can only change your `displayName` through here.",
-    summary: "Edit account",
-    body: editAccountBodySchema,
-    response: {
-        404: zodResponseSchema({
-            status: 404,
-            error: "Not Found",
-            code: "user_not_found",
-            message: "User not found",
-            data: null,
-        }).describe("Couldn't find user."),
-        200: zodResponseSchema({
-            status: 200,
-            error: null,
-            code: "update_account_success",
-            message: "Account data updated successfully",
-            data: nonSensitiveUser,
-        }).describe("Account data updated successfully."),
     },
     security: [{ JWT: [] }],
 };
@@ -135,7 +110,6 @@ Once clicked, the account is deleted along with the single use token, then the u
 
 export const accountDocs = {
     getAccountSchema,
-    editAccountSchema,
     requestDeletionSchema,
     confirmDeletionSchema,
 };
