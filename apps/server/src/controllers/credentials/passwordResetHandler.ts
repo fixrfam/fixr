@@ -1,6 +1,7 @@
 import { env } from "@/src/env";
 import { hashPassword } from "@/src/helpers/hash-password";
-import { sendPasswordResetEmail, emailDisplayName } from "@repo/mail/services";
+import { emailDisplayName } from "@repo/mail/services";
+import { createEmailQueue, queueEmail } from "@repo/mail/queue";
 import { apiResponse } from "@/src/helpers/response";
 import { queryUserByEmail } from "@/src/services/auth.services";
 import { updateUserPassword } from "@/src/services/credentials.services";
@@ -15,6 +16,7 @@ import { confirmPasswordResetSchema } from "@repo/schemas/credentials";
 import { FastifyReply } from "fastify";
 import { z } from "zod";
 import { APP_NAME } from "@repo/constants/app";
+import { redis } from "@/src/config/redis";
 
 export async function requestPasswordResetHandler({
     email,
@@ -63,14 +65,19 @@ export async function requestPasswordResetHandler({
 
     const verificationUrl = `${env.FRONTEND_URL}/auth/forgot-password/${encodeURIComponent(oneTimeToken.token)}`;
 
-    await sendPasswordResetEmail({
-        to: user.email,
-        appName: APP_NAME,
-        verificationUrl: verificationUrl,
-        displayName: user.displayName ?? emailDisplayName(user.email),
-        credentials: {
-            email_user: env.EMAIL_USER,
-            email_pass: env.EMAIL_PASSWORD,
+    const emailQueue = createEmailQueue(redis);
+
+    await queueEmail(emailQueue, {
+        job: "sendPasswordResetEmail",
+        payload: {
+            to: user.email,
+            appName: APP_NAME,
+            verificationUrl: verificationUrl,
+            displayName: user.displayName ?? emailDisplayName(user.email),
+            credentials: {
+                email_user: env.EMAIL_USER,
+                email_pass: env.EMAIL_PASSWORD,
+            },
         },
     });
 

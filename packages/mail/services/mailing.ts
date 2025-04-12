@@ -9,13 +9,6 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-    },
-});
 
 interface EmailCommonProps {
     to: string;
@@ -31,10 +24,20 @@ const sendEmail = async ({
     subject,
     html,
     appName,
+    credentials,
 }: EmailCommonProps & {
     html: string;
     subject: string;
 }) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: credentials.email_user,
+            pass: credentials.email_pass,
+        },
+        from: credentials.email_user,
+    });
+
     try {
         const info = await transporter.sendMail({
             from: `${appName} - Comunicação <${process.env.EMAIL_USER}>`,
@@ -115,3 +118,10 @@ export const sendPasswordResetEmail = async ({
 
 // Extracts display name from an email
 export const emailDisplayName = (email: string) => email.split("@")[0];
+
+export const emails = {
+    sendInviteEmail,
+    sendAccountVerificationEmail,
+    sendAccountDeletionEmail,
+    sendPasswordResetEmail,
+};

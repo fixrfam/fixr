@@ -8,9 +8,11 @@ import {
 import { apiResponse, tryCatch } from "@/lib/utils";
 import { unmask } from "@repo/constants/masks";
 import { APP_NAME } from "@repo/constants/app";
-import { sendInviteEmail, emailDisplayName } from "@repo/mail/services";
+import { emailDisplayName } from "@repo/mail/services";
 import { createCompanySchema } from "@repo/schemas/companies";
 import { NextRequest, NextResponse } from "next/server";
+import { createEmailQueue, queueEmail } from "@repo/mail/queue";
+import { redis } from "@/lib/redis";
 
 export async function POST(req: NextRequest) {
     const { data, error } = await tryCatch(createCompanySchema.parseAsync(await req.json()));
@@ -91,16 +93,22 @@ export async function POST(req: NextRequest) {
         );
 
     await createOrgWithAdmin(data);
-    await sendInviteEmail({
-        to: data.owner_email,
-        appName: APP_NAME,
-        companyName: data.name,
-        ctaUrl: `${process.env.FRONTEND_URL}/auth/login`,
-        displayName: `Admin - ${emailDisplayName(data.owner_email)}`,
-        password: data.owner_password,
-        credentials: {
-            email_user: process.env.EMAIL_USER as string,
-            email_pass: process.env.EMAIL_PASSWORD as string,
+
+    const emailQueue = createEmailQueue(redis);
+
+    await queueEmail(emailQueue, {
+        job: "sendInviteEmail",
+        payload: {
+            to: data.owner_email,
+            appName: APP_NAME,
+            companyName: data.name,
+            ctaUrl: `${process.env.FRONTEND_URL}/auth/login`,
+            displayName: `Admin - ${emailDisplayName(data.owner_email)}`,
+            password: data.owner_password,
+            credentials: {
+                email_user: process.env.EMAIL_USER as string,
+                email_pass: process.env.EMAIL_PASSWORD as string,
+            },
         },
     });
 
