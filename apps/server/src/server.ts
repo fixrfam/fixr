@@ -31,6 +31,7 @@ import { apiResponse } from "./helpers/response";
 import { apiResponseSchema } from "@repo/schemas/utils";
 import { APP_NAME } from "@repo/constants/app";
 import { accountSchema } from "@repo/schemas/account";
+import { startEmailWorker } from "./queue/workers/emailWorker";
 
 const envToLogger = {
     development: {
@@ -209,5 +210,8 @@ server
     .then(() => {
         console.log(chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`));
     });
+
+// Start the email worker
+startEmailWorker();
 
 export default server;

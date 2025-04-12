@@ -13,6 +13,14 @@
         "./services": {
             "types": "./services/mailing.ts",
             "default": "./dist/services/mailing.js"
+        },
+        "./queue": {
+            "types": "./services/queue/queue.ts",
+            "default": "./dist/services/queue/queue.js"
+        },
+        "./worker": {
+            "types": "./services/worker/worker.ts",
+            "default": "./dist/services/worker/worker.js"
         }
     },
     "dependencies": {
@@ -20,6 +28,7 @@
         "@react-email/tailwind": "1.0.4",
         "@repo/constants": "*",
         "@types/node": "^20.11.24",
+        "bullmq": "^5.48.0",
         "react": "19.0.0",
         "react-dom": "19.0.0",
         "typescript": "^5.3.3"
