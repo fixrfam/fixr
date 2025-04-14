@@ -1,8 +1,7 @@
 import { ArrowRight, Trash2 } from "lucide-react";
 import CookieDialog from "../cookie-dialog";
-import Logo from "@/public/logo.svg";
-import Image from "next/image";
 import { cookieKey } from "@repo/constants/cookies";
+import { Logo } from "../svg/Logo";
 
 export function AuthDialogs({
     showVerifiedDialog,
@@ -30,7 +29,7 @@ export function AuthDialogs({
             >
                 <div className='flex flex-col gap-4 items-center'>
                     <div className='flex items-center justify-center rounded-md bg-primary text-primary-foreground p-2'>
-                        <Image src={Logo} alt='logo' className='size-5' />
+                        <Logo className='size-5' />
                     </div>
                     <div className='text-foreground space-y-1 text-center'>
                         <h2 className='font-bold tracking-tight text-2xl'>Account Verified! 🎉</h2>

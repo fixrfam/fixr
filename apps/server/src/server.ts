@@ -205,7 +205,7 @@ server.setErrorHandler((error, request, response) => {
 server
     .listen({
         port: Number(env.NODE_PORT),
-        host: "0.0.0.0",
+        host: "::",
     })
     .then(() => {
         console.log(chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`));
