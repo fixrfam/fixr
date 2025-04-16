@@ -18,8 +18,8 @@ export const companies = mysqlTable("companies", {
 /**
  * Here we override the createdAt with a coerce so a date coming, for example, as a string, gets converted into a real Date()
  */
-export const organizationSelectSchema = createSelectSchema(companies, {
+export const companySelectSchema = createSelectSchema(companies, {
     createdAt: z.coerce.date(),
 });
 
-export const organizationInsertSchema = createInsertSchema(companies);
+export const companyInsertSchema = createInsertSchema(companies);

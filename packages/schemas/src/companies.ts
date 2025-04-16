@@ -26,3 +26,7 @@ export const createCompanySchema = z.object({
     owner_email: z.string().email({ message: "Invalid email address." }),
     owner_password: passwordSchema,
 });
+
+export const getCompanyByIdSchema = z.object({
+    id: z.string().cuid2(),
+});
