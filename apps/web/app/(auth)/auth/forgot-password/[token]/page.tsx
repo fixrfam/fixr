@@ -2,9 +2,10 @@
 
 import AuthFormSuccess from "@/components/auth/auth-form-success";
 import { ResetPasswordForm } from "@/components/reset-password-form";
-import { useState } from "react";
+import { useState, use } from "react";
 
-export default function ChangePasswordPage({ params }: { params: { token: string } }) {
+export default function ChangePasswordPage(props: { params: Promise<{ token: string }> }) {
+    const params = use(props.params);
     const [success, setSuccess] = useState(false);
 
     return !success ? (

@@ -33,7 +33,7 @@ const processQueue = (error: AxiosError | null) => {
 axiosClient.interceptors.request.use(async (config) => {
     if (!isClientSide()) {
         const { cookies } = await import("next/headers");
-        const cookiesString = cookies()
+        const cookiesString = (await cookies())
             .getAll()
             .map((item) => `${item.name}=${item.value}`)
             .join("; ");

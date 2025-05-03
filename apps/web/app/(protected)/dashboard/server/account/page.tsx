@@ -52,18 +52,18 @@ export default async function ServerPage() {
                                 Info
                             </p>
                             <div className='flex flex-col gap-2'>
-                                <p className='inline-flex items-center gap-2 tracking-tight'>
+                                <div className='inline-flex items-center gap-2 tracking-tight'>
                                     <div className='text-primary bg-primary/30 p-1 rounded-md'>
                                         <Building2 className='size-5' />
                                     </div>
                                     {content?.company?.name}
-                                </p>
-                                <p className='inline-flex items-center gap-2 tracking-tight'>
+                                </div>
+                                <div className='inline-flex items-center gap-2 tracking-tight'>
                                     <div className='text-primary bg-primary/30 p-1 rounded-md'>
                                         <BriefcaseBusiness className='size-5' />
                                     </div>
                                     {firstUpper(content?.company?.role as string)}
-                                </p>
+                                </div>
                             </div>
                         </div>
                     </div>
