@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     try {
         await signOut(cookieStore.toString());

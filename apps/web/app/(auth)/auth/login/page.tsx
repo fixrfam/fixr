@@ -3,8 +3,8 @@ import { LoginForm } from "@/components/auth/login-form";
 import { cookieKey } from "@repo/constants/cookies";
 import { cookies } from "next/headers";
 
-export default function LoginPage() {
-    const cookieStore = cookies();
+export default async function LoginPage() {
+    const cookieStore = await cookies();
     const showVerifiedDialog = cookieStore.get(cookieKey("showVerifiedDialog"))?.value === "true";
     const showDeletedDialog = cookieStore.get(cookieKey("showDeletedDialog"))?.value === "true";
 

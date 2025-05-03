@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Badge } from "../ui/badge";
 
 export async function AccountPopover() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const session = getSession(cookieStore);
     const displayName = session.displayName || emailDisplayName(session.email || "");
 
