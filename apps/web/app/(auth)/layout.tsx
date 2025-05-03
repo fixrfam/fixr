@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { APP_NAME } from "@repo/constants/app";
-import Image from "next/image";
-import Logo from "@/public/logo.svg";
+import { Logo } from "@/components/svg/Logo";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -19,7 +18,7 @@ export default function AuthLayout({
                 <div className='flex flex-col gap-4 p-6 md:p-10'>
                     <div className='flex justify-center gap-2 md:justify-start'>
                         <a href='#' className='flex items-center gap-4 font-medium'>
-                            <Image src={Logo} alt='logo' className='size-6' />
+                            <Logo className='size-6' />
                             {APP_NAME}
                         </a>
                     </div>

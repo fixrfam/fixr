@@ -11,3 +11,7 @@ export const accountCacheKey = (userId: string): string => {
 export const jwtPayloadCacheKey = (userId: string): string => {
     return `jwtPayload:${userId}`;
 };
+
+export const companyCacheKey = (companyId: string): string => {
+    return `company:${companyId}`;
+};

@@ -59,7 +59,7 @@ export const SettingsCardFooter = forwardRef<HTMLDivElement, SettingsCardFooterP
             <div
                 ref={ref}
                 className={cn(
-                    "border-t px-6 py-4 w-full flex justify-between items-center gap-4",
+                    "border-t rounded-b-lg px-6 py-4 w-full flex justify-between items-center gap-4",
                     destructive
                         ? "bg-destructive/50 border-destructive"
                         : "bg-accent border-border",

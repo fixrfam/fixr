@@ -32,6 +32,9 @@ import { apiResponseSchema } from "@repo/schemas/utils";
 import { APP_NAME } from "@repo/constants/app";
 import { accountSchema } from "@repo/schemas/account";
 import { startEmailWorker } from "./queue/workers/emailWorker";
+import { companiesRoutes } from "./routes/companies/companies.routes";
+import { companySelectSchema } from "@repo/db/schema";
+import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 
 const envToLogger = {
     development: {
@@ -75,6 +78,14 @@ server.register(fastifySwagger, {
                 name: "Credentials",
                 description: "Change account credentials (password) in different ways.",
             },
+            {
+                name: "Companies",
+                description: "Company management.",
+            },
+            {
+                name: "Companies/Employees",
+                description: "Manage company employees.",
+            },
         ],
         security: [],
         components: {
@@ -92,6 +103,7 @@ server.register(fastifySwagger, {
         schemas: {
             Response: apiResponseSchema,
             User: accountSchema,
+            Company: companySelectSchema,
         },
     }),
 });
@@ -104,7 +116,7 @@ server.register(scalarUi, {
         metaData: {
             title: `Docs - ${APP_NAME} API`,
         },
-        favicon: "/public/favicon.svg",
+        favicon: "/public/favicon.ico",
         theme: "none",
     },
 });
@@ -142,6 +154,14 @@ server.register(accountRoutes, {
 
 server.register(credentialsRoutes, {
     prefix: "/credentials",
+});
+
+server.register(companiesRoutes, {
+    prefix: "/companies",
+});
+
+server.register(employeesRoutes, {
+    prefix: "/companies/:companyId/employees",
 });
 
 server.get("/", (_, reply) => {
@@ -205,7 +225,7 @@ server.setErrorHandler((error, request, response) => {
 server
     .listen({
         port: Number(env.NODE_PORT),
-        host: "0.0.0.0",
+        host: "::",
     })
     .then(() => {
         console.log(chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`));

@@ -49,4 +49,28 @@ __{cookieName}__{appName}
 So, for example, the **"session"** cookie on an app called **"Acme"** turns into \`__session__acme\` for avoiding conflicts and ensure consistant naming.
 
 - **Note:** This docs refers the the cookies by their **name**, not by their **keys**, so the \`__session__acme\` cookie, for example, will only be referenced as \`session\`
+
+## Pagination
+
+All endpoints returning lists are paginated to prevent excessive data loads and ensure optimal performance. The pagination response format is defined as follows, and returned inside the response \`data\` object:
+
+\`\`\`typescript
+export const paginatedDataSchema = (recordSchema: ZodObject<ZodRawShape>) =>
+    z.object({
+        records: z.array(z.object(recordSchema.shape)),
+        pagination: z.object({
+            total_records: z.number(),
+            total_pages: z.number(),
+            current_page: z.number(),
+            next_page: z.number().nullable(),
+            prev_page: z.number().nullable(),
+        }),
+    });
+
+export const getPaginatedDataSchema = z.object({
+    page: z.number().gte(1),
+    query: z.string().optional(),
+    sort: z.enum(["newer", "older"]).optional(),
+});
+\`\`\`
 `;

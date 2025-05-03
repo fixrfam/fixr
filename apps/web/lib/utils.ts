@@ -21,3 +21,11 @@ export function parseJwt(token?: string) {
 }
 
 export const isClientSide = (): boolean => typeof window !== "undefined";
+
+export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = {
+    [K in Keys]: Required<Pick<T, K>> & Partial<Omit<T, K>>;
+}[Keys];
+
+export function firstUpper(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
