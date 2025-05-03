@@ -1,7 +1,11 @@
-import { type ApiResponse } from "@repo/schemas/utils";
+import { PaginatedData, type ApiResponse } from "@repo/schemas/utils";
 
 export const apiResponse = ({ status, error, message, code, data }: ApiResponse) => {
     return { status, error, message, code, data };
+};
+
+export const paginatedData = ({ records, pagination }: PaginatedData) => {
+    return { records, pagination };
 };
 
 export const httpStatusCodes: Record<number, string> = {

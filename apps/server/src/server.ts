@@ -34,6 +34,7 @@ import { accountSchema } from "@repo/schemas/account";
 import { startEmailWorker } from "./queue/workers/emailWorker";
 import { companiesRoutes } from "./routes/companies/companies.routes";
 import { companySelectSchema } from "@repo/db/schema";
+import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 
 const envToLogger = {
     development: {
@@ -80,6 +81,10 @@ server.register(fastifySwagger, {
             {
                 name: "Companies",
                 description: "Company management.",
+            },
+            {
+                name: "Companies/Employees",
+                description: "Manage company employees.",
             },
         ],
         security: [],
@@ -153,6 +158,10 @@ server.register(credentialsRoutes, {
 
 server.register(companiesRoutes, {
     prefix: "/companies",
+});
+
+server.register(employeesRoutes, {
+    prefix: "/companies/:companyId/employees",
 });
 
 server.get("/", (_, reply) => {

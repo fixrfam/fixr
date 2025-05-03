@@ -30,3 +30,7 @@ export const createCompanySchema = z.object({
 export const getCompanyByIdSchema = z.object({
     id: z.string().cuid2(),
 });
+
+export const getCompanyNestedDataSchema = z.object({
+    companyId: z.string().cuid2(),
+});
