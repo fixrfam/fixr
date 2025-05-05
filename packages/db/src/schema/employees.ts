@@ -6,7 +6,7 @@ import { z } from "zod";
 import { users } from "./users";
 import { companies } from "./companies";
 
-export const rolesEnum = mysqlEnum("roles", ["admin", "manager", "employee"]);
+export const rolesEnum = mysqlEnum("roles", ["admin", "manager", "technician"]);
 
 export const employees = mysqlTable("employees", {
     id: varchar("id", { length: 25 })

@@ -46,7 +46,7 @@ export async function queryUserById(id: string) {
  * @param email
  * @returns
  */
-export async function queryUserByEmail(email: string): Promise<z.infer<typeof userSchema>> {
+export async function queryUserByEmail(email: string): Promise<z.infer<typeof userSchema> | null> {
     const [user] = await db
         .select({
             id: users.id,
@@ -66,6 +66,8 @@ export async function queryUserByEmail(email: string): Promise<z.infer<typeof us
         .leftJoin(clients, eq(clients.userId, users.id))
         .where(eq(users.email, email))
         .limit(1);
+
+    if (!user) return null;
 
     return userSchema.parse(user);
 }

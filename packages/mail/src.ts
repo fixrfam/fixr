@@ -1,1 +1,1 @@
-export const whiteLogoUrl = "https://iili.io/3zKzWt2.png";
+export const whiteLogoUrl = "https://i.imgur.com/d3ZzTqA.png";
