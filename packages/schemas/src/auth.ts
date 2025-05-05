@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { employeeRoles } from "./employee";
+import { employeeRoles } from "./roles";
 
 export const passwordSchema = z
     .string({ required_error: "Password is required." })
@@ -37,6 +37,8 @@ export const createUserSchema = z.object({
             message: "Name too long.",
         }),
 });
+
+z.lazy;
 
 export const loginUserSchema = z.object({
     email: z.string().email(),

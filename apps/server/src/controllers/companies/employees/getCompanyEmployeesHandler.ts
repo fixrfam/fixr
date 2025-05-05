@@ -7,7 +7,6 @@ import { and, asc, desc, eq, like } from "drizzle-orm";
 import { employees as employeesTable } from "@repo/db/schema";
 import { getPaginatedCount, getPaginatedRecords } from "@/src/services/generic/pagination.services";
 import { getPaginatedDataSchema } from "@repo/schemas/utils";
-import { tryCatch } from "@/src/helpers/try-catch";
 
 export async function getCompanyEmployeesHandler({
     userJwt,

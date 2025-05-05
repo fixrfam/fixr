@@ -16,6 +16,10 @@
             "types": "./src/auth.ts",
             "default": "./dist/auth.js"
         },
+        "./roles": {
+            "types": "./src/roles.ts",
+            "default": "./dist/roles.js"
+        },
         "./credentials": {
             "types": "./src/credentials.ts",
             "default": "./dist/credentials.js"
@@ -27,6 +31,10 @@
         "./companies": {
             "types": "./src/companies.ts",
             "default": "./dist/companies.js"
+        },
+        "./employees": {
+            "types": "./src/employees.ts",
+            "default": "./dist/employees.js"
         },
         "./common": {
             "types": "./src/common.ts",
