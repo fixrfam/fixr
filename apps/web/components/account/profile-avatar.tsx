@@ -4,10 +4,7 @@ import { forwardRef, HTMLAttributes } from "react";
 import Avatar from "boring-avatars";
 
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
-    RequireAtLeastOne<{
-        src?: string;
-        fallbackHash?: string;
-    }>;
+    RequireAtLeastOne<{ src?: string; fallbackHash?: string }> & { variant?: "rounded" | "square" };
 
 const avatarColors = [
     "#b9daff",
@@ -24,11 +21,14 @@ const avatarColors = [
 
 export const ProfileAvatar = forwardRef<HTMLDivElement, AvatarProps>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ src, fallbackHash, className, ...props }, ref) => {
+    ({ src, fallbackHash, className, variant = "rounded", ...props }, ref) => {
+        const round = { square: "rounded-md", rounded: "rounded-full" };
+
         return (
             <div
                 className={cn(
-                    "rounded-full aspect-square overflow-clip border border-border flex items-center justify-center",
+                    "aspect-square overflow-clip border border-border flex items-center justify-center",
+                    round[variant],
                     className
                 )}
                 ref={ref}
@@ -38,6 +38,7 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, AvatarProps>(
                     name={fallbackHash}
                     variant='beam'
                     className='size-full'
+                    square={variant === "square"}
                     colors={avatarColors}
                 />
                 <img src={src} className='aspect-square object-cover' alt=''></img>

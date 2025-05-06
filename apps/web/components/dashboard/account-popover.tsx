@@ -1,4 +1,4 @@
-import { ProfileAvatar } from "../account/profile-avatar";
+import { AvatarProps, ProfileAvatar } from "../account/profile-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { emailDisplayName, getSession } from "@/lib/auth/utils";
 import { cookies } from "next/headers";
@@ -7,9 +7,17 @@ import { Building2, Settings } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { SignOutButton } from "../auth/signout-button";
 import Link from "next/link";
-import { Badge } from "../ui/badge";
+import { cn } from "@/lib/utils";
 
-export async function AccountPopover() {
+export async function AccountPopover({
+    showData,
+    variant = "rounded",
+    className,
+}: {
+    variant?: AvatarProps["variant"];
+    className?: string;
+    showData?: boolean;
+}) {
     const cookieStore = await cookies();
     const session = getSession(cookieStore);
     const displayName = session.displayName || emailDisplayName(session.email || "");
@@ -17,7 +25,23 @@ export async function AccountPopover() {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <ProfileAvatar fallbackHash={session.id} className='!size-8 hover:cursor-pointer' />
+                <div className={cn("flex gap-4 items-center min-w-0", className)}>
+                    <ProfileAvatar
+                        fallbackHash={session.id}
+                        className='!size-9 hover:cursor-pointer'
+                        variant={variant}
+                    />
+                    {showData && (
+                        <div className='flex flex-col min-w-0'>
+                            <p className='truncate text-sm font-medium whitespace-nowrap overflow-hidden'>
+                                {displayName}
+                            </p>
+                            <p className='truncate text-xs text-muted-foreground whitespace-nowrap overflow-hidden'>
+                                {session.email}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </PopoverTrigger>
             <PopoverContent className='w-80 p-0' align='end'>
                 <div className='flex gap-4 p-4'>
