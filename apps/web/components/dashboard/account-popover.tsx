@@ -1,10 +1,9 @@
-import { AvatarProps, ProfileAvatar } from "../account/profile-avatar";
+import { AvatarProps, Avatar } from "../account/profile-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { emailDisplayName, getSession } from "@/lib/auth/utils";
 import { cookies } from "next/headers";
 import { Button } from "../ui/button";
-import { Building2, Settings } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { Settings } from "lucide-react";
 import { SignOutButton } from "../auth/signout-button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -26,7 +25,7 @@ export async function AccountPopover({
         <Popover>
             <PopoverTrigger asChild>
                 <div className={cn("flex gap-4 items-center min-w-0", className)}>
-                    <ProfileAvatar
+                    <Avatar
                         fallbackHash={session.id}
                         className='!size-9 hover:cursor-pointer'
                         variant={variant}
@@ -43,9 +42,13 @@ export async function AccountPopover({
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className='w-80 p-0' align='end'>
+            <PopoverContent className='w-80 p-0' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
-                    <ProfileAvatar fallbackHash={session.id} className='size-12 text-4xl' />
+                    <Avatar
+                        fallbackHash={session.id}
+                        className='size-12 text-4xl'
+                        variant='square'
+                    />
                     <div className='flex flex-col space-y-1 min-w-0'>
                         <p className='font-medium leading-5 truncate'>{displayName}</p>
                         <p className='text-xs leading-none text-muted-foreground truncate'>

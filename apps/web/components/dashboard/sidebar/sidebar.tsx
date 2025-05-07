@@ -1,5 +1,4 @@
-import { ProfileAvatar } from "@/components/account/profile-avatar";
-import { Logo } from "@/components/svg/Logo";
+import { Avatar } from "@/components/account/profile-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, Search } from "lucide-react";
@@ -7,13 +6,17 @@ import { AccountPopover } from "../account-popover";
 import { ModeToggle } from "@/components/mode-toggle";
 import { sidebarSections } from "./sidebar-routes";
 import { SidebarButton } from "./sidebar-button";
-import { Separator } from "@/components/ui/separator";
 import { TextLogo } from "@/components/svg/TextLogo";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth/utils";
 
-export function Sidebar({ width, margin }: { width: string; margin: string }) {
+export async function Sidebar({ width, margin }: { width: string; margin: string }) {
+    const cookieStore = await cookies();
+    const session = getSession(cookieStore);
+
     return (
         <aside
-            className={`fixed rounded-md border border-border bg-background flex flex-col justify-between`}
+            className={`fixed rounded-md border border-border bg-background flex flex-col justify-between select-none`}
             style={{ width, height: `calc(100dvh - (2 * ${margin}))`, left: margin, top: margin }}
         >
             <div className='flex w-full justify-between items-center px-5'>
@@ -25,11 +28,16 @@ export function Sidebar({ width, margin }: { width: string; margin: string }) {
             <div className='space-y-4'>
                 <div className='flex w-full justify-between items-center px-5'>
                     <div className='flex gap-3'>
-                        <div className='size-9 rounded-sm bg-primary flex items-center justify-center'>
-                            <Logo className='size-6 text-white' />
-                        </div>
+                        <Avatar
+                            className='size-9 rounded-sm'
+                            fallbackHash={session.company?.id as string}
+                            fallbackType='marble'
+                            variant='square'
+                        />
                         <div>
-                            <p className='text-sm font-medium tracking-tight'>Acme Inc.</p>
+                            <p className='text-sm font-medium tracking-tight'>
+                                {session.company?.name}
+                            </p>
                             <p className='text-xs tracking-tight text-muted-foreground'>
                                 My company
                             </p>
@@ -66,8 +74,8 @@ export function Sidebar({ width, margin }: { width: string; margin: string }) {
                 className='w-full h-full py-5 overflow-y-auto space-y-5 px-2'
                 style={{
                     maskImage: `
-                        linear-gradient(to bottom, transparent, white 12px),
-                        linear-gradient(to top, transparent, white 12px)
+                        linear-gradient(to bottom, transparent, white 1rem),
+                        linear-gradient(to top, transparent, white 1rem)
                     `,
                     maskComposite: "intersect",
                     WebkitMaskComposite: "destination-in",
@@ -80,7 +88,7 @@ export function Sidebar({ width, margin }: { width: string; margin: string }) {
                         </p>
                         <div className='px-3'>
                             {section.items.map((item) => (
-                                <SidebarButton key={item.id} {...item} />
+                                <SidebarButton key={item.id} data={item} />
                             ))}
                         </div>
                     </div>

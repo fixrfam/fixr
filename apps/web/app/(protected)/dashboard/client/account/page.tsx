@@ -8,13 +8,12 @@ import { ApiResponse } from "@repo/schemas/utils";
 import { AxiosResponse } from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings } from "@/components/account/settings";
-import { ProfileAvatar } from "@/components/account/profile-avatar";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, BriefcaseBusiness, Building2 } from "lucide-react";
+import { Avatar } from "@/components/account/profile-avatar";
+import { BriefcaseBusiness, Building2 } from "lucide-react";
 import { accountSchema } from "@repo/schemas/account";
 import { Separator } from "@/components/ui/separator";
 import { firstUpper } from "@/lib/utils";
+import { Heading } from "@/components/dashboard/heading";
 
 export default function ClientPage() {
     const { isPending, data } = useQuery<AxiosResponse<ApiResponse<z.infer<typeof accountSchema>>>>(
@@ -31,14 +30,7 @@ export default function ClientPage() {
     return (
         <div className='w-full flex flex-col items-center space-y-10'>
             <div className='w-full flex items-center justify-between'>
-                <div className='flex gap-2 items-center'>
-                    <h1 className='text-2xl font-semibold tracking-tight'>Account (client)</h1>
-                    <Button asChild variant={"link"}>
-                        <Link href='/dashboard/server/account'>
-                            Server <ArrowRight />
-                        </Link>
-                    </Button>
-                </div>
+                <Heading title='Account' description='Manage your account settings' />
                 <div className='flex gap-2 items-center'>
                     <SignOutButton variant={"outline"}>Signout</SignOutButton>
                 </div>
@@ -46,10 +38,7 @@ export default function ClientPage() {
             <div className='w-full flex flex-col lg:flex-row gap-10'>
                 <div className='w-full lg:max-w-[20rem] space-y-4'>
                     {!isPending ? (
-                        <ProfileAvatar
-                            fallbackHash={content?.id as string}
-                            className='size-32 text-4xl'
-                        />
+                        <Avatar fallbackHash={content?.id as string} className='size-32 text-4xl' />
                     ) : (
                         <Skeleton className='w-32 h-32 rounded-full' />
                     )}

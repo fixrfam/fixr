@@ -1,3 +1,5 @@
+import { Heading } from "@/components/dashboard/heading";
+
 export default function Home() {
-    return <h1>Home</h1>;
+    return <Heading title='Home' description='Welcome to your dashboard' />;
 }
