@@ -28,11 +28,11 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             };
 
             toast.loading({
-                text: "Signing you out, hold tight...",
+                text: "Saindo, aguarde um momento...",
                 options: {
                     promise: fetchSignout(),
-                    success: "See you later!",
-                    error: "Error signing out, try again.",
+                    success: "Até logo!",
+                    error: "Erro ao sair, tente novamente.",
                     autoDismiss: false,
                 },
             });

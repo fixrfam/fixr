@@ -19,9 +19,9 @@ export default async function ServerPage() {
     return (
         <div className='w-full flex flex-col items-center space-y-10'>
             <div className='w-full flex items-center justify-between'>
-                <Heading title='Account' description='Manage your account settings' />
+                <Heading title='Conta' description='Gerencie as configurações da sua conta.' />
                 <div className='flex gap-2 items-center'>
-                    <SignOutButton variant={"outline"}>Signout</SignOutButton>
+                    <SignOutButton variant={"outline"}>Sair</SignOutButton>
                 </div>
             </div>
             <div className='w-full flex flex-col lg:flex-row gap-10'>
@@ -32,7 +32,7 @@ export default async function ServerPage() {
                             <h2
                                 className={`text-3xl w-full tracking-tight truncate ${content?.displayName && "font-semibold"}`}
                             >
-                                {content?.displayName ?? "No display name"}
+                                {content?.displayName ?? "Sem nome de exibição"}
                             </h2>
                             <p className='text-muted-foreground'>{content?.email}</p>
                         </div>

@@ -61,16 +61,14 @@ export async function AccountPopover({
                                 size='sm'
                                 asChild
                             >
-                                <Link href='/dashboard/client/account'>
+                                <Link href='/dashboard/account'>
                                     <Settings className='size-4' />
-                                    Manage
+                                    Gerenciar
                                 </Link>
                             </Button>
-                            <SignOutButton
-                                variant='outline'
-                                className='h-7 text-xs'
-                                size='icon'
-                            ></SignOutButton>
+                            <SignOutButton variant='outline' className='h-7 text-xs' size='icon'>
+                                Sair
+                            </SignOutButton>
                         </div>
                     </div>
                 </div>

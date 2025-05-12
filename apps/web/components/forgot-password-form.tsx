@@ -71,10 +71,10 @@ export function ForgotPasswordForm({
                         <ShieldQuestion className='size-5' />
                     </div>
                     <h1 className='text-2xl font-bold tracking-tight whitespace-nowrap'>
-                        Forgot your password?
+                        Esqueceu sua senha?
                     </h1>
                     <p className='text-balance text-sm text-muted-foreground'>
-                        Enter your email below, we will reset it for you!
+                        Digite seu e-mail abaixo, nós iremos redefini-la para você!
                     </p>
                 </div>
                 <div className='grid gap-6'>
@@ -83,11 +83,11 @@ export function ForgotPasswordForm({
                         name='email'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email *</FormLabel>
+                                <FormLabel>E-mail *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type='email'
-                                        placeholder='m@example.com'
+                                        placeholder='m@exemplo.com'
                                         required
                                         {...field}
                                     />
@@ -101,12 +101,12 @@ export function ForgotPasswordForm({
                         className='w-full'
                         disabled={loading || !formState.isValid}
                     >
-                        {!loading ? "Reset password" : <Loader2 className='animate-spin size-4' />}
+                        {!loading ? "Redefinir senha" : <Loader2 className='animate-spin size-4' />}
                     </Button>
                 </div>
                 <div className='text-center text-sm'>
                     <Link href='/auth/login' className='underline underline-offset-4'>
-                        Go back
+                        Voltar
                     </Link>
                 </div>
             </form>

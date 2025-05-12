@@ -11,9 +11,9 @@ export default function ForgotPassword() {
         <ForgotPasswordForm onSuccess={setSuccess} />
     ) : (
         <AuthFormSuccess
-            title='Email sent! 📧'
-            description='We sent you a confirmation email.'
-            paragraph='Click the link sent to your email, fill your new password and you are ready to go!'
+            title='Email enviado! 📧'
+            description='Enviamos um email de confirmação.'
+            paragraph='Clique no link enviado para o seu email, preencha a sua nova senha e está tudo pronto!'
         />
     );
 }

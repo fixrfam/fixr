@@ -37,26 +37,26 @@ export function ResetPasswordForm({
         .extend({
             password: z
                 .string()
-                .min(8, { message: "Must be at least 8 characters long." })
-                .max(128, { message: "Must be at most 128 characters long." })
+                .min(8, { message: "Deve ter pelo menos 8 caracteres." })
+                .max(128, { message: "Deve ter no máximo 128 caracteres." })
                 .refine((password) => /[A-Z]/.test(password), {
-                    message: "Must contain at least one uppercase letter.",
+                    message: "Deve conter pelo menos uma letra maiúscula.",
                 })
                 .refine((password) => /[a-z]/.test(password), {
-                    message: "Must contain at least one lowercase letter.",
+                    message: "Deve conter pelo menos uma letra minúscula.",
                 })
                 .refine((password) => /[0-9]/.test(password), {
-                    message: "Must contain at least one number.",
+                    message: "Deve conter pelo menos um número.",
                 })
                 .refine((password) => /[#?!@$%^&*-]/.test(password), {
-                    message: "Must contain at least one special character.",
+                    message: "Deve conter pelo menos um caractere especial.",
                 }),
             confirmPassword: z
-                .string({ required_error: "Please confirm your password." })
-                .min(1, { message: "Confirm your password." }),
+                .string({ required_error: "Por favor, confirme sua senha." })
+                .min(1, { message: "Confirme sua senha." }),
         })
         .refine((data) => data.password === data.confirmPassword, {
-            message: "Passwords do not match.",
+            message: "As senhas não coincidem.",
             path: ["confirmPassword"],
         });
 
@@ -113,10 +113,10 @@ export function ResetPasswordForm({
                         <Lock className='size-5' />
                     </div>
                     <h1 className='text-2xl font-bold tracking-tight whitespace-nowrap'>
-                        Change your password
+                        Alterar sua senha
                     </h1>
                     <p className='text-balance text-sm text-muted-foreground'>
-                        Create a new, secure one and fill it below.
+                        Crie uma nova senha segura e preencha abaixo.
                     </p>
                 </div>
                 <div className='grid gap-6'>
@@ -125,7 +125,7 @@ export function ResetPasswordForm({
                         name='password'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Password *</FormLabel>
+                                <FormLabel>Senha *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type='password'
@@ -143,7 +143,7 @@ export function ResetPasswordForm({
                         name='confirmPassword'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Confirm password *</FormLabel>
+                                <FormLabel>Confirmar senha *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type='password'
@@ -153,8 +153,8 @@ export function ResetPasswordForm({
                                     />
                                 </FormControl>
                                 <FormDescription>
-                                    Confirming helps ensure there are no typos, keeping your account
-                                    secure.
+                                    A confirmação ajuda a garantir que não haja erros de digitação,
+                                    mantendo sua conta segura.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -165,7 +165,7 @@ export function ResetPasswordForm({
                         className='w-full'
                         disabled={loading || !formState.isValid}
                     >
-                        {!loading ? "Change password" : <Loader2 className='animate-spin size-4' />}
+                        {!loading ? "Alterar senha" : <Loader2 className='animate-spin size-4' />}
                     </Button>
                 </div>
             </form>

@@ -11,31 +11,32 @@ export function Settings() {
     return (
         <>
             <SettingsCard className='w-full' id='password_change'>
-                <SettingsCardTitle>Change Password</SettingsCardTitle>
+                <SettingsCardTitle>Alterar Senha</SettingsCardTitle>
                 <SettingsCardContent className='space-y-4'>
                     <p className='text-sm'>
-                        Update your account password. To successfully change it, you must provide
-                        your current password and a new password.
+                        Atualize a senha da sua conta. Para alterá-la com sucesso, você deve
+                        fornecer sua senha atual e uma nova senha.
                     </p>
                 </SettingsCardContent>
                 <SettingsCardFooter className='py-2'>
                     <p className='text-sm text-muted-foreground'>
-                        Make sure to choose a strong and unique one.
+                        Certifique-se de escolher uma senha forte e única.
                     </p>
                     <ChangePassword />
                 </SettingsCardFooter>
             </SettingsCard>
             <SettingsCard className='w-full' id='delete_account' destructive>
-                <SettingsCardTitle>Delete account</SettingsCardTitle>
+                <SettingsCardTitle>Excluir Conta</SettingsCardTitle>
                 <SettingsCardContent className='space-y-4'>
                     <p className='text-sm'>
-                        Deleting your account is permanent and cannot be undone. This action will
-                        erase <b>all your data</b> and <b>data related to you</b>.
+                        Excluir sua conta é permanente e não pode ser desfeito. Esta ação irá apagar{" "}
+                        <b>todos os seus dados</b> e <b>dados relacionados a você</b>.
                     </p>
                 </SettingsCardContent>
                 <SettingsCardFooter className='py-2' destructive>
                     <p className='text-sm'>
-                        Please make sure you really want to proceed before confirming.
+                        Por favor, certifique-se de que realmente deseja prosseguir antes de
+                        confirmar.
                     </p>
                     <DeleteAccount />
                 </SettingsCardFooter>

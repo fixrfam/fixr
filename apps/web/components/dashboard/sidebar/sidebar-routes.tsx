@@ -2,32 +2,32 @@ import { SidebarSection } from "./types";
 
 export const sidebarSections: readonly SidebarSection[] = [
     {
-        title: "System",
+        title: "Sistema",
         items: [
-            { id: "home", label: "Home", href: "/home", type: "route", icon: "Home" },
+            { id: "home", label: "Início", href: "/home", type: "route", icon: "Home" },
             {
                 id: "notifications",
-                label: "Notifications",
+                label: "Notificações",
                 href: "/notifications",
                 type: "route",
                 icon: "Bell",
             },
-            { id: "logs", label: "Logs", href: "/logs", type: "route", icon: "List" },
+            { id: "logs", label: "Registros", href: "/logs", type: "route", icon: "List" },
             {
                 id: "settings",
-                label: "Settings",
+                label: "Configurações",
                 icon: "Settings",
                 items: [
                     {
                         id: "profile",
-                        label: "Profile",
+                        label: "Perfil",
                         href: "/server/account",
                         type: "route",
                         icon: "User",
                     },
                     {
                         id: "security",
-                        label: "Security",
+                        label: "Segurança",
                         href: "/settings/security",
                         type: "route",
                         icon: "Shield",
@@ -38,54 +38,54 @@ export const sidebarSections: readonly SidebarSection[] = [
         ],
     },
     {
-        title: "Features",
+        title: "Funcionalidades",
         items: [
             {
                 id: "service-orders",
-                label: "Service Orders",
+                label: "Ordens de Serviço",
                 href: "/service-orders",
                 type: "route",
                 icon: "Clipboard",
             },
             {
                 id: "estimates",
-                label: "Estimates",
+                label: "Orçamentos",
                 href: "/estimates",
                 type: "route",
                 icon: "HandCoins",
             },
             {
                 id: "suppliers",
-                label: "Suppliers",
+                label: "Fornecedores",
                 href: "/suppliers",
                 type: "route",
                 icon: "Package",
             },
-            { id: "parts", label: "Parts", href: "/parts", type: "route", icon: "Puzzle" },
+            { id: "parts", label: "Peças", href: "/parts", type: "route", icon: "Puzzle" },
             {
                 id: "inventory",
-                label: "Inventory",
+                label: "Estoque",
                 href: "/inventory",
                 type: "route",
                 icon: "Warehouse",
             },
             {
                 id: "support",
-                label: "Support",
+                label: "Suporte",
                 href: "/support",
                 type: "route",
                 icon: "MessageCircleQuestion",
             },
             {
                 id: "customers",
-                label: "Customers",
+                label: "Clientes",
                 href: "/customers",
                 type: "route",
                 icon: "Users",
             },
             {
                 id: "devices",
-                label: "Devices",
+                label: "Aparelhos",
                 href: "/devices",
                 type: "route",
                 icon: "MonitorSmartphone",
@@ -93,11 +93,11 @@ export const sidebarSections: readonly SidebarSection[] = [
         ],
     },
     {
-        title: "Company",
+        title: "Empresa",
         items: [
             {
                 id: "employees",
-                label: "Employees",
+                label: "Funcionários",
                 href: "/employees",
                 type: "route",
                 icon: "ContactRound",
