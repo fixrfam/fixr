@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { cn, RequireAtLeastOne } from "@/lib/utils";
 import { forwardRef, HTMLAttributes } from "react";
-import Avatar from "boring-avatars";
+import BoringAvatar from "boring-avatars";
 
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
-    RequireAtLeastOne<{
-        src?: string;
-        fallbackHash?: string;
-    }>;
+    RequireAtLeastOne<{ src?: string; fallbackHash?: string }> & {
+        variant?: "rounded" | "square";
+        fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring" | "bauhaus";
+    };
 
 const avatarColors = [
     "#b9daff",
@@ -19,25 +19,38 @@ const avatarColors = [
     "#1039bd",
     "#1039bd",
     "#11225a",
-    "#0d183e",
 ];
 
-export const ProfileAvatar = forwardRef<HTMLDivElement, AvatarProps>(
+export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ src, fallbackHash, className, ...props }, ref) => {
+    (
+        {
+            src,
+            fallbackHash,
+            className,
+            variant = "rounded",
+            fallbackType = "beam" as const,
+            ...props
+        },
+        ref
+    ) => {
+        const round = { square: "rounded-md", rounded: "rounded-full" };
+
         return (
             <div
                 className={cn(
-                    "rounded-full aspect-square overflow-clip border border-border flex items-center justify-center",
+                    "aspect-square overflow-clip border border-border flex items-center justify-center",
+                    round[variant],
                     className
                 )}
                 ref={ref}
                 {...props}
             >
-                <Avatar
+                <BoringAvatar
                     name={fallbackHash}
-                    variant='beam'
+                    variant={fallbackType}
                     className='size-full'
+                    square={variant === "square"}
                     colors={avatarColors}
                 />
                 <img src={src} className='aspect-square object-cover' alt=''></img>
@@ -45,4 +58,4 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, AvatarProps>(
         );
     }
 );
-ProfileAvatar.displayName = "ProfileAvatar";
+Avatar.displayName = "ProfileAvatar";

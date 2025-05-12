@@ -1,14 +1,14 @@
-import { ProfileAvatar } from "@/components/account/profile-avatar";
+import { Avatar } from "@/components/account/profile-avatar";
 import { Settings } from "@/components/account/settings";
 import { SignOutButton } from "@/components/auth/signout-button";
+import { Heading } from "@/components/dashboard/heading";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { axios } from "@/lib/auth/axios";
 import { firstUpper } from "@/lib/utils";
 import { accountSchema } from "@repo/schemas/account";
 import { ApiResponse } from "@repo/schemas/utils";
-import { ArrowRight, BriefcaseBusiness, Building2 } from "lucide-react";
-import Link from "next/link";
+import { BriefcaseBusiness, Building2 } from "lucide-react";
 import { z } from "zod";
 
 export default async function ServerPage() {
@@ -19,24 +19,14 @@ export default async function ServerPage() {
     return (
         <div className='w-full flex flex-col items-center space-y-10'>
             <div className='w-full flex items-center justify-between'>
-                <div className='flex gap-2 items-center'>
-                    <h1 className='text-2xl font-semibold tracking-tight'>Account (server)</h1>
-                    <Button asChild variant={"link"}>
-                        <Link href='/dashboard/client/account'>
-                            Client <ArrowRight />
-                        </Link>
-                    </Button>
-                </div>
+                <Heading title='Account' description='Manage your account settings' />
                 <div className='flex gap-2 items-center'>
                     <SignOutButton variant={"outline"}>Signout</SignOutButton>
                 </div>
             </div>
             <div className='w-full flex flex-col lg:flex-row gap-10'>
                 <div className='w-full lg:max-w-[20rem] space-y-4'>
-                    <ProfileAvatar
-                        fallbackHash={content?.id as string}
-                        className='size-32 text-4xl'
-                    />
+                    <Avatar fallbackHash={content?.id as string} className='size-32 text-4xl' />
                     <div className='space-y-5'>
                         <div>
                             <h2

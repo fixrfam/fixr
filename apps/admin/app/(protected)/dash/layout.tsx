@@ -32,21 +32,14 @@ const geistMono = localFont({
     weight: "100 900",
 });
 
-export const metadata: Metadata = {
-    title: "Fixr Admin",
-    description: "Painel de administrador",
-};
+export const metadata: Metadata = { title: "Fixr Admin", description: "Painel de administrador" };
 
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <ClerkProvider>
             <html lang='en' suppressHydrationWarning>
                 <body
-                    className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased font-[family-name:var(--font-inter)]`}
+                    className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased font-[family-name:var(--font-geist-sans)]`}
                 >
                     <ThemeProvider
                         attribute='class'
