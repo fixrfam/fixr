@@ -6,12 +6,12 @@ import {
     createOrgWithAdmin,
 } from "@/lib/services/companies";
 import { apiResponse, tryCatch } from "@/lib/utils";
-import { unmask } from "@repo/constants/masks";
-import { APP_NAME } from "@repo/constants/app";
-import { emailDisplayName } from "@repo/mail/services";
-import { createCompanySchema } from "@repo/schemas/companies";
+import { unmask } from "@fixr/constants/masks";
+import { APP_NAME } from "@fixr/constants/app";
+import { emailDisplayName } from "@fixr/mail/services";
+import { createCompanySchema } from "@fixr/schemas/companies";
 import { NextRequest, NextResponse } from "next/server";
-import { createEmailQueue, queueEmail } from "@repo/mail/queue";
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { redis } from "@/lib/redis";
 
 export async function POST(req: NextRequest) {

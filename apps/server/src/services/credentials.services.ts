@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "@repo/db/connection";
-import { users } from "@repo/db/schema";
+import { db } from "@fixr/db/connection";
+import { users } from "@fixr/db/schema";
 import { userCacheKey } from "../helpers/cache";
 import { redis } from "../config/redis";
 

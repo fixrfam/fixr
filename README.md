@@ -4,7 +4,7 @@ A starting point for custom authentication without magic libraries. This monorep
 
 - A **Fastify API** using JWT refresh tokens, accepting credentials via the `Authorization` header or a `token` cookie.
 - A **Next.js 14 Frontend** with server/client authentication, middleware revalidation, and Axios interceptors.
-- Shared [Zod](https://zod.dev) schemas via the `@repo/schemas` package.
+- Shared [Zod](https://zod.dev) schemas via the `@fixr/schemas` package.
 - Turborepo for local package sharing and scripting.
 
 ### Powered by:

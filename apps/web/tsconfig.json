@@ -1,5 +1,5 @@
 {
-    "extends": "@repo/typescript-config/nextjs.json",
+    "extends": "@fixr/typescript-config/nextjs.json",
     "compilerOptions": {
         "plugins": [{ "name": "next" }],
         "paths": { "@/*": ["./*"], "react": ["./node_modules/@types/react"] },

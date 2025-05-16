@@ -1,6 +1,6 @@
 import { ArrowRight, Trash2 } from "lucide-react";
 import CookieDialog from "../cookie-dialog";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 import { Logo } from "../svg/Logo";
 
 export function AuthDialogs({

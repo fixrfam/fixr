@@ -1,10 +1,10 @@
 import { and, eq, gte, sql } from "drizzle-orm";
 import { FastifyReply } from "fastify";
 
-import { db } from "@repo/db/connection";
-import { oneTimeTokens, refreshTokens, users } from "@repo/db/schema";
+import { db } from "@fixr/db/connection";
+import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema";
 import { generateOneTimeToken } from "../helpers/tokens";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export interface RefreshToken {
     token: string;

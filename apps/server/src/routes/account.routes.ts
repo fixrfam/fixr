@@ -5,12 +5,12 @@ import {
     confirmAccountDeletionHandler,
     requestAccountDeletionHandler,
 } from "../controllers/account/deleteHandler";
-import { confirmAccountDeletionSchema } from "@repo/schemas/account";
+import { confirmAccountDeletionSchema } from "@fixr/schemas/account";
 import { FastifyTypedInstance } from "../interfaces/fastify";
 import { authenticate } from "../middlewares/authenticate";
 import { accountDocs } from "../docs/account.docs";
 import { z } from "zod";
-import { userJWT } from "@repo/schemas/auth";
+import { userJWT } from "@fixr/schemas/auth";
 
 export async function accountRoutes(fastify: FastifyTypedInstance) {
     fastify.get(

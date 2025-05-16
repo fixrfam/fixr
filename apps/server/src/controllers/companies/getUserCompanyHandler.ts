@@ -2,9 +2,9 @@ import { FastifyReply } from "fastify";
 
 import { apiResponse } from "@/src/helpers/response";
 import { z } from "zod";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { queryCompanyById } from "@/src/services/companies/companies.services";
-import { companySelectSchema } from "@repo/db/schema";
+import { companySelectSchema } from "@fixr/db/schema";
 
 export async function getUserCompanyHandler({
     userJwt,

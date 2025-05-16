@@ -1,7 +1,7 @@
 import { hashPassword } from "@/src/helpers/hash-password";
-import { db } from "@repo/db/connection";
-import { employees, users } from "@repo/db/schema";
-import { createEmployeeSchema } from "@repo/schemas/employees";
+import { db } from "@fixr/db/connection";
+import { employees, users } from "@fixr/db/schema";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 

@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { userJWT } from "@repo/schemas/auth";
+import { userJWT } from "@fixr/schemas/auth";
 import { authenticateEmployee } from "@/src/middlewares/authenticateEmployee";
 import { FastifyTypedInstance } from "@/src/interfaces/fastify";
 import { employeesDocs } from "@/src/docs/companies/employees/employees.docs";
 import { getCompanyEmployeesHandler } from "@/src/controllers/companies/employees/getCompanyEmployeesHandler";
-import { getCompanyNestedDataSchema } from "@repo/schemas/companies";
-import { getPaginatedDataSchema } from "@repo/schemas/utils";
-import { createEmployeeSchema } from "@repo/schemas/employees";
+import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
+import { getPaginatedDataSchema } from "@fixr/schemas/utils";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { registerEmployeeHandler } from "@/src/controllers/companies/employees/registerEmployeeHandler";
 
 export async function employeesRoutes(fastify: FastifyTypedInstance) {

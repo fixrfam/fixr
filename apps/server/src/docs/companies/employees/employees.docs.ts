@@ -1,9 +1,9 @@
-import { createEmployeeSchema } from "@repo/schemas/employees";
-import { getPaginatedDataSchema, paginatedDataSchema } from "@repo/schemas/utils";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
+import { getPaginatedDataSchema, paginatedDataSchema } from "@fixr/schemas/utils";
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../../types";
-import { employeeSelectSchema } from "@repo/db/schema";
-import { getCompanyNestedDataSchema } from "@repo/schemas/companies";
+import { employeeSelectSchema } from "@fixr/db/schema";
+import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { z } from "zod";
 
 const getCompanyEmployeesSchema: FastifySchema = {

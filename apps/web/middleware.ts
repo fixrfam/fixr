@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseJwt } from "./lib/utils";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get(cookieKey("session"))?.value;
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
 
         // If the user is at the loginPath and has a valid token, they need to go to dashboard.
         if (token || refreshToken) {
-            return NextResponse.redirect(new URL("/dashboard/client/account", request.url));
+            return NextResponse.redirect(new URL("/dashboard/account", request.url));
         }
 
         return NextResponse.next();

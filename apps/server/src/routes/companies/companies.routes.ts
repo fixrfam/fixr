@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { userJWT } from "@repo/schemas/auth";
+import { userJWT } from "@fixr/schemas/auth";
 import { authenticateEmployee } from "@/src/middlewares/authenticateEmployee";
 import { getUserCompanyHandler } from "@/src/controllers/companies/getUserCompanyHandler";
 import { companiesDocs } from "@/src/docs/companies/companies.docs";
 import { FastifyTypedInstance } from "@/src/interfaces/fastify";
-import { getCompanyByIdSchema } from "@repo/schemas/companies";
+import { getCompanyByIdSchema } from "@fixr/schemas/companies";
 import { getCompanyByIdHandler } from "@/src/controllers/companies/getCompanyByIdHandler";
 
 export async function companiesRoutes(fastify: FastifyTypedInstance) {

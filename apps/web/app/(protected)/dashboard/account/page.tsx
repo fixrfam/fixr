@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { axios } from "@/lib/auth/axios";
 import { firstUpper } from "@/lib/utils";
-import { accountSchema } from "@repo/schemas/account";
-import { ApiResponse } from "@repo/schemas/utils";
+import { accountSchema } from "@fixr/schemas/account";
+import { ApiResponse } from "@fixr/schemas/utils";
 import { BriefcaseBusiness, Building2 } from "lucide-react";
 import { z } from "zod";
 
@@ -19,7 +19,7 @@ export default async function ServerPage() {
     return (
         <div className='w-full flex flex-col items-center space-y-10'>
             <div className='w-full flex items-center justify-between'>
-                <Heading title='Conta' description='Gerencie as configurações da sua conta.' />
+                <Heading title='Perfil' description='Gerencie as configurações da sua conta.' />
                 <div className='flex gap-2 items-center'>
                     <SignOutButton variant={"outline"}>Sair</SignOutButton>
                 </div>

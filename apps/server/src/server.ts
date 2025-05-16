@@ -28,12 +28,12 @@ import { apiDescription } from "./docs/main";
 import { join } from "path";
 import { cwd } from "process";
 import { apiResponse } from "./helpers/response";
-import { apiResponseSchema } from "@repo/schemas/utils";
-import { APP_NAME } from "@repo/constants/app";
-import { accountSchema } from "@repo/schemas/account";
+import { apiResponseSchema } from "@fixr/schemas/utils";
+import { APP_NAME } from "@fixr/constants/app";
+import { accountSchema } from "@fixr/schemas/account";
 import { startEmailWorker } from "./queue/workers/emailWorker";
 import { companiesRoutes } from "./routes/companies/companies.routes";
-import { companySelectSchema } from "@repo/db/schema";
+import { companySelectSchema } from "@fixr/db/schema";
 import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 
 const envToLogger = {

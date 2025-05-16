@@ -1,4 +1,4 @@
-import { db } from "@repo/db/connection";
+import { db } from "@fixr/db/connection";
 import { count, SQL } from "drizzle-orm";
 import { MySqlTable } from "drizzle-orm/mysql-core";
 

@@ -1,7 +1,7 @@
 import { redis } from "@/src/config/redis";
 import { CACHE_TTL, companyCacheKey } from "@/src/helpers/cache";
-import { db } from "@repo/db/connection";
-import { companies, companySelectSchema } from "@repo/db/schema";
+import { db } from "@fixr/db/connection";
+import { companies, companySelectSchema } from "@fixr/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function queryCompanyById(id: string) {

@@ -1,9 +1,9 @@
-import { userJWT } from "@repo/schemas/auth";
+import { userJWT } from "@fixr/schemas/auth";
 import { axios } from "./axios";
 import { parseCookies } from "nookies";
 import { parseJwt } from "../utils";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export function emailDisplayName(email: string) {
     return email.split("@")[0];

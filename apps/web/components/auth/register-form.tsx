@@ -4,7 +4,7 @@ import { api, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { createUserSchema as baseCreateUserSchema } from "@repo/schemas/auth";
+import { createUserSchema as baseCreateUserSchema } from "@fixr/schemas/auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,7 @@ import { AxiosError } from "axios";
 import { axios } from "@/lib/auth/axios";
 import { toast } from "@pheralb/toast";
 import { fallbackMessages, messages } from "@/lib/messages";
-import { type ApiResponse } from "@repo/schemas/utils";
+import { type ApiResponse } from "@fixr/schemas/utils";
 import { Loader2 } from "lucide-react";
 
 export function RegisterForm({ onSuccess }: { onSuccess: Dispatch<SetStateAction<boolean>> }) {

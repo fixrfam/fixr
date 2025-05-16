@@ -5,10 +5,10 @@ import { registerHandler } from "../controllers/auth/registerHandler";
 import { revalidateHandler } from "../controllers/auth/revalidateHandler";
 import { verifyHandler } from "../controllers/auth/verifyHandler";
 import { authDocs } from "../docs/auth.docs";
-import { createUserSchema, loginUserSchema, verifyEmailSchema } from "@repo/schemas/auth";
+import { createUserSchema, loginUserSchema, verifyEmailSchema } from "@fixr/schemas/auth";
 import { FastifyTypedInstance } from "../interfaces/fastify";
 import { signOutHandler } from "../controllers/auth/signOutHandler";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
     fastify.post(

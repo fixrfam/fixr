@@ -21,7 +21,7 @@ export const sidebarSections: readonly SidebarSection[] = [
                     {
                         id: "profile",
                         label: "Perfil",
-                        href: "/server/account",
+                        href: "/account",
                         type: "route",
                         icon: "User",
                     },

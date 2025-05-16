@@ -25,7 +25,7 @@ export function Settings() {
                     <ChangePassword />
                 </SettingsCardFooter>
             </SettingsCard>
-            <SettingsCard className='w-full' id='delete_account' destructive>
+            {/* <SettingsCard className='w-full' id='delete_account' destructive>
                 <SettingsCardTitle>Excluir Conta</SettingsCardTitle>
                 <SettingsCardContent className='space-y-4'>
                     <p className='text-sm'>
@@ -40,7 +40,7 @@ export function Settings() {
                     </p>
                     <DeleteAccount />
                 </SettingsCardFooter>
-            </SettingsCard>
+            </SettingsCard> */}
         </>
     );
 }

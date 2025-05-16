@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { axios } from "@/lib/auth/axios";
-import { ApiResponse } from "@repo/schemas/utils";
+import { ApiResponse } from "@fixr/schemas/utils";
 import { api } from "@/lib/utils";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { toast } from "@pheralb/toast";

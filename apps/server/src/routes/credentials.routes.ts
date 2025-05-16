@@ -4,10 +4,10 @@ import {
     changePasswordAuthenticatedSchema,
     requestPasswordResetSchema,
     confirmPasswordResetSchema,
-} from "@repo/schemas/credentials";
+} from "@fixr/schemas/credentials";
 import { FastifyTypedInstance } from "../interfaces/fastify";
 import { authenticate } from "../middlewares/authenticate";
-import { userJWT } from "@repo/schemas/auth";
+import { userJWT } from "@fixr/schemas/auth";
 import { z } from "zod";
 import {
     confirmPasswordResetHandler,

@@ -1,5 +1,5 @@
 import { signOut } from "@/lib/auth/utils";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 

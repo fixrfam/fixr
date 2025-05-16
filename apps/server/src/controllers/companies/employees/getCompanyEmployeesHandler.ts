@@ -2,11 +2,11 @@ import { FastifyReply } from "fastify";
 
 import { apiResponse, paginatedData } from "@/src/helpers/response";
 import { z } from "zod";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { and, asc, desc, eq, like } from "drizzle-orm";
-import { employees as employeesTable } from "@repo/db/schema";
+import { employees as employeesTable } from "@fixr/db/schema";
 import { getPaginatedCount, getPaginatedRecords } from "@/src/services/generic/pagination.services";
-import { getPaginatedDataSchema } from "@repo/schemas/utils";
+import { getPaginatedDataSchema } from "@fixr/schemas/utils";
 
 export async function getCompanyEmployeesHandler({
     userJwt,

@@ -1,6 +1,6 @@
 import { AuthDialogs } from "@/components/auth/auth-dialogs";
 import { LoginForm } from "@/components/auth/login-form";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 import { cookies } from "next/headers";
 
 export default async function LoginPage() {

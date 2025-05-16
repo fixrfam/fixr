@@ -1,7 +1,7 @@
 import { FastifySchema } from "fastify";
 import { z } from "zod";
 
-import { createUserSchema, loginUserSchema } from "@repo/schemas/auth";
+import { createUserSchema, loginUserSchema } from "@fixr/schemas/auth";
 import { zodResponseSchema } from "./types";
 
 const registerSchema: FastifySchema = {

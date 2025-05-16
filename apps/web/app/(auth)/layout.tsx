@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { APP_NAME } from "@repo/constants/app";
+import { APP_NAME } from "@fixr/constants/app";
 import { Logo } from "@/components/svg/Logo";
 
 export const metadata: Metadata = {

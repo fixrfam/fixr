@@ -24,15 +24,15 @@ export const messages: { [key: string]: { title: string; description: string } }
         description: "Não encontramos nenhum usuário com essas credenciais.",
     },
     login_success: {
-        title: "Login realizado com sucesso!",
+        title: "Login realizado!",
         description: "Você será redirecionado em instantes...",
     },
     update_account_success: {
-        title: "Conta atualizada com sucesso!",
+        title: "Conta atualizada!",
         description: "Recarregue a página para ver as mudanças.",
     },
     password_update_success: {
-        title: "Senha atualizada com sucesso!",
+        title: "Senha atualizada!",
         description: "Use sua nova senha no próximo login.",
     },
     equal_passwords: {

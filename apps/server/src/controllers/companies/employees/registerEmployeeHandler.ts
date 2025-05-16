@@ -2,20 +2,20 @@ import { FastifyReply } from "fastify";
 
 import { apiResponse } from "@/src/helpers/response";
 import { z } from "zod";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { queryUserByEmail } from "@/src/services/auth.services";
-import { createEmployeeSchema } from "@repo/schemas/employees";
-import { employeeRoles } from "@repo/schemas/roles";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
+import { employeeRoles } from "@fixr/schemas/roles";
 import {
     createEmployeeAndAccount,
     getEmployeeByCpf,
 } from "@/src/services/companies/employees/employees.services";
 import { generateRandomPassword } from "@/src/helpers/generate-password";
-import { createEmailQueue, queueEmail } from "@repo/mail/queue";
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { redis } from "@/src/config/redis";
-import { APP_NAME } from "@repo/constants/app";
+import { APP_NAME } from "@fixr/constants/app";
 import { env } from "@/src/env";
-import { emailDisplayName } from "@repo/mail/services";
+import { emailDisplayName } from "@fixr/mail/services";
 
 export async function registerEmployeeHandler({
     userJwt,

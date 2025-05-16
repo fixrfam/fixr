@@ -6,7 +6,7 @@ import { apiResponse } from "@/src/helpers/response";
 
 import { signJWT } from "../../helpers/jwt";
 import { generateRefreshToken } from "../../helpers/tokens";
-import { jwtPayload, loginUserSchema } from "@repo/schemas/auth";
+import { jwtPayload, loginUserSchema } from "@fixr/schemas/auth";
 import { queryJWTPayloadByUserId, queryUserByEmail } from "../../services/auth.services";
 import { setJWTCookie, setRefreshToken } from "../../services/tokens.services";
 

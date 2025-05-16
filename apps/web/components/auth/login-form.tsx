@@ -4,11 +4,11 @@ import { api, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { loginUserSchema } from "@repo/schemas/auth";
+import { loginUserSchema } from "@fixr/schemas/auth";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { ApiResponse } from "@repo/schemas/utils";
+import { ApiResponse } from "@fixr/schemas/utils";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -69,7 +69,7 @@ export function LoginForm() {
                 <div className='flex flex-col items-center gap-2 text-center'>
                     <h1 className='text-2xl font-bold tracking-tight'>Entre na sua conta</h1>
                     <p className='text-balance text-sm text-muted-foreground'>
-                        Insira seu e-mail abaixo para entrar na sua conta
+                        Insira suas credenciais e entre na sua conta
                     </p>
                 </div>
                 <div className='grid gap-6'>

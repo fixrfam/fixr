@@ -1,7 +1,7 @@
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../types";
-import { companySelectSchema } from "@repo/db/schema";
-import { getCompanyByIdSchema as getCompanyByIdParamsSchema } from "@repo/schemas/companies";
+import { companySelectSchema } from "@fixr/db/schema";
+import { getCompanyByIdSchema as getCompanyByIdParamsSchema } from "@fixr/schemas/companies";
 import { z } from "zod";
 
 const getUserCompanySchema: FastifySchema = {

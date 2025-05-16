@@ -3,7 +3,7 @@ import { FastifyReply } from "fastify";
 import { queryAccountById } from "../../services/account.services";
 
 import { apiResponse } from "@/src/helpers/response";
-import { accountSchema } from "@repo/schemas/account";
+import { accountSchema } from "@fixr/schemas/account";
 
 export async function getAccountHandler({
     userId,

@@ -1,12 +1,12 @@
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@repo/db/connection";
-import { clients, companies, employees, users } from "@repo/db/schema";
+import { db } from "@fixr/db/connection";
+import { clients, companies, employees, users } from "@fixr/db/schema";
 import { redis } from "../config/redis";
 import { accountCacheKey, CACHE_TTL } from "../helpers/cache";
-import { accountSchema } from "@repo/schemas/account";
+import { accountSchema } from "@fixr/schemas/account";
 
 export async function queryAccountById(id: string) {
     const cacheKey = accountCacheKey(id);
