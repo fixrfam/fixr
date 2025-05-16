@@ -69,6 +69,8 @@ export async function queryUserByEmail(email: string): Promise<z.infer<typeof us
 
     if (!user) return null;
 
+    console.log(user);
+
     return userSchema.parse(user);
 }
 

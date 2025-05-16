@@ -10,7 +10,10 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@fixr/constants": "*",
+        "@fixr/typescript-config": "*",
         "@hookform/resolvers": "^3.10.0",
+        "@maskito/react": "^3.8.0",
         "@pheralb/toast": "^0.2.3",
         "@radix-ui/react-alert-dialog": "^1.1.5",
         "@radix-ui/react-collapsible": "^1.1.10",
@@ -18,10 +21,9 @@
         "@radix-ui/react-dropdown-menu": "^2.1.5",
         "@radix-ui/react-label": "^2.1.1",
         "@radix-ui/react-popover": "^1.1.6",
+        "@radix-ui/react-select": "^2.2.4",
         "@radix-ui/react-separator": "^1.1.2",
         "@radix-ui/react-slot": "^1.2.0",
-        "@fixr/constants": "*",
-        "@fixr/typescript-config": "*",
         "@tanstack/react-query": "^5.64.1",
         "axios": "^1.7.9",
         "boring-avatars": "^1.11.2",

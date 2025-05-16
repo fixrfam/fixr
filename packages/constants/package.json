@@ -23,13 +23,20 @@
         "./messages": {
             "types": "./src/messages.ts",
             "default": "./dist/messages.js"
+        },
+        "./roles": {
+            "types": "./src/roles.ts",
+            "default": "./dist/roles.js"
         }
     },
     "devDependencies": {
         "@fixr/typescript-config": "*",
+        "@fixr/schemas": "*",
         "@types/eslint": "^8.56.5",
         "@types/node": "^20.11.24",
         "typescript": "^5.3.3"
     },
-    "dependencies": {}
+    "dependencies": {
+        "zod": "^3.24.4"
+    }
 }

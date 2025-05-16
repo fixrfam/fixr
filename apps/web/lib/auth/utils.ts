@@ -25,3 +25,17 @@ export function getSession(cookies?: ReadonlyRequestCookies) {
     const jwt = parseJwt(cookieStore[cookieKey("session")]); // Corrected access using cookieKey
     return userJWT.parse(jwt);
 }
+
+export const getClientSession = (): ReturnType<typeof userJWT.parse> | null => {
+    const cookies = parseCookies();
+
+    const raw = cookies[cookieKey("session")];
+    if (!raw) return null;
+
+    try {
+        const jwt = parseJwt(raw);
+        return userJWT.parse(jwt);
+    } catch {
+        return null;
+    }
+};

@@ -17,8 +17,12 @@ export const messages: Record<string, Message> = {
         description: "Uma empresa com este CNPJ já existe.",
     },
     email_already_exists: {
-        title: "Email ja cadastrado",
+        title: "Email já cadastrado",
         description: "Um usuario com este email já existe.",
+    },
+    email_already_used: {
+        title: "Email já cadastrado",
+        description: "Um usuário com este email já existe.",
     },
     subdomain_taken: {
         title: "Subdomínio em uso.",
@@ -27,6 +31,22 @@ export const messages: Record<string, Message> = {
     company_create_success: {
         title: "Sucesso!",
         description: "Empresa criada com sucesso.",
+    },
+    company_not_found: {
+        title: "Empresa não encontrada",
+        description: "Não há empresas atreladas a sua conta.",
+    },
+    not_allowed: {
+        title: "Acesso negado",
+        description: "Você nao tem permissão para executar essa ação.",
+    },
+    violates_role_hierarchy: {
+        title: "Ação negada",
+        description: "Você só pode cadastrar funcionários subordinados.",
+    },
+    create_employee_success: {
+        title: "Sucesso!",
+        description: "Funcionario cadastrado com sucesso.",
     },
 };
 

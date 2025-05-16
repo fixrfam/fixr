@@ -29,6 +29,13 @@
       "when": 1746396319718,
       "tag": "0003_lean_starbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1747437851417,
+      "tag": "0004_fearless_human_fly",
+      "breakpoints": true
     }
   ]
 }
