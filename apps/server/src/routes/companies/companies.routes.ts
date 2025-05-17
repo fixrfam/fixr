@@ -6,22 +6,23 @@ import { companiesDocs } from "@/src/docs/companies/companies.docs";
 import { FastifyTypedInstance } from "@/src/interfaces/fastify";
 import { getCompanyByIdSchema } from "@fixr/schemas/companies";
 import { getCompanyByIdHandler } from "@/src/controllers/companies/getCompanyByIdHandler";
+import { withErrorHandler } from "@/src/middlewares/withErrorHandler";
 
 export async function companiesRoutes(fastify: FastifyTypedInstance) {
     fastify.get(
         "/",
         { preHandler: authenticateEmployee, schema: companiesDocs.getUserCompanySchema },
-        async (request, response) => {
+        withErrorHandler(async (request, response) => {
             const userJwt = request.user as z.infer<typeof userJWT>;
 
             await getUserCompanyHandler({ userJwt, response });
-        }
+        })
     );
 
     fastify.get(
         "/:id",
         { preHandler: authenticateEmployee, schema: companiesDocs.getCompanyByIdSchema },
-        async (request, response) => {
+        withErrorHandler(async (request, response) => {
             const userJwt = request.user as z.infer<typeof userJWT>;
             const params = await getCompanyByIdSchema.parseAsync(request.params);
 
@@ -30,6 +31,6 @@ export async function companiesRoutes(fastify: FastifyTypedInstance) {
                 userJwt,
                 response,
             });
-        }
+        })
     );
 }

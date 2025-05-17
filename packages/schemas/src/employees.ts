@@ -9,7 +9,7 @@ export const createEmployeeSchema = z.object({
         .min(3, { message: "O nome deve ter no mínimo 3 caracteres." })
         .max(100, { message: "Ops! Nome muito grande..." }),
     cpf: cpf,
-    phone: z.string().length(11, { message: "Telefone incompleto." }).optional(),
+    phone: z.string().length(11, { message: "Telefone incompleto." }).optional().nullable(),
     role: employeeRoles,
     email: z.string({ required_error: "Preencha este campo" }).email({ message: "Email inválido" }),
     password: passwordSchema.optional(),

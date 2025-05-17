@@ -30,7 +30,7 @@ export async function createEmployeeAndAccount({
     await db.insert(employees).values({
         cpf: data.cpf,
         name: data.name,
-        phone: unmask.phone(data.phone ?? ""),
+        phone: unmask.phone(data.phone),
         role: data.role,
         userId: userId.id,
         companyId: companyId,

@@ -7,7 +7,7 @@ export const accountSchema = z
         email: z.string().email({ message: "Invalid email address" }),
         displayName: z.string().min(3).max(100).nullable(),
         cpf: z.string().length(11),
-        phone: z.string().length(11).nullable(),
+        phone: z.string().length(11).optional().nullable(),
         profileType: z.union([z.literal("client"), z.literal("employee")]),
         company: z
             .object({

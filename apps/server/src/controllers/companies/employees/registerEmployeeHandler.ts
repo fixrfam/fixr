@@ -15,7 +15,6 @@ import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { redis } from "@/src/config/redis";
 import { APP_NAME } from "@fixr/constants/app";
 import { env } from "@/src/env";
-import { emailDisplayName } from "@fixr/mail/services";
 
 export async function registerEmployeeHandler({
     userJwt,

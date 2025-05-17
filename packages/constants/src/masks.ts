@@ -57,5 +57,5 @@ export const phone = [
 export const unmask = {
     cpf: (value: string) => value.replace(/\D/g, ""),
     cnpj: (value: string) => value.replace(/\D/g, ""),
-    phone: (value: string) => value.replace(/\D/g, ""),
+    phone: (value?: string | null) => value?.replace(/\D/g, ""),
 };
