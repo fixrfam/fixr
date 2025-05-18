@@ -4,6 +4,7 @@
     "scripts": {
         "build": "dotenv -- turbo build",
         "dev": "dotenv -- turbo dev --parallel --no-daemon",
+        "start": "dotenv -- turbo start --parallel --no-daemon",
         "lint": "dotenv -- turbo lint",
         "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
         "migrate": "dotenv -- turbo run migrate --filter=@fixr/db",

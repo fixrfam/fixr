@@ -140,7 +140,7 @@ server.register(fastifyCookie, {
 });
 
 server.register(fastifyStatic, {
-    root: join(cwd(), "src", "public"),
+    root: join(cwd(), "public"),
     prefix: "/public/",
 });
 

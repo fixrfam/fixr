@@ -4,10 +4,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "next dev --turbopack",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint"
+        "dev": "dotenv -- next dev --turbopack",
+        "build": "dotenv -- next build",
+        "start": "dotenv -- next start",
+        "lint": "dotenv -- next lint"
     },
     "dependencies": {
         "@fixr/constants": "*",
@@ -29,12 +29,13 @@
         "boring-avatars": "^1.11.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "dotenv": "^16.5.0",
         "lucide-react": "^0.471.1",
         "next": "15.3.1",
         "next-themes": "^0.4.4",
         "nookies": "^2.5.2",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
+        "react": "19.1.0",
+        "react-dom": "19.1.0",
         "react-hook-form": "^7.54.2",
         "react-wrap-balancer": "^1.1.1",
         "tailwind-merge": "^2.6.0",
@@ -52,7 +53,7 @@
         "typescript": "^5"
     },
     "overrides": {
-        "@types/react": "19.0.0",
-        "@types/react-dom": "19.0.0"
+        "@types/react": "19.1.2",
+        "@types/react-dom": "19.1.3"
     }
 }

@@ -10,11 +10,11 @@ import { redirect, useRouter } from "next/navigation";
 export default function NewEmployeePage() {
     const session = getClientSession();
 
+    const router = useRouter();
+
     if (!session) {
         return redirect("/auth/login");
     }
-
-    const router = useRouter();
 
     return (
         <div className='flex flex-col gap-6'>
