@@ -1,24 +1,61 @@
 import { db } from "@fixr/db/connection";
-import { count, SQL } from "drizzle-orm";
-import { MySqlTable } from "drizzle-orm/mysql-core";
+import { count, getTableColumns, SQL } from "drizzle-orm";
+import { AnyMySqlColumn, MySqlTable } from "drizzle-orm/mysql-core";
+
+type Join = {
+    type: "inner" | "left" | "right" | "full";
+    table: MySqlTable;
+    on: SQL;
+};
 
 /**
  * Fetches a paginated range of records from a given table.
  */
 export async function getPaginatedRecords({
     table,
+    select,
     skip,
     take,
     where,
     order,
+    joins,
 }: {
     table: MySqlTable;
     skip: number;
     take: number;
+    select?: Record<string, AnyMySqlColumn | SQL | Record<string, AnyMySqlColumn>>;
     where?: SQL;
+    joins?: Join[];
     order: SQL;
 }) {
-    return await db.select().from(table).where(where).orderBy(order).limit(take).offset(skip);
+    const baseQuery = db
+        .select(select ?? getTableColumns(table))
+        .from(table)
+        .where(where)
+        .orderBy(order);
+
+    if (joins) {
+        for (const join of joins) {
+            switch (join.type) {
+                case "inner":
+                    baseQuery.innerJoin(join.table, join.on);
+                    break;
+                case "left":
+                    baseQuery.leftJoin(join.table, join.on);
+                    break;
+                case "right":
+                    baseQuery.rightJoin(join.table, join.on);
+                    break;
+                case "full":
+                    baseQuery.fullJoin(join.table, join.on);
+                    break;
+            }
+        }
+    }
+
+    const query = baseQuery.limit(take).offset(skip);
+
+    return await query;
 }
 
 /**

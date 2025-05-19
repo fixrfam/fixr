@@ -1,10 +1,10 @@
 "use client";
 
-import { api, cn } from "@/lib/utils";
+import { api, cn, parseJwt } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { loginUserSchema } from "@fixr/schemas/auth";
+import { loginUserSchema, userJWT } from "@fixr/schemas/auth";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
@@ -16,6 +16,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/hooks/use-session";
 
 export function LoginForm() {
     const [loading, setLoading] = useState(false);
@@ -36,9 +37,13 @@ export function LoginForm() {
     async function onSubmit(values: z.infer<typeof loginUserSchema>) {
         setLoading(true);
         try {
-            const res = await axios.post<ApiResponse>(api("/auth/login"), values, {
-                withCredentials: true,
-            });
+            const res = await axios.post<ApiResponse<{ token: string }>>(
+                api("/auth/login"),
+                values,
+                {
+                    withCredentials: true,
+                }
+            );
             if (res.status === 200) {
                 const message = messages[res.data.code] ?? fallbackMessages.success;
 
@@ -46,7 +51,8 @@ export function LoginForm() {
                     text: message.title,
                     description: message.description,
                 });
-                router.push("/dashboard/account");
+                const jwt = parseJwt(res.data.data?.token);
+                router.push(`/dashboard/${jwt?.company?.subdomain}/account`);
             }
         } catch (error) {
             if (error instanceof AxiosError) {

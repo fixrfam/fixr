@@ -13,7 +13,7 @@ export function Heading({
     return (
         <div className='flex gap-4 items-center'>
             {Icon && (
-                <div className='size-12 bg-primary rounded-md grid place-items-center'>
+                <div className='size-12 shrink-0 bg-primary rounded-md grid place-items-center'>
                     <Icon className='size-6 text-white' />
                 </div>
             )}

@@ -46,6 +46,7 @@ import { useState } from "react";
 import { api, tryCatch } from "@/lib/utils";
 import { toast } from "@pheralb/toast";
 import { userJWT } from "@fixr/schemas/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreateEmployeeForm({
     session,
@@ -68,6 +69,8 @@ export function CreateEmployeeForm({
         reValidateMode: "onChange",
     });
 
+    const queryClient = useQueryClient();
+
     async function onSubmit(values: z.infer<typeof createEmployeeSchema>) {
         setLoading(true);
 
@@ -78,7 +81,7 @@ export function CreateEmployeeForm({
 
         try {
             const { data: response, error } = await tryCatch<AxiosResponse<ApiResponse>>(
-                axios.post(api(`/companies/${session.company?.id}/employees`), formatted)
+                axios.post(api(`/companies/${session.company?.subdomain}/employees`), formatted)
             );
 
             if (error && error instanceof AxiosError) {
@@ -99,13 +102,14 @@ export function CreateEmployeeForm({
             });
 
             onSuccess();
+            queryClient.invalidateQueries({ queryKey: ["employeesData"] });
         } finally {
             setLoading(false);
         }
     }
 
     const cpfMask = useMaskito({ options: { mask: cpf } });
-    const phoneMask = useMaskito({ options: { mask: phone } });
+    // const phoneMask = useMaskito({ options: { mask: phone } });
 
     function generatePwd() {
         form.setValue("password", generateRandomPassword());

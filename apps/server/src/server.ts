@@ -161,7 +161,7 @@ server.register(companiesRoutes, {
 });
 
 server.register(employeesRoutes, {
-    prefix: "/companies/:companyId/employees",
+    prefix: "/companies/:subdomain/employees",
 });
 
 server.get("/", (_, reply) => {

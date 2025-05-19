@@ -18,10 +18,10 @@ export async function employeesRoutes(fastify: FastifyTypedInstance) {
         withErrorHandler(async (request, response) => {
             const userJwt = request.user as z.infer<typeof userJWT>;
             const { query, sort, page, perPage } = getPaginatedDataSchema.parse(request.query);
-            const { companyId } = getCompanyNestedDataSchema.parse(request.params);
+            const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
             await getCompanyEmployeesHandler({
-                companyId,
+                subdomain,
                 userJwt,
                 response,
                 page,
@@ -38,9 +38,9 @@ export async function employeesRoutes(fastify: FastifyTypedInstance) {
         withErrorHandler(async (request, response) => {
             const userJwt = request.user as z.infer<typeof userJWT>;
             const body = await createEmployeeSchema.parseAsync(request.body);
-            const { companyId } = getCompanyNestedDataSchema.parse(request.params);
+            const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-            await registerEmployeeHandler({ userJwt, data: body, companyId, response });
+            await registerEmployeeHandler({ userJwt, data: body, subdomain, response });
         })
     );
 }

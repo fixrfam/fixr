@@ -3,14 +3,15 @@
 import { BackButton } from "@/components/dashboard/back-button";
 import { CreateEmployeeForm } from "@/components/dashboard/employees/new/CreateEmployeeForm";
 import { Heading } from "@/components/dashboard/heading";
-import { getClientSession } from "@/lib/auth/utils";
+import { useSession } from "@/lib/hooks/use-session";
 import { UserRoundPlus } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 
 export default function NewEmployeePage() {
-    const session = getClientSession();
+    const session = useSession();
 
     const router = useRouter();
+    const params = useParams<{ subdomain: string }>();
 
     if (!session) {
         return redirect("/auth/login");
@@ -28,7 +29,7 @@ export default function NewEmployeePage() {
             </div>
             <CreateEmployeeForm
                 session={session}
-                onSuccess={() => router.push("/dashboard/employees")}
+                onSuccess={() => router.push(`/dashboard/${params.subdomain}/employees`)}
             />
         </div>
     );

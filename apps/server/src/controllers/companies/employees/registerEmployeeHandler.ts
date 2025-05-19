@@ -15,15 +15,16 @@ import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { redis } from "@/src/config/redis";
 import { APP_NAME } from "@fixr/constants/app";
 import { env } from "@/src/env";
+import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services";
 
 export async function registerEmployeeHandler({
     userJwt,
-    companyId,
+    subdomain,
     data,
     response,
 }: {
     userJwt: z.infer<typeof jwtPayload>;
-    companyId: string;
+    subdomain: string;
     data: z.infer<typeof createEmployeeSchema>;
     response: FastifyReply;
 }) {
@@ -40,7 +41,7 @@ export async function registerEmployeeHandler({
     }
 
     const allowedRoles = ["admin", "manager"] as z.infer<typeof employeeRoles>[];
-    const isSameCompany = userJwt.company.id === companyId;
+    const isSameCompany = userJwt.company.subdomain === subdomain;
     const isPrivilegedUser = allowedRoles.includes(userJwt.company.role);
 
     if (!isSameCompany || !isPrivilegedUser) {
@@ -72,8 +73,13 @@ export async function registerEmployeeHandler({
 
     const existingEmailQuery = queryUserByEmail(data.email);
     const existingCpfQuery = getEmployeeByCpf(data.cpf);
+    const companyQuery = queryCompanyBySubdomain(subdomain);
 
-    const [existingEmail, existingCpf] = await Promise.all([existingEmailQuery, existingCpfQuery]);
+    const [existingEmail, existingCpf, company] = await Promise.all([
+        existingEmailQuery,
+        existingCpfQuery,
+        companyQuery,
+    ]);
 
     if (existingEmail) {
         return response.status(409).send(
@@ -101,7 +107,10 @@ export async function registerEmployeeHandler({
 
     const employeePassword = data.password ?? generateRandomPassword();
 
-    await createEmployeeAndAccount({ data: { ...data, password: employeePassword }, companyId });
+    await createEmployeeAndAccount({
+        data: { ...data, password: employeePassword },
+        companyId: company.id,
+    });
 
     const emailQueue = createEmailQueue(redis);
 

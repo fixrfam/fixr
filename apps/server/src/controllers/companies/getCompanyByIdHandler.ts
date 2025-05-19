@@ -3,19 +3,19 @@ import { FastifyReply } from "fastify";
 import { apiResponse } from "@/src/helpers/response";
 import { z } from "zod";
 import { jwtPayload } from "@fixr/schemas/auth";
-import { queryCompanyById } from "@/src/services/companies/companies.services";
+import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services";
 import { companySelectSchema } from "@fixr/db/schema";
 
-export async function getCompanyByIdHandler({
-    companyId,
+export async function getCompanyBySubdomainHandler({
+    subdomain,
     userJwt,
     response,
 }: {
-    companyId: string;
+    subdomain: string;
     userJwt: z.infer<typeof jwtPayload>;
     response: FastifyReply;
 }) {
-    if (companyId !== userJwt.company?.id) {
+    if (subdomain !== userJwt.company?.subdomain) {
         return response.status(403).send(
             apiResponse({
                 status: 403,
@@ -27,7 +27,7 @@ export async function getCompanyByIdHandler({
         );
     }
 
-    const company = await queryCompanyById(companyId);
+    const company = await queryCompanyBySubdomain(subdomain);
 
     if (!company) {
         return response.status(404).send(

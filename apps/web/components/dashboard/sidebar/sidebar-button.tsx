@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { SidebarItem } from "./types";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import * as icons from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import Link from "next/link";
 
 export function SidebarButton({
     data,
@@ -17,11 +17,12 @@ export function SidebarButton({
     const Icon = icons[data.icon] as icons.LucideIcon;
 
     const currentPath = usePathname();
+    const params = useParams<{ subdomain: string }>();
 
     if (data.type === "route") {
         const { id, label, href } = data;
 
-        const path = `/dashboard/${href.replace("/", "")}`;
+        const path = `/dashboard/${params.subdomain}${href}`;
         const active = path === currentPath;
 
         return (

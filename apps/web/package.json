@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "@fixr/constants": "*",
+        "@fixr/db": "*",
         "@fixr/typescript-config": "*",
         "@hookform/resolvers": "^3.10.0",
         "@maskito/react": "^3.8.0",
@@ -25,6 +26,7 @@
         "@radix-ui/react-separator": "^1.1.2",
         "@radix-ui/react-slot": "^1.2.0",
         "@tanstack/react-query": "^5.64.1",
+        "@tanstack/react-table": "^8.21.3",
         "axios": "^1.7.9",
         "boring-avatars": "^1.11.2",
         "class-variance-authority": "^0.7.1",
@@ -40,7 +42,8 @@
         "react-wrap-balancer": "^1.1.1",
         "tailwind-merge": "^2.6.0",
         "tailwindcss-animate": "^1.0.7",
-        "zod": "^3.24.1"
+        "zod": "^3.24.1",
+        "zustand": "^5.0.4"
     },
     "devDependencies": {
         "@types/node": "^20",

@@ -10,14 +10,20 @@ export function api(path: string) {
 }
 
 export function parseJwt(token?: string) {
-    if (token) {
-        try {
-            return JSON.parse(atob(token.split(".")[1]!));
-        } catch (_) {
-            return null;
-        }
+    if (!token) return null;
+
+    try {
+        const [, payload] = token.split(".");
+        if (!payload) return null;
+
+        const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const raw = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+        const json = new TextDecoder("utf-8").decode(raw);
+
+        return JSON.parse(json);
+    } catch {
+        return null;
     }
-    return null;
 }
 
 export const isClientSide = (): boolean => typeof window !== "undefined";
