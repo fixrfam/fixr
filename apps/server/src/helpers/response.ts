@@ -1,4 +1,4 @@
-import { PaginatedData, type ApiResponse } from "@repo/schemas/utils";
+import { PaginatedData, type ApiResponse } from "@fixr/schemas/utils";
 
 export const apiResponse = ({ status, error, message, code, data }: ApiResponse) => {
     return { status, error, message, code, data };

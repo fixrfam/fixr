@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import { parseCookies } from "nookies";
 import { isClientSide, parseJwt } from "../utils";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 const axiosClient = axios.create({
     withCredentials: true,

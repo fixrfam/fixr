@@ -1,5 +1,5 @@
 import "fastify";
-import { nonSensitiveAccount } from "@repo/schemas/auth";
+import { nonSensitiveAccount } from "@fixr/schemas/auth";
 import { z } from "zod";
 
 declare const userJWT = nonSensitiveAccount.extend({

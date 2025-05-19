@@ -4,10 +4,10 @@ import { z } from "zod";
 import { apiResponse } from "@/src/helpers/response";
 
 import { hashPassword } from "../../helpers/hash-password";
-import { sendAccountVerificationEmail, emailDisplayName } from "@repo/mail/services";
-import { APP_NAME } from "@repo/constants/app";
+import { sendAccountVerificationEmail, emailDisplayName } from "@fixr/mail/services";
+import { APP_NAME } from "@fixr/constants/app";
 
-import { createUserSchema } from "@repo/schemas/auth";
+import { createUserSchema } from "@fixr/schemas/auth";
 import { createUser, deleteUser, queryUserByEmail } from "../../services/auth.services";
 import { createOneTimeToken } from "../../services/tokens.services";
 import { env } from "@/src/env";

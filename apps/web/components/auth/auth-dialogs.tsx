@@ -1,6 +1,6 @@
 import { ArrowRight, Trash2 } from "lucide-react";
 import CookieDialog from "../cookie-dialog";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 import { Logo } from "../svg/Logo";
 
 export function AuthDialogs({
@@ -17,12 +17,12 @@ export function AuthDialogs({
                 close={{
                     cta: (
                         <>
-                            Start <ArrowRight />
+                            Iniciar <ArrowRight />
                         </>
                     ),
                     toast: {
-                        text: "Login to explore the app.",
-                        description: "We are waiting for you!",
+                        text: "Entre para explorar o app.",
+                        description: "Estamos esperando por voc!",
                     },
                 }}
                 open={showVerifiedDialog}
@@ -32,15 +32,17 @@ export function AuthDialogs({
                         <Logo className='size-5' />
                     </div>
                     <div className='text-foreground space-y-1 text-center'>
-                        <h2 className='font-bold tracking-tight text-2xl'>Account Verified! 🎉</h2>
+                        <h2 className='font-bold tracking-tight text-2xl'>
+                            Conta verificada com sucesso!
+                        </h2>
                         <p className='text-muted-foreground'>
-                            Your account verification is complete.
+                            A verificação da sua conta foi concluída com sucesso.
                         </p>
                     </div>
                     <div className='text-foreground space-y-1 text-center'>
                         <p className='text-muted-foreground text-sm'>
-                            Your email has been successfully verified, and your account is ready to
-                            go. Click below to log in and start exploring.
+                            O seu e-mail foi verificado com sucesso e a sua conta está pronta para
+                            uso. Clique abaixo para entrar e começar a explorar.
                         </p>
                     </div>
                 </div>
@@ -48,10 +50,10 @@ export function AuthDialogs({
             <CookieDialog
                 cookieKey={cookieKey("showDeletedDialog")}
                 close={{
-                    cta: "Close",
+                    cta: "Fechar",
                     toast: {
-                        text: "Goodbye for now!",
-                        description: "Your account is deleted. Come back anytime.",
+                        text: "Até mais!",
+                        description: "A sua conta foi excluída. Volte quando quiser.",
                     },
                 }}
                 open={showDeletedDialog}
@@ -60,14 +62,16 @@ export function AuthDialogs({
                     <Trash2 className='text-destructive size-8' />
                     <div className='text-foreground space-y-1 text-center'>
                         <h2 className='font-bold tracking-tight text-2xl'>
-                            Your account has been deleted
+                            A sua conta foi excluída
                         </h2>
-                        <p className='text-muted-foreground'>We&apos;re sorry to see you go!</p>
+                        <p className='text-muted-foreground'>
+                            Estamos tristes em ver você ir embora!
+                        </p>
                     </div>
                     <div className='text-foreground space-y-1 text-center'>
                         <p className='text-muted-foreground text-sm'>
-                            If you ever decide to return, we&apos;ll be here to welcome you back.
-                            Feel free to sign up again anytime!
+                            Se você decidir voltar, estaremos aqui para recebê-lo de volta. Sinta-se
+                            à vontade para se inscrever novamente a qualquer momento!
                         </p>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import server from "../server";
 
 export function signJWT({

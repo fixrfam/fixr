@@ -6,7 +6,7 @@ import { signJWT } from "../../helpers/jwt";
 import { generateRefreshToken } from "../../helpers/tokens";
 import { queryJWTPayloadByUserId, queryTokenData } from "../../services/auth.services";
 import { deleteRefreshToken, setJWTCookie, setRefreshToken } from "../../services/tokens.services";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 
 /*
 This function is used to revalidate the JWT token

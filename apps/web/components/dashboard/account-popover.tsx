@@ -24,9 +24,9 @@ export async function AccountPopover({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <div className={cn("flex gap-4 items-center min-w-0", className)}>
+                <div className={cn("flex gap-4 items-center min-w-0 cursor-pointer", className)}>
                     <Avatar
-                        fallbackHash={session.id}
+                        fallbackHash={session?.id ?? ""}
                         className='!size-9 hover:cursor-pointer'
                         variant={variant}
                     />
@@ -36,7 +36,7 @@ export async function AccountPopover({
                                 {displayName}
                             </p>
                             <p className='truncate text-xs text-muted-foreground whitespace-nowrap overflow-hidden'>
-                                {session.email}
+                                {session?.email}
                             </p>
                         </div>
                     )}
@@ -44,16 +44,20 @@ export async function AccountPopover({
             </PopoverTrigger>
             <PopoverContent className='w-80 p-0' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
-                    <Avatar
-                        fallbackHash={session.id}
-                        className='size-12 text-4xl'
-                        variant='square'
-                    />
+                    <Link href='/dashboard/account' className='cursor-pointer'>
+                        <Avatar
+                            fallbackHash={session?.id ?? ""}
+                            className='size-12 text-4xl'
+                            variant='square'
+                        />
+                    </Link>
                     <div className='flex flex-col space-y-1 min-w-0'>
-                        <p className='font-medium leading-5 truncate'>{displayName}</p>
-                        <p className='text-xs leading-none text-muted-foreground truncate'>
-                            {session.email}
-                        </p>
+                        <Link href='/dashboard/account' className='space-y-1 cursor-pointer'>
+                            <p className='font-medium leading-5 truncate'>{displayName}</p>
+                            <p className='text-xs leading-none text-muted-foreground truncate'>
+                                {session?.email}
+                            </p>
+                        </Link>
                         <div className='grid grid-cols-2 gap-2 !mt-3 w-full'>
                             <Button
                                 variant='outline'
@@ -61,9 +65,9 @@ export async function AccountPopover({
                                 size='sm'
                                 asChild
                             >
-                                <Link href='/dashboard/client/account'>
+                                <Link href='/dashboard/account'>
                                     <Settings className='size-4' />
-                                    Manage
+                                    Gerenciar
                                 </Link>
                             </Button>
                             <SignOutButton

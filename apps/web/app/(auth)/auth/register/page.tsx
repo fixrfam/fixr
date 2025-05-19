@@ -11,9 +11,9 @@ export default function RegisterPage() {
         <RegisterForm onSuccess={setSuccess} />
     ) : (
         <AuthFormSuccess
-            title='Check your inbox'
-            description='Your account was created successfully!🎉'
-            paragraph='We sent you a confirmation email. Click the link and you are ready to go!'
+            title='Verifique sua caixa de entrada'
+            description='Sua conta foi criada com sucesso!🎉'
+            paragraph='Enviamos um email de confirmação. Clique no link e está tudo pronto!'
         />
     );
 }

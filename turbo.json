@@ -30,6 +30,9 @@
             "cache": false,
             "persistent": true,
             "env": ["CHOKIDAR_USEPOLLING=TRUE", "REDIS_PASSWORD"]
+        },
+        "start": {
+            "dependsOn": []
         }
     }
 }

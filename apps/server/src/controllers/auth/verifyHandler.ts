@@ -5,7 +5,7 @@ import { apiResponse } from "@/src/helpers/response";
 import { setUserVerified } from "../../services/auth.services";
 import { deleteOneTimeToken, queryOneTimeToken } from "../../services/tokens.services";
 import { env } from "@/src/env";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export async function verifyHandler({
     token,

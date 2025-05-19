@@ -1,16 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { axios } from "@/lib/auth/axios";
-import { ApiResponse } from "@repo/schemas/utils";
+import { ApiResponse } from "@fixr/schemas/utils";
 import { api } from "@/lib/utils";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { toast } from "@pheralb/toast";
@@ -33,7 +31,7 @@ export function DeleteAccount() {
 
     const requestAccountDeletionSchema = z.object({
         confirmPhrase: z.string().regex(/^delete my account$/, {
-            message: "Invalid phrase.",
+            message: "Frase inválida.",
         }),
     });
 
@@ -80,15 +78,15 @@ export function DeleteAccount() {
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button size={"sm"} variant={"destructive"}>
-                    Request deletion
+                    Solicitar exclusão
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your account and
-                        remove your data from our servers.
+                        Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e
+                        removerá seus dados dos nossos servidores.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <Form {...form}>
@@ -99,13 +97,14 @@ export function DeleteAccount() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>
-                                        Please type &quot;delete my account&quot; to continue
+                                        Por favor, digite &quot;delete my account&quot; para
+                                        continuar
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             type='text'
                                             required
-                                            placeholder='Type it here'
+                                            placeholder='Digite aqui'
                                             {...field}
                                         />
                                     </FormControl>
@@ -116,14 +115,14 @@ export function DeleteAccount() {
                     </form>
                 </Form>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <Button
                         variant={"destructive"}
                         type='submit'
                         disabled={loading || !formState.isValid}
                         form='change_password'
                     >
-                        {!loading ? <>Delete</> : <Loader2 className='animate-spin size-4' />}
+                        {!loading ? <>Excluir</> : <Loader2 className='animate-spin size-4' />}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

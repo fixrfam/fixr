@@ -1,7 +1,7 @@
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "./types";
 import { z } from "zod";
-import { accountSchema } from "@repo/schemas/account";
+import { accountSchema } from "@fixr/schemas/account";
 
 const getAccountSchema: FastifySchema = {
     tags: ["Account"],

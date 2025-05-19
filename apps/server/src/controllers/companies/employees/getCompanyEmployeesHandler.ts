@@ -2,15 +2,16 @@ import { FastifyReply } from "fastify";
 
 import { apiResponse, paginatedData } from "@/src/helpers/response";
 import { z } from "zod";
-import { jwtPayload } from "@repo/schemas/auth";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { and, asc, desc, eq, like } from "drizzle-orm";
-import { employees as employeesTable } from "@repo/db/schema";
+import { employees as employeesTable, users as usersTable } from "@fixr/db/schema";
 import { getPaginatedCount, getPaginatedRecords } from "@/src/services/generic/pagination.services";
-import { getPaginatedDataSchema } from "@repo/schemas/utils";
+import { getPaginatedDataSchema } from "@fixr/schemas/utils";
+import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services";
 
 export async function getCompanyEmployeesHandler({
     userJwt,
-    companyId,
+    subdomain,
     page,
     perPage,
     query,
@@ -18,7 +19,7 @@ export async function getCompanyEmployeesHandler({
     response,
 }: {
     userJwt: z.infer<typeof jwtPayload>;
-    companyId: string;
+    subdomain: string;
     response: FastifyReply;
 } & z.infer<typeof getPaginatedDataSchema>) {
     if (!userJwt.company) {
@@ -33,7 +34,7 @@ export async function getCompanyEmployeesHandler({
         );
     }
 
-    if (userJwt.company.id !== companyId) {
+    if (userJwt.company.subdomain !== subdomain) {
         return response.status(403).send(
             apiResponse({
                 status: 403,
@@ -45,6 +46,8 @@ export async function getCompanyEmployeesHandler({
         );
     }
 
+    const company = await queryCompanyBySubdomain(subdomain);
+
     const PER_PAGE = perPage ?? 10;
 
     //If there is no sort arg, fallback to newer records.
@@ -52,17 +55,40 @@ export async function getCompanyEmployeesHandler({
         sort === "newer" || !sort ? desc(employeesTable.createdAt) : asc(employeesTable.createdAt);
 
     const filter = and(
-        eq(employeesTable.companyId, companyId),
+        eq(employeesTable.companyId, company.id),
         like(employeesTable.name, `%${query ?? ""}%`) //like "%%" to fetch all if there is no query
     );
 
     const [presentations, totalRecords] = await Promise.all([
         getPaginatedRecords({
             table: employeesTable,
+            select: {
+                id: employeesTable.id,
+                name: employeesTable.name,
+                cpf: employeesTable.cpf,
+                phone: employeesTable.phone,
+                role: employeesTable.role,
+                createdAt: employeesTable.createdAt,
+                userId: employeesTable.userId,
+                companyId: employeesTable.companyId,
+                account: {
+                    id: usersTable.id,
+                    email: usersTable.email,
+                    createdAt: usersTable.createdAt,
+                    verified: usersTable.verified,
+                },
+            },
             skip: (page - 1) * PER_PAGE,
             take: PER_PAGE,
             where: filter,
             order: order,
+            joins: [
+                {
+                    type: "inner",
+                    table: usersTable,
+                    on: eq(usersTable.id, employeesTable.userId),
+                },
+            ],
         }),
         getPaginatedCount({
             table: employeesTable,

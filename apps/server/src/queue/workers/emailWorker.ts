@@ -1,7 +1,7 @@
 import { Worker } from "bullmq";
 import type { Redis } from "ioredis";
-import type { EmailJobData } from "@repo/mail/queue";
-import { emails } from "@repo/mail/services";
+import type { EmailJobData } from "@fixr/mail/queue";
+import { emails } from "@fixr/mail/services";
 import { FastifyPluginCallback, FastifyPluginOptions } from "fastify";
 import { FastifyTypedInstance } from "@/src/interfaces/fastify";
 import { redis } from "@/src/config/redis";

@@ -39,7 +39,7 @@ export async function Sidebar({ width, margin }: { width: string; margin: string
                                 {session.company?.name}
                             </p>
                             <p className='text-xs tracking-tight text-muted-foreground'>
-                                My company
+                                Minha empresa
                             </p>
                         </div>
                     </div>

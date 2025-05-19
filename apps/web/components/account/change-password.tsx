@@ -14,13 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { Save, Loader2 } from "lucide-react";
-import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@repo/schemas/credentials";
+import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@fixr/schemas/credentials";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { axios } from "@/lib/auth/axios";
-import { ApiResponse } from "@repo/schemas/utils";
+import { ApiResponse } from "@fixr/schemas/utils";
 import { api } from "@/lib/utils";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { toast } from "@pheralb/toast";
@@ -35,26 +35,26 @@ export function ChangePassword() {
         .extend({
             new: z
                 .string()
-                .min(8, { message: "Must be at least 8 characters long." })
-                .max(128, { message: "Must be at most 128 characters long." })
+                .min(8, { message: "A senha deve ter pelo menos 8 caracteres." })
+                .max(128, { message: "A senha deve ter no máximo 128 caracteres." })
                 .refine((password) => /[A-Z]/.test(password), {
-                    message: "Must contain at least one uppercase letter.",
+                    message: "A senha deve conter pelo menos uma letra maiúscula.",
                 })
                 .refine((password) => /[a-z]/.test(password), {
-                    message: "Must contain at least one lowercase letter.",
+                    message: "A senha deve conter pelo menos uma letra minúscula.",
                 })
                 .refine((password) => /[0-9]/.test(password), {
-                    message: "Must contain at least one number.",
+                    message: "A senha deve conter pelo menos um número.",
                 })
                 .refine((password) => /[#?!@$%^&*-]/.test(password), {
-                    message: "Must contain at least one special character.",
+                    message: "A senha deve conter pelo menos um caractere especial.",
                 }),
             confirmNew: z
-                .string({ required_error: "Please confirm your password." })
-                .min(1, { message: "Confirm your password." }),
+                .string({ required_error: "Por favor, confirme sua senha." })
+                .min(1, { message: "Confirme sua senha." }),
         })
         .refine((data) => data.new === data.confirmNew, {
-            message: "Passwords do not match.",
+            message: "As senhas não coincidem.",
             path: ["confirmNew"],
         });
 
@@ -102,13 +102,13 @@ export function ChangePassword() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size={"sm"}>Change</Button>
+                <Button size={"sm"}>Mudar</Button>
             </DialogTrigger>
             <DialogContent className='sm:max-w-[425px]'>
                 <DialogHeader>
-                    <DialogTitle>Change password</DialogTitle>
+                    <DialogTitle>Alterar senha</DialogTitle>
                     <DialogDescription>
-                        Fill your current password, and the new one you want to use.
+                        Insira sua senha atual e a nova senha que você deseja usar.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -119,7 +119,7 @@ export function ChangePassword() {
                     >
                         <div className='grid grid-cols-4 items-start gap-4'>
                             <Label htmlFor='name' className='text-right py-3'>
-                                Old
+                                Atual
                             </Label>
                             <FormField
                                 control={form.control}
@@ -142,7 +142,7 @@ export function ChangePassword() {
                         </div>
                         <div className='grid grid-cols-4 items-start gap-4'>
                             <Label htmlFor='username' className='text-right py-3'>
-                                New
+                                Nova
                             </Label>
                             <FormField
                                 control={form.control}
@@ -164,7 +164,7 @@ export function ChangePassword() {
                         </div>
                         <div className='grid grid-cols-4 items-start gap-4'>
                             <Label htmlFor='name' className='text-right py-3'>
-                                Confirm
+                                Confirmar
                             </Label>
                             <FormField
                                 control={form.control}
@@ -181,8 +181,8 @@ export function ChangePassword() {
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            Confirming helps ensure there are no typos, keeping your
-                                            account secure.
+                                            Confirme sua senha para garantir que não haja erros de
+                                            digitação, mantendo sua conta segura.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -200,7 +200,7 @@ export function ChangePassword() {
                     >
                         {!loading ? (
                             <>
-                                Save <Save />
+                                Salvar <Save />
                             </>
                         ) : (
                             <Loader2 className='animate-spin size-4' />

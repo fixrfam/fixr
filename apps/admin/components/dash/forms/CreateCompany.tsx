@@ -15,16 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useMaskito } from "@maskito/react";
-import { cnpj, cpf, unmask } from "@repo/constants/masks";
-import { messages, defaultMessages } from "@repo/constants/messages";
+import { cnpj, cpf, unmask } from "@fixr/constants/masks";
+import { messages, defaultMessages } from "@fixr/constants/messages";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronsUpDown, Dices, Loader2, Plus } from "lucide-react";
 import { generateRandomPassword, tryCatch } from "@/lib/utils";
 import PasswordInput from "@/components/ui/password-input";
 import { toast } from "@pheralb/toast";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { ApiResponse } from "@repo/schemas/utils";
-import { createCompanySchema } from "@repo/schemas/companies";
+import { ApiResponse } from "@fixr/schemas/utils";
+import { createCompanySchema } from "@fixr/schemas/companies";
 import { useState } from "react";
 
 export function CreateCompany() {

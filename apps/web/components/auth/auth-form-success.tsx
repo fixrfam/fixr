@@ -23,7 +23,7 @@ export default function AuthFormSuccess({
             <p className='text-center'>{paragraph}</p>
             <Link href='/auth/login'>
                 <Button>
-                    Go to login <ArrowRight />
+                    Ir para o login <ArrowRight />
                 </Button>
             </Link>
         </div>

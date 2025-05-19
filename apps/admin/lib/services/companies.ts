@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db } from "@repo/db/connection";
-import { employees, companies, users } from "@repo/db/schema";
+import { db } from "@fixr/db/connection";
+import { employees, companies, users } from "@fixr/db/schema";
 import { z } from "zod";
-import { createCompanySchema } from "@repo/schemas/companies";
+import { createCompanySchema } from "@fixr/schemas/companies";
 import { hashPassword } from "../pwd";
 
 export async function getEmployeeByCpf(cpf: string) {

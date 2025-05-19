@@ -1,10 +1,11 @@
-import { createEmployeeSchema } from "@repo/schemas/employees";
-import { getPaginatedDataSchema, paginatedDataSchema } from "@repo/schemas/utils";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
+import { getPaginatedDataSchema, paginatedDataSchema } from "@fixr/schemas/utils";
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../../types";
-import { employeeSelectSchema } from "@repo/db/schema";
-import { getCompanyNestedDataSchema } from "@repo/schemas/companies";
+import { employeeSelectSchema } from "@fixr/db/schema";
+import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { z } from "zod";
+import { accountSchema } from "@fixr/schemas/account";
 
 const getCompanyEmployeesSchema: FastifySchema = {
     tags: ["Companies/Employees"],
@@ -21,7 +22,15 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
             error: null,
             message: "Company employees successfully retrieved.",
             code: "get_company_employees_success",
-            data: paginatedDataSchema(employeeSelectSchema),
+            data: paginatedDataSchema(
+                employeeSelectSchema.extend({
+                    account: accountSchema.pick({
+                        id: true,
+                        email: true,
+                        createdAt: true,
+                    }),
+                })
+            ),
         }).describe("Presentations retrieved successfully."),
         416: zodResponseSchema({
             status: 416,

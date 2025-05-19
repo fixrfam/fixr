@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
-import { emailDisplayName, sendAccountDeletionEmail } from "@repo/mail/services";
-import { APP_NAME } from "@repo/constants/app";
+import { emailDisplayName, sendAccountDeletionEmail } from "@fixr/mail/services";
+import { APP_NAME } from "@fixr/constants/app";
 import { queryAccountById } from "../../services/account.services";
 import { deleteUser } from "../../services/auth.services";
 import {
@@ -12,7 +12,7 @@ import {
 } from "../../services/tokens.services";
 import { apiResponse } from "@/src/helpers/response";
 import { env } from "@/src/env";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
 
 export async function requestAccountDeletionHandler({
     userId,

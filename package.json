@@ -4,11 +4,12 @@
     "scripts": {
         "build": "dotenv -- turbo build",
         "dev": "dotenv -- turbo dev --parallel --no-daemon",
+        "start": "dotenv -- turbo start --parallel --no-daemon",
         "lint": "dotenv -- turbo lint",
         "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
-        "migrate": "dotenv -- turbo run migrate --filter=@repo/db",
-        "generate": "dotenv -- turbo run generate --filter=@repo/db",
-        "db:studio": "dotenv -- turbo run studio --filter=@repo/db"
+        "migrate": "dotenv -- turbo run migrate --filter=@fixr/db",
+        "generate": "dotenv -- turbo run generate --filter=@fixr/db",
+        "studio": "dotenv -- turbo run studio --filter=@fixr/db"
     },
     "devDependencies": {
         "prettier": "^3.2.5",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseJwt } from "./lib/utils";
-import { cookieKey } from "@repo/constants/cookies";
+import { cookieKey } from "@fixr/constants/cookies";
+import { userJWT } from "@fixr/schemas/auth";
 
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get(cookieKey("session"))?.value;
@@ -10,6 +11,7 @@ export async function middleware(request: NextRequest) {
     const isProtectedRoute = request.nextUrl.pathname.startsWith("/dashboard");
     const isLoginPath = request.nextUrl.pathname.startsWith("/auth/login");
     const isForgotPasswordTokenPath = request.nextUrl.pathname.startsWith("/auth/forgot-password/");
+    const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard/");
 
     /**
      * Rule used to make so the user can't access the resetPassword form without providing a valid token
@@ -43,7 +45,7 @@ export async function middleware(request: NextRequest) {
 
         // If the user is at the loginPath and has a valid token, they need to go to dashboard.
         if (token || refreshToken) {
-            return NextResponse.redirect(new URL("/dashboard/client/account", request.url));
+            return NextResponse.redirect(new URL("/dashboard/account", request.url));
         }
 
         return NextResponse.next();
@@ -64,6 +66,24 @@ export async function middleware(request: NextRequest) {
             }
 
             return NextResponse.next();
+        }
+    }
+
+    // Restrict the user so it can only access his company tenant
+    if (isProtectedRoute) {
+        // Split into [ '', 'dashboard', '{tenant}', ...rest ]
+        const segments = request.nextUrl.pathname.split("/");
+        const requestedTenant = segments[2];
+        const userTenant = payload?.company?.subdomain;
+
+        if (!userTenant || requestedTenant !== userTenant) {
+            // Build the correct redirect path with the proper tenant
+            const pathAfterTenant = segments.slice(3).join("/");
+            const redirectPath = pathAfterTenant
+                ? `/dashboard/${userTenant}/${pathAfterTenant}`
+                : `/dashboard/${userTenant}`;
+
+            return NextResponse.redirect(new URL(redirectPath, request.url));
         }
     }
 

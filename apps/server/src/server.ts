@@ -28,12 +28,12 @@ import { apiDescription } from "./docs/main";
 import { join } from "path";
 import { cwd } from "process";
 import { apiResponse } from "./helpers/response";
-import { apiResponseSchema } from "@repo/schemas/utils";
-import { APP_NAME } from "@repo/constants/app";
-import { accountSchema } from "@repo/schemas/account";
+import { apiResponseSchema } from "@fixr/schemas/utils";
+import { APP_NAME } from "@fixr/constants/app";
+import { accountSchema } from "@fixr/schemas/account";
 import { startEmailWorker } from "./queue/workers/emailWorker";
 import { companiesRoutes } from "./routes/companies/companies.routes";
-import { companySelectSchema } from "@repo/db/schema";
+import { companySelectSchema } from "@fixr/db/schema";
 import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 
 const envToLogger = {
@@ -140,7 +140,7 @@ server.register(fastifyCookie, {
 });
 
 server.register(fastifyStatic, {
-    root: join(cwd(), "src", "public"),
+    root: join(cwd(), "public"),
     prefix: "/public/",
 });
 
@@ -161,7 +161,7 @@ server.register(companiesRoutes, {
 });
 
 server.register(employeesRoutes, {
-    prefix: "/companies/:companyId/employees",
+    prefix: "/companies/:subdomain/employees",
 });
 
 server.get("/", (_, reply) => {

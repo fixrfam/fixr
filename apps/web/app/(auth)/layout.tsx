@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { APP_NAME } from "@repo/constants/app";
+import { APP_NAME } from "@fixr/constants/app";
 import { Logo } from "@/components/svg/Logo";
+import { SessionProvider } from "@/lib/hooks/use-session";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -14,26 +15,28 @@ export default function AuthLayout({
 }>) {
     return (
         <>
-            <div className='grid min-h-svh lg:grid-cols-2'>
-                <div className='flex flex-col gap-4 p-6 md:p-10'>
-                    <div className='flex justify-center gap-2 md:justify-start'>
-                        <a href='#' className='flex items-center gap-4 font-medium'>
-                            <Logo className='size-6' />
-                            {APP_NAME}
-                        </a>
+            <SessionProvider>
+                <div className='grid min-h-svh lg:grid-cols-2'>
+                    <div className='flex flex-col gap-4 p-6 md:p-10'>
+                        <div className='flex justify-center gap-2 md:justify-start'>
+                            <a href='#' className='flex items-center gap-4 font-medium'>
+                                <Logo className='size-6' />
+                                {APP_NAME}
+                            </a>
+                        </div>
+                        <div className='flex flex-1 items-center justify-center'>
+                            <div className='w-full max-w-xs'>{children}</div>
+                        </div>
                     </div>
-                    <div className='flex flex-1 items-center justify-center'>
-                        <div className='w-full max-w-xs'>{children}</div>
+                    <div className='relative hidden bg-muted lg:block'>
+                        <img
+                            src='/placeholder.svg'
+                            alt='Image'
+                            className='absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale'
+                        />
                     </div>
                 </div>
-                <div className='relative hidden bg-muted lg:block'>
-                    <img
-                        src='/placeholder.svg'
-                        alt='Image'
-                        className='absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale'
-                    />
-                </div>
-            </div>
+            </SessionProvider>
         </>
     );
 }

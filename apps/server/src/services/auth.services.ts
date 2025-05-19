@@ -1,8 +1,8 @@
 import { eq, sql } from "drizzle-orm";
 
-import { db } from "@repo/db/connection";
-import { clients, companies, employees, refreshTokens, users } from "@repo/db/schema";
-import { createUserSchema, jwtPayload, userSchema } from "@repo/schemas/auth";
+import { db } from "@fixr/db/connection";
+import { clients, companies, employees, refreshTokens, users } from "@fixr/db/schema";
+import { createUserSchema, jwtPayload, userSchema } from "@fixr/schemas/auth";
 import { z } from "zod";
 import { CACHE_TTL, jwtPayloadCacheKey, userCacheKey } from "../helpers/cache";
 import { redis } from "../config/redis";

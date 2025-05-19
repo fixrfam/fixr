@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { type ApiResponse } from "@repo/schemas/utils";
+import { type ApiResponse } from "@fixr/schemas/utils";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));

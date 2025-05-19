@@ -1,5 +1,5 @@
 {
-    "name": "@repo/schemas",
+    "name": "@fixr/schemas",
     "version": "0.0.0",
     "type": "module",
     "private": true,
@@ -43,7 +43,7 @@
     },
     "devDependencies": {
         "zod": "latest",
-        "@repo/typescript-config": "*",
+        "@fixr/typescript-config": "*",
         "@types/eslint": "^8.56.5",
         "@types/node": "^20.11.24",
         "typescript": "^5.3.3"

@@ -1,7 +1,7 @@
 import { env } from "@/src/env";
 import { hashPassword } from "@/src/helpers/hash-password";
-import { emailDisplayName } from "@repo/mail/services";
-import { createEmailQueue, queueEmail } from "@repo/mail/queue";
+import { emailDisplayName } from "@fixr/mail/services";
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { apiResponse } from "@/src/helpers/response";
 import { queryUserByEmail } from "@/src/services/auth.services";
 import { updateUserPassword } from "@/src/services/credentials.services";
@@ -12,10 +12,10 @@ import {
     getUserOneTimeTokensWithEmail,
     queryOneTimeToken,
 } from "@/src/services/tokens.services";
-import { confirmPasswordResetSchema } from "@repo/schemas/credentials";
+import { confirmPasswordResetSchema } from "@fixr/schemas/credentials";
 import { FastifyReply } from "fastify";
 import { z } from "zod";
-import { APP_NAME } from "@repo/constants/app";
+import { APP_NAME } from "@fixr/constants/app";
 import { redis } from "@/src/config/redis";
 
 export async function requestPasswordResetHandler({

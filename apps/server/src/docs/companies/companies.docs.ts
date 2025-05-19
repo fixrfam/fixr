@@ -1,8 +1,7 @@
 import { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../types";
-import { companySelectSchema } from "@repo/db/schema";
-import { getCompanyByIdSchema as getCompanyByIdParamsSchema } from "@repo/schemas/companies";
-import { z } from "zod";
+import { companySelectSchema } from "@fixr/db/schema";
+import { getCompanyBySubdomainSchema as getCompanyBySubdomainParamsSchema } from "@fixr/schemas/companies";
 
 const getUserCompanySchema: FastifySchema = {
     tags: ["Companies"],
@@ -27,11 +26,11 @@ const getUserCompanySchema: FastifySchema = {
     security: [{ JWT: [] }],
 };
 
-const getCompanyByIdSchema: FastifySchema = {
+const getCompanyBySubdomainSchema: FastifySchema = {
     tags: ["Companies"],
-    summary: "Get company by ID.",
+    summary: "Get company by subdomain",
     description: `Retrieves the specified company. The user can only retrieve companies it belongs to.`,
-    params: getCompanyByIdParamsSchema,
+    params: getCompanyBySubdomainParamsSchema,
     response: {
         403: zodResponseSchema({
             status: 403,
@@ -58,4 +57,7 @@ const getCompanyByIdSchema: FastifySchema = {
     security: [{ JWT: [] }],
 };
 
-export const companiesDocs = { getUserCompanySchema, getCompanyByIdSchema };
+export const companiesDocs = {
+    getUserCompanySchema,
+    getCompanyByIdSchema: getCompanyBySubdomainSchema,
+};

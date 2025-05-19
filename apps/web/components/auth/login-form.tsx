@@ -1,14 +1,14 @@
 "use client";
 
-import { api, cn } from "@/lib/utils";
+import { api, cn, parseJwt } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { loginUserSchema } from "@repo/schemas/auth";
+import { loginUserSchema, userJWT } from "@fixr/schemas/auth";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { ApiResponse } from "@repo/schemas/utils";
+import { ApiResponse } from "@fixr/schemas/utils";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/hooks/use-session";
 
 export function LoginForm() {
     const [loading, setLoading] = useState(false);
@@ -36,9 +37,13 @@ export function LoginForm() {
     async function onSubmit(values: z.infer<typeof loginUserSchema>) {
         setLoading(true);
         try {
-            const res = await axios.post<ApiResponse>(api("/auth/login"), values, {
-                withCredentials: true,
-            });
+            const res = await axios.post<ApiResponse<{ token: string }>>(
+                api("/auth/login"),
+                values,
+                {
+                    withCredentials: true,
+                }
+            );
             if (res.status === 200) {
                 const message = messages[res.data.code] ?? fallbackMessages.success;
 
@@ -46,7 +51,8 @@ export function LoginForm() {
                     text: message.title,
                     description: message.description,
                 });
-                router.push("/dashboard/client/account");
+                const jwt = parseJwt(res.data.data?.token);
+                router.push(`/dashboard/${jwt?.company?.subdomain}/account`);
             }
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -67,9 +73,9 @@ export function LoginForm() {
         <Form {...form}>
             <form className={cn("flex flex-col gap-6")} onSubmit={form.handleSubmit(onSubmit)}>
                 <div className='flex flex-col items-center gap-2 text-center'>
-                    <h1 className='text-2xl font-bold tracking-tight'>Login to your account</h1>
+                    <h1 className='text-2xl font-bold tracking-tight'>Entre na sua conta</h1>
                     <p className='text-balance text-sm text-muted-foreground'>
-                        Enter your email below to login to your account
+                        Insira suas credenciais e entre na sua conta
                     </p>
                 </div>
                 <div className='grid gap-6'>
@@ -78,7 +84,7 @@ export function LoginForm() {
                         name='email'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email *</FormLabel>
+                                <FormLabel>E-mail *</FormLabel>
                                 <FormControl>
                                     <Input
                                         type='email'
@@ -97,12 +103,12 @@ export function LoginForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <div className='flex items-center'>
-                                    <FormLabel>Password *</FormLabel>
+                                    <FormLabel>Senha *</FormLabel>
                                     <Link
                                         href='/auth/forgot-password'
                                         className='ml-auto text-sm underline-offset-4 hover:underline'
                                     >
-                                        Forgot your password?
+                                        Esqueceu sua senha?
                                     </Link>
                                 </div>
                                 <FormControl>
@@ -122,11 +128,11 @@ export function LoginForm() {
                         className='w-full'
                         disabled={loading || !formState.isValid}
                     >
-                        {!loading ? "Login" : <Loader2 className='animate-spin size-4' />}
+                        {!loading ? "Entrar" : <Loader2 className='animate-spin size-4' />}
                     </Button>
                     {/* <div className='relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border'>
                     <span className='relative z-10 bg-background px-2 text-muted-foreground'>
-                        Or continue with
+                        Ou continue com
                     </span>
                 </div>
                 <Button variant='outline' className='w-full'>
@@ -136,13 +142,13 @@ export function LoginForm() {
                             fill='currentColor'
                         />
                     </svg>
-                    Login with GitHub
+                    Entre com o GitHub
                 </Button> */}
                 </div>
                 <div className='text-center text-sm'>
-                    Don&apos;t have an account?{" "}
+                    N&atilde;o tem uma conta?{" "}
                     <Link href='/auth/register' className='underline underline-offset-4'>
-                        Sign up
+                        Cadastre-se
                     </Link>
                 </div>
             </form>

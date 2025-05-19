@@ -1,7 +1,8 @@
 import { hashPassword } from "@/src/helpers/hash-password";
-import { db } from "@repo/db/connection";
-import { employees, users } from "@repo/db/schema";
-import { createEmployeeSchema } from "@repo/schemas/employees";
+import { unmask } from "@fixr/constants/masks";
+import { db } from "@fixr/db/connection";
+import { employees, users } from "@fixr/db/schema";
+import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -29,7 +30,7 @@ export async function createEmployeeAndAccount({
     await db.insert(employees).values({
         cpf: data.cpf,
         name: data.name,
-        phone: data.phone,
+        phone: unmask.phone(data.phone),
         role: data.role,
         userId: userId.id,
         companyId: companyId,

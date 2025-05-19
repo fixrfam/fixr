@@ -3,7 +3,7 @@ import {
     changePasswordAuthenticatedSchema as changePasswordAuthenticatedBody,
     confirmPasswordResetSchema as confirmPasswordResetBody,
     requestPasswordResetSchema as requestPasswordResetBody,
-} from "@repo/schemas/credentials";
+} from "@fixr/schemas/credentials";
 import { zodResponseSchema } from "./types";
 import { z } from "zod";
 
