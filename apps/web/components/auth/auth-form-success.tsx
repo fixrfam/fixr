@@ -13,8 +13,8 @@ export default function AuthFormSuccess({
 }) {
     return (
         <div className='flex flex-col items-center space-y-6'>
-            <div className='p-4 bg-foreground rounded-lg'>
-                <CircleCheck className='text-background' />
+            <div className='p-3 bg-primary rounded-lg'>
+                <CircleCheck className='text-white' />
             </div>
             <div className='text-center space-y-1'>
                 <h1 className='text-2xl font-semibold tracking-tight'>{title}</h1>

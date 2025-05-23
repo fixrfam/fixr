@@ -67,14 +67,14 @@ export function ForgotPasswordForm({
         <Form {...form}>
             <form className={cn("flex flex-col gap-6")} onSubmit={form.handleSubmit(onSubmit)}>
                 <div className='flex flex-col items-center gap-2 text-center'>
-                    <div className='p-1.5 bg-foreground text-background rounded-md'>
+                    <div className='p-1.5 bg-primary text-white rounded-md'>
                         <ShieldQuestion className='size-5' />
                     </div>
                     <h1 className='text-2xl font-bold tracking-tight whitespace-nowrap'>
                         Esqueceu sua senha?
                     </h1>
                     <p className='text-balance text-sm text-muted-foreground'>
-                        Digite seu e-mail abaixo, nós iremos redefini-la para você!
+                        Digite seu e-mail abaixo, redefinimos para você!
                     </p>
                 </div>
                 <div className='grid gap-6'>
@@ -87,7 +87,7 @@ export function ForgotPasswordForm({
                                 <FormControl>
                                     <Input
                                         type='email'
-                                        placeholder='m@exemplo.com'
+                                        placeholder='email@exemplo.com'
                                         required
                                         {...field}
                                     />

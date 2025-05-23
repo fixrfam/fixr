@@ -109,7 +109,7 @@ export function ResetPasswordForm({
         <Form {...form}>
             <form className={cn("flex flex-col gap-6")} onSubmit={form.handleSubmit(onSubmit)}>
                 <div className='flex flex-col items-center gap-2 text-center'>
-                    <div className='p-1.5 bg-foreground text-background rounded-md'>
+                    <div className='p-1.5 bg-primary text-white rounded-md'>
                         <Lock className='size-5' />
                     </div>
                     <h1 className='text-2xl font-bold tracking-tight whitespace-nowrap'>

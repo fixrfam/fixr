@@ -12,8 +12,8 @@ export default function ChangePasswordPage(props: { params: Promise<{ token: str
         <ResetPasswordForm onSuccess={setSuccess} token={params.token} />
     ) : (
         <AuthFormSuccess
-            title='Senha alterada!! 🎉'
-            description='Senha alterada! 🎉'
+            title='Senha alterada! 🎉'
+            description='Sua senha foi alterada com sucesso.'
             paragraph='Você conseguiu! Agora você pode entrar com sua nova senha.'
         />
     );

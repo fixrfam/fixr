@@ -41,7 +41,7 @@ export const createUserSchema = z.object({
 z.lazy;
 
 export const loginUserSchema = z.object({
-    email: z.string().email(),
+    email: z.string().email({ message: "Email inválido" }),
     password: z.string(),
 });
 
