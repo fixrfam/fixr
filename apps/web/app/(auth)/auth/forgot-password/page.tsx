@@ -12,7 +12,7 @@ export default function ForgotPassword() {
     ) : (
         <AuthFormSuccess
             title='Email enviado! 📧'
-            description='Enviamos um email de confirmação.'
+            description='Enviamos um email de redefinição.'
             paragraph='Clique no link enviado para o seu email, preencha a sua nova senha e está tudo pronto!'
         />
     );

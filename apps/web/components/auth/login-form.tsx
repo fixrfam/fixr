@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/hooks/use-session";
+import { Logo } from "../svg/Logo";
 
 export function LoginForm() {
     const [loading, setLoading] = useState(false);
@@ -73,7 +74,8 @@ export function LoginForm() {
         <Form {...form}>
             <form className={cn("flex flex-col gap-6")} onSubmit={form.handleSubmit(onSubmit)}>
                 <div className='flex flex-col items-center gap-2 text-center'>
-                    <h1 className='text-2xl font-bold tracking-tight'>Entre na sua conta</h1>
+                    <Logo className='size-8 text-primary' />
+                    <h1 className='text-2xl font-bold tracking-tight'>Bem vindo ao Fixr!</h1>
                     <p className='text-balance text-sm text-muted-foreground'>
                         Insira suas credenciais e entre na sua conta
                     </p>
@@ -88,7 +90,7 @@ export function LoginForm() {
                                 <FormControl>
                                     <Input
                                         type='email'
-                                        placeholder='m@example.com'
+                                        placeholder='email@exemplo.com'
                                         required
                                         {...field}
                                     />
@@ -145,11 +147,8 @@ export function LoginForm() {
                     Entre com o GitHub
                 </Button> */}
                 </div>
-                <div className='text-center text-sm'>
-                    N&atilde;o tem uma conta?{" "}
-                    <Link href='/auth/register' className='underline underline-offset-4'>
-                        Cadastre-se
-                    </Link>
+                <div className='text-center text-sm opacity-30'>
+                    Projeto universitário sem fins lucrativos.
                 </div>
             </form>
         </Form>
