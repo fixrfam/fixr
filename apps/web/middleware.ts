@@ -77,10 +77,10 @@ export async function middleware(request: NextRequest) {
         const userTenant = payload?.company?.subdomain;
 
         if (!userTenant || requestedTenant !== userTenant) {
-            // Build the correct redirect path with the proper tenant
-            const pathAfterTenant = segments.slice(3).join("/");
-            const redirectPath = pathAfterTenant
-                ? `/dashboard/${userTenant}/${pathAfterTenant}`
+            // Rebuild whatever comes after the tenant
+            const rest = segments.slice(3).join("/");
+            const redirectPath = rest
+                ? `/dashboard/${userTenant}/${rest}`
                 : `/dashboard/${userTenant}`;
 
             return NextResponse.redirect(new URL(redirectPath, request.url));

@@ -1,6 +1,6 @@
 "use client";
 
-import { columns } from "@/components/dashboard/employees/columns";
+import { columns, dataSchema } from "@/components/dashboard/employees/columns";
 import { DataTable } from "@/components/dashboard/employees/data-table";
 import { Heading } from "@/components/dashboard/heading";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +16,7 @@ export default function EmployeesPage() {
     const params = useParams<{ subdomain: string }>();
 
     const { isPending, data } = useQuery<
-        AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof employeeSelectSchema>>>>
+        AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof dataSchema>>>>
     >({
         queryKey: ["employeesData"],
         queryFn: async () => await axios.get(`/companies/${params.subdomain}/employees?page=1`),
