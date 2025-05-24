@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const dataSchema = employeeSelectSchema.extend({
+export const dataSchema = employeeSelectSchema.extend({
     account: accountSchema.pick({
         id: true,
         email: true,

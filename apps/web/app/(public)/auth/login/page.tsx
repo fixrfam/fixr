@@ -9,12 +9,12 @@ export default async function LoginPage() {
     const showDeletedDialog = cookieStore.get(cookieKey("showDeletedDialog"))?.value === "true";
 
     return (
-        <>
+        <div>
             <LoginForm />
             <AuthDialogs
                 showDeletedDialog={showDeletedDialog}
                 showVerifiedDialog={showVerifiedDialog}
             />
-        </>
+        </div>
     );
 }

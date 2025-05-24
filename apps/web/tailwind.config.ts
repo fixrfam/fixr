@@ -65,6 +65,26 @@ const config: Config = {
                 md: "calc(var(--radius) - 2px)",
                 sm: "calc(var(--radius) - 4px)",
             },
+            screens: {
+                "2lg": "1152px",
+            },
+            fontSize: {
+                "5.5xl": [
+                    "3.45rem",
+                    {
+                        lineHeight: "1",
+                    },
+                ],
+                "4.5xl": [
+                    "2.6rem",
+                    {
+                        lineHeight: "1",
+                    },
+                ],
+            },
+            fontFamily: {
+                heading: "var(--font-cal)",
+            },
         },
     },
     // eslint-disable-next-line @typescript-eslint/no-require-imports
