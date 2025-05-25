@@ -5,14 +5,18 @@ import {
     Button,
     Container,
     Head,
+    Heading,
+    Hr,
     Html,
     Img,
     Link,
     Preview,
     Section,
+    Tailwind,
     Text,
 } from "@react-email/components";
 import { render } from "@react-email/render";
+import { FixrHeader } from "../components/FixrHeader";
 
 interface EmailProps {
     displayName: string;
@@ -23,36 +27,59 @@ interface EmailProps {
 const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
 
 export const PasswordReset = ({ displayName, appName, verificationUrl }: EmailProps) => (
-    <Html>
-        <Head />
-        <Preview>Change your password, {displayName}!</Preview>
-        <Body style={main}>
-            <Container style={container}>
-                <Img src={`/public/logo.png`} width='31' height='25' alt='' />
+    <Tailwind
+        config={{
+            theme: {
+                extend: {
+                    colors: {
+                        brand: "#1F65FE",
+                        border: "#dedede",
+                    },
+                },
+            },
+        }}
+    >
+        <Html>
+            <Head />
+            <Preview>Redefinição de senha</Preview>
+            <Body style={main}>
+                <Container className='max-w-[480px] mx-auto '>
+                    <FixrHeader />
 
-                <Text style={title}>
-                    Oops! Forgot your password, <strong>{displayName}</strong>?
-                </Text>
-
-                <Section style={section}>
-                    <Text style={text}>
-                        Hey <strong>{displayName}</strong>!
+                    <Text className='my-0 text-lg tracking-tight'>
+                        Olá, <i className='italic'>{displayName}</i>!
                     </Text>
-                    <Text style={text}>
-                        You requested a "forgot my password" credentials reset for an account at{" "}
-                        <Link>{appName}</Link>, registered with this email. Click the button below
-                        to change your password.
+                    <Heading className='text-left my-0 text-2xl md:text-3xl font-semibold tracking-tight mb-4'>
+                        Esqueceu sua senha? 🔒
+                    </Heading>
+                    <Section className='gap-0'>
+                        <Text>
+                            Recebemos uma solicitação para alterar a senha da sua conta no Fixr.
+                            <br />
+                            Se foi você, pode definir uma nova senha clicando no botão abaixo:
+                        </Text>
+
+                        <Container>
+                            <Container className='w-full flex items-center justify-center  text-center'></Container>
+                            <Button
+                                className='box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white my-4'
+                                href={verificationUrl}
+                            >
+                                Redefinir minha senha
+                            </Button>
+                        </Container>
+                        <Text className='font-bold my-0 text-center'>
+                            Para manter sua conta segura, não encaminhe este e-mail a ninguém.
+                        </Text>
+                    </Section>
+                    <Hr className='my-12'></Hr>
+                    <Text className='text-[#6a737d] text-sm text-center'>
+                        Se você não solicitou essa alteração, basta ignorar e excluir esta mensagem.
                     </Text>
-
-                    <Button style={button} href={verificationUrl} target='_blank'>
-                        Change my password
-                    </Button>
-                </Section>
-
-                <Text style={footer}>If you haven't requested it, please ignore this email.</Text>
-            </Container>
-        </Body>
-    </Html>
+                </Container>
+            </Body>
+        </Html>
+    </Tailwind>
 );
 
 PasswordReset.PreviewProps = {

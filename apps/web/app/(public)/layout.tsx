@@ -4,6 +4,7 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import Header from "@/components/home/Header";
+import { SessionProvider } from "@/lib/hooks/use-session";
 
 const inter = localFont({
     src: "../fonts/InterVF.ttf",
@@ -32,18 +33,20 @@ export default function RootLayout({
             <body
                 className={`${inter.variable} ${cal.variable} antialiased font-[family-name:var(--font-inter)]`}
             >
-                <ThemeProvider
-                    attribute='class'
-                    defaultTheme='system'
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    <div className='items-center justify-items-center min-h-screen gap-16'>
-                        <Header />
-                        {children}
-                    </div>
-                    <ThemedToaster />
-                </ThemeProvider>
+                <SessionProvider>
+                    <ThemeProvider
+                        attribute='class'
+                        defaultTheme='system'
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <div className='items-center justify-items-center min-h-screen gap-16'>
+                            <Header />
+                            {children}
+                        </div>
+                        <ThemedToaster />
+                    </ThemeProvider>
+                </SessionProvider>
             </body>
         </html>
     );

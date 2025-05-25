@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import * as icons from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Link from "next/link";
+import { useSidebarStore } from "@/lib/hooks/stores/use-sidebar-store";
 
 export function SidebarButton({
     data,
@@ -19,6 +20,8 @@ export function SidebarButton({
     const currentPath = usePathname();
     const params = useParams<{ subdomain: string }>();
 
+    const { close } = useSidebarStore();
+
     if (data.type === "route") {
         const { id, label, href } = data;
 
@@ -26,7 +29,7 @@ export function SidebarButton({
         const active = path === currentPath;
 
         return (
-            <Link id={id} href={path} prefetch>
+            <Link id={id} href={path} prefetch onClick={() => close()}>
                 <div
                     className={cn(
                         "text-secondary-foreground pr-2 py-1.5 text-sm rounded-sm inline-flex items-center gap-2 w-full relative",

@@ -57,8 +57,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 
     return (
         <div>
-            <div className='flex items-center py-4 gap-2 justify-between'>
-                <div className='relative w-full'>
+            <div className='flex items-center py-4 gap-2 justify-between flex-wrap'>
+                <div className='relative'>
                     <Search className='absolute top-1/2 -translate-y-1/2 left-3 size-4 text-muted-foreground' />
                     <Input
                         placeholder='Procurar funcionários...'
@@ -69,10 +69,10 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                         className='w-full max-w-md pl-9'
                     />
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex gap-2 flex-wrap items-center'>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant='outline' className='ml-auto'>
+                            <Button variant='outline'>
                                 Colunas <ChevronDown className='size-4' />
                             </Button>
                         </DropdownMenuTrigger>
