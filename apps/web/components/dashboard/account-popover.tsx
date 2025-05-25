@@ -43,7 +43,7 @@ export function AccountPopover({
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className='w-80 p-0' align='start' sideOffset={10}>
+            <PopoverContent className='w-80 p-0 z-[999]' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
                     <Link href='/dashboard/account' className='cursor-pointer'>
                         <Avatar

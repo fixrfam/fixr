@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Grid from "../../Grid";
 import { motion } from "framer-motion";
-import HomeLight from "@/public/home_light.png";
-import HomeDark from "@/public/home_dark.png";
+import HomeLight from "@/public/home_light.webp";
+import HomeDark from "@/public/home_dark.webp";
 
 export const AppPreview = () => {
     return (
