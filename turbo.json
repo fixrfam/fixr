@@ -20,7 +20,22 @@
     "tasks": {
         "build": {
             "dependsOn": ["^build"],
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
+            "inputs": ["$TURBO_DEFAULT$", ".env*"],
+            "env": [
+                "REDIS_PASSWORD",
+                "REDIS_URL",
+                "DB_URL",
+                "FRONTEND_URL",
+                "RESEND_KEY",
+                "JWT_SECRET",
+                "COOKIE_ENCRYPTION_SECRET",
+                "NODE_PORT",
+                "NEXT_PUBLIC_API_URL",
+                "NEXT_PUBLIC_DOCS_URL",
+                "NEXT_PUBLIC_API_URL",
+                "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+                "CLERK_SECRET_KEY"
+            ]
         },
         "build:server": {
             "dependsOn": ["^build:server"],
