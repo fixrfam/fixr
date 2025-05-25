@@ -123,10 +123,6 @@ export async function registerEmployeeHandler({
             ctaUrl: `${env.FRONTEND_URL}/auth/login`,
             displayName: data.name,
             password: employeePassword,
-            credentials: {
-                email_user: env.EMAIL_USER,
-                email_pass: env.EMAIL_PASSWORD,
-            },
         },
     });
 

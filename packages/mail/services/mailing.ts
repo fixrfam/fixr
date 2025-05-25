@@ -14,10 +14,6 @@ dotenv.config({ path: "../.env" });
 interface EmailCommonProps {
     to: string;
     appName: string;
-    credentials: {
-        email_user: string;
-        email_pass: string;
-    };
 }
 
 const sendEmail = async ({
@@ -47,7 +43,6 @@ const sendEmail = async ({
 export const sendInviteEmail = async ({
     to,
     appName,
-    credentials,
     ...props
 }: InviteEmailProps & EmailCommonProps) =>
     sendEmail({
@@ -58,14 +53,12 @@ export const sendInviteEmail = async ({
             appName,
             ...props,
         }),
-        credentials,
     });
 
 export const sendAccountVerificationEmail = async ({
     to,
     verificationUrl,
     displayName,
-    credentials,
     appName,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
     sendEmail({
@@ -73,14 +66,12 @@ export const sendAccountVerificationEmail = async ({
         appName,
         subject: `Verify your email, @${displayName}!`,
         html: await renderVerificationEmail({ verificationUrl, displayName, appName }),
-        credentials,
     });
 
 export const sendAccountDeletionEmail = async ({
     to,
     verificationUrl,
     displayName,
-    credentials,
     appName,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
     sendEmail({
@@ -88,14 +79,12 @@ export const sendAccountDeletionEmail = async ({
         appName,
         subject: `${displayName}'s account delete confirmation.`,
         html: await renderDeletionEmail({ verificationUrl, displayName, appName }),
-        credentials,
     });
 
 export const sendPasswordResetEmail = async ({
     to,
     verificationUrl,
     displayName,
-    credentials,
     appName,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
     sendEmail({
@@ -103,7 +92,6 @@ export const sendPasswordResetEmail = async ({
         appName,
         subject: `Esqueceu sua senha, ${displayName}?`,
         html: await renderPasswordResetEmail({ verificationUrl, displayName, appName }),
-        credentials,
     });
 
 // Extracts display name from an email

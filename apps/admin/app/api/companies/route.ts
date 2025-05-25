@@ -105,10 +105,6 @@ export async function POST(req: NextRequest) {
             ctaUrl: `${process.env.FRONTEND_URL}/auth/login`,
             displayName: `Admin - ${emailDisplayName(data.owner_email)}`,
             password: data.owner_password,
-            credentials: {
-                email_user: process.env.EMAIL_USER as string,
-                email_pass: process.env.EMAIL_PASSWORD as string,
-            },
         },
     });
 

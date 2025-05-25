@@ -61,10 +61,6 @@ export async function registerHandler({
         appName: APP_NAME,
         verificationUrl: verificationUrl,
         displayName: newUser.displayName ?? emailDisplayName(newUser.email),
-        credentials: {
-            email_user: env.EMAIL_USER,
-            email_pass: env.EMAIL_PASSWORD,
-        },
     }).catch(async () => {
         await deleteUser(newUser.id);
 

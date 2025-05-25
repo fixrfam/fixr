@@ -58,10 +58,6 @@ export async function requestAccountDeletionHandler({
         appName: APP_NAME,
         verificationUrl: verificationUrl,
         displayName: account.displayName ?? emailDisplayName(account.email),
-        credentials: {
-            email_user: env.EMAIL_USER,
-            email_pass: env.EMAIL_PASSWORD,
-        },
     });
 
     return response.status(201).send(

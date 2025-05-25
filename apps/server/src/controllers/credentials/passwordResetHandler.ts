@@ -74,10 +74,6 @@ export async function requestPasswordResetHandler({
             appName: APP_NAME,
             verificationUrl: verificationUrl,
             displayName: user.displayName ?? emailDisplayName(user.email),
-            credentials: {
-                email_user: env.EMAIL_USER,
-                email_pass: env.EMAIL_PASSWORD,
-            },
         },
     });
 
