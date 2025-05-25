@@ -1,13 +1,26 @@
+"use client";
+
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { TextLogo } from "../svg/TextLogo";
 import { Button } from "../ui/button";
 import { ModeToggle } from "../mode-toggle";
+import { useScrollPosition } from "@/lib/hooks/use-scroll-position";
+import { cn } from "@/lib/utils";
 
 export default function Header() {
+    const { hasScrolled } = useScrollPosition();
+
     return (
-        <header className='w-full h-20 flex items-center justify-center p-8 border-b-[1px] border-border border-opacity-10 fixed z-[99] bg-background/50 backdrop-blur-lg'>
-            <div className='max-w-7xl w-full flex justify-between items-center'>
+        <header
+            className={`flex items-center w-full h-20 justify-center p-8 border-b-[1px] border-border border-opacity-10 fixed z-[99] bg-background/50 backdrop-blur-lg`}
+        >
+            <div
+                className={cn(
+                    `w-full transition-all duration-500 flex justify-between items-center`,
+                    hasScrolled ? "max-w-7xl" : "max-w-full"
+                )}
+            >
                 <div className='flex gap-8'>
                     <Link href='/' prefetch>
                         <TextLogo className='w-16 text-primary' />

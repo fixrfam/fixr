@@ -1,0 +1,29 @@
+# Use imagem mínima do Node.js
+FROM node:22.13-alpine
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copia package.json e lock para instalação de dependências
+COPY package*.json ./
+
+# Instala dependências
+RUN npm install
+
+# Copia o restante dos arquivos
+COPY . .
+
+# Executa turbo prune
+RUN npx turbo prune server --docker
+
+# Move para a pasta de build
+WORKDIR /app/out/full
+
+# Instala dependências na pasta de build
+RUN npm install
+
+# Gera build
+RUN npm run build
+
+# Define comando de inicialização
+CMD ["npm", "run", "start"]

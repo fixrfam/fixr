@@ -1,24 +1,25 @@
 import { AvatarProps, Avatar } from "../account/profile-avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
-import { emailDisplayName, getSession } from "@/lib/auth/utils";
-import { cookies } from "next/headers";
+import { emailDisplayName } from "@/lib/auth/utils";
 import { Button } from "../ui/button";
 import { Settings } from "lucide-react";
 import { SignOutButton } from "../auth/signout-button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { z } from "zod";
+import { userJWT } from "@fixr/schemas/auth";
 
-export async function AccountPopover({
+export function AccountPopover({
+    session,
     showData,
     variant = "rounded",
     className,
 }: {
+    session: z.infer<typeof userJWT>;
     variant?: AvatarProps["variant"];
     className?: string;
     showData?: boolean;
 }) {
-    const cookieStore = await cookies();
-    const session = getSession(cookieStore);
     const displayName = session.displayName || emailDisplayName(session.email || "");
 
     return (
@@ -42,7 +43,7 @@ export async function AccountPopover({
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className='w-80 p-0' align='start' sideOffset={10}>
+            <PopoverContent className='w-80 p-0 z-[999]' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
                     <Link href='/dashboard/account' className='cursor-pointer'>
                         <Avatar

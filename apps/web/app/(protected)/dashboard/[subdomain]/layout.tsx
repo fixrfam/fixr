@@ -6,6 +6,9 @@ import localFont from "next/font/local";
 import "../../../globals.css";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth/utils";
+import { Header } from "@/components/dashboard/sidebar/header";
 
 export const metadata: Metadata = {
     title: "Fixr - Dashboard",
@@ -24,8 +27,9 @@ const cal = localFont({
     weight: "100 200 300 400 500 600 700 800 900",
 });
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-    const sidebarStyle = { width: "286px", margin: "0.625rem" };
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    const cookieStore = await cookies();
+    const session = getSession(cookieStore);
 
     return (
         <html lang='en' suppressHydrationWarning>
@@ -40,8 +44,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 >
                     <QueryClientWrapper>
                         <SessionProvider>
-                            <Sidebar width={sidebarStyle.width} margin={sidebarStyle.margin} />
-                            <main className='ml-[calc(286px+0.625rem)] w-[calc(100%-(286px+0.625rem))] py-8 px-10'>
+                            <Sidebar session={session} />
+                            <Header />
+                            <main className='pt-20 lg:ml-[calc(286px+0.625rem)] w-full lg:w-[calc(100%-(286px+0.625rem))] py-6 lg:py-8 px-6 lg:px-10 transition-all'>
                                 {children}
                             </main>
                         </SessionProvider>

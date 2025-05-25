@@ -1,9 +1,9 @@
-import { SessionProvider } from "@/lib/hooks/use-session";
 import Image from "next/image";
 import LoginBg from "@/public/login_bg.webp";
-import { TextLogo } from "@/components/svg/TextLogo";
 import Link from "next/link";
 import { Logo } from "@/components/svg/Logo";
+import { TextAnimate } from "@/components/magicui/text-animate";
+import { BlurFade } from "@/components/magicui/blur-fade";
 
 export default function AuthLayout({
     children,
@@ -12,20 +12,50 @@ export default function AuthLayout({
 }>) {
     return (
         <>
-            <SessionProvider>
-                <div className='grid min-h-svh lg:grid-cols-2 p-6 w-full pt-24'>
-                    <div className='relative hidden bg-muted lg:block rounded-3xl overflow-clip'>
-                        <Image
-                            src={LoginBg}
-                            alt='Uma pessoa consertando um laptop com uma chave de fenda.'
-                            className='absolute inset-0 h-full w-full object-cover'
-                        />
-                        <div className='absolute z-10 size-full flex flex-col justify-between px-16 py-12 xl:px-20 xl:py-16'>
+            <div className='grid min-h-svh lg:grid-cols-2 p-6 w-full pt-24'>
+                <div className='relative hidden bg-muted lg:block rounded-3xl overflow-clip'>
+                    <Image
+                        src={LoginBg}
+                        alt='Uma pessoa consertando um laptop com uma chave de fenda.'
+                        className='absolute inset-0 h-full w-full object-cover'
+                    />
+                    <div className='absolute z-10 size-full flex flex-col justify-between px-16 py-12 xl:px-20 xl:py-16'>
+                        <BlurFade direction='up'>
                             <Logo className='w-14 text-white shrink-0' />
-                            <h1 className='text-[3.875rem] xl:text-[4.5rem] leading-[4.5rem] xl:leading-[5.25rem] tracking-tight text-white'>
-                                Gerenciando <br /> <b>serviços</b> com <br />
-                                <b>excelência</b>.
-                            </h1>
+                        </BlurFade>
+                        <h1 className='text-[3.875rem] xl:text-[4.5rem] leading-[4.5rem] xl:leading-[5.25rem] tracking-tight text-white'>
+                            <TextAnimate animation='blurInUp' by='character' as='span' delay={0.15}>
+                                Gerenciando
+                            </TextAnimate>
+                            <br />{" "}
+                            <TextAnimate
+                                animation='blurInUp'
+                                by='character'
+                                as='b'
+                                delay={0.15 * 2}
+                            >
+                                serviços
+                            </TextAnimate>{" "}
+                            <TextAnimate
+                                animation='blurInUp'
+                                by='character'
+                                as='span'
+                                delay={0.15 * 3}
+                            >
+                                com
+                            </TextAnimate>
+                            <br />
+                            {""}
+                            <TextAnimate
+                                animation='blurInUp'
+                                by='character'
+                                as='b'
+                                delay={0.15 * 4}
+                            >
+                                excelência.
+                            </TextAnimate>
+                        </h1>
+                        <BlurFade direction='up' delay={0.3}>
                             <div>
                                 <p className='text-xl text-white'>Faça login para começar.</p>
                                 <Link
@@ -38,15 +68,17 @@ export default function AuthLayout({
                                     </p>
                                 </Link>
                             </div>
-                        </div>
-                    </div>
-                    <div className='flex flex-col gap-4 p-6 md:p-10'>
-                        <div className='flex flex-1 items-center justify-center'>
-                            <div className='w-full max-w-xs'>{children}</div>
-                        </div>
+                        </BlurFade>
                     </div>
                 </div>
-            </SessionProvider>
+                <div className='flex flex-col gap-4 p-6 md:p-10'>
+                    <div className='flex flex-1 items-center justify-center'>
+                        <BlurFade>
+                            <div className='w-full max-w-xs'>{children}</div>
+                        </BlurFade>
+                    </div>
+                </div>
+            </div>
         </>
     );
 }

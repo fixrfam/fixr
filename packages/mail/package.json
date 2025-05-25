@@ -24,14 +24,16 @@
         }
     },
     "dependencies": {
+        "@fixr/constants": "*",
         "@react-email/components": "0.0.34",
         "@react-email/tailwind": "1.0.4",
-        "@fixr/constants": "*",
         "@types/node": "^20.11.24",
         "bullmq": "^5.48.0",
         "react": "19.0.0",
         "react-dom": "19.0.0",
-        "typescript": "^5.3.3"
+        "resend": "^4.5.1",
+        "typescript": "^5.3.3",
+        "zod": "^3.25.28"
     },
     "devDependencies": {
         "@types/react": "19.0.1",

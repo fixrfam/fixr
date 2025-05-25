@@ -7,6 +7,7 @@ import {
 } from "../emails/Invite";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { resend } from "../config/resend";
 
 dotenv.config({ path: "../.env" });
 
@@ -23,31 +24,20 @@ const sendEmail = async ({
     to,
     subject,
     html,
-    appName,
-    credentials,
 }: EmailCommonProps & {
     html: string;
     subject: string;
 }) => {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: credentials.email_user,
-            pass: credentials.email_pass,
-        },
-        from: credentials.email_user,
-    });
-
     try {
-        const info = await transporter.sendMail({
-            from: `${appName} - Comunicação <${process.env.EMAIL_USER}>`,
-            to,
-            subject,
-            html,
+        const { data } = await resend.emails.send({
+            from: "Fixr - Comunicação <no-reply@mail.fixr.com.br>",
+            to: [to],
+            subject: subject,
+            html: html,
         });
 
-        console.log(`Email sent to ${to}: ${info.messageId}`);
-        return info;
+        console.log(`Email sent to ${to}: ${data?.id}`);
+        return data;
     } catch (error) {
         console.error(`Failed to send email to ${to}:`, error);
         throw error;
@@ -111,7 +101,7 @@ export const sendPasswordResetEmail = async ({
     sendEmail({
         to,
         appName,
-        subject: `Change your password, @${displayName}!`,
+        subject: `Esqueceu sua senha, ${displayName}?`,
         html: await renderPasswordResetEmail({ verificationUrl, displayName, appName }),
         credentials,
     });
