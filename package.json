@@ -3,6 +3,9 @@
     "private": true,
     "scripts": {
         "build": "dotenv -- turbo build",
+        "build:server": "dotenv -- turbo build --filter=server",
+        "build:web": "dotenv -- turbo build --filter=web",
+        "build:admin": "dotenv -- turbo build --filter=admin",
         "dev": "dotenv -- turbo dev --parallel --no-daemon",
         "start": "dotenv -- turbo start --parallel --no-daemon",
         "lint": "dotenv -- turbo lint",
