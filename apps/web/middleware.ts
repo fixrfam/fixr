@@ -22,11 +22,13 @@ export async function middleware(request: NextRequest) {
         try {
             const tokenValidationResponse = await validatePasswordResetToken(request);
             if (!tokenValidationResponse) {
-                return NextResponse.redirect(new URL("/auth/login", request.url));
+                return NextResponse.redirect(
+                    new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL)
+                );
             }
         } catch (error) {
             console.error("Error during password reset token validation:", error);
-            return NextResponse.redirect(new URL("/auth/login", request.url));
+            return NextResponse.redirect(new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL));
         }
     }
 
@@ -45,7 +47,9 @@ export async function middleware(request: NextRequest) {
 
         // If the user is at the loginPath and has a valid token, they need to go to dashboard.
         if (token || refreshToken) {
-            return NextResponse.redirect(new URL("/dashboard/account", request.url));
+            return NextResponse.redirect(
+                new URL("/dashboard/account", process.env.NEXT_PUBLIC_APP_URL)
+            );
         }
 
         return NextResponse.next();
@@ -62,7 +66,9 @@ export async function middleware(request: NextRequest) {
             console.error("Error during token revalidation:", error);
 
             if (isProtectedRoute) {
-                return NextResponse.redirect(new URL("/auth/login", request.url));
+                return NextResponse.redirect(
+                    new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL)
+                );
             }
 
             return NextResponse.next();
@@ -83,7 +89,7 @@ export async function middleware(request: NextRequest) {
                 ? `/dashboard/${userTenant}/${rest}`
                 : `/dashboard/${userTenant}`;
 
-            return NextResponse.redirect(new URL(redirectPath, request.url));
+            return NextResponse.redirect(new URL(redirectPath, process.env.NEXT_PUBLIC_APP_URL));
         }
     }
 
@@ -113,12 +119,12 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 
     // Handle invalid refresh token: redirect to signout route which will clear cookies and redirect to login
     if (revalidateResponse.status === 401) {
-        return NextResponse.redirect(new URL("/api/auth/signout", request.url));
+        return NextResponse.redirect(new URL("/api/auth/signout", process.env.NEXT_PUBLIC_APP_URL));
     }
 
     // Revalidation failed: redirect to login
     if (isProtectedRoute) {
-        return NextResponse.redirect(new URL("/auth/login", request.url));
+        return NextResponse.redirect(new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL));
     }
 
     return NextResponse.next();
