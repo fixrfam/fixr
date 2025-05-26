@@ -5,6 +5,7 @@ import { db } from "@fixr/db/connection";
 import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema";
 import { generateOneTimeToken } from "../helpers/tokens";
 import { cookieKey } from "@fixr/constants/cookies";
+import { env } from "../env";
 
 export interface RefreshToken {
     token: string;
@@ -18,6 +19,7 @@ export async function setRefreshToken(response: FastifyReply, token: RefreshToke
         path: "/",
         sameSite: "none" as const,
         secure: true,
+        domain: env.COOKIE_DOMAIN,
     };
 
     /**
@@ -51,6 +53,7 @@ export function setJWTCookie(response: FastifyReply, token: string) {
         // expires: new Date(Date.now() + 10 * 1000),
         expires: new Date(Date.now() + 5 * 60 * 1000),
         secure: true,
+        domain: env.COOKIE_DOMAIN,
     };
 
     response.setCookie(cookieKey("session"), token, cookieOptions);
