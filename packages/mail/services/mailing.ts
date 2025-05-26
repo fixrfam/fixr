@@ -25,12 +25,17 @@ const sendEmail = async ({
     subject: string;
 }) => {
     try {
-        const { data } = await resend.emails.send({
+        const { data, error } = await resend.emails.send({
             from: "Fixr - Comunicação <no-reply@mail.fixr.com.br>",
             to: [to],
             subject: subject,
             html: html,
         });
+
+        if (error) {
+            console.error(`Failed to send email to ${to}:`, error);
+            throw error;
+        }
 
         console.log(`Email sent to ${to}: ${data?.id}`);
         return data;

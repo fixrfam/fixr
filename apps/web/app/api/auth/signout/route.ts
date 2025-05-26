@@ -8,5 +8,7 @@ export async function GET(request: NextRequest) {
     cookieStore.delete(cookieKey("session"));
     cookieStore.delete(cookieKey("refreshToken"));
 
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    const href = request.nextUrl.href;
+
+    return NextResponse.redirect(new URL("/auth/login", href));
 }
