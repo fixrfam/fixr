@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import Header from "@/components/home/Header";
 import { SessionProvider } from "@/lib/hooks/use-session";
+import { ApiDowntimeBanner } from "@/components/home/ApiDowntimeBanner";
 
 const inter = localFont({
     src: "../fonts/InterVF.ttf",
@@ -54,6 +55,7 @@ export default function RootLayout({
                         disableTransitionOnChange
                     >
                         <div className='items-center justify-items-center min-h-screen gap-16'>
+                            <ApiDowntimeBanner />
                             <Header />
                             {children}
                         </div>
