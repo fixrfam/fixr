@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     return (
         <html lang='en' suppressHydrationWarning>
             <body
-                className={`${inter.variable} ${cal.variable} antialiased font-[family-name:var(--font-inter)]`}
+                className={`${inter.variable} ${cal.variable} antialiased font-(family-name:--font-inter)`}
             >
                 <ThemeProvider
                     attribute='class'

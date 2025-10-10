@@ -7,7 +7,7 @@ export default function Home() {
         <main className='flex flex-col gap-8 items-center w-full p-8 py-24'>
             <Hero />
             <LampContainer className='-translate-y-[35%] hidden lg:flex'>{null}</LampContainer>
-            <Features className='lg:-mt-[95dvh] z-[2]' />
+            <Features className='lg:-mt-[95dvh] z-2' />
         </main>
     );
 }

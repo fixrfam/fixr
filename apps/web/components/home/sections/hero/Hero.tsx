@@ -7,10 +7,10 @@ import { BlurFade } from "@/components/magicui/blur-fade";
 
 export default function Hero() {
     return (
-        <section className='w-full max-w-7xl flex flex-col gap-10 justify-center items-start py-2 lg:py-10 space-y-6 z-[2]'>
-            <div className='flex flex-col w-full items-start gap-4 z-[3]'>
+        <section className='w-full max-w-7xl flex flex-col gap-10 justify-center items-start py-2 lg:py-10 space-y-6 z-2'>
+            <div className='flex flex-col w-full items-start gap-4 z-3'>
                 <BlurFade delay={0.3} direction='up' inView>
-                    <div className='bg-primary/15 border-[1px] border-primary text-primary px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm rounded-full font-light shadow-[0_4px_30_-8px_var(--primary-500)]'>
+                    <div className='bg-primary/15 border border-primary text-primary px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm rounded-full font-light shadow-[0_4px_30_-8px_var(--primary-500)]'>
                         <WandSparkles className='w-4 h-4 inline-block mr-2' />
                         Simplifique e expanda
                     </div>
@@ -50,7 +50,7 @@ export default function Hero() {
                             </TextAnimate>
                         </h1>
                     </div>
-                    <div className='space-y-8 lg:space-y-4 lg:w-[28rem]'>
+                    <div className='space-y-8 lg:space-y-4 lg:w-md'>
                         <TextAnimate
                             as='p'
                             className='text-sm lg:text-base max-w-lg font-light'

@@ -24,7 +24,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
             <aside
                 data-state={isOpen ? "open" : "closed"}
                 className={cn(
-                    `w-[286px] h-[calc(100dvh-(2*0.625rem))] left-[0.625rem] top-[0.625rem] z-[99]
+                    `w-[286px] h-[calc(100dvh-(2*0.625rem))] left-2.5 top-2.5 z-99
                     fixed rounded-md border border-border bg-background flex flex-col justify-between select-none transition-transform`,
                     `lg:translate-x-0`, // Always visible on desktop
                     `-translate-x-[calc(100%+0.625rem)] data-[state=open]:translate-x-0` // Slide in on mobile
@@ -119,7 +119,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
             </aside>
             <div
                 className={cn(
-                    "fixed w-full h-dvh z-[98] bg-background/5 backdrop-blur-sm transition-all",
+                    "fixed w-full h-dvh z-98 bg-background/5 backdrop-blur-xs transition-all",
                     isDesktop && "hidden",
                     !isDesktop && !isOpen
                         ? "opacity-0 pointer-events-none"

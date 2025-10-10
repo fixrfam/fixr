@@ -42,7 +42,7 @@ export function SidebarButton({
                     }}
                 >
                     {active && nestingLevel ? (
-                        <div className='absolute h-1/2 w-[1px] bg-primary left-[calc(1rem-0.5px)]'></div>
+                        <div className='absolute h-1/2 w-px bg-primary left-[calc(1rem-0.5px)]'></div>
                     ) : (
                         <></>
                     )}
@@ -67,7 +67,7 @@ export function SidebarButton({
                 </div>
             </CollapsibleTrigger>
             <CollapsibleContent className='relative'>
-                <div className='absolute w-[1px] left-[calc(1rem-0.5px)] h-full bg-border'></div>
+                <div className='absolute w-px left-[calc(1rem-0.5px)] h-full bg-border'></div>
                 {items.map((item) => (
                     <SidebarButton key={item.id} data={item} nestingLevel={nestingLevel + 1} />
                 ))}

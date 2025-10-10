@@ -13,7 +13,7 @@ export default function Header() {
 
     return (
         <header
-            className={`flex items-center w-full h-20 justify-center p-8 border-b-[1px] border-border border-opacity-10 fixed z-[99] bg-background/50 backdrop-blur-lg`}
+            className={`flex items-center w-full h-20 justify-center p-8 border-b border-border border-opacity-10 fixed z-99 bg-background/50 backdrop-blur-lg`}
         >
             <div
                 className={cn(

@@ -30,10 +30,10 @@ export const LampContainer = ({
                     style={{
                         backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
                     }}
-                    className='absolute inset-auto right-1/2 h-56 overflow-visible w-[30rem] bg-gradient-conic from-primary via-transparent to-transparent text-white [--conic-position:from_70deg_at_center_top]'
+                    className='absolute inset-auto right-1/2 h-56 overflow-visible w-120 bg-gradient-conic from-primary via-transparent to-transparent text-white [--conic-position:from_70deg_at_center_top]'
                 >
-                    <div className='absolute  w-[100%] left-0 bg-background h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]' />
-                    <div className='absolute  w-40 h-[100%] left-0 bg-background  bottom-0 z-20 [mask-image:linear-gradient(to_right,white,transparent)]' />
+                    <div className='absolute  w-full left-0 bg-background h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]' />
+                    <div className='absolute  w-40 h-full left-0 bg-background  bottom-0 z-20 mask-[linear-gradient(to_right,white,transparent)]' />
                 </motion.div>
                 <motion.div
                     id='rglow'
@@ -47,10 +47,10 @@ export const LampContainer = ({
                     style={{
                         backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
                     }}
-                    className='absolute inset-auto left-1/2 h-56 w-[30rem] bg-gradient-conic from-transparent via-transparent to-primary text-white [--conic-position:from_290deg_at_center_top]'
+                    className='absolute inset-auto left-1/2 h-56 w-120 bg-gradient-conic from-transparent via-transparent to-primary text-white [--conic-position:from_290deg_at_center_top]'
                 >
-                    <div className='absolute  w-40 h-[100%] right-0 bg-background  bottom-0 z-20 [mask-image:linear-gradient(to_left,white,transparent)]' />
-                    <div className='absolute  w-[100%] right-0 bg-background h-40 bottom-0 z-20 [mask-image:linear-gradient(to_top,white,transparent)]' />
+                    <div className='absolute  w-40 h-full right-0 bg-background  bottom-0 z-20 mask-[linear-gradient(to_left,white,transparent)]' />
+                    <div className='absolute  w-full right-0 bg-background h-40 bottom-0 z-20 mask-[linear-gradient(to_top,white,transparent)]' />
                 </motion.div>
                 <div
                     id='topglow'
@@ -62,7 +62,7 @@ export const LampContainer = ({
                 ></div>
                 <div
                     id='topglow'
-                    className='absolute inset-auto z-50 h-36 w-[28rem] -translate-y-1/2 rounded-full bg-primary opacity-50 blur-3xl'
+                    className='absolute inset-auto z-50 h-36 w-md -translate-y-1/2 rounded-full bg-primary opacity-50 blur-3xl'
                 ></div>
                 <motion.div
                     id='largeglow'
@@ -73,7 +73,7 @@ export const LampContainer = ({
                         duration: 0.8,
                         ease: "easeInOut",
                     }}
-                    className='absolute inset-auto z-30 h-36 w-64 -translate-y-[6rem] rounded-full bg-primary-300 blur-2xl'
+                    className='absolute inset-auto z-30 h-36 w-64 -translate-y-24 rounded-full bg-primary-300 blur-2xl'
                 ></motion.div>
                 <motion.div
                     id='bulb'
@@ -84,12 +84,12 @@ export const LampContainer = ({
                         duration: 0.8,
                         ease: "easeInOut",
                     }}
-                    className='absolute inset-auto z-50 h-0.5 w-[30rem] -translate-y-[7rem] bg-primary-300 '
+                    className='absolute inset-auto z-50 h-0.5 w-120 -translate-y-28 bg-primary-300'
                 ></motion.div>
 
                 <div
                     id='darken'
-                    className='absolute inset-auto z-40 h-44 w-full -translate-y-[12.5rem] bg-background '
+                    className='absolute inset-auto z-40 h-44 w-full -translate-y-50 bg-background '
                 ></div>
             </div>
 

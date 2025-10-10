@@ -10,7 +10,7 @@ export default function Features({ className }: { className?: string }) {
                 className
             )}
         >
-            <div className='bg-background border-[1px] border-primary text-primary px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm rounded-full font-light shadow-[0_4px_30_-8px_var(--primary-500)]'>
+            <div className='bg-background border border-primary text-primary px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm rounded-full font-light shadow-[0_4px_30_-8px_var(--primary-500)]'>
                 <Feather className='w-4 h-4 inline-block mr-2' />
                 Simples & intuitivo
             </div>
