@@ -6,7 +6,7 @@ import BoringAvatar from "boring-avatars";
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
     RequireAtLeastOne<{ src?: string; fallbackHash?: string }> & {
         variant?: "rounded" | "square";
-        fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring-3" | "bauhaus";
+        fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring" | "bauhaus";
     };
 
 const avatarColors = [
