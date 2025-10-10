@@ -376,13 +376,13 @@ const TextAnimateBase = ({
       : { container: defaultContainerVariants, item: defaultItemVariants };
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode='popLayout'>
       <MotionComponent
         variants={finalVariants.container as Variants}
-        initial="hidden"
+        initial='hidden'
         whileInView={startOnView ? "show" : undefined}
         animate={startOnView ? undefined : "show"}
-        exit="exit"
+        exit='exit'
         className={cn("whitespace-pre-wrap", className)}
         viewport={{ once }}
         {...props}
@@ -395,7 +395,7 @@ const TextAnimateBase = ({
             className={cn(
               by === "line" ? "block" : "inline-block whitespace-pre",
               by === "character" && "",
-              segmentClassName,
+              segmentClassName
             )}
           >
             {segment}

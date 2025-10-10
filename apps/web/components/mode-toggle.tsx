@@ -24,7 +24,7 @@ export function ModeToggle({ ...props }: ButtonProps) {
                     <span className='sr-only'>Alternar tema</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='z-[100]'>
+            <DropdownMenuContent align='end' className='z-100'>
                 <DropdownMenuItem onClick={() => setTheme("light")}>Claro</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>Escuro</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>Sistema</DropdownMenuItem>

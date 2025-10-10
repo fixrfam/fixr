@@ -23,7 +23,7 @@ export default function AuthLayout({
                         <BlurFade direction='up'>
                             <Logo className='w-14 text-white shrink-0' />
                         </BlurFade>
-                        <h1 className='text-[3.875rem] xl:text-[4.5rem] leading-[4.5rem] xl:leading-[5.25rem] tracking-tight text-white'>
+                        <h1 className='text-[3.875rem] xl:text-[4.5rem] leading-18 xl:leading-21 tracking-tight text-white'>
                             <TextAnimate animation='blurInUp' by='character' as='span' delay={0.15}>
                                 Gerenciando
                             </TextAnimate>

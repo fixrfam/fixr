@@ -45,7 +45,7 @@ export default function RootLayout({
     return (
         <html lang='en' suppressHydrationWarning>
             <body
-                className={`${inter.variable} ${cal.variable} antialiased font-[family-name:var(--font-inter)]`}
+                className={`${inter.variable} ${cal.variable} antialiased font-(family-name:--font-inter)`}
             >
                 <SessionProvider>
                     <ThemeProvider

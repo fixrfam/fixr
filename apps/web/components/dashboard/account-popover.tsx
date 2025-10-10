@@ -28,7 +28,7 @@ export function AccountPopover({
                 <div className={cn("flex gap-4 items-center min-w-0 cursor-pointer", className)}>
                     <Avatar
                         fallbackHash={session?.id ?? ""}
-                        className='!size-9 hover:cursor-pointer'
+                        className='size-9! hover:cursor-pointer'
                         variant={variant}
                     />
                     {showData && (
@@ -43,7 +43,7 @@ export function AccountPopover({
                     )}
                 </div>
             </PopoverTrigger>
-            <PopoverContent className='w-80 p-0 z-[999]' align='start' sideOffset={10}>
+            <PopoverContent className='w-80 p-0 z-999' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
                     <Link href='/dashboard/account' className='cursor-pointer'>
                         <Avatar
@@ -59,7 +59,7 @@ export function AccountPopover({
                                 {session?.email}
                             </p>
                         </Link>
-                        <div className='grid grid-cols-2 gap-2 !mt-3 w-full'>
+                        <div className='grid grid-cols-2 gap-2 mt-3! w-full'>
                             <Button
                                 variant='outline'
                                 className='w-full h-7 text-xs'
