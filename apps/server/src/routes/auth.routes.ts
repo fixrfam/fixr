@@ -10,6 +10,7 @@ import { FastifyTypedInstance } from "../interfaces/fastify";
 import { signOutHandler } from "../controllers/auth/signOutHandler";
 import { cookieKey } from "@fixr/constants/cookies";
 import { withErrorHandler } from "../middlewares/withErrorHandler";
+import { apiResponse } from "../helpers/response";
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
     fastify.post(
@@ -18,9 +19,17 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
             schema: authDocs.registerSchema,
         },
         withErrorHandler(async (request, response) => {
-            const body = await createUserSchema.parseAsync(request.body);
+            await createUserSchema.parseAsync(request.body);
 
-            await registerHandler({ body, request, response });
+            return response.status(500).send(
+                apiResponse({
+                    status: 501,
+                    error: "Not implemented",
+                    code: "not_implemented",
+                    message: "This endpoint is not implemented or disabled.",
+                    data: null,
+                })
+            );
         })
     );
 
