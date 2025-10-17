@@ -7,13 +7,13 @@ export const LampContainer = ({
     children,
     className,
 }: {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     className?: string;
 }) => {
     return (
         <div
             className={cn(
-                "relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background w-full rounded-md z-0",
+                "relative flex min-h-screen flex-col items-center justify-center overflow-hidden w-full rounded-md z-0 pointer-events-none",
                 className
             )}
         >
