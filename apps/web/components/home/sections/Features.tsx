@@ -1,3 +1,4 @@
+import { LampContainer } from "@/components/ui/lamp";
 import { cn } from "@/lib/utils";
 import { Feather } from "lucide-react";
 
@@ -6,10 +7,12 @@ export default function Features({ className }: { className?: string }) {
         <section
             id='features'
             className={cn(
-                "w-full max-w-7xl flex flex-col gap-4 lg::gap-10 justify-center items-center",
+                "w-full max-w-7xl min-h-96 flex flex-col gap-4 lg::gap-10 items-center relative",
                 className
             )}
         >
+            <LampContainer className='hidden lg:flex absolute z-[-1] -translate-y-[42.5%]' />
+
             <div className='bg-background border border-primary text-primary px-3 py-2 text-xs md:px-4 md:py-2 md:text-sm rounded-full font-light shadow-[0_4px_30_-8px_var(--primary-500)]'>
                 <Feather className='w-4 h-4 inline-block mr-2' />
                 Simples & intuitivo

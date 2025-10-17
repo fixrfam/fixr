@@ -2,11 +2,11 @@
 
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { TextLogo } from "../svg/TextLogo";
-import { Button } from "../ui/button";
-import { ModeToggle } from "../mode-toggle";
 import { useScrollPosition } from "@/lib/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
+import { TextLogo } from "@/components/svg/TextLogo";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default function Header() {
     const { hasScrolled } = useScrollPosition();
