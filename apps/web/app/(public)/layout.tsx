@@ -3,9 +3,10 @@ import localFont from "next/font/local";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
-import Header from "@/components/home/Header";
 import { SessionProvider } from "@/lib/hooks/use-session";
 import { ApiDowntimeBanner } from "@/components/home/ApiDowntimeBanner";
+import Footer from "@/components/home/layout/Footer";
+import Header from "@/components/home/layout/Header";
 
 const inter = localFont({
     src: "../fonts/InterVF.ttf",
@@ -58,6 +59,7 @@ export default function RootLayout({
                             <ApiDowntimeBanner />
                             <Header />
                             {children}
+                            <Footer className='z-2' />
                         </div>
                         <ThemedToaster />
                     </ThemeProvider>
