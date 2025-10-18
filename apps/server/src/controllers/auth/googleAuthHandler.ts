@@ -21,6 +21,14 @@ const GOOGLE_CREDS = {
 
 const client = new OAuth2Client(GOOGLE_CREDS);
 
+/**
+ * Inicia o processo de login com o Google OAuth2.
+ *
+ * Este endpoint redireciona o usuário para a tela de consentimento da Google,
+ * onde ele autoriza o aplicativo a acessar seu e-mail e perfil.
+ * Após a autorização, a Google redireciona de volta para `/auth/google/callback`
+ * com um código de autorização (`code`).
+ */
 export async function googleLoginHandler({
     response,
 }: {
@@ -40,6 +48,20 @@ export async function googleLoginHandler({
     return response.redirect(url);
 }
 
+/**
+ * Manipula o callback do Google após a autorização OAuth2.
+ *
+ * Este endpoint:
+ * 1. Troca o código de autorização (`code`) pelos tokens de acesso e ID.
+ * 2. Verifica o ID token e extrai os dados do usuário.
+ * 3. Valida se o e-mail retornado existe e está verificado.
+ * 4. Atualiza os dados do usuário com as informações mais recentes da Google.
+ * 5. Gera novo JWT + refresh token.
+ * 6. Define os cookies e redireciona para o dashboard.
+ *
+ * Caso ocorra algum erro, redireciona de volta para `/auth/login` com um cookie
+ * que indica o tipo de falha (ex.: e-mail não verificado, usuário inexistente, etc).
+ */
 export async function googleCallbackHandler({
     code,
     response,
@@ -60,6 +82,7 @@ export async function googleCallbackHandler({
     }
 
     try {
+        // Troca o código de autorização pelos tokens da Google
         const { tokens } = await client.getToken(code);
         const idToken = tokens.id_token;
 
@@ -99,6 +122,7 @@ export async function googleCallbackHandler({
 
         const user = await queryUserByEmail(payload.email.toLowerCase());
 
+        // Apenas usuários já cadastrados conseguem acessar o sistema com o Google
         if (!user) {
             return response
                 .setCookie(cookieKey("googleAuthError"), "gacc_user_not_found", errorCookieSettings)

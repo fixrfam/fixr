@@ -51,7 +51,10 @@ const envToLogger = {
 };
 
 //Set Zod as the default request/response data serializer
-const server = fastify({ logger: envToLogger["development"] }).withTypeProvider<ZodTypeProvider>();
+const server = fastify({
+    logger: envToLogger["development"],
+    allowErrorHandlerOverride: true,
+}).withTypeProvider<ZodTypeProvider>();
 
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);

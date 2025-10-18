@@ -87,6 +87,7 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
 
     fastify.get(
         "/google",
+        { schema: authDocs.googleLoginSchema },
         withErrorHandler(async (request, response) => {
             await googleLoginHandler({ request, response });
         })
@@ -94,6 +95,7 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
 
     fastify.get(
         "/google/callback",
+        { schema: authDocs.googleCallbackSchema },
         withErrorHandler(
             async (request: FastifyRequest<{ Querystring: { code: string } }>, response) => {
                 const { code } = await googleCallbackSchema.parseAsync(request.query);
