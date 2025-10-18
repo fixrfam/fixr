@@ -4,10 +4,11 @@ import { emailDisplayName } from "@/lib/auth/utils";
 import { Button } from "../ui/button";
 import { Settings } from "lucide-react";
 import { SignOutButton } from "../auth/signout-button";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { userJWT } from "@fixr/schemas/auth";
+import { DashLink } from "./dash-link";
+import { useParams } from "next/navigation";
 
 export function AccountPopover({
     session,
@@ -21,6 +22,7 @@ export function AccountPopover({
     showData?: boolean;
 }) {
     const displayName = session.displayName || emailDisplayName(session.email || "");
+    const params = useParams<{ subdomain: string }>();
 
     return (
         <Popover>
@@ -30,6 +32,7 @@ export function AccountPopover({
                         fallbackHash={session?.id ?? ""}
                         className='size-9! hover:cursor-pointer'
                         variant={variant}
+                        src={session.avatarUrl}
                     />
                     {showData && (
                         <div className='flex flex-col min-w-0'>
@@ -45,20 +48,29 @@ export function AccountPopover({
             </PopoverTrigger>
             <PopoverContent className='w-80 p-0 z-999' align='start' sideOffset={10}>
                 <div className='flex gap-4 p-4'>
-                    <Link href='/dashboard/account' className='cursor-pointer'>
+                    <DashLink
+                        subdomain={params.subdomain}
+                        href='/account'
+                        className='cursor-pointer'
+                    >
                         <Avatar
                             fallbackHash={session?.id ?? ""}
                             className='size-12 text-4xl'
                             variant='square'
+                            src={session.avatarUrl}
                         />
-                    </Link>
+                    </DashLink>
                     <div className='flex flex-col space-y-1 min-w-0'>
-                        <Link href='/dashboard/account' className='space-y-1 cursor-pointer'>
+                        <DashLink
+                            subdomain={params.subdomain}
+                            href='/account'
+                            className='space-y-1 cursor-pointer'
+                        >
                             <p className='font-medium leading-5 truncate'>{displayName}</p>
                             <p className='text-xs leading-none text-muted-foreground truncate'>
                                 {session?.email}
                             </p>
-                        </Link>
+                        </DashLink>
                         <div className='grid grid-cols-2 gap-2 mt-3! w-full'>
                             <Button
                                 variant='outline'
@@ -66,10 +78,10 @@ export function AccountPopover({
                                 size='sm'
                                 asChild
                             >
-                                <Link href='/dashboard/account'>
+                                <DashLink subdomain={params.subdomain} href='/account'>
                                     <Settings className='size-4' />
                                     Gerenciar
-                                </Link>
+                                </DashLink>
                             </Button>
                             <SignOutButton
                                 variant='outline'

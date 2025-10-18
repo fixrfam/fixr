@@ -14,6 +14,7 @@ export const userSchema = z.object({
     id: z.string().cuid2(),
     email: z.string().email({ message: "Invalid email address" }),
     displayName: z.string().min(3).max(100).nullable(),
+    avatarUrl: z.string().url().nullable(),
     profileType: z.union([z.literal("client"), z.literal("employee")]),
     passwordHash: z.string(),
     verified: z.boolean(),
@@ -50,6 +51,7 @@ export const jwtPayload = z
         id: z.string().cuid2(),
         email: z.string().email({ message: "Invalid email address" }),
         displayName: z.string().min(3).max(100).nullable(),
+        avatarUrl: z.string().url().nullable(),
         profileType: z.union([z.literal("client"), z.literal("employee")]),
         company: z
             .object({
@@ -73,4 +75,8 @@ export const userJWT = jwtPayload.extend({
 export const verifyEmailSchema = z.object({
     token: z.string(),
     redirectUrl: z.string().optional(),
+});
+
+export const googleCallbackSchema = z.object({
+    code: z.string(),
 });

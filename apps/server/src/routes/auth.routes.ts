@@ -5,13 +5,18 @@ import { registerHandler } from "../controllers/auth/registerHandler";
 import { revalidateHandler } from "../controllers/auth/revalidateHandler";
 import { verifyHandler } from "../controllers/auth/verifyHandler";
 import { authDocs } from "../docs/auth.docs";
-import { createUserSchema, loginUserSchema, verifyEmailSchema } from "@fixr/schemas/auth";
+import {
+    createUserSchema,
+    googleCallbackSchema,
+    loginUserSchema,
+    verifyEmailSchema,
+} from "@fixr/schemas/auth";
 import { FastifyTypedInstance } from "../interfaces/fastify";
 import { signOutHandler } from "../controllers/auth/signOutHandler";
 import { cookieKey } from "@fixr/constants/cookies";
 import { withErrorHandler } from "../middlewares/withErrorHandler";
 import { apiResponse } from "../helpers/response";
-import { googleLoginHandler } from "../controllers/auth/googleAuthHandler";
+import { googleCallbackHandler, googleLoginHandler } from "../controllers/auth/googleAuthHandler";
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
     fastify.post(
@@ -85,5 +90,15 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
         withErrorHandler(async (request, response) => {
             await googleLoginHandler({ request, response });
         })
+    );
+
+    fastify.get(
+        "/google/callback",
+        withErrorHandler(
+            async (request: FastifyRequest<{ Querystring: { code: string } }>, response) => {
+                const { code } = await googleCallbackSchema.parseAsync(request.query);
+                await googleCallbackHandler({ response, code });
+            }
+        )
     );
 }

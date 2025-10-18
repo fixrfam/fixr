@@ -10,6 +10,8 @@ export const users = mysqlTable("users", {
         .primaryKey(),
     email: varchar("email", { length: 255 }).unique().notNull(),
     passwordHash: varchar("password_hash", { length: 128 }).notNull(),
+    googleId: varchar("google_id", { length: 255 }).unique(),
+    avatarUrl: varchar("avatar_url", { length: 255 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     verified: boolean("verified").default(false).notNull(),
 });

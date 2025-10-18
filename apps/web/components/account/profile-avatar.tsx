@@ -4,7 +4,7 @@ import { forwardRef, HTMLAttributes } from "react";
 import BoringAvatar from "boring-avatars";
 
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
-    RequireAtLeastOne<{ src?: string; fallbackHash?: string }> & {
+    RequireAtLeastOne<{ src?: string | null; fallbackHash?: string }> & {
         variant?: "rounded" | "square";
         fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring" | "bauhaus";
     };
@@ -53,7 +53,9 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
                     square={variant === "square"}
                     colors={avatarColors}
                 />
-                <img src={src} className='aspect-square object-cover' alt=''></img>
+                {src && (
+                    <img src={src} className='aspect-square object-cover' alt='Foto do usuário' />
+                )}
             </div>
         );
     }
