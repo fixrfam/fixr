@@ -14,12 +14,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Loader2 } from "lucide-react";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Logo } from "../svg/Logo";
 import { Google } from "../svg/Google";
+import { AlertDescription, AlertTitle } from "../ui/alert";
+import { cookieKey } from "@fixr/constants/cookies";
+import CookieAlert from "../cookie-alert";
 
-export function LoginForm() {
+export function LoginForm({ errors }: { errors?: { google?: string } }) {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -153,6 +156,20 @@ export function LoginForm() {
                         {googleLoading ? <Loader2 className='animate-spin size-4' /> : <Google />}
                         Entrar com Google
                     </Button>
+                    {errors && errors.google && (
+                        <CookieAlert
+                            cookieKey={cookieKey("googleAuthError")}
+                            show={Boolean(errors?.google)}
+                            variant='destructive'
+                            className='border-destructive/50 bg-destructive/20'
+                        >
+                            <AlertCircleIcon />
+                            <AlertTitle>{messages[errors.google]?.title}</AlertTitle>
+                            <AlertDescription>
+                                <p>{messages[errors.google]?.description}</p>
+                            </AlertDescription>
+                        </CookieAlert>
+                    )}
                 </div>
                 <div className='text-center text-sm opacity-30'>
                     Projeto universitário sem fins lucrativos.

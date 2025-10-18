@@ -9,8 +9,9 @@ import {
 import { signJWT } from "@/src/helpers/jwt";
 import { generateRefreshToken } from "@/src/helpers/tokens";
 import { setJWTCookie, setRefreshToken } from "@/src/services/tokens.services";
-import { jwtPayload } from "@fixr/schemas/auth";
 import { env } from "@/src/env";
+import { cookieKey } from "@fixr/constants/cookies";
+import { CookieSerializeOptions } from "@fastify/cookie";
 
 const GOOGLE_CREDS = {
     clientId: env.GOOGLE_AUTH_CLIENT_ID,
@@ -81,42 +82,39 @@ export async function googleCallbackHandler({
 
         const payload = ticket.getPayload();
 
+        const authLoginUrl = `${env.FRONTEND_URL}/auth/login`;
+        const errorCookieSettings: CookieSerializeOptions = {
+            path: "/",
+            httpOnly: false,
+            sameSite: "none",
+            secure: true,
+        };
+
         if (!payload?.email) {
-            return response.status(424).send(
-                apiResponse({
-                    status: 424,
-                    error: "Failed Dependency",
-                    code: "missing_email",
-                    message: "Google account did not return an email",
-                    data: null,
-                })
-            );
+            return response
+                .setCookie(cookieKey("googleAuthError"), "gacc_missing_email", errorCookieSettings)
+                .status(302)
+                .redirect(authLoginUrl);
         }
 
         const user = await queryUserByEmail(payload.email.toLowerCase());
 
         if (!user) {
-            return response.status(404).send(
-                apiResponse({
-                    status: 404,
-                    error: "Not Found",
-                    code: "user_not_found",
-                    message: "User not found",
-                    data: null,
-                })
-            );
+            return response
+                .setCookie(cookieKey("googleAuthError"), "gacc_user_not_found", errorCookieSettings)
+                .status(302)
+                .redirect(authLoginUrl);
         }
 
-        if (!user.verified) {
-            return response.status(403).send(
-                apiResponse({
-                    status: 403,
-                    error: "Forbidden",
-                    code: "email_not_verified",
-                    message: "Email not verified",
-                    data: null,
-                })
-            );
+        if (!user.verified || !payload.email_verified) {
+            return response
+                .setCookie(
+                    cookieKey("googleAuthError"),
+                    "gacc_email_not_verified",
+                    errorCookieSettings
+                )
+                .status(302)
+                .redirect(authLoginUrl);
         }
 
         await updateUserWithGoogleData({ userId: user.id, data: payload });
@@ -128,7 +126,9 @@ export async function googleCallbackHandler({
         await setRefreshToken(response, refreshToken, user.id);
         setJWTCookie(response, token);
 
-        return response.redirect(`${env.FRONTEND_URL}/dashboard`);
+        const dashboardUrl = `${env.FRONTEND_URL}/dashboard`;
+
+        return response.redirect(dashboardUrl);
     } catch (err) {
         console.error(err);
         return response.status(500).send(
