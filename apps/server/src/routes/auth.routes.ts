@@ -11,6 +11,7 @@ import { signOutHandler } from "../controllers/auth/signOutHandler";
 import { cookieKey } from "@fixr/constants/cookies";
 import { withErrorHandler } from "../middlewares/withErrorHandler";
 import { apiResponse } from "../helpers/response";
+import { googleLoginHandler } from "../controllers/auth/googleAuthHandler";
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
     fastify.post(
@@ -76,6 +77,13 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
             const refreshToken = request.cookies[cookieKey("refreshToken")];
 
             await revalidateHandler({ refreshToken, response });
+        })
+    );
+
+    fastify.get(
+        "/google",
+        withErrorHandler(async (request, response) => {
+            await googleLoginHandler({ request, response });
         })
     );
 }
