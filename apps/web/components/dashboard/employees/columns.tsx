@@ -22,6 +22,7 @@ export const dataSchema = employeeSelectSchema.extend({
     account: accountSchema.pick({
         id: true,
         email: true,
+        avatarUrl: true,
         createdAt: true,
     }),
 });
@@ -33,7 +34,11 @@ export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
         cell: ({ row }) => {
             return (
                 <div className='inline-flex items-center gap-3'>
-                    <Avatar fallbackHash={row.original.account.id as string} className='size-9' />
+                    <Avatar
+                        fallbackHash={row.original.account.id as string}
+                        className='size-9'
+                        src={row.original.account.avatarUrl}
+                    />
                     <div className='flex flex-col'>
                         <p>{row.original.name}</p>
                         <p className='text-xs inline-flex items-center text-muted-foreground hover:underline cursor-pointer'>

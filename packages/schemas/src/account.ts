@@ -5,6 +5,7 @@ export const accountSchema = z
     .object({
         id: z.string().cuid2(),
         email: z.string().email({ message: "Invalid email address" }),
+        avatarUrl: z.string().url().nullable(),
         displayName: z.string().min(3).max(100).nullable(),
         cpf: z.string().length(11),
         phone: z.string().length(11).optional().nullable(),

@@ -1,41 +1,48 @@
 {
-  "version": "7",
-  "dialect": "mysql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "5",
-      "when": 1742181123111,
-      "tag": "0000_gifted_paper_doll",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1742437797841,
-      "tag": "0001_fast_joseph",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1743969301174,
-      "tag": "0002_eminent_doomsday",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1746396319718,
-      "tag": "0003_lean_starbolt",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1747437851417,
-      "tag": "0004_fearless_human_fly",
-      "breakpoints": true
-    }
-  ]
+    "version": "7",
+    "dialect": "mysql",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "5",
+            "when": 1742181123111,
+            "tag": "0000_gifted_paper_doll",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "5",
+            "when": 1742437797841,
+            "tag": "0001_fast_joseph",
+            "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "5",
+            "when": 1743969301174,
+            "tag": "0002_eminent_doomsday",
+            "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "5",
+            "when": 1746396319718,
+            "tag": "0003_lean_starbolt",
+            "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "5",
+            "when": 1747437851417,
+            "tag": "0004_fearless_human_fly",
+            "breakpoints": true
+        },
+        {
+            "idx": 5,
+            "version": "5",
+            "when": 1760755210443,
+            "tag": "0005_faulty_mandarin",
+            "breakpoints": true
+        }
+    ]
 }

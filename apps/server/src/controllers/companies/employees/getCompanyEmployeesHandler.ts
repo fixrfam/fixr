@@ -74,6 +74,7 @@ export async function getCompanyEmployeesHandler({
                 account: {
                     id: usersTable.id,
                     email: usersTable.email,
+                    avatarUrl: usersTable.avatarUrl,
                     createdAt: usersTable.createdAt,
                     verified: usersTable.verified,
                 },
