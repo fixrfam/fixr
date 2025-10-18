@@ -61,6 +61,21 @@ export const messages: { [key: string]: { title: string; description: string } }
         description:
             "Você já possui uma solicitação de exclusão. Conclua-a ou aguarde 30 minutos para expirar.",
     },
+    gacc_missing_email: {
+        title: "E-mail não fornecido",
+        description:
+            "Não foi possível recuperar seu endereço de e-mail do Google. Por favor, tente novamente.",
+    },
+    gacc_user_not_found: {
+        title: "Não foi possível acessar sua conta",
+        description:
+            "O seu e-mail vinculado ao Google não está registrado como funcionário ou cliente de nenhuma empresa.",
+    },
+    gacc_email_not_verified: {
+        title: "E-mail não verificado",
+        description:
+            "O seu endereço de e-mail do Google ainda não foi verificado. Verifique seu e-mail e tente novamente.",
+    },
 };
 
 export const fallbackMessages = {

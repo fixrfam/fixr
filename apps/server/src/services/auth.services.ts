@@ -6,6 +6,7 @@ import { createUserSchema, jwtPayload, userSchema } from "@fixr/schemas/auth";
 import { z } from "zod";
 import { CACHE_TTL, jwtPayloadCacheKey, userCacheKey } from "../helpers/cache";
 import { redis } from "../config/redis";
+import { TokenPayload } from "google-auth-library";
 
 export async function queryUserById(id: string) {
     const cacheKey = userCacheKey(id);
@@ -26,6 +27,7 @@ export async function queryUserById(id: string) {
                           WHEN ${clients.id} IS NOT NULL THEN 'client'
                           ELSE 'unknown'
                         END`,
+            avatarUrl: users.avatarUrl,
             createdAt: users.createdAt,
             verified: users.verified,
         })
@@ -58,6 +60,7 @@ export async function queryUserByEmail(email: string): Promise<z.infer<typeof us
                       WHEN ${clients.id} IS NOT NULL THEN 'client'
                       ELSE 'unknown'
                     END`,
+            avatarUrl: users.avatarUrl,
             createdAt: users.createdAt,
             verified: users.verified,
         })
@@ -90,17 +93,18 @@ export async function queryJWTPayloadByUserId(userId: string) {
                           WHEN ${clients.id} IS NOT NULL THEN 'client'
                           ELSE 'unknown'
                       END`,
+            avatarUrl: users.avatarUrl,
             company: sql`
-            CASE
-              WHEN ${employees.id} IS NOT NULL THEN JSON_OBJECT(
-                'id', ${companies.id},
-                'name', ${companies.name},
-                'subdomain', ${companies.subdomain},
-                'role', ${employees.role}
-              )
-              ELSE NULL
-            END
-          `,
+                CASE
+                    WHEN ${employees.id} IS NOT NULL THEN JSON_OBJECT(
+                        'id', ${companies.id},
+                        'name', ${companies.name},
+                        'subdomain', ${companies.subdomain},
+                        'role', ${employees.role}
+                    )
+                    ELSE NULL
+                END
+            `,
             createdAt: users.createdAt,
         })
         .from(users)
@@ -108,6 +112,8 @@ export async function queryJWTPayloadByUserId(userId: string) {
         .leftJoin(clients, eq(clients.userId, users.id))
         .leftJoin(companies, eq(employees.companyId, companies.id))
         .where(eq(users.id, userId));
+
+    console.log(payload);
 
     await redis.set(cacheKey, JSON.stringify(payload), "EX", CACHE_TTL);
 
@@ -161,4 +167,26 @@ export async function deleteUser(userId: string) {
     await redis.del(cacheKey);
 
     return await delUser;
+}
+
+export async function updateUserWithGoogleData({
+    userId,
+    data,
+}: {
+    userId: string;
+    data: Partial<TokenPayload>;
+}) {
+    const invalidate = {
+        user: userCacheKey(userId),
+        jwt: jwtPayloadCacheKey(userId),
+    };
+
+    for (const [_, key] of Object.entries(invalidate)) {
+        await redis.del(key);
+    }
+
+    return await db
+        .update(users)
+        .set({ googleId: data.sub, avatarUrl: data.picture })
+        .where(eq(users.id, userId));
 }

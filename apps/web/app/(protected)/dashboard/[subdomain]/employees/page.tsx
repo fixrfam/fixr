@@ -5,7 +5,6 @@ import { DataTable } from "@/components/dashboard/employees/data-table";
 import { Heading } from "@/components/dashboard/heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { axios } from "@/lib/auth/axios";
-import { employeeSelectSchema } from "@fixr/db/schema";
 import { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";

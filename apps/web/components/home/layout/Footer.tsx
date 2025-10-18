@@ -12,7 +12,7 @@ export default function Footer({ className, ...props }: ComponentPropsWithoutRef
             )}
             {...props}
         >
-            <p className='text-sm text-muted-foreground/50'>
+            <p className='text-sm text-muted-foreground/50 text-center px-4'>
                 Construído pela equipe <TextLogo className='w-11 inline-flex align-sub' /> como
                 projeto acadêmico na{" "}
                 <Link

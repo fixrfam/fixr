@@ -27,6 +27,7 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
                     account: accountSchema.pick({
                         id: true,
                         email: true,
+                        avatarUrl: true,
                         createdAt: true,
                     }),
                 })

@@ -11,6 +11,9 @@ const envSchema = z.object({
     NODE_PORT: z.string(),
     FRONTEND_URL: z.string().url(),
     REDIS_PASSWORD: z.string(),
+    GOOGLE_AUTH_CLIENT_ID: z.string(),
+    GOOGLE_AUTH_CLIENT_SECRET: z.string(),
+    GOOGLE_AUTH_REDIRECT_URI: z.string().url(),
 });
 
 export const env = envSchema.parse(process.env);

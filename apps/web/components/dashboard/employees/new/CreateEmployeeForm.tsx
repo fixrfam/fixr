@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { generateRandomPassword } from "@/lib/utils/generateRandomPassword";
-import { cpf, phone, unmask } from "@fixr/constants/masks";
+import { cpf, unmask } from "@fixr/constants/masks";
 import { useMaskito } from "@maskito/react";
 import {
     Form,
@@ -18,17 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-    BriefcaseBusiness,
-    Dices,
-    IdCard,
-    Loader2,
-    Lock,
-    Mail,
-    PhoneIcon,
-    Plus,
-    User,
-} from "lucide-react";
+import { BriefcaseBusiness, Dices, IdCard, Loader2, Lock, Mail, Plus, User } from "lucide-react";
 import PasswordInput from "@/components/ui/password-input";
 import {
     Select,
@@ -118,7 +108,7 @@ export function CreateEmployeeForm({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-3 max-w-xl'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5 max-w-xl'>
                 <FormField
                     control={form.control}
                     name='name'
@@ -147,7 +137,7 @@ export function CreateEmployeeForm({
                             </FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className='w-full'>
                                         <SelectValue placeholder='Selecione um cargo' />
                                     </SelectTrigger>
                                 </FormControl>

@@ -26,7 +26,11 @@ export default async function ServerPage() {
             </div>
             <div className='w-full flex flex-col lg:flex-row gap-10'>
                 <div className='w-full lg:max-w-[20rem] space-y-4'>
-                    <Avatar fallbackHash={content?.id as string} className='size-32 text-4xl' />
+                    <Avatar
+                        fallbackHash={content?.id as string}
+                        className='size-32 text-4xl'
+                        src={content?.avatarUrl}
+                    />
                     <div className='space-y-5'>
                         <div>
                             <h2
