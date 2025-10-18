@@ -46,15 +46,21 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
                 ref={ref}
                 {...props}
             >
-                <BoringAvatar
-                    name={fallbackHash}
-                    variant={fallbackType}
-                    className='size-full'
-                    square={variant === "square"}
-                    colors={avatarColors}
-                />
+                {!src && (
+                    <BoringAvatar
+                        name={fallbackHash}
+                        variant={fallbackType}
+                        className='size-full'
+                        square={variant === "square"}
+                        colors={avatarColors}
+                    />
+                )}
                 {src && (
-                    <img src={src} className='aspect-square object-cover' alt='Foto do usuário' />
+                    <img
+                        src={src}
+                        className='aspect-square object-cover size-full'
+                        alt='Foto do usuário'
+                    />
                 )}
             </div>
         );
