@@ -1,98 +1,333 @@
-# Authentication Boilerplate Monorepo
+## Fixr - O jeito fácil de gerenciar sua assistência técnica
 
-A starting point for custom authentication without magic libraries. This monorepo provides:
+![Banner](https://wqys0fziog.ufs.sh/f/itbpE5hD7PnqgWWYtuk8FHtl3sLyqWjV6ngAihdeOK7xU0CP)
 
-- A **Fastify API** using JWT refresh tokens, accepting credentials via the `Authorization` header or a `token` cookie.
-- A **Next.js 14 Frontend** with server/client authentication, middleware revalidation, and Axios interceptors.
-- Shared [Zod](https://zod.dev) schemas via the `@fixr/schemas` package.
-- Turborepo for local package sharing and scripting.
+O **Fixr** é uma aplicação web desenvolvida para o gerenciamento de ordens de serviço em assistências técnicas. O projeto tem como objetivo otimizar processos internos, centralizar informações e facilitar o acompanhamento de serviços, oferecendo uma solução completa para empresas do setor.
 
-### Powered by:
+A aplicação foi idealizada a partir de entrevistas com profissionais da área de eletroeletrônicos, realizadas com o propósito de compreender as principais dificuldades enfrentadas por empresas de pequeno e médio porte. A partir dessas entrevistas, foram definidos os requisitos funcionais e não funcionais do sistema, elaborados os modelos de banco de dados (conceitual, lógico e físico) e desenvolvido um protótipo de interface utilizando a ferramenta Figma.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6.svg?style=for-the-badge&logo=TypeScript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-000000.svg?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-5FA04E.svg?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Fastify](https://img.shields.io/badge/Fastify-000000.svg?style=for-the-badge&logo=Fastify&logoColor=white)
-![Turborepo](https://img.shields.io/badge/Turborepo-EF4444.svg?style=for-the-badge&logo=Turborepo&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB.svg?style=for-the-badge&logo=React&logoColor=black)
-![React Hook Form](https://img.shields.io/badge/React%20Hook%20Form-EC5990.svg?style=for-the-badge&logo=React-Hook-Form&logoColor=white)
-![Zod](https://img.shields.io/badge/Zod-3E67B1.svg?style=for-the-badge&logo=Zod&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-5A29E4.svg?style=for-the-badge&logo=Axios&logoColor=white)
-![Swagger](https://img.shields.io/badge/Swagger-85EA2D.svg?style=for-the-badge&logo=Swagger&logoColor=black)
-![Scalar](https://img.shields.io/badge/Scalar-1A1A1A.svg?style=for-the-badge&logo=Scalar&logoColor=white)
-![Resend](https://img.shields.io/badge/Resend-000000.svg?style=for-the-badge&logo=Resend&logoColor=white)
-![.ENV](https://img.shields.io/badge/.ENV-ECD53F.svg?style=for-the-badge&logo=dotenv&logoColor=black)
-![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F.svg?style=for-the-badge&logo=Drizzle&logoColor=black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-FF4438.svg?style=for-the-badge&logo=Redis&logoColor=white)
+O **Fixr** foi desenvolvido como parte da disciplina de **Projeto Integrador** do curso de **Ciência da Computação** da **Faculdade das Américas (FAM)**, aplicando tecnologias modernas e práticas consolidadas de desenvolvimento web para garantir segurança, desempenho e escalabilidade.
 
-## API
+> [!NOTE]  
+> **Acesse o projeto agora mesmo: [https://fixr.com.br](https://fixr.com.br)**
 
-Built with [Fastify](https://www.fastify.io), the API handles auth using:
+#### Criado com
 
-- **Type Validation:** [Zod](https://zod.dev)
-- **ORM:** [Drizzle](https://orm.drizzle.team) with [PostgreSQL](https://www.postgresql.org)
-- **Mailing:** [Resend](https://resend.com) & [React Email](https://react.email)
-- **Encryption:** [bcrypt](https://www.npmjs.com/package/bcrypt)
-- **Caching:** [Redis](https://redis.io)
+[![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Fastify](https://img.shields.io/badge/-Fastify-000000?style=flat&logo=fastify&logoColor=white)](https://www.fastify.io/)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=fff)](https://www.mysql.com/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=fff)](https://redis.io/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-000000?logo=turborepo&logoColor=fff)](https://turborepo.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/)
+[![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=fff)](https://jwt.io/)
+[![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=000)](https://orm.drizzle.team/)
+[![BullMQ](https://img.shields.io/badge/BullMQ-FF0000?logo=bullmq&logoColor=fff)](https://docs.bullmq.io/)
+[![Zod](https://img.shields.io/badge/Zod-326CE5?logo=zod&logoColor=fff)](https://zod.dev/)
+[![React Hook Form](https://img.shields.io/badge/React%20Hook%20Form-EC5990?logo=reacthookform&logoColor=fff)](https://react-hook-form.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=fff)](https://ui.shadcn.com/)
+[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=000)](https://swagger.io/)
+[![Scalar UI](https://img.shields.io/badge/Scalar%20UI-000000?logo=scalar&logoColor=fff)](https://scalar.so/)
 
-Documentation is available on the following API routes:
+---
 
-- [Scalar UI](https://scalar-ui.com) for a modern interface at `/docs`
-- [Swagger](https://swagger.io) for the classic one at `/reference`
+### Sumário
 
-## Frontend
+- [Objetivo](#objetivo)
+- [Arquitetura](#arquitetura)
+- [Funcionalidades Principais](#funcionalidades-principais)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Documentação da API](#documentação-da-api)
+- [Como Executar o Projeto](#como-executar-o-projeto)
+- [Equipe, Artigos e Referências](#equipe-artigos-e-referências)
 
-The frontend leverages [Next.js 14](https://nextjs.org) for seamless server/client authentication, with revalidation in middleware and auth interceptors powered by [Axios](https://axios-http.com).
+---
 
-## Authentication Flow
+### Objetivo
 
-Users authenticate via JWT refresh tokens. Supported actions include:
+O gerenciamento de ordens de serviço em assistências técnicas enfrenta diversos desafios, especialmente em empresas de pequeno e médio porte que ainda utilizam processos manuais. Entre os problemas mais comuns estão a perda de formulários, atrasos no atendimento, dificuldade de acompanhamento do status de reparos e controle ineficiente de estoque.
 
-- Password reset (authenticated and "forgot password")
-- Email confirmation before signup
-- Account deletion
-- Display name updates
+O **Fixr** foi desenvolvido para superar essas limitações, oferecendo uma **plataforma centralizada** que integra o gerenciamento de ordens de serviço, controle de estoque e geração de orçamentos. O sistema permite que técnicos e clientes acompanhem o progresso das ordens em tempo real, além de automatizar o registro de peças utilizadas e pedidos de compra junto a fornecedores, promovendo maior eficiência operacional.
 
-![Authentication Flow](apps/server/src/public/flux.svg)
+Além disso, o Fixr implementa um **modelo de permissões de acesso** que organiza os usuários em diferentes níveis funcionais, garantindo segurança e flexibilidade no uso da plataforma pelos setores de atendimento, laboratório e administração.
 
-## Setup
+---
 
-Begin by configuring your environment. Rename and update the provided `.env.example` files:
+### Arquitetura
 
-- **Global secrets:** [.env.example](.env.example) for DB, Redis, etc.
-- **API secrets:** [apps/server/.env.example](apps/server/.env.example) for JWT signing keys and API keys.
-- **Next.js variables:** [apps/web/.env.example](apps/web/.env.example).
-- **Admin dashboard secrets:** [apps/admin/.env.example](apps/admin/.env.example).
+O **Fixr** adota uma arquitetura moderna, organizada em um **monorepo** que centraliza frontend, backend e pacotes compartilhados, permitindo **reuso de código, consistência entre aplicações e automação de tarefas** por meio do **Turborepo**.
 
-Next, spin up your Postgres and Redis databases with Docker Compose:
+A estrutura principal do repositório é:
 
-```sh
-docker compose up
+```
+apps/
+ ├─ web/       → Aplicação principal para clientes e técnicos (Next.js)
+ ├─ admin/     → Painel administrativo interno para gerentes e administradores
+ └─ server/    → API REST em Fastify, responsável por toda a lógica de negócios e integração com o banco de dados
+
+packages/
+ ├─ db/        → Schemas, migrações e conexão com o banco de dados (Drizzle ORM + MySQL)
+ ├─ schemas/   → Schemas Zod compartilhados entre frontend e backend para validação consistente
+ ├─ constants/ → Constantes e enums do sistema
+ └─ mail/      → Templates de email em React e configuração da fila de processamento com BullMQ
 ```
 
-Install dependencies and run database migrations:
+#### Backend
 
-```sh
+O servidor é construído com **Fastify**, garantindo alta performance e baixo overhead em requisições HTTP. A comunicação com o banco de dados é feita através do **Drizzle ORM**, enquanto **Redis** é utilizado para cache e armazenamento temporário de jobs. Operações pesadas, como envio de emails ou importação de grandes volumes de funcionários, são processadas de forma assíncrona com **BullMQ**, garantindo respostas rápidas no frontend.
+
+A autenticação é realizada via **JWT**, com suporte a **refresh tokens**, garantindo segurança e controle de acesso baseado em permissões definidas por cargo.
+
+#### Frontend
+
+O frontend é desenvolvido em **Next.js**, oferecendo renderização híbrida (**SSR**, **ISR**) para melhor desempenho e experiência do usuário. Ele consome a API REST, exibindo informações em interfaces intuitivas e responsivas, compatíveis com dispositivos móveis.
+
+#### Infraestrutura
+
+Toda a aplicação é conteinerizada com **Docker**, facilitando deploy e escalabilidade. A API é documentada com **OpenAPI**, permitindo integração e testes automatizados, utilizando **Swagger** e **Scalar UI** para visualização interativa.
+
+---
+
+### Funcionalidades Principais
+
+- **Gerenciamento de Ordens de Serviço (OS)**
+  Permite criar, atualizar e acompanhar ordens de serviço com registro completo de histórico, controle de status (aberta, em andamento, concluída ou cancelada) e informações detalhadas sobre clientes, serviços e produtos utilizados.
+
+- **Criação de Orçamentos e Controle de Peças**
+  Gera orçamentos automaticamente com base nas peças e serviços vinculados a cada OS, garantindo precisão nos custos e verificando a disponibilidade em estoque antes da aprovação.
+
+- **Gestão de Estoque e Fornecedores**
+  Controla entradas, saídas e níveis de estoque de produtos, permitindo a criação automática de pedidos de compra quando peças estão em falta, otimizando a reposição e evitando interrupções nos serviços.
+
+- **Controle de Acesso e Permissões**
+  Implementa papéis e permissões detalhados (administrador, gerente, técnico, financeiro, estoquista), garantindo que cada usuário tenha acesso apenas às funções relevantes à sua função, aumentando a segurança e a organização do fluxo interno.
+
+- **Acompanhamento em Tempo Real**
+  Técnicos e clientes podem acompanhar o progresso das OS em tempo real, visualizando atualizações automáticas de status e informações relevantes, reduzindo falhas de comunicação e agilizando o atendimento.
+
+- **Notificações Automáticas**
+  Envia emails automáticos para atualização de status, aprovações de orçamentos e confirmações de cadastro, mantendo clientes e colaboradores sempre informados sem a necessidade de contato manual.
+
+---
+
+### Tecnologias Utilizadas
+
+O **Fixr** foi desenvolvido utilizando tecnologias modernas e consolidadas, que garantem **desempenho, escalabilidade e segurança** em todas as camadas da aplicação.
+
+#### Frontend
+
+- [**Next.js**](https://nextjs.org/): Framework React para renderização híbrida (SSR/ISR), otimizando performance e SEO.
+- [**React**](https://react.dev/): Biblioteca para construção de interfaces dinâmicas e reutilizáveis.
+- [**TailwindCSS**](https://tailwindcss.com/): Framework utilitário para estilização rápida e consistente, com foco em responsividade.
+- [**shadcn/ui**](https://ui.shadcn.com/): Componentes prontos e personalizáveis para acelerar a construção de interfaces.
+- [**React Hook Form**](https://react-hook-form.com/): Gerenciamento eficiente de formulários e validação de dados.
+- [**Zod**](https://zod.dev/): Validação de dados em frontend, garantindo consistência com a API.
+
+#### Backend
+
+- [**Node.js**](https://nodejs.org/): Ambiente de execução rápido e escalável para o servidor.
+- [**Fastify**](https://www.fastify.io/): Framework leve e de alta performance para construção da API REST.
+- [**Drizzle ORM**](https://orm.drizzle.team/): Mapeamento objeto-relacional para MySQL, simplificando consultas e migrações.
+- [**MySQL**](https://www.mysql.com/): Banco de dados relacional confiável para armazenar informações estruturadas.
+- [**Redis**](https://redis.io/): Cache em memória e armazenamento de dados temporários para otimização de desempenho.
+- [**BullMQ**](https://docs.bullmq.io/): Gerenciamento de filas para processamento assíncrono de tarefas pesadas.
+- [**JWT (JSON Web Tokens)**](https://jwt.io/): Autenticação segura baseada em tokens de acesso e refresh tokens.
+- [**Zod**](https://zod.dev/): Validação de dados no backend, garantindo integridade das informações recebidas.
+- [**Swagger**](https://swagger.io/): Documentação interativa da API para testes e integração.
+- [**Scalar UI**](https://scalar.so/): Interface gráfica para visualização e interação com a documentação da API.
+
+#### Infraestrutura
+
+- [**Docker**](https://www.docker.com/): Conteinerização completa do ambiente de desenvolvimento e produção.
+- [**Turborepo**](https://turbo.build/repo): Orquestração de monorepo, compartilhamento de pacotes e automação de tarefas de build e deploy.
+- [**TypeScript**](https://www.typescriptlang.org/): Tipagem estática para maior segurança e manutenção do código.
+
+---
+
+### Estrutura do Repositório
+
+O repositório do **Fixr** segue uma organização em **monorepo**, separando claramente frontend, backend e pacotes compartilhados, facilitando o desenvolvimento, reuso de código e manutenção.
+
+```bash
+fixr/
+├─ apps/
+│  ├─ web/        # Aplicação principal para usuários e clientes, desenvolvida em Next.js
+│  ├─ admin/      # Painel administrativo interno, destinado a gerentes e administradores
+│  └─ server/     # API REST construída com Fastify, responsável pela lógica de negócios e integração com o banco de dados
+│
+├─ packages/
+│  ├─ db/         # Schemas, conexões e migrações do banco de dados (Drizzle + MySQL)
+│  ├─ schemas/    # Schemas Zod compartilhados entre frontend e backend para validação consistente
+│  ├─ constants/  # Constantes globais e enums do sistema
+│  └─ mail/       # Templates de e-mail em React e configuração da fila de envio com BullMQ
+│
+└─ turbo.json     # Configuração do Turborepo para orquestração de pacotes e tarefas
+```
+
+Essa estrutura permite:
+
+- Desenvolvimento independente de frontend e backend.
+- Reuso de código e validações compartilhadas.
+- Escalabilidade e organização de tarefas via Turborepo.
+
+---
+
+### Documentação da API
+
+A API do **Fixr** é totalmente documentada seguindo o padrão **OpenAPI 3.0**, garantindo **clareza, consistência e facilidade de integração** com outras aplicações.
+
+Os principais pontos de acesso à documentação são:
+
+- **Scalar UI:** `/docs` – Interface interativa para exploração e testes da API.
+- **Swagger Reference:** `/reference` – Referência completa com detalhes de endpoints, parâmetros e respostas.
+
+A documentação é projetada para facilitar futuras **integrações com ERPs e outros sistemas externos**, permitindo que usuários com perfil de gerente possam gerar **API tokens** diretamente pelo painel administrativo, garantindo segurança e controle de acesso granular.
+
+---
+
+### Como Executar o Projeto
+
+Para rodar o **Fixr** localmente, você precisará ter instalados em sua máquina:
+
+- [Docker](https://www.docker.com/)
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/)
+
+#### Passos
+
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/fixrfam/fixr
+cd fixr
+```
+
+2. Instale as dependências de todos os apps e pacotes:
+
+```bash
 npm install
+```
+
+3. Duplique o arquivo `.env.example` e preencha as variáveis de ambiente conforme indicado. As chaves do **Resend**, **Clerk** e **Google OAuth** devem ser obtidas nos respectivos serviços.
+
+---
+
+#### Variáveis Globais
+
+Essas variáveis são usadas tanto pelo **Docker Compose** quanto pelos apps, sendo interpoladas, por exemplo, na conexão com o banco de dados:
+
+```env
+MYSQL_ROOT_PASSWORD="docker"
+MYSQL_DATABASE="fixr"
+MYSQL_USER="fixr"
+MYSQL_PASSWORD="fixr"
+
+REDIS_PASSWORD="docker"
+
+# Não altere estas linhas
+REDIS_URL="redis://default:${REDIS_PASSWORD}@localhost:6379/0"
+DB_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@localhost:3306/${MYSQL_DATABASE}"
+```
+
+#### Variáveis do Servidor
+
+```env
+FRONTEND_URL="http://localhost:3000"
+
+RESEND_KEY="re_{$}"
+
+JWT_SECRET=""
+COOKIE_ENCRYPTION_SECRET=""
+COOKIE_DOMAIN="localhost"
+
+GOOGLE_AUTH_CLIENT_ID=""
+GOOGLE_AUTH_CLIENT_SECRET=""
+GOOGLE_AUTH_REDIRECT_URI="http://localhost:3333/auth/google/callback"
+
+NODE_PORT="3333"
+```
+
+#### Variáveis do Web App
+
+```env
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NEXT_PUBLIC_API_URL="http://localhost:3333"
+NEXT_PUBLIC_DOCS_URL="https://docs.fixr.com.br"
+NEXT_PUBLIC_LINKTREE_URL="https://linktr.ee/fixrfam"
+```
+
+#### Variáveis do Painel Admin
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3333"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_{$}"
+CLERK_SECRET_KEY="sk_test_{$}"
+```
+
+---
+
+#### Inicializando o Projeto
+
+1. Crie os containers com Docker:
+
+```bash
+docker compose up -d
+```
+
+2. Rode as migrations para criar as tabelas no banco:
+
+```bash
 npm run migrate
 ```
 
-Finally, start the development server:
+3. Inicie os apps:
 
-```sh
+```bash
 npm run dev
 ```
 
-## Customization
+- A API estará disponível em: `http://localhost:3333`
+- O frontend estará disponível em: `http://localhost:3000`
+- O painel administrativo estará disponível em: `http://localhost:6969`
 
-Every aspect of this boilerplate can be customized to fit your needs. For example, you can:
+---
 
-- Customize the `APP_NAME` in [packages/constants/src/app.ts](packages/constants/src/app.ts) which will be used in mailing, docs and some UI components.
-- Change the "Logo" to anything you like
-    - Web logo in: [apps/web/public/logo.svg](apps/web/public/logo.svg)
-    - Server logos in: [apps/server/src/public/logo.png](apps/server/src/public/logo.png) and [apps/server/src/public/favicon.svg](apps/server/src/public/favicon.svg)
-        > Logos won't load on emails on development server because email clients can't access your localhost. On the production server, they will work fine.
-- Customize every aspect of the UI Components in the [apps/web/components](apps/web/components) directory ([https://ui.shadcn.com/](shadcn/ui) btw).
-- Customize the mailing templates in the [apps/server/src/emails](apps/server/src/emails) directory using [https://react.email/](React Email).
-- Change docs theme and colors in the [apps/server/src/server.ts](apps/server/src/server.ts) file according to [https://github.com/scalar/scalar/blob/82c8f39c5f390ced5d8406bfb0b23623575fb85e/documentation/themes.md](Scalar UI themes).
+### Equipe, Artigos e Referências
+
+#### Equipe
+
+- **Ricardo Amorim da Silva**
+  [ricardo.gg](https://ricardo.gg) | [GitHub](https://github.com/risixdzn) | [Email](mailto:me@ricardo.gg)
+
+- **Felipe Martinez de Melo**
+  [GitHub](https://github.com/femartinezmelo)
+
+- **Sofia Nunes de Freitas**
+  [GitHub](https://github.com/sofia-freitas54)
+
+- **Matheus Costa Silva**
+
+#### Artigos da Revista FAM
+
+O desenvolvimento do **Fixr** acompanha os trabalhos realizados nos semestres da disciplina de Projeto Integrador, publicados na revista da **Faculdade das Américas (FAM)**:
+
+- **1º Semestre** – [VI_CATI_FAM_17_02_2024 (p. 329)](https://vemprafam.com.br/wp-content/uploads/2025/07/VI_CATI%20FAM_17_02_2024%205.pdf?_t=1751486084#page=329)
+- **2º Semestre** – [VII_CATI_FAM_17_03_2024 (p. 252)](https://vemprafam.com.br/wp-content/uploads/2025/07/VII_CATI%20FAM_17_03_2024%204.pdf?_t=1751486070#page=252)
+
+Os artigos referentes ao **3º e 4º semestres** ainda serão publicados e atualizados neste README assim que disponíveis.
+
+#### Referências
+
+1. KOIVISTO, Elma. _Implementation of an Internal Order Management System_. Bachelor of Engineering Industrial. 2023 março. [Disponível aqui](https://www.theseus.fi/bitstream/handle/10024/793127/Koivisto_Elma.pdf?sequence=4).
+2. Equipe TOTVS, et al. _Software de controle de estoque, o que é, tipos e como escolher_. 2022. [Disponível aqui](https://bit.ly/3V2BbGw).
+3. DUMAS, Marlon; LA ROSA, et al. _Fundamentals of Business Process Management_. 2. ed. Berlin: Springer, 2013. [Disponível aqui](https://bit.ly/3NxT1fM).
+4. GARCIA-MOLINA, Hector; ULLMAN, et al. _Database Systems: The Complete Book_. 2. ed. Upper Saddle River: Pearson Prentice, 2001. [Disponível aqui](https://bit.ly/3NyBDYs).
+5. REIS, Claudio Francisco dos. _Sistema de Ordem de Serviço_. Assis: Fundação Educacional do Município de Assis – FEMA, 2010. Trabalho de Conclusão de Curso (Graduação). [Disponível aqui](https://go.ricardo.gg/fixrosclaudio).
+6. FU, Jamie; LIU, Katherine; LIU, Richard; WONG, Anna. _JWT Web Security: 6.857 Final Project_. Cambridge, MA: MIT, 2022. [Disponível aqui](https://go.ricardo.gg/fixrjwtmit).
+7. TOTVS. _Saiba tudo sobre sistema para assistência técnica_. 15 jun. 2020. [Disponível aqui](https://go.ricardo.gg/fixrtotvsast).
+8. HARSH, Kumar. _O que é Arquitetura de Aplicativos Web? Quebrando um aplicativo da Web_. Kinsta, 17 jan. 2025. [Disponível aqui](https://go.ricardo.gg/fixrarqweb).
+9. MICROSOFT. _Estilo de arquitetura Queue-Worker Web_. Azure Architecture Center, 2025. [Disponível aqui](https://go.ricardo.gg/fixrwebqueue).
