@@ -16,23 +16,13 @@ import { api, tryCatch } from "@/lib/utils";
 import { axios } from "@/lib/auth/axios";
 import { AxiosError, AxiosResponse } from "axios";
 import { ApiResponse } from "@fixr/schemas/utils";
-
-const createCustomerSchema = z.object({
-  name: z.string().min(1, "O nome é obrigatório"),
-  email: z.string().email("Email inválido").min(1, "O email é obrigatório"),
-  cpf: z.string().min(14, "CPF inválido").max(14, "CPF inválido"),
-  phone: z.string().min(1, "O telefone é obrigatório"),
-  alternativePhone: z.string().optional(),
-  address: z.string().min(1, "O endereço é obrigatório"),
-  state: z.string().min(2, "O estado é obrigatório").max(2),
-  city: z.string().min(1, "A cidade é obrigatória"),
-});
+import {createClientSchema} from "@fixr/schemas/clients";
 
 export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: boolean, onOpenChange: (open: boolean) => void, onCustomerCreated: (cpf: string) => void }) {
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof createCustomerSchema>>({
-    resolver: zodResolver(createCustomerSchema),
+  const form = useForm<z.infer<typeof createClientSchema>>({
+    resolver: zodResolver(createClientSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -50,7 +40,7 @@ export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: b
   const phoneMask = useMaskito({ options: { mask: phone } });
   const altPhoneMask = useMaskito({ options: { mask: phone } });
 
-  async function onSubmit(values: z.infer<typeof createCustomerSchema>) {
+  async function onSubmit(values: z.infer<typeof createClientSchema>) {
     setLoading(true);
 
     const formattedData = {

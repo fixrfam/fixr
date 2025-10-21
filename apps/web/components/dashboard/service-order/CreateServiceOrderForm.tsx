@@ -9,15 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
+import {createOrderServiceSchema} from "@fixr/schemas/service-orders";
 
-// Defina o schema para a Ordem de Serviço aqui (exemplo)
-//ver com o ricardo pra criar junto do schema dos employees
-const createOrderServiceSchema = z.object({
-  customerCpf: z.string().min(14, "CPF inválido").max(14, "CPF inválido"),
-  // ... outros campos como data, marca, etc.
-});
-
-export function CreateOrderServiceForm() {
+export function CreateServiceOrderForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const form = useForm<z.infer<typeof createOrderServiceSchema>>({

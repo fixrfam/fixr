@@ -39,6 +39,14 @@
         "./common": {
             "types": "./src/common.ts",
             "default": "./dist/common.js"
+        },
+        "./clients": {
+            "types": "./src/clients.ts",
+            "default": "./dist/clients.js"
+        },
+         "./service-orders": {
+            "types": "./src/service-orders.ts",
+            "default": "./dist/service-orders.js"
         }
     },
     "devDependencies": {

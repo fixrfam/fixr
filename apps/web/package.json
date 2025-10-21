@@ -13,6 +13,7 @@
         "@fixr/constants": "*",
         "@fixr/db": "*",
         "@fixr/typescript-config": "*",
+        "@fixr/schemas": "*",
         "@hookform/resolvers": "^3.10.0",
         "@maskito/react": "^3.8.0",
         "@pheralb/toast": "^0.2.3",

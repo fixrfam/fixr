@@ -1,12 +1,14 @@
-import { CreateOrderServiceForm } from "@/components/dashboard/service-order/CreateOrderServiceForm";
+import { CreateServiceOrderForm } from "@/components/dashboard/service-order/CreateServiceOrderForm";
+import { Heading } from "@/components/dashboard/heading";
 
 export default function ServiceOrdersPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Ordens de Serviço</h2>
-      </div>
-      <CreateOrderServiceForm />
-    </div>
+    <div className='flex flex-col gap-2'>
+    <Heading
+        title={"Ordens de serviço"}
+        description={"Controle as ordens de serviço de seus clientes"}
+    />
+    <CreateServiceOrderForm />
+    </div>  
   );
 }
