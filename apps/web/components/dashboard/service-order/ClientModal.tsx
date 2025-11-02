@@ -66,7 +66,7 @@ export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: b
         text: "Cliente cadastrado com sucesso!",
       });
 
-      onCustomerCreated(values.cpf);
+      onCustomerCreated(formattedData.cpf);
       onOpenChange(false);
     } catch (error) {
       toast.error({
