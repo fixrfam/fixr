@@ -2,6 +2,7 @@
     "extends": "@fixr/typescript-config/nextjs.json",
     "compilerOptions": {
         "plugins": [{ "name": "next" }],
+        "baseUrl": ".",
         "paths": { "@/*": ["./*"], "react": ["./node_modules/@types/react"] },
         "jsx": "preserve"
     },

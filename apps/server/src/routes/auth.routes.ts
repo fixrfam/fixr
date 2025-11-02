@@ -5,11 +5,18 @@ import { registerHandler } from "../controllers/auth/registerHandler";
 import { revalidateHandler } from "../controllers/auth/revalidateHandler";
 import { verifyHandler } from "../controllers/auth/verifyHandler";
 import { authDocs } from "../docs/auth.docs";
-import { createUserSchema, loginUserSchema, verifyEmailSchema } from "@fixr/schemas/auth";
+import {
+    createUserSchema,
+    googleCallbackSchema,
+    loginUserSchema,
+    verifyEmailSchema,
+} from "@fixr/schemas/auth";
 import { FastifyTypedInstance } from "../interfaces/fastify";
 import { signOutHandler } from "../controllers/auth/signOutHandler";
 import { cookieKey } from "@fixr/constants/cookies";
 import { withErrorHandler } from "../middlewares/withErrorHandler";
+import { apiResponse } from "../helpers/response";
+import { googleCallbackHandler, googleLoginHandler } from "../controllers/auth/googleAuthHandler";
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
     fastify.post(
@@ -18,9 +25,17 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
             schema: authDocs.registerSchema,
         },
         withErrorHandler(async (request, response) => {
-            const body = await createUserSchema.parseAsync(request.body);
+            await createUserSchema.parseAsync(request.body);
 
-            await registerHandler({ body, request, response });
+            return response.status(500).send(
+                apiResponse({
+                    status: 501,
+                    error: "Not implemented",
+                    code: "not_implemented",
+                    message: "This endpoint is not implemented or disabled.",
+                    data: null,
+                })
+            );
         })
     );
 
@@ -68,5 +83,24 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
 
             await revalidateHandler({ refreshToken, response });
         })
+    );
+
+    fastify.get(
+        "/google",
+        { schema: authDocs.googleLoginSchema },
+        withErrorHandler(async (request, response) => {
+            await googleLoginHandler({ request, response });
+        })
+    );
+
+    fastify.get(
+        "/google/callback",
+        { schema: authDocs.googleCallbackSchema },
+        withErrorHandler(
+            async (request: FastifyRequest<{ Querystring: { code: string } }>, response) => {
+                const { code } = await googleCallbackSchema.parseAsync(request.query);
+                await googleCallbackHandler({ response, code });
+            }
+        )
     );
 }

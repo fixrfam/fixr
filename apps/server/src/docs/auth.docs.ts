@@ -232,10 +232,92 @@ for users that are trying to request a new \`JWT\` when their \`refreshToken\` h
     },
 };
 
+const googleLoginSchema: FastifySchema = {
+    tags: ["Auth"],
+    summary: "Start Google OAuth",
+    description: `
+**Redirects the user to Google's OAuth 2.0 authorization page.**
+
+This route initiates the Google login process by redirecting the user to the Google consent screen.  
+After granting permissions, Google redirects back to \`/auth/google/callback\` with an authorization \`code\`.
+
+No authentication or body parameters are required.`,
+    response: {
+        302: zodResponseSchema({
+            status: 302,
+            error: null,
+            code: "google_auth_init_success",
+            message: "The user will be redirected to the Google consent screen.",
+            data: null,
+        }).describe("User gets redirected to the Google consent screen."),
+        500: zodResponseSchema({
+            status: 500,
+            error: "Internal Server Error",
+            code: "google_auth_init_failed",
+            message: "Failed to initialize Google authentication",
+            data: null,
+        }).describe("Internal error while building Google OAuth URL."),
+    },
+};
+
+const googleCallbackSchema: FastifySchema = {
+    tags: ["Auth"],
+    summary: "Handle Google OAuth callback",
+    description: `
+**Handles the redirect from Google after user authorization.**
+
+This endpoint exchanges the received \`code\` for tokens, verifies the ID token, and:
+- Validates the user email.
+- Checks if the user exists and is verified.
+- Syncs Google data with the user profile.
+- Issues a new JWT and refresh token.
+- Redirects to the dashboard on success.
+
+In case of errors (missing email, unverified email, etc.), it sets a cookie with the error code (\`googleAuthError\`) and redirects the user back to \`/auth/login\`.`,
+    querystring: z.object({
+        code: z.string(),
+    }),
+    response: {
+        422: zodResponseSchema({
+            status: 422,
+            error: "Unprocessable Entity",
+            code: "missing_code",
+            message: "Missing authorization code from Google",
+            data: null,
+        }).describe("No authorization code provided by Google."),
+        502: zodResponseSchema({
+            status: 502,
+            error: "Bad Gateway",
+            code: "missing_id_token",
+            message: "No ID token returned from Google",
+            data: null,
+        }).describe("Google did not return an ID token."),
+        500: zodResponseSchema({
+            status: 500,
+            error: "Internal Server Error",
+            code: "google_auth_failed",
+            message: "Failed to authenticate with Google",
+            data: null,
+        }).describe("Unexpected error during Google authentication."),
+        302: zodResponseSchema({
+            status: 302,
+            error: null,
+            code: "user_redirected",
+            message:
+                "Either the user was successfully authenticated and redirected to the dashboard, or an error occurred and the user was redirected back to the login page.",
+            data: null,
+        }).describe(
+            "User was successfully authenticated and redirected to the dashboard. Or an error occurred and the user was redirected back to the login page."
+        ),
+    },
+};
+
 export const authDocs = {
     registerSchema,
     loginSchema,
     revalidateSchema,
     verifySchema,
     signOutSchema,
+    googleLoginSchema,
+    googleCallbackSchema,
 };

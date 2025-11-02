@@ -21,6 +21,7 @@ export async function queryAccountById(id: string) {
             id: users.id,
             email: users.email,
             displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+            avatarUrl: users.avatarUrl,
             cpf: sql`COALESCE(${employees.cpf}, ${clients.cpf})`,
             phone: sql`COALESCE(${employees.phone}, ${clients.phone})`,
             profileType: sql`CASE
