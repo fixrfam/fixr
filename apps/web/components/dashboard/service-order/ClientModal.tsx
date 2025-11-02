@@ -12,8 +12,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useMaskito } from "@maskito/react";
 import { cpf, phone, unmask } from "@fixr/constants/masks";
 import { toast } from "@pheralb/toast";
-import { api, tryCatch } from "@/lib/utils";
-import { axios } from "@/lib/auth/axios";
 import {createClientSchema} from "@fixr/schemas/clients";
 
 export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: boolean, onOpenChange: (open: boolean) => void, onCustomerCreated: (cpf: string) => void }) {
