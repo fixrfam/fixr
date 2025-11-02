@@ -56,7 +56,7 @@ export function CreateOrderServiceForm() {
               )}
             />
             <Button type="button" onClick={() => setIsModalOpen(true)}>
-              Criar cadastro cliente <Plus className="ml-2 size-4" />
+              Criar cadastro de cliente <Plus className="ml-2 size-4" />
             </Button>
           </div>
           {/* Adicione os outros campos da Ordem de Serviço aqui */}
