@@ -12,6 +12,7 @@
     "dependencies": {
         "@fixr/constants": "*",
         "@fixr/db": "*",
+        "@fixr/schemas": "*",
         "@fixr/typescript-config": "*",
         "@hookform/resolvers": "^3.10.0",
         "@maskito/react": "^3.8.0",

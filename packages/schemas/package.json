@@ -1,54 +1,62 @@
 {
-    "name": "@fixr/schemas",
-    "version": "0.0.0",
-    "type": "module",
-    "private": true,
-    "scripts": {
-        "dev": "tsc --watch",
-        "build": "tsc"
+  "name": "@fixr/schemas",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./account": {
+      "types": "./src/account.ts",
+      "default": "./dist/account.js"
     },
-    "exports": {
-        "./account": {
-            "types": "./src/account.ts",
-            "default": "./dist/account.js"
-        },
-        "./auth": {
-            "types": "./src/auth.ts",
-            "default": "./dist/auth.js"
-        },
-        "./roles": {
-            "types": "./src/roles.ts",
-            "default": "./dist/roles.js"
-        },
-        "./credentials": {
-            "types": "./src/credentials.ts",
-            "default": "./dist/credentials.js"
-        },
-        "./utils": {
-            "types": "./src/utils.ts",
-            "default": "./dist/utils.js"
-        },
-        "./companies": {
-            "types": "./src/companies.ts",
-            "default": "./dist/companies.js"
-        },
-        "./employees": {
-            "types": "./src/employees.ts",
-            "default": "./dist/employees.js"
-        },
-        "./common": {
-            "types": "./src/common.ts",
-            "default": "./dist/common.js"
-        }
+    "./auth": {
+      "types": "./src/auth.ts",
+      "default": "./dist/auth.js"
     },
-    "devDependencies": {
-        "zod": "latest",
-        "@fixr/typescript-config": "*",
-        "@types/eslint": "^8.56.5",
-        "@types/node": "^20.11.24",
-        "typescript": "^5.3.3"
+    "./roles": {
+      "types": "./src/roles.ts",
+      "default": "./dist/roles.js"
     },
-    "dependencies": {
-        "zod": "latest"
+    "./credentials": {
+      "types": "./src/credentials.ts",
+      "default": "./dist/credentials.js"
+    },
+    "./utils": {
+      "types": "./src/utils.ts",
+      "default": "./dist/utils.js"
+    },
+    "./companies": {
+      "types": "./src/companies.ts",
+      "default": "./dist/companies.js"
+    },
+    "./employees": {
+      "types": "./src/employees.ts",
+      "default": "./dist/employees.js"
+    },
+    "./common": {
+      "types": "./src/common.ts",
+      "default": "./dist/common.js"
+    },
+    "./clients": {
+      "types": "./src/clients.ts",
+      "default": "./dist/clients.js"
+    },
+    "./service-orders": {
+      "types": "./src/service-orders.ts",
+      "default": "./dist/service-orders.js"
     }
+  },
+  "devDependencies": {
+    "zod": "latest",
+    "@fixr/typescript-config": "*",
+    "@types/eslint": "^8.56.5",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "zod": "latest"
+  }
 }
