@@ -14,8 +14,6 @@ import { cpf, phone, unmask } from "@fixr/constants/masks";
 import { toast } from "@pheralb/toast";
 import { api, tryCatch } from "@/lib/utils";
 import { axios } from "@/lib/auth/axios";
-import { AxiosError, AxiosResponse } from "axios";
-import { ApiResponse } from "@fixr/schemas/utils";
 
 const createCustomerSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
