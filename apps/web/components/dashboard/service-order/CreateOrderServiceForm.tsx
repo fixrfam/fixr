@@ -11,7 +11,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Plus } from "lucide-react";
 import {createOrderServiceSchema} from "@fixr/schemas/service-orders";
 
-export function CreateServiceOrderForm() {
+export function CreateOrderServiceForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const form = useForm<z.infer<typeof createOrderServiceSchema>>({

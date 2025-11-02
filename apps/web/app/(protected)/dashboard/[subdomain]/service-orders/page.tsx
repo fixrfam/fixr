@@ -1,4 +1,4 @@
-import { CreateServiceOrderForm } from "@/components/dashboard/service-order/CreateOrderServiceForm";
+import { CreateOrderServiceForm } from "@/components/dashboard/service-order/CreateOrderServiceForm";
 import { Heading } from "@/components/dashboard/heading";
 
 export default function ServiceOrdersPage() {
@@ -8,7 +8,7 @@ export default function ServiceOrdersPage() {
         title={"Ordens de serviço"}
         description={"Controle as ordens de serviço de seus clientes"}
     />
-    <CreateServiceOrderForm />
+    <CreateOrderServiceForm />
     </div>  
   );
 }
