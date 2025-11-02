@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { cpf } from "@fixr/schemas/common";
 
 export const createOrderServiceSchema = z.object({
-  customerCpf: z.string().min(14, "CPF inválido").max(14, "CPF inválido"),
+  customerCpf: cpf,
   // ... outros campos como data, marca, etc.
 });
