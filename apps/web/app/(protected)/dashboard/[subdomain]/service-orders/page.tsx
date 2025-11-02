@@ -1,14 +1,28 @@
-import { CreateOrderServiceForm } from "@/components/dashboard/service-order/CreateOrderServiceForm";
 import { Heading } from "@/components/dashboard/heading";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { DashLink } from "@/components/dashboard/dash-link";
 
-export default function ServiceOrdersPage() {
+type Params = Promise<{ subdomain: string }>;
+
+export default async function ServiceOrdersPage({
+  params,
+}: {
+  params: Params;
+}) {
+  const { subdomain } = await params;
+
   return (
-    <div className='flex flex-col gap-2'>
-    <Heading
+    <div className="space-y-4">
+      <Heading
         title={"Ordens de serviço"}
         description={"Controle as ordens de serviço de seus clientes"}
-    />
-    <CreateOrderServiceForm />
-    </div>  
+      />
+      <Button asChild>
+        <DashLink href={"/service-orders/new"} subdomain={subdomain} prefetch>
+          Nova ordem de serviço <Plus className="size-4" />
+        </DashLink>
+      </Button>
+    </div>
   );
 }
