@@ -28,7 +28,7 @@ export function CreateServiceOrderForm() {
 
   const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
     console.log("Ordem de serviço a ser criada:", values);
-    // Lógica para enviar a ordem de serviço para a API
+  
   };
 
   return (
@@ -51,10 +51,10 @@ export function CreateServiceOrderForm() {
               )}
             />
             <Button type="button" onClick={() => setIsModalOpen(true)}>
-              Criar cadastro cliente <Plus className="ml-2 size-4" />
+              Criar cadastro de cliente <Plus className="ml-2 size-4" />
             </Button>
           </div>
-          {/* Adicione os outros campos da Ordem de Serviço aqui */}
+        
           <div className="pt-4">
             <Button type="submit" className="w-full">Finalizar cadastro</Button>
           </div>

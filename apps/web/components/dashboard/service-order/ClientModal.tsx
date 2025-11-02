@@ -14,8 +14,6 @@ import { cpf, phone, unmask } from "@fixr/constants/masks";
 import { toast } from "@pheralb/toast";
 import { api, tryCatch } from "@/lib/utils";
 import { axios } from "@/lib/auth/axios";
-import { AxiosError, AxiosResponse } from "axios";
-import { ApiResponse } from "@fixr/schemas/utils";
 import {createClientSchema} from "@fixr/schemas/clients";
 
 export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: boolean, onOpenChange: (open: boolean) => void, onCustomerCreated: (cpf: string) => void }) {
@@ -51,14 +49,12 @@ export function ClientModal({ open, onOpenChange, onCustomerCreated }: { open: b
     };
 
     try {
-      // SUBSTITUA ESTA CHAMADA PELA SUA ROTA REAL DE API DE CLIENTES
-      // Exemplo: axios.post(api(`/customers`), formattedData);
-
+      
       toast.success({
         text: "Cliente cadastrado com sucesso!",
       });
 
-      onCustomerCreated(values.cpf);
+      onCustomerCreated ( formattedData . cpf ) ;
       onOpenChange(false);
     } catch (error) {
       toast.error({

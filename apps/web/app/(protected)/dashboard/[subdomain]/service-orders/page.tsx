@@ -1,4 +1,4 @@
-import { CreateServiceOrderForm } from "@/components/dashboard/service-order/CreateServiceOrderForm";
+import { CreateServiceOrderForm } from "@/components/dashboard/service-order/CreateOrderServiceForm";
 import { Heading } from "@/components/dashboard/heading";
 
 export default function ServiceOrdersPage() {
