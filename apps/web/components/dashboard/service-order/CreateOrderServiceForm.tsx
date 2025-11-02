@@ -11,7 +11,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Plus } from "lucide-react";
 
 // Defina o schema para a Ordem de Serviço aqui (exemplo)
-//ver com o ricardo pra criar junto do schema dos employees
 const createOrderServiceSchema = z.object({
   customerCpf: z.string().min(14, "CPF inválido").max(14, "CPF inválido"),
   // ... outros campos como data, marca, etc.
