@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { cpf } from "@fixr/schemas/common";
 
 export const createClientSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
   email: z.string().email("Email inválido").min(1, "O email é obrigatório"),
-  cpf: z.string().min(14, "CPF inválido").max(14, "CPF inválido"),
+  cpf: cpf,
   phone: z.string().min(1, "O telefone é obrigatório"),
   alternativePhone: z.string().optional(),
   address: z.string().min(1, "O endereço é obrigatório"),
