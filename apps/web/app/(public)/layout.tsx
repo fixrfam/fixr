@@ -44,22 +44,22 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang='en' suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning>
             <body
                 className={`${inter.variable} ${cal.variable} antialiased font-(family-name:--font-inter)`}
             >
                 <SessionProvider>
                     <ThemeProvider
-                        attribute='class'
-                        defaultTheme='system'
+                        attribute="class"
+                        defaultTheme="system"
                         enableSystem
                         disableTransitionOnChange
                     >
-                        <div className='items-center justify-items-center min-h-screen gap-16'>
+                        <div className="items-center justify-items-center min-h-screen gap-16">
                             <ApiDowntimeBanner />
                             <Header />
                             {children}
-                            <Footer className='z-2' />
+                            <Footer className="z-2" />
                         </div>
                         <ThemedToaster />
                     </ThemeProvider>
