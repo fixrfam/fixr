@@ -1,9 +1,14 @@
+"use client";
+
 import { getApiHealthStatus } from "@/lib/services/api";
 import { TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
+import { use } from "react";
 
-export async function ApiDowntimeBanner() {
-  const healthy = await getApiHealthStatus();
+const apiHealthQuery = getApiHealthStatus();
+
+export function ApiDowntimeBanner() {
+  const healthy = use(apiHealthQuery);
 
   if (healthy) return;
 
