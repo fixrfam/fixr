@@ -150,10 +150,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --text-5.5xl: 3.45rem;
-  --text-5.5xl--line-height: 1;
-  --text-4.5xl: 2.6rem;
-  --text-4.5xl--line-height: 1;
+  --text-5\.5xl: 3.45rem;
+  --text-5\.5xl--line-height: 1;
+  --text-4\.5xl: 2.6rem;
+  --text-4\.5xl--line-height: 1;
 
   --font-heading: var(--font-cal);
 

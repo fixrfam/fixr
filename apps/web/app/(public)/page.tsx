@@ -1,5 +1,5 @@
-import Features from "@/components/home/sections/Features";
-import Hero from "@/components/home/sections/hero/Hero";
+import Features from "@/components/home/sections/Features"
+import Hero from "@/components/home/sections/hero/Hero"
 
 export default function Home() {
   return (
@@ -7,5 +7,5 @@ export default function Home() {
       <Hero />
       <Features className="z-2 mt-10" />
     </main>
-  );
+  )
 }

@@ -1,9 +1,9 @@
-import { config } from "dotenv";
-import { z } from "zod";
+import { config } from "dotenv"
+import { z } from "zod"
 
-config();
+config()
 const envSchema = z.object({
-    RESEND_KEY: z.string(),
-});
+  RESEND_KEY: z.string(),
+})
 
-export const env = envSchema.parse(process.env);
+export const env = envSchema.parse(process.env)

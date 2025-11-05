@@ -1,22 +1,21 @@
-"use client";
+"use client"
 
-import { ComponentPropsWithoutRef } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { createOrderServiceSchema } from "@fixr/schemas/service-orders"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { UserPlus } from "lucide-react"
+import { ComponentPropsWithoutRef } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { UserPlus } from "lucide-react";
-import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
@@ -24,8 +23,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { NewClientForm } from "../clients/new-client-form";
+} from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+import { NewClientForm } from "../clients/new-client-form"
 
 export function NewServiceOrderForm({
   className,
@@ -36,15 +36,15 @@ export function NewServiceOrderForm({
     defaultValues: {
       customerCpf: "",
     },
-  });
+  })
 
   const handleCustomerCreated = (cpf: string) => {
-    form.setValue("customerCpf", cpf);
-  };
+    form.setValue("customerCpf", cpf)
+  }
 
   const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
-    console.log("Ordem de serviço a ser criada:", values);
-  };
+    console.log("Ordem de serviço a ser criada:", values)
+  }
 
   return (
     <Form {...form}>
@@ -97,5 +97,5 @@ export function NewServiceOrderForm({
         </div>
       </form>
     </Form>
-  );
+  )
 }

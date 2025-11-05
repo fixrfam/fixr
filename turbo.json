@@ -1,73 +1,76 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "ui": "tui",
-    "daemon": false,
-    "globalEnv": [
-        "MYSQL_ROOT_PASSWORD",
-        "MYSQL_DATABASE",
-        "MYSQL_USER",
-        "MYSQL_PASSWORD",
-        "REDIS_PASSWORD",
-        "REDIS_URL",
-        "DB_URL",
-        "FRONTEND_URL",
-        "RESEND_KEY",
-        "JWT_SECRET",
-        "COOKIE_ENCRYPTION_SECRET",
-        "COOKIE_DOMAIN",
-        "NODE_PORT",
-        "NEXT_PUBLIC_APP_URL",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_DOCS_URL",
-        "NEXT_PUBLIC_LINKTREE_URL",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-        "CLERK_SECRET_KEY",
-        "GOOGLE_AUTH_CLIENT_ID",
-        "GOOGLE_AUTH_CLIENT_SECRET",
-        "GOOGLE_AUTH_REDIRECT_URI"
-    ],
-    "tasks": {
-        "build": {
-            "dependsOn": ["^build"],
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
-        },
-        "build:server": {
-            "dependsOn": ["^build:server"],
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
-        },
-        "build:web": {
-            "dependsOn": ["^build:web"],
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
-        },
-        "build:admin": {
-            "dependsOn": ["^build:admin"],
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
-        },
-        "lint": {
-            "dependsOn": ["^lint"],
-            "env": ["REDIS_PASSWORD", "FOO"]
-        },
-        "check-types": {
-            "dependsOn": ["^check-types"]
-        },
-        "generate": {
-            "dependsOn": ["^generate"]
-        },
-        "migrate": {
-            "dependsOn": ["^generate"]
-        },
-        "studio": {
-            "dependsOn": []
-        },
-        "dev": {
-            "dependsOn": ["^migrate"],
-            "cache": false,
-            "persistent": true,
-            "inputs": ["$TURBO_DEFAULT$", ".env*"]
-        },
-        "start": {
-            "dependsOn": []
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "daemon": false,
+  "globalEnv": [
+    "MYSQL_ROOT_PASSWORD",
+    "MYSQL_DATABASE",
+    "MYSQL_USER",
+    "MYSQL_PASSWORD",
+    "REDIS_PASSWORD",
+    "REDIS_URL",
+    "DB_URL",
+    "FRONTEND_URL",
+    "RESEND_KEY",
+    "JWT_SECRET",
+    "COOKIE_ENCRYPTION_SECRET",
+    "COOKIE_DOMAIN",
+    "NODE_PORT",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_DOCS_URL",
+    "NEXT_PUBLIC_LINKTREE_URL",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY",
+    "GOOGLE_AUTH_CLIENT_ID",
+    "GOOGLE_AUTH_CLIENT_SECRET",
+    "GOOGLE_AUTH_REDIRECT_URI"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "build:server": {
+      "dependsOn": ["^build:server"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "build:web": {
+      "dependsOn": ["^build:web"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "build:admin": {
+      "dependsOn": ["^build:admin"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "env": ["REDIS_PASSWORD", "FOO"]
+    },
+    "lint:write": {
+      "dependsOn": ["^lint:write"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "generate": {
+      "dependsOn": ["^generate"]
+    },
+    "migrate": {
+      "dependsOn": ["^generate"]
+    },
+    "studio": {
+      "dependsOn": []
+    },
+    "dev": {
+      "dependsOn": ["^migrate"],
+      "cache": false,
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
+    },
+    "start": {
+      "dependsOn": []
     }
+  }
 }

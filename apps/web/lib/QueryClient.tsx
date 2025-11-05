@@ -1,15 +1,17 @@
-"use client";
+"use client"
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 export const queryClient = new QueryClient({
-    defaultOptions: { queries: { refetchOnWindowFocus: false } },
-});
+  defaultOptions: { queries: { refetchOnWindowFocus: false } },
+})
 
 export default function QueryClientWrapper({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode
 }>) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
 }

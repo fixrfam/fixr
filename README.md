@@ -84,6 +84,20 @@ Finally, start the development server:
 npm run dev
 ```
 
+Optionally, if you want to have auto formatting and linting suggestions on your ide, install the **BiomeJS** extension on your preferred IDE:
+
+- VSCode: [BiomeJS Extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)
+- IntelliJ: [BiomeJS Plugin](https://plugins.jetbrains.com/plugin/22761-biome)
+- Zed: Just search for Biome in the extensions panel
+
+More details on IDE linting support here: [https://biomejs.dev/guides/editors/first-party-extensions/](https://biomejs.dev/guides/editors/first-party-extensions/)
+
+Also, if you want to fix Git Blame to ignore formatting commits, you can add the following to your global git config:
+
+```sh
+git config --global blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ## Customization
 
 Every aspect of this boilerplate can be customized to fit your needs. For example, you can:

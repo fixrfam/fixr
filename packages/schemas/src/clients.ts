@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { cpf } from "@fixr/schemas/common";
+import { cpf } from "@fixr/schemas/common"
+import { z } from "zod"
 
 export const createClientSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
@@ -10,5 +10,4 @@ export const createClientSchema = z.object({
   address: z.string().min(1, "O endereço é obrigatório"),
   state: z.string().min(2, "O estado é obrigatório").max(2),
   city: z.string().min(1, "A cidade é obrigatória"),
-});
-
+})
