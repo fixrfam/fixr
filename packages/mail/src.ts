@@ -1,1 +1,1 @@
-export const whiteLogoUrl = "https://i.imgur.com/d3ZzTqA.png";
+export const whiteLogoUrl = "https://i.imgur.com/d3ZzTqA.png"

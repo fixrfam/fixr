@@ -57,17 +57,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "checkConstraint": {}
@@ -118,12 +114,8 @@
           "name": "refresh_tokens_user_id_users_id_fk",
           "tableFrom": "refresh_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -131,17 +123,13 @@
       "compositePrimaryKeys": {
         "refresh_tokens_id": {
           "name": "refresh_tokens_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "refresh_tokens_token_unique": {
           "name": "refresh_tokens_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "checkConstraint": {}
@@ -206,12 +194,8 @@
           "name": "one_time_tokens_user_id_users_id_fk",
           "tableFrom": "one_time_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -219,17 +203,13 @@
       "compositePrimaryKeys": {
         "one_time_tokens_id": {
           "name": "one_time_tokens_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "one_time_tokens_token_unique": {
           "name": "one_time_tokens_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "checkConstraint": {}
@@ -286,23 +266,17 @@
       "compositePrimaryKeys": {
         "companies_id": {
           "name": "companies_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "companies_cnpj_unique": {
           "name": "companies_cnpj_unique",
-          "columns": [
-            "cnpj"
-          ]
+          "columns": ["cnpj"]
         },
         "companies_subdomain_unique": {
           "name": "companies_subdomain_unique",
-          "columns": [
-            "subdomain"
-          ]
+          "columns": ["subdomain"]
         }
       },
       "checkConstraint": {}
@@ -374,12 +348,8 @@
           "name": "employees_user_id_users_id_fk",
           "tableFrom": "employees",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -387,12 +357,8 @@
           "name": "employees_company_id_companies_id_fk",
           "tableFrom": "employees",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -400,17 +366,13 @@
       "compositePrimaryKeys": {
         "employees_id": {
           "name": "employees_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "employees_cpf_unique": {
           "name": "employees_cpf_unique",
-          "columns": [
-            "cpf"
-          ]
+          "columns": ["cpf"]
         }
       },
       "checkConstraint": {}
@@ -468,12 +430,8 @@
           "name": "clients_user_id_users_id_fk",
           "tableFrom": "clients",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -481,17 +439,13 @@
       "compositePrimaryKeys": {
         "clients_id": {
           "name": "clients_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "clients_cpf_unique": {
           "name": "clients_cpf_unique",
-          "columns": [
-            "cpf"
-          ]
+          "columns": ["cpf"]
         }
       },
       "checkConstraint": {}

@@ -49,9 +49,11 @@
       "bracketSameLine": false,
       "quoteStyle": "double",
       "attributePosition": "auto",
-      "bracketSpacing": true
+      "bracketSpacing": true,
+      "indentWidth": 2
     }
   },
+
   "html": {
     "formatter": {
       "indentScriptAndStyle": false,

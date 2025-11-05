@@ -1,53 +1,53 @@
-"use client";
+"use client"
 
-import React, { FormEvent, useState } from "react";
-import { Button, ButtonProps } from "../ui/button";
-import { Loader2, LogOut } from "lucide-react";
-import { toast } from "@pheralb/toast";
-import { useRouter } from "next/navigation";
+import { toast } from "@pheralb/toast"
+import { Loader2, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
+import React, { FormEvent, useState } from "react"
+import { Button, ButtonProps } from "../ui/button"
 
 const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ children, ...props }, ref) => {
-        const [loading, setLoading] = useState(false);
+  ({ children, ...props }, ref) => {
+    const [loading, setLoading] = useState(false)
 
-        const router = useRouter();
+    const router = useRouter()
 
-        const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
 
-            const fetchSignout = async () => {
-                setLoading(true);
-                const response = await fetch("/api/auth/signout", {
-                    method: "GET",
-                    credentials: "include",
-                });
+      const fetchSignout = async () => {
+        setLoading(true)
+        const response = await fetch("/api/auth/signout", {
+          method: "GET",
+          credentials: "include",
+        })
 
-                if (response.redirected) {
-                    router.push(response.url);
-                }
-            };
+        if (response.redirected) {
+          router.push(response.url)
+        }
+      }
 
-            toast.loading({
-                text: "Saindo, aguarde um momento...",
-                options: {
-                    promise: fetchSignout(),
-                    success: "Até logo!",
-                    error: "Erro ao sair, tente novamente.",
-                    autoDismiss: false,
-                },
-            });
-        };
-
-        return (
-            <form onSubmit={(e) => onSubmit(e)}>
-                <Button disabled={loading} ref={ref} {...props}>
-                    {children}
-                    {!loading ? <LogOut /> : <Loader2 className='animate-spin' />}
-                </Button>
-            </form>
-        );
+      toast.loading({
+        text: "Saindo, aguarde um momento...",
+        options: {
+          promise: fetchSignout(),
+          success: "Até logo!",
+          error: "Erro ao sair, tente novamente.",
+          autoDismiss: false,
+        },
+      })
     }
-);
-SignOutButton.displayName = "SignOutButton";
 
-export { SignOutButton };
+    return (
+      <form onSubmit={(e) => onSubmit(e)}>
+        <Button disabled={loading} ref={ref} {...props}>
+          {children}
+          {!loading ? <LogOut /> : <Loader2 className="animate-spin" />}
+        </Button>
+      </form>
+    )
+  },
+)
+SignOutButton.displayName = "SignOutButton"
+
+export { SignOutButton }

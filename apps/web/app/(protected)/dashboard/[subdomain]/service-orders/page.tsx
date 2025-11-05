@@ -1,16 +1,16 @@
-import { Heading } from "@/components/dashboard/heading";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { DashLink } from "@/components/dashboard/dash-link";
+import { Plus } from "lucide-react"
+import { DashLink } from "@/components/dashboard/dash-link"
+import { Heading } from "@/components/dashboard/heading"
+import { Button } from "@/components/ui/button"
 
-type Params = Promise<{ subdomain: string }>;
+type Params = Promise<{ subdomain: string }>
 
 export default async function ServiceOrdersPage({
   params,
 }: {
-  params: Params;
+  params: Params
 }) {
-  const { subdomain } = await params;
+  const { subdomain } = await params
 
   return (
     <div className="space-y-4">
@@ -24,5 +24,5 @@ export default async function ServiceOrdersPage({
         </DashLink>
       </Button>
     </div>
-  );
+  )
 }

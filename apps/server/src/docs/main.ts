@@ -73,4 +73,4 @@ export const getPaginatedDataSchema = z.object({
     sort: z.enum(["newer", "older"]).optional(),
 });
 \`\`\`
-`;
+`

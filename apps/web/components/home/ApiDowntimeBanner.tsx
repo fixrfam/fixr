@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import { getApiHealthStatus } from "@/lib/services/api";
-import { TriangleAlert, X } from "lucide-react";
-import Link from "next/link";
-import { use } from "react";
+import { TriangleAlert, X } from "lucide-react"
+import Link from "next/link"
+import { use } from "react"
+import { getApiHealthStatus } from "@/lib/services/api"
 
-const apiHealthQuery = getApiHealthStatus();
+const apiHealthQuery = getApiHealthStatus()
 
 export function ApiDowntimeBanner() {
-  const healthy = use(apiHealthQuery);
+  const healthy = use(apiHealthQuery)
 
-  if (healthy) return;
+  if (healthy) return
 
   return (
     <div className="fixed bottom-2 z-97">
@@ -33,5 +33,5 @@ export function ApiDowntimeBanner() {
         </label>
       </div>
     </div>
-  );
+  )
 }
