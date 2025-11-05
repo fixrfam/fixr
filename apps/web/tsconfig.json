@@ -1,11 +1,17 @@
 {
-    "extends": "@fixr/typescript-config/nextjs.json",
-    "compilerOptions": {
-        "plugins": [{ "name": "next" }],
-        "baseUrl": ".",
-        "paths": { "@/*": ["./*"], "react": ["./node_modules/@types/react"] },
-        "jsx": "preserve"
-    },
-    "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", "next.config.js", ".next/types/**/*.ts"],
-    "exclude": ["node_modules"]
+  "extends": "@fixr/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"], "react": ["./node_modules/@types/react"] },
+    "jsx": "preserve"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
 }

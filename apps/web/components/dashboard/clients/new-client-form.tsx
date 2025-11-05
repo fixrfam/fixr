@@ -1,34 +1,34 @@
-"use client";
+'use client'
 
-import { ComponentPropsWithoutRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { cpf, phone, unmask } from '@fixr/constants/masks'
+import { createClientSchema } from '@fixr/schemas/clients'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMaskito } from '@maskito/react'
+import { toast } from '@pheralb/toast'
 import {
-  Loader2,
-  User,
-  Mail,
-  PhoneIcon,
-  IdCard,
-  MapPin,
   Building,
+  IdCard,
+  Loader2,
+  Mail,
+  MapPin,
+  PhoneIcon,
   Smartphone,
-} from "lucide-react";
+  User,
+} from 'lucide-react'
+import { ComponentPropsWithoutRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { useMaskito } from "@maskito/react";
-import { cpf, phone, unmask } from "@fixr/constants/masks";
-import { toast } from "@pheralb/toast";
-import { createClientSchema } from "@fixr/schemas/clients";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 export function NewClientForm({
   onCustomerCreated,
@@ -36,32 +36,32 @@ export function NewClientForm({
   className,
   ...props
 }: {
-  onCustomerCreated: (cpf: string) => void;
-  cols?: number;
-} & ComponentPropsWithoutRef<"form">) {
-  const [loading, setLoading] = useState(false);
+  onCustomerCreated: (cpf: string) => void
+  cols?: number
+} & ComponentPropsWithoutRef<'form'>) {
+  const [loading, setLoading] = useState(false)
 
   const form = useForm<z.infer<typeof createClientSchema>>({
     resolver: zodResolver(createClientSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      cpf: "",
-      phone: "",
-      alternativePhone: "",
-      address: "",
-      state: "",
-      city: "",
+      name: '',
+      email: '',
+      cpf: '',
+      phone: '',
+      alternativePhone: '',
+      address: '',
+      state: '',
+      city: '',
     },
-    mode: "all",
-  });
+    mode: 'all',
+  })
 
-  const cpfMask = useMaskito({ options: { mask: cpf } });
-  const phoneMask = useMaskito({ options: { mask: phone } });
-  const altPhoneMask = useMaskito({ options: { mask: phone } });
+  const cpfMask = useMaskito({ options: { mask: cpf } })
+  const phoneMask = useMaskito({ options: { mask: phone } })
+  const altPhoneMask = useMaskito({ options: { mask: phone } })
 
   async function onSubmit(values: z.infer<typeof createClientSchema>) {
-    setLoading(true);
+    setLoading(true)
 
     const formattedData = {
       ...values,
@@ -70,20 +70,20 @@ export function NewClientForm({
       alternativePhone: values.alternativePhone
         ? unmask.phone(values.alternativePhone)
         : null,
-    };
+    }
 
     try {
       toast.success({
-        text: "Cliente cadastrado com sucesso!",
-      });
+        text: 'Cliente cadastrado com sucesso!',
+      })
 
-      onCustomerCreated(formattedData.cpf);
+      onCustomerCreated(formattedData.cpf)
     } catch {
       toast.error({
-        text: "Erro ao cadastrar cliente",
-      });
+        text: 'Erro ao cadastrar cliente',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -91,13 +91,13 @@ export function NewClientForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn("space-y-3", className)}
+        className={cn('space-y-3', className)}
         {...props}
       >
         <div
           className={cn(
-            "grid grid-cols-1 gap-4",
-            cols == 2 && "md:grid-cols-2",
+            'grid grid-cols-1 gap-4',
+            cols == 2 && 'md:grid-cols-2',
           )}
         >
           <FormField
@@ -144,7 +144,7 @@ export function NewClientForm({
                     {...field}
                     ref={phoneMask}
                     onInput={(e) =>
-                      form.setValue("phone", e.currentTarget.value)
+                      form.setValue('phone', e.currentTarget.value)
                     }
                   />
                 </FormControl>
@@ -167,7 +167,7 @@ export function NewClientForm({
                     {...field}
                     ref={altPhoneMask}
                     onInput={(e) =>
-                      form.setValue("alternativePhone", e.currentTarget.value)
+                      form.setValue('alternativePhone', e.currentTarget.value)
                     }
                   />
                 </FormControl>
@@ -188,7 +188,7 @@ export function NewClientForm({
                     placeholder="000.000.000-00"
                     {...field}
                     ref={cpfMask}
-                    onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
+                    onInput={(e) => form.setValue('cpf', e.currentTarget.value)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -242,10 +242,10 @@ export function NewClientForm({
           />
         </div>
         <Button type="submit" disabled={loading} className="w-full mt-4">
-          Finalizar cadastro{" "}
+          Finalizar cadastro{' '}
           {!loading ? <User /> : <Loader2 className="animate-spin" />}
         </Button>
       </form>
     </Form>
-  );
+  )
 }

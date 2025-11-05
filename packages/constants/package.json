@@ -1,42 +1,45 @@
 {
-    "name": "@fixr/constants",
-    "version": "0.0.0",
-    "type": "module",
-    "private": true,
-    "scripts": {
-        "dev": "tsc --watch",
-        "build": "tsc"
+  "name": "@fixr/constants",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
+  },
+  "exports": {
+    "./app": {
+      "types": "./src/app.ts",
+      "default": "./dist/app.js"
     },
-    "exports": {
-        "./app": {
-            "types": "./src/app.ts",
-            "default": "./dist/app.js"
-        },
-        "./cookies": {
-            "types": "./src/cookies.ts",
-            "default": "./dist/cookies.js"
-        },
-        "./masks": {
-            "types": "./src/masks.ts",
-            "default": "./dist/masks.js"
-        },
-        "./messages": {
-            "types": "./src/messages.ts",
-            "default": "./dist/messages.js"
-        },
-        "./roles": {
-            "types": "./src/roles.ts",
-            "default": "./dist/roles.js"
-        }
+    "./cookies": {
+      "types": "./src/cookies.ts",
+      "default": "./dist/cookies.js"
     },
-    "devDependencies": {
-        "@fixr/typescript-config": "*",
-        "@fixr/schemas": "*",
-        "@types/eslint": "^8.56.5",
-        "@types/node": "^20.11.24",
-        "typescript": "^5.3.3"
+    "./masks": {
+      "types": "./src/masks.ts",
+      "default": "./dist/masks.js"
     },
-    "dependencies": {
-        "zod": "^3.24.4"
+    "./messages": {
+      "types": "./src/messages.ts",
+      "default": "./dist/messages.js"
+    },
+    "./roles": {
+      "types": "./src/roles.ts",
+      "default": "./dist/roles.js"
     }
+  },
+  "devDependencies": {
+    "@fixr/typescript-config": "*",
+    "@fixr/schemas": "*",
+    "@biomejs/biome": "2.3.3",
+    "@types/eslint": "^8.56.5",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "zod": "^3.24.4"
+  }
 }

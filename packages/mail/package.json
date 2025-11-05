@@ -1,43 +1,46 @@
 {
-    "name": "@fixr/mail",
-    "version": "0.1.10",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "build": "tsc",
-        "dev": "tsc --watch",
-        "studio": "email dev",
-        "export": "email export"
+  "name": "@fixr/mail",
+  "version": "0.1.10",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "studio": "email dev",
+    "export": "email export",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
+  },
+  "exports": {
+    "./services": {
+      "types": "./services/mailing.ts",
+      "default": "./dist/services/mailing.js"
     },
-    "exports": {
-        "./services": {
-            "types": "./services/mailing.ts",
-            "default": "./dist/services/mailing.js"
-        },
-        "./queue": {
-            "types": "./services/queue/queue.ts",
-            "default": "./dist/services/queue/queue.js"
-        },
-        "./worker": {
-            "types": "./services/worker/worker.ts",
-            "default": "./dist/services/worker/worker.js"
-        }
+    "./queue": {
+      "types": "./services/queue/queue.ts",
+      "default": "./dist/services/queue/queue.js"
     },
-    "dependencies": {
-        "@fixr/constants": "*",
-        "@react-email/components": "0.0.34",
-        "@react-email/tailwind": "1.0.4",
-        "@types/node": "^20.11.24",
-        "bullmq": "^5.48.0",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
-        "resend": "^4.5.1",
-        "typescript": "^5.3.3",
-        "zod": "^3.25.28"
-    },
-    "devDependencies": {
-        "@types/react": "19.0.1",
-        "@types/react-dom": "19.0.1",
-        "react-email": "3.0.7"
+    "./worker": {
+      "types": "./services/worker/worker.ts",
+      "default": "./dist/services/worker/worker.js"
     }
+  },
+  "dependencies": {
+    "@fixr/constants": "*",
+    "@react-email/components": "0.0.34",
+    "@react-email/tailwind": "1.0.4",
+    "@types/node": "^20.11.24",
+    "bullmq": "^5.48.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "resend": "^4.5.1",
+    "typescript": "^5.3.3",
+    "zod": "^3.25.28",
+    "@biomejs/biome": "2.3.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "react-email": "3.0.7"
+  }
 }

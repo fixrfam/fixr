@@ -1,44 +1,47 @@
 {
-    "name": "@fixr/db",
-    "version": "0.0.0",
-    "type": "module",
-    "private": true,
-    "scripts": {
-        "dev": "tsc --watch",
-        "build": "tsc",
-        "migrate": "dotenv -- tsx src/migrate.ts",
-        "generate": "dotenv -- drizzle-kit generate",
-        "studio": "dotenv -- drizzle-kit studio"
+  "name": "@fixr/db",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "migrate": "dotenv -- tsx src/migrate.ts",
+    "generate": "dotenv -- drizzle-kit generate",
+    "studio": "dotenv -- drizzle-kit studio",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
+  },
+  "exports": {
+    "./app": {
+      "types": "./src/app.ts",
+      "default": "./dist/app.js"
     },
-    "exports": {
-        "./app": {
-            "types": "./src/app.ts",
-            "default": "./dist/app.js"
-        },
-        "./cookies": {
-            "types": "./src/cookies.ts",
-            "default": "./dist/cookies.js"
-        },
-        "./connection": {
-            "types": "./src/connection.ts",
-            "default": "./dist/src/connection.js"
-        },
-        "./schema": {
-            "types": "./src/schema/index.ts",
-            "default": "./dist/src/schema/index.js"
-        }
+    "./cookies": {
+      "types": "./src/cookies.ts",
+      "default": "./dist/cookies.js"
     },
-    "devDependencies": {
-        "@fixr/typescript-config": "*",
-        "@types/eslint": "^8.56.5",
-        "@types/node": "^20.11.24",
-        "typescript": "^5.3.3"
+    "./connection": {
+      "types": "./src/connection.ts",
+      "default": "./dist/src/connection.js"
     },
-    "dependencies": {
-        "dotenv": "^16.4.5",
-        "drizzle-orm": "^0.38.3",
-        "drizzle-zod": "^0.7.0",
-        "zod": "^3.23.8",
-        "mysql2": "^3.13.0"
+    "./schema": {
+      "types": "./src/schema/index.ts",
+      "default": "./dist/src/schema/index.js"
     }
+  },
+  "devDependencies": {
+    "@fixr/typescript-config": "*",
+    "@biomejs/biome": "2.3.3",
+    "@types/eslint": "^8.56.5",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.38.3",
+    "drizzle-zod": "^0.7.0",
+    "zod": "^3.23.8",
+    "mysql2": "^3.13.0"
+  }
 }

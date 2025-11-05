@@ -1,139 +1,147 @@
-import * as React from "react";
-
 import {
-    Body,
-    Button,
-    Container,
-    Head,
-    Html,
-    Img,
-    Link,
-    Preview,
-    Section,
-    Text,
-} from "@react-email/components";
-import { render } from "@react-email/render";
+  Body,
+  Button,
+  Container,
+  Head,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Section,
+  Text,
+} from '@react-email/components'
+import { render } from '@react-email/render'
+import * as React from 'react'
 
 interface EmailProps {
-    displayName: string;
-    appName: string;
-    verificationUrl: string;
+  displayName: string
+  appName: string
+  verificationUrl: string
 }
 
-const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+const baseUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : ''
 
-export const VerificationEmail = ({ displayName, appName, verificationUrl }: EmailProps) => (
-    <Html>
-        <Head />
-        <Preview>{displayName}, Confirm your email!</Preview>
-        <Body style={main}>
-            <Container style={container}>
-                <Img src={`/public/logo.png`} width='31' height='25' alt='' />
+export const VerificationEmail = ({
+  displayName,
+  appName,
+  verificationUrl,
+}: EmailProps) => (
+  <Html>
+    <Head />
+    <Preview>{displayName}, Confirm your email!</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <Img src={`/public/logo.png`} width="31" height="25" alt="" />
 
-                <Text style={title}>
-                    <strong>{displayName}</strong>, your new account is just one step away.
-                </Text>
+        <Text style={title}>
+          <strong>{displayName}</strong>, your new account is just one step
+          away.
+        </Text>
 
-                <Section style={section}>
-                    <Text style={text}>
-                        Hey <strong>{displayName}</strong>!
-                    </Text>
-                    <Text style={text}>
-                        You have registered a new account on <Link>{appName}</Link>, click the
-                        button below to confirm your identity.
-                    </Text>
+        <Section style={section}>
+          <Text style={text}>
+            Hey <strong>{displayName}</strong>!
+          </Text>
+          <Text style={text}>
+            You have registered a new account on <Link>{appName}</Link>, click
+            the button below to confirm your identity.
+          </Text>
 
-                    <Button style={button} href={verificationUrl} target='_blank'>
-                        Verify email
-                    </Button>
-                </Section>
+          <Button style={button} href={verificationUrl} target="_blank">
+            Verify email
+          </Button>
+        </Section>
 
-                <Text style={footer}>If you haven't registered, please ignore this email.</Text>
-            </Container>
-        </Body>
-    </Html>
-);
+        <Text style={footer}>
+          If you haven't registered, please ignore this email.
+        </Text>
+      </Container>
+    </Body>
+  </Html>
+)
 
 VerificationEmail.PreviewProps = {
-    displayName: "alanturing",
-} as EmailProps;
+  displayName: 'alanturing',
+} as EmailProps
 
-export default VerificationEmail;
+export default VerificationEmail
 
 const main = {
-    backgroundColor: "#ffffff",
-    color: "#24292e",
-    fontFamily:
-        '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-};
+  backgroundColor: '#ffffff',
+  color: '#24292e',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
+}
 
 const container = {
-    maxWidth: "480px",
-    margin: "0 auto",
-    padding: "20px 0 48px",
-};
+  maxWidth: '480px',
+  margin: '0 auto',
+  padding: '20px 0 48px',
+}
 
 const title = {
-    fontSize: "24px",
-    lineHeight: 1.25,
-};
+  fontSize: '24px',
+  lineHeight: 1.25,
+}
 
 const section = {
-    padding: "24px",
-    border: "solid 1px #dedede",
-    borderRadius: "5px",
-    textAlign: "center" as const,
-};
+  padding: '24px',
+  border: 'solid 1px #dedede',
+  borderRadius: '5px',
+  textAlign: 'center' as const,
+}
 
 const text = {
-    margin: "0 0 10px 0",
-    textAlign: "left" as const,
-};
+  margin: '0 0 10px 0',
+  textAlign: 'left' as const,
+}
 
 const button = {
-    fontSize: "14px",
-    backgroundColor: "#000000",
-    color: "#fff",
-    lineHeight: 1.5,
-    borderRadius: "0.5em",
-    padding: "12px 24px",
-};
+  fontSize: '14px',
+  backgroundColor: '#000000',
+  color: '#fff',
+  lineHeight: 1.5,
+  borderRadius: '0.5em',
+  padding: '12px 24px',
+}
 
 const links = {
-    textAlign: "center" as const,
-};
+  textAlign: 'center' as const,
+}
 
 const link = {
-    color: "#0366d6",
-    fontSize: "12px",
-};
+  color: '#0366d6',
+  fontSize: '12px',
+}
 
 const footer = {
-    color: "#6a737d",
-    fontSize: "12px",
-    textAlign: "center" as const,
-    marginTop: "60px",
-};
+  color: '#6a737d',
+  fontSize: '12px',
+  textAlign: 'center' as const,
+  marginTop: '60px',
+}
 
 export async function renderEmail({
-    verificationUrl,
-    displayName,
-    appName,
+  verificationUrl,
+  displayName,
+  appName,
 }: {
-    verificationUrl: string;
-    displayName: string;
-    appName: string;
+  verificationUrl: string
+  displayName: string
+  appName: string
 }): Promise<string> {
-    try {
-        return await render(
-            <VerificationEmail
-                verificationUrl={verificationUrl}
-                displayName={displayName}
-                appName={appName}
-            />
-        );
-    } catch (error) {
-        console.error("Failed to render email", error);
-        throw new Error(`Failed to render email ${error}`);
-    }
+  try {
+    return await render(
+      <VerificationEmail
+        verificationUrl={verificationUrl}
+        displayName={displayName}
+        appName={appName}
+      />,
+    )
+  } catch (error) {
+    console.error('Failed to render email', error)
+    throw new Error(`Failed to render email ${error}`)
+  }
 }

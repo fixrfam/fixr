@@ -1,22 +1,22 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { Button, ButtonProps } from "../ui/button";
-import { ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { Button, ButtonProps } from '../ui/button'
 
 export function BackButton({ className, ...props }: ButtonProps) {
-    const router = useRouter();
+  const router = useRouter()
 
-    return (
-        <Button
-            variant={"ghost"}
-            className={cn("text-foreground px-0", className)}
-            onClick={() => router.back()}
-            {...props}
-        >
-            <ArrowLeft />
-            Voltar
-        </Button>
-    );
+  return (
+    <Button
+      variant={'ghost'}
+      className={cn('text-foreground px-0', className)}
+      onClick={() => router.back()}
+      {...props}
+    >
+      <ArrowLeft />
+      Voltar
+    </Button>
+  )
 }

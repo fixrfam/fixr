@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "tsc --watch",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
   },
   "exports": {
     "./account": {
@@ -53,6 +55,7 @@
     "@fixr/typescript-config": "*",
     "@types/eslint": "^8.56.5",
     "@types/node": "^20.11.24",
+    "@biomejs/biome": "2.3.3",
     "typescript": "^5.3.3",
     "zod": "latest"
   },

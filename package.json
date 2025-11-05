@@ -1,36 +1,35 @@
 {
-    "name": "turbo",
-    "private": true,
-    "scripts": {
-        "build": "dotenv -- turbo build",
-        "build:server": "dotenv -- turbo build --filter=server",
-        "build:web": "dotenv -- turbo build --filter=web",
-        "build:admin": "dotenv -- turbo build --filter=admin",
-        "dev": "dotenv -- turbo dev --parallel --no-daemon",
-        "start": "dotenv -- turbo start --parallel --no-daemon",
-        "start:server": "dotenv -- turbo start --parallel --no-daemon --filter=server",
-        "start:web": "dotenv -- turbo start --parallel --no-daemon --filter=web",
-        "start:admin": "dotenv -- turbo start --parallel --no-daemon --filter=admin",
-        "lint": "dotenv -- turbo lint",
-        "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
-        "migrate": "dotenv -- turbo run migrate --filter=@fixr/db",
-        "generate": "dotenv -- turbo run generate --filter=@fixr/db",
-        "studio": "dotenv -- turbo run studio --filter=@fixr/db"
-    },
-    "devDependencies": {
-        "prettier": "^3.2.5",
-        "turbo": "^2.4.4",
-        "typescript": "5.5.4"
-    },
-    "engines": {
-        "node": ">=18"
-    },
-    "packageManager": "npm@10.2.3",
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "dependencies": {
-        "dotenv-cli": "^8.0.0"
-    }
+  "name": "turbo",
+  "private": true,
+  "scripts": {
+    "build": "dotenv -- turbo build",
+    "build:server": "dotenv -- turbo build --filter=server",
+    "build:web": "dotenv -- turbo build --filter=web",
+    "build:admin": "dotenv -- turbo build --filter=admin",
+    "dev": "dotenv -- turbo dev --parallel --no-daemon",
+    "start": "dotenv -- turbo start --parallel --no-daemon",
+    "start:server": "dotenv -- turbo start --parallel --no-daemon --filter=server",
+    "start:web": "dotenv -- turbo start --parallel --no-daemon --filter=web",
+    "start:admin": "dotenv -- turbo start --parallel --no-daemon --filter=admin",
+    "lint": "dotenv -- turbo lint --continue",
+    "lint:write": "dotenv -- turbo lint:write --continue",
+    "format": "dotenv -- prettier --write \"**/*.{ts,tsx,md}\"",
+    "migrate": "dotenv -- turbo run migrate --filter=@fixr/db",
+    "generate": "dotenv -- turbo run generate --filter=@fixr/db",
+    "studio": "dotenv -- turbo run studio --filter=@fixr/db"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.3",
+    "prettier": "^3.2.5",
+    "turbo": "^2.4.4",
+    "typescript": "5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.2.3",
+  "workspaces": ["apps/*", "packages/*"],
+  "dependencies": {
+    "dotenv-cli": "^8.0.0"
+  }
 }
