@@ -1,12 +1,12 @@
-import { cookieKey } from '@fixr/constants/cookies'
-import { FastifyReply } from 'fastify'
-import { env } from '@/src/env'
-import { apiResponse } from '@/src/helpers/response'
-import { setUserVerified } from '../../services/auth.services'
+import { cookieKey } from "@fixr/constants/cookies"
+import { FastifyReply } from "fastify"
+import { env } from "@/src/env"
+import { apiResponse } from "@/src/helpers/response"
+import { setUserVerified } from "../../services/auth.services"
 import {
   deleteOneTimeToken,
   queryOneTimeToken,
-} from '../../services/tokens.services'
+} from "../../services/tokens.services"
 
 export async function verifyHandler({
   token,
@@ -24,9 +24,9 @@ export async function verifyHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'token_not_found',
-        message: 'Token not found',
+        error: "Not Found",
+        code: "token_not_found",
+        message: "Token not found",
         data: null,
       }),
     )
@@ -35,20 +35,20 @@ export async function verifyHandler({
     return response.status(410).send(
       apiResponse({
         status: 410,
-        error: 'Gone',
-        code: 'token_expired',
-        message: 'Token expired',
+        error: "Gone",
+        code: "token_expired",
+        message: "Token expired",
         data: null,
       }),
     )
   }
-  if (oneTimeToken.tokenType !== 'confirmation') {
+  if (oneTimeToken.tokenType !== "confirmation") {
     return response.status(400).send(
       apiResponse({
         status: 400,
-        error: 'Bad Request',
-        code: 'invalid_token',
-        message: 'Invalid token',
+        error: "Bad Request",
+        code: "invalid_token",
+        message: "Invalid token",
         data: null,
       }),
     )
@@ -61,10 +61,10 @@ export async function verifyHandler({
 
   if (redirectUrl) {
     return response
-      .setCookie(cookieKey('showVerifiedDialog'), 'true', {
-        path: '/',
+      .setCookie(cookieKey("showVerifiedDialog"), "true", {
+        path: "/",
         httpOnly: false,
-        sameSite: 'none',
+        sameSite: "none",
         secure: true,
       })
       .status(302)
@@ -75,8 +75,8 @@ export async function verifyHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'email_verify_success',
-      message: 'Email verified successfully',
+      code: "email_verify_success",
+      message: "Email verified successfully",
       data: null,
     }),
   )

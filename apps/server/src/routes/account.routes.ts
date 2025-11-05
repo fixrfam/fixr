@@ -1,20 +1,20 @@
-import { confirmAccountDeletionSchema } from '@fixr/schemas/account'
-import { userJWT } from '@fixr/schemas/auth'
-import { FastifyRequest } from 'fastify'
-import { z } from 'zod'
-import { getAccountHandler } from '../controllers/account/accountHandler'
+import { confirmAccountDeletionSchema } from "@fixr/schemas/account"
+import { userJWT } from "@fixr/schemas/auth"
+import { FastifyRequest } from "fastify"
+import { z } from "zod"
+import { getAccountHandler } from "../controllers/account/accountHandler"
 import {
   confirmAccountDeletionHandler,
   requestAccountDeletionHandler,
-} from '../controllers/account/deleteHandler'
-import { accountDocs } from '../docs/account.docs'
-import { FastifyTypedInstance } from '../interfaces/fastify'
-import { authenticate } from '../middlewares/authenticate'
-import { withErrorHandler } from '../middlewares/withErrorHandler'
+} from "../controllers/account/deleteHandler"
+import { accountDocs } from "../docs/account.docs"
+import { FastifyTypedInstance } from "../interfaces/fastify"
+import { authenticate } from "../middlewares/authenticate"
+import { withErrorHandler } from "../middlewares/withErrorHandler"
 
 export async function accountRoutes(fastify: FastifyTypedInstance) {
   fastify.get(
-    '/',
+    "/",
     { preHandler: authenticate, schema: accountDocs.getAccountSchema },
     withErrorHandler(async (request, response) => {
       const userJwt = request.user as z.infer<typeof userJWT>
@@ -24,7 +24,7 @@ export async function accountRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.post(
-    '/request-deletion',
+    "/request-deletion",
     { preHandler: authenticate, schema: accountDocs.requestDeletionSchema },
     withErrorHandler(async (request, response) => {
       const userJwt = request.user as z.infer<typeof userJWT>
@@ -38,7 +38,7 @@ export async function accountRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.get(
-    '/confirm-deletion',
+    "/confirm-deletion",
     { schema: accountDocs.confirmDeletionSchema },
     withErrorHandler(
       async (

@@ -1,17 +1,17 @@
-import { CookieSerializeOptions } from '@fastify/cookie'
-import { cookieKey } from '@fixr/constants/cookies'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { OAuth2Client } from 'google-auth-library'
-import { env } from '@/src/env'
-import { signJWT } from '@/src/helpers/jwt'
-import { apiResponse } from '@/src/helpers/response'
-import { generateRefreshToken } from '@/src/helpers/tokens'
+import { CookieSerializeOptions } from "@fastify/cookie"
+import { cookieKey } from "@fixr/constants/cookies"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { OAuth2Client } from "google-auth-library"
+import { env } from "@/src/env"
+import { signJWT } from "@/src/helpers/jwt"
+import { apiResponse } from "@/src/helpers/response"
+import { generateRefreshToken } from "@/src/helpers/tokens"
 import {
   queryJWTPayloadByUserId,
   queryUserByEmail,
   updateUserWithGoogleData,
-} from '@/src/services/auth.services'
-import { setJWTCookie, setRefreshToken } from '@/src/services/tokens.services'
+} from "@/src/services/auth.services"
+import { setJWTCookie, setRefreshToken } from "@/src/services/tokens.services"
 
 const GOOGLE_CREDS = {
   clientId: env.GOOGLE_AUTH_CLIENT_ID,
@@ -38,8 +38,8 @@ export async function googleLoginHandler({
   const params = {
     client_id: GOOGLE_CREDS.clientId,
     redirect_uri: GOOGLE_CREDS.redirectUri,
-    response_type: 'code',
-    scope: 'openid email profile',
+    response_type: "code",
+    scope: "openid email profile",
   }
 
   const query = new URLSearchParams(params).toString()
@@ -73,9 +73,9 @@ export async function googleCallbackHandler({
     return response.status(422).send(
       apiResponse({
         status: 422,
-        error: 'Unprocessable Entity',
-        code: 'missing_code',
-        message: 'Missing authorization code from Google',
+        error: "Unprocessable Entity",
+        code: "missing_code",
+        message: "Missing authorization code from Google",
         data: null,
       }),
     )
@@ -90,9 +90,9 @@ export async function googleCallbackHandler({
       return response.status(502).send(
         apiResponse({
           status: 502,
-          error: 'Bad Gateway',
-          code: 'missing_id_token',
-          message: 'No ID token returned from Google',
+          error: "Bad Gateway",
+          code: "missing_id_token",
+          message: "No ID token returned from Google",
           data: null,
         }),
       )
@@ -107,17 +107,17 @@ export async function googleCallbackHandler({
 
     const authLoginUrl = `${env.FRONTEND_URL}/auth/login`
     const errorCookieSettings: CookieSerializeOptions = {
-      path: '/',
+      path: "/",
       httpOnly: false,
-      sameSite: 'none',
+      sameSite: "none",
       secure: true,
     }
 
     if (!payload?.email) {
       return response
         .setCookie(
-          cookieKey('googleAuthError'),
-          'gacc_missing_email',
+          cookieKey("googleAuthError"),
+          "gacc_missing_email",
           errorCookieSettings,
         )
         .status(302)
@@ -130,8 +130,8 @@ export async function googleCallbackHandler({
     if (!user) {
       return response
         .setCookie(
-          cookieKey('googleAuthError'),
-          'gacc_user_not_found',
+          cookieKey("googleAuthError"),
+          "gacc_user_not_found",
           errorCookieSettings,
         )
         .status(302)
@@ -141,8 +141,8 @@ export async function googleCallbackHandler({
     if (!user.verified || !payload.email_verified) {
       return response
         .setCookie(
-          cookieKey('googleAuthError'),
-          'gacc_email_not_verified',
+          cookieKey("googleAuthError"),
+          "gacc_email_not_verified",
           errorCookieSettings,
         )
         .status(302)
@@ -166,9 +166,9 @@ export async function googleCallbackHandler({
     return response.status(500).send(
       apiResponse({
         status: 500,
-        error: 'Internal Server Error',
-        code: 'google_auth_failed',
-        message: 'Failed to authenticate with Google',
+        error: "Internal Server Error",
+        code: "google_auth_failed",
+        message: "Failed to authenticate with Google",
         data: null,
       }),
     )

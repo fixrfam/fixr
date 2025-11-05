@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
-import { cpf, unmask } from '@fixr/constants/masks'
-import { defaultMessages, messages } from '@fixr/constants/messages'
-import { roleLabels } from '@fixr/constants/roles'
-import { userJWT } from '@fixr/schemas/auth'
-import { createEmployeeSchema } from '@fixr/schemas/employees'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMaskito } from '@maskito/react'
-import { toast } from '@pheralb/toast'
-import { useQueryClient } from '@tanstack/react-query'
-import { AxiosError, AxiosResponse } from 'axios'
+import { cpf, unmask } from "@fixr/constants/masks"
+import { defaultMessages, messages } from "@fixr/constants/messages"
+import { roleLabels } from "@fixr/constants/roles"
+import { userJWT } from "@fixr/schemas/auth"
+import { createEmployeeSchema } from "@fixr/schemas/employees"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMaskito } from "@maskito/react"
+import { toast } from "@pheralb/toast"
+import { useQueryClient } from "@tanstack/react-query"
+import { AxiosError, AxiosResponse } from "axios"
 import {
   BriefcaseBusiness,
   Dices,
@@ -20,11 +20,11 @@ import {
   Mail,
   Plus,
   User,
-} from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+} from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -33,19 +33,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import PasswordInput from '@/components/ui/password-input'
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import PasswordInput from "@/components/ui/password-input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { axios } from '@/lib/auth/axios'
-import { api, tryCatch } from '@/lib/utils'
-import { generateRandomPassword } from '@/lib/utils/generateRandomPassword'
+} from "@/components/ui/select"
+import { axios } from "@/lib/auth/axios"
+import { api, tryCatch } from "@/lib/utils"
+import { generateRandomPassword } from "@/lib/utils/generateRandomPassword"
 
 export function CreateEmployeeForm({
   session,
@@ -59,13 +59,13 @@ export function CreateEmployeeForm({
   const form = useForm<z.infer<typeof createEmployeeSchema>>({
     resolver: zodResolver(createEmployeeSchema),
     defaultValues: {
-      cpf: '',
-      email: '',
-      name: '',
-      password: '',
+      cpf: "",
+      email: "",
+      name: "",
+      password: "",
     },
-    mode: 'all',
-    reValidateMode: 'onChange',
+    mode: "all",
+    reValidateMode: "onChange",
   })
 
   const queryClient = useQueryClient()
@@ -108,7 +108,7 @@ export function CreateEmployeeForm({
       })
 
       onSuccess()
-      queryClient.invalidateQueries({ queryKey: ['employeesData'] })
+      queryClient.invalidateQueries({ queryKey: ["employeesData"] })
     } finally {
       setLoading(false)
     }
@@ -118,7 +118,7 @@ export function CreateEmployeeForm({
   // const phoneMask = useMaskito({ options: { mask: phone } });
 
   function generatePwd() {
-    form.setValue('password', generateRandomPassword())
+    form.setValue("password", generateRandomPassword())
     form.trigger()
   }
 
@@ -191,7 +191,7 @@ export function CreateEmployeeForm({
                   placeholder="123.456.789-00"
                   {...field}
                   ref={cpfMask}
-                  onInput={(e) => form.setValue('cpf', e.currentTarget.value)}
+                  onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
                 />
               </FormControl>
               <FormMessage />
@@ -235,7 +235,7 @@ export function CreateEmployeeForm({
                   />
                   <Button
                     type="button"
-                    variant={'outline'}
+                    variant={"outline"}
                     onClick={() => generatePwd()}
                   >
                     <Dices className="size-3.5" />
@@ -254,7 +254,7 @@ export function CreateEmployeeForm({
             disabled={!form.formState.isValid || loading}
             className="w-full"
           >
-            Cadastrar{' '}
+            Cadastrar{" "}
             {!loading ? <Plus /> : <Loader2 className="animate-spin" />}
           </Button>
         </div>

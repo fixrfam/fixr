@@ -1,10 +1,10 @@
-import { cookieKey } from '@fixr/constants/cookies'
-import { db } from '@fixr/db/connection'
-import { oneTimeTokens, refreshTokens, users } from '@fixr/db/schema'
-import { and, eq, gte, sql } from 'drizzle-orm'
-import { FastifyReply } from 'fastify'
-import { env } from '../env'
-import { generateOneTimeToken } from '../helpers/tokens'
+import { cookieKey } from "@fixr/constants/cookies"
+import { db } from "@fixr/db/connection"
+import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema"
+import { and, eq, gte, sql } from "drizzle-orm"
+import { FastifyReply } from "fastify"
+import { env } from "../env"
+import { generateOneTimeToken } from "../helpers/tokens"
 
 export interface RefreshToken {
   token: string
@@ -19,8 +19,8 @@ export async function setRefreshToken(
   const cookieOptions = {
     httpOnly: true,
     expires: token.expires, // Adds 7 days to the current date
-    path: '/',
-    sameSite: 'none' as const,
+    path: "/",
+    sameSite: "none" as const,
     secure: true,
     domain: env.COOKIE_DOMAIN,
   }
@@ -46,7 +46,7 @@ export async function setRefreshToken(
   // Executing both operations in parallel cuz they don't depend on each other.
   await Promise.allSettled([createRefresh, deleteExpired])
 
-  response.setCookie(cookieKey('refreshToken'), token.token, cookieOptions)
+  response.setCookie(cookieKey("refreshToken"), token.token, cookieOptions)
 }
 
 export async function deleteRefreshToken(token: string) {
@@ -55,16 +55,16 @@ export async function deleteRefreshToken(token: string) {
 
 export function setJWTCookie(response: FastifyReply, token: string) {
   const cookieOptions = {
-    path: '/',
+    path: "/",
     httpOnly: false,
-    sameSite: 'none' as const,
+    sameSite: "none" as const,
     // expires: new Date(Date.now() + 10 * 1000),
     expires: new Date(Date.now() + 5 * 60 * 1000),
     secure: true,
     domain: env.COOKIE_DOMAIN,
   }
 
-  response.setCookie(cookieKey('session'), token, cookieOptions)
+  response.setCookie(cookieKey("session"), token, cookieOptions)
 }
 
 export async function createOneTimeToken({
@@ -74,7 +74,7 @@ export async function createOneTimeToken({
 }: {
   userId: string
   email: string
-  tokenType: 'confirmation' | 'password_reset' | 'account_deletion'
+  tokenType: "confirmation" | "password_reset" | "account_deletion"
 }) {
   const token = generateOneTimeToken()
 

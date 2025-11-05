@@ -1,29 +1,29 @@
-import { createId } from '@paralleldrive/cuid2'
+import { createId } from "@paralleldrive/cuid2"
 import {
   mysqlEnum,
   mysqlTable,
   timestamp,
   varchar,
-} from 'drizzle-orm/mysql-core'
+} from "drizzle-orm/mysql-core"
 
-import { users } from './users'
+import { users } from "./users"
 
-export const ottTypeEnum = mysqlEnum('ott_type', [
-  'confirmation',
-  'password_reset',
-  'account_deletion',
+export const ottTypeEnum = mysqlEnum("ott_type", [
+  "confirmation",
+  "password_reset",
+  "account_deletion",
 ])
 
-export const oneTimeTokens = mysqlTable('one_time_tokens', {
-  id: varchar('id', { length: 25 })
+export const oneTimeTokens = mysqlTable("one_time_tokens", {
+  id: varchar("id", { length: 25 })
     .$defaultFn(() => createId())
     .primaryKey(),
-  token: varchar('token', { length: 128 }).notNull().unique(),
+  token: varchar("token", { length: 128 }).notNull().unique(),
   tokenType: ottTypeEnum.notNull(),
-  relatesTo: varchar('relates_to', { length: 255 }),
-  userId: varchar('user_id', { length: 25 }).references(() => users.id, {
-    onDelete: 'cascade',
+  relatesTo: varchar("relates_to", { length: 255 }),
+  userId: varchar("user_id", { length: 25 }).references(() => users.id, {
+    onDelete: "cascade",
   }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
 })

@@ -1,7 +1,7 @@
-import { ClipboardPlus } from 'lucide-react'
-import { BackButton } from '@/components/dashboard/back-button'
-import { Heading } from '@/components/dashboard/heading'
-import { NewServiceOrderForm } from '@/components/dashboard/service-order/new-service-order-form'
+import { ClipboardPlus } from "lucide-react"
+import { BackButton } from "@/components/dashboard/back-button"
+import { Heading } from "@/components/dashboard/heading"
+import { NewServiceOrderForm } from "@/components/dashboard/service-order/new-service-order-form"
 
 export default function NewServiceOrderPage() {
   return (

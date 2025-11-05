@@ -1,7 +1,7 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { apiResponse, httpStatusCodes } from '../helpers/response'
-import { queryUserById } from '../services/auth.services'
-import { isFastifyError } from './utils'
+import { FastifyReply, FastifyRequest } from "fastify"
+import { apiResponse, httpStatusCodes } from "../helpers/response"
+import { queryUserById } from "../services/auth.services"
+import { isFastifyError } from "./utils"
 
 export const authenticateEmployee = async (
   req: FastifyRequest,
@@ -19,20 +19,20 @@ export const authenticateEmployee = async (
       return res.status(404).send(
         apiResponse({
           status: 404,
-          error: 'Not Found',
-          code: 'user_not_found',
-          message: 'User not found',
+          error: "Not Found",
+          code: "user_not_found",
+          message: "User not found",
           data: null,
         }),
       )
     }
-    if (user.profileType !== 'employee') {
+    if (user.profileType !== "employee") {
       return res.status(403).send(
         apiResponse({
           status: 404,
-          error: 'Forbidden',
-          code: 'not_allowed',
-          message: 'You are not allowed to perform this action.',
+          error: "Forbidden",
+          code: "not_allowed",
+          message: "You are not allowed to perform this action.",
           data: null,
         }),
       )

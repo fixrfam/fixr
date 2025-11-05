@@ -1,16 +1,16 @@
-'use client'
+"use client"
 
-import * as icons from 'lucide-react'
-import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import * as icons from "lucide-react"
+import Link from "next/link"
+import { useParams, usePathname } from "next/navigation"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import { useSidebarStore } from '@/lib/hooks/stores/use-sidebar-store'
-import { cn } from '@/lib/utils'
-import { SidebarItem } from './types'
+} from "@/components/ui/collapsible"
+import { useSidebarStore } from "@/lib/hooks/stores/use-sidebar-store"
+import { cn } from "@/lib/utils"
+import { SidebarItem } from "./types"
 
 export function SidebarButton({
   data,
@@ -26,7 +26,7 @@ export function SidebarButton({
 
   const { close } = useSidebarStore()
 
-  if (data.type === 'route') {
+  if (data.type === "route") {
     const { id, label, href } = data
 
     const path = `/dashboard/${params.subdomain}${href}`
@@ -36,13 +36,13 @@ export function SidebarButton({
       <Link id={id} href={path} prefetch onClick={() => close()}>
         <div
           className={cn(
-            'text-secondary-foreground pr-2 py-1.5 text-sm rounded-sm inline-flex items-center gap-2 w-full relative',
-            !active ? 'hover:bg-muted/50' : 'bg-primary/10 text-primary',
+            "text-secondary-foreground pr-2 py-1.5 text-sm rounded-sm inline-flex items-center gap-2 w-full relative",
+            !active ? "hover:bg-muted/50" : "bg-primary/10 text-primary",
           )}
           style={{
             paddingLeft: nestingLevel
               ? `calc(${nestingLevel + 1}rem - 0.25rem)`
-              : '0.5rem',
+              : "0.5rem",
           }}
         >
           {active && nestingLevel ? (

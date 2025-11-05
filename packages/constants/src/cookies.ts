@@ -1,4 +1,4 @@
-import { APP_NAME } from './app'
+import { APP_NAME } from "./app"
 
 /**
  * Generates a standardized cookie key using the app's name.
@@ -12,7 +12,7 @@ import { APP_NAME } from './app'
 export const cookieKey = (name: string): `__${typeof name}__${string}` => {
   const sanitizedAppName = APP_NAME.trim()
     .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, '')
+    .replace(/[^a-z0-9_-]/g, "")
 
   return `__${name}__${sanitizedAppName}`
 }

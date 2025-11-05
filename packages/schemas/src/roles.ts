@@ -1,9 +1,9 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const employeeRoles = z.enum([
-  'admin',
-  'manager',
-  'warehouse',
-  'financial',
-  'technician',
+  "admin",
+  "manager",
+  "warehouse",
+  "financial",
+  "technician",
 ])

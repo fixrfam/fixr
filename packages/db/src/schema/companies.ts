@@ -1,17 +1,17 @@
-import { createId } from '@paralleldrive/cuid2'
-import { mysqlTable, text, timestamp, varchar } from 'drizzle-orm/mysql-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { z } from 'zod'
+import { createId } from "@paralleldrive/cuid2"
+import { mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core"
+import { createInsertSchema, createSelectSchema } from "drizzle-zod"
+import { z } from "zod"
 
-export const companies = mysqlTable('companies', {
-  id: varchar('id', { length: 25 })
+export const companies = mysqlTable("companies", {
+  id: varchar("id", { length: 25 })
     .$defaultFn(() => createId())
     .primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  cnpj: varchar('cnpj', { length: 14 }).unique().notNull(),
-  address: varchar('address', { length: 255 }),
-  subdomain: varchar('subdomain', { length: 32 }).unique().notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  cnpj: varchar("cnpj", { length: 14 }).unique().notNull(),
+  address: varchar("address", { length: 255 }),
+  subdomain: varchar("subdomain", { length: 32 }).unique().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
 /**

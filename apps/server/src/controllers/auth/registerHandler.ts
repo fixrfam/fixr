@@ -1,20 +1,20 @@
-import { APP_NAME } from '@fixr/constants/app'
+import { APP_NAME } from "@fixr/constants/app"
 import {
   emailDisplayName,
   sendAccountVerificationEmail,
-} from '@fixr/mail/services'
-import { createUserSchema } from '@fixr/schemas/auth'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
-import { env } from '@/src/env'
-import { apiResponse } from '@/src/helpers/response'
-import { hashPassword } from '../../helpers/hash-password'
+} from "@fixr/mail/services"
+import { createUserSchema } from "@fixr/schemas/auth"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { z } from "zod"
+import { env } from "@/src/env"
+import { apiResponse } from "@/src/helpers/response"
+import { hashPassword } from "../../helpers/hash-password"
 import {
   createUser,
   deleteUser,
   queryUserByEmail,
-} from '../../services/auth.services'
-import { createOneTimeToken } from '../../services/tokens.services'
+} from "../../services/auth.services"
+import { createOneTimeToken } from "../../services/tokens.services"
 
 export async function registerHandler({
   body,
@@ -33,9 +33,9 @@ export async function registerHandler({
     return response.status(409).send(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'email_already_used',
-        message: 'Email is already registered.',
+        error: "Conflict",
+        code: "email_already_used",
+        message: "Email is already registered.",
         data: null,
       }),
     )
@@ -53,7 +53,7 @@ export async function registerHandler({
   const oneTimeToken = await createOneTimeToken({
     email: newUser.email,
     userId: newUser.id,
-    tokenType: 'confirmation',
+    tokenType: "confirmation",
   })
 
   const redirectUrl = `${env.FRONTEND_URL}/auth/login`
@@ -71,9 +71,9 @@ export async function registerHandler({
     return response.status(500).send(
       apiResponse({
         status: 500,
-        error: 'Internal Server Error',
-        code: 'verification_email_failed',
-        message: 'Failed to send verification email',
+        error: "Internal Server Error",
+        code: "verification_email_failed",
+        message: "Failed to send verification email",
         data: null,
       }),
     )
@@ -83,8 +83,8 @@ export async function registerHandler({
     apiResponse({
       status: 201,
       error: null,
-      code: 'user_registered_success',
-      message: 'User registered successfully',
+      code: "user_registered_success",
+      message: "User registered successfully",
       data: null,
     }),
   )

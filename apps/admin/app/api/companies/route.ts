@@ -1,18 +1,18 @@
-import { APP_NAME } from '@fixr/constants/app'
-import { unmask } from '@fixr/constants/masks'
-import { createEmailQueue, queueEmail } from '@fixr/mail/queue'
-import { emailDisplayName } from '@fixr/mail/services'
-import { createCompanySchema } from '@fixr/schemas/companies'
-import { NextRequest, NextResponse } from 'next/server'
-import { redis } from '@/lib/redis'
+import { APP_NAME } from "@fixr/constants/app"
+import { unmask } from "@fixr/constants/masks"
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue"
+import { emailDisplayName } from "@fixr/mail/services"
+import { createCompanySchema } from "@fixr/schemas/companies"
+import { NextRequest, NextResponse } from "next/server"
+import { redis } from "@/lib/redis"
 import {
   createOrgWithAdmin,
   getCompanyByCnpj,
   getCompanyBySubdomain,
   getEmployeeByCpf,
   getUserByEmail,
-} from '@/lib/services/companies'
-import { apiResponse, tryCatch } from '@/lib/utils'
+} from "@/lib/services/companies"
+import { apiResponse, tryCatch } from "@/lib/utils"
 
 export async function POST(req: NextRequest) {
   const { data, error } = await tryCatch(
@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiResponse({
         status: 400,
-        error: 'Bad request',
-        code: 'schema_mismatch',
-        message: 'Schema mismatch the expected one.',
+        error: "Bad request",
+        code: "schema_mismatch",
+        message: "Schema mismatch the expected one.",
         data: null,
       }),
     )
@@ -49,9 +49,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'cpf_conflict',
-        message: 'CPF is already registered.',
+        error: "Conflict",
+        code: "cpf_conflict",
+        message: "CPF is already registered.",
         data: null,
       }),
       { status: 409 },
@@ -61,9 +61,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'cnpj_conflict',
-        message: 'CNPJ is already registered.',
+        error: "Conflict",
+        code: "cnpj_conflict",
+        message: "CNPJ is already registered.",
         data: null,
       }),
       { status: 409 },
@@ -73,9 +73,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'email_already_exists',
-        message: 'Email is already used.',
+        error: "Conflict",
+        code: "email_already_exists",
+        message: "Email is already used.",
         data: null,
       }),
       { status: 409 },
@@ -85,9 +85,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'subdomain_taken',
-        message: 'Subdomain is already taken.',
+        error: "Conflict",
+        code: "subdomain_taken",
+        message: "Subdomain is already taken.",
         data: null,
       }),
       { status: 409 },
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
   const emailQueue = createEmailQueue(redis)
 
   await queueEmail(emailQueue, {
-    job: 'sendInviteEmail',
+    job: "sendInviteEmail",
     payload: {
       to: data.owner_email,
       appName: APP_NAME,
@@ -113,8 +113,8 @@ export async function POST(req: NextRequest) {
     apiResponse({
       status: 201,
       error: null,
-      code: 'company_create_success',
-      message: 'Company created successfully.',
+      code: "company_create_success",
+      message: "Company created successfully.",
       data: null,
     }),
     { status: 201 },

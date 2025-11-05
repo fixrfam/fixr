@@ -1,48 +1,48 @@
-'use client'
+"use client"
 
-import { SignOutButton, UserButton, useUser } from '@clerk/nextjs'
-import { Building2, LogOut } from 'lucide-react'
-import * as React from 'react'
-import FixrIcon from '@/components/FixrIcon'
-import { NavMain } from '@/components/sidebar/nav-main'
-import { TeamSwitcher } from '@/components/sidebar/team-switcher'
+import { SignOutButton, UserButton, useUser } from "@clerk/nextjs"
+import { Building2, LogOut } from "lucide-react"
+import * as React from "react"
+import FixrIcon from "@/components/FixrIcon"
+import { NavMain } from "@/components/sidebar/nav-main"
+import { TeamSwitcher } from "@/components/sidebar/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from '@/components/ui/sidebar'
-import { Button } from '../ui/button'
+} from "@/components/ui/sidebar"
+import { Button } from "../ui/button"
 
 // This is sample data.
 const data = {
   user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
   },
   teams: [
     {
-      name: 'Fixr',
+      name: "Fixr",
       logo: FixrIcon,
-      plan: 'Enterprise',
+      plan: "Enterprise",
     },
   ],
   navMain: [
     {
-      title: 'Empresas',
-      url: '/dash/companies',
+      title: "Empresas",
+      url: "/dash/companies",
       icon: Building2,
       isActive: true,
       items: [
         {
-          title: 'Lista',
-          url: '/dash/companies',
+          title: "Lista",
+          url: "/dash/companies",
         },
         {
-          title: 'Nova',
-          url: '/dash/companies/new',
+          title: "Nova",
+          url: "/dash/companies/new",
         },
       ],
     },
@@ -94,11 +94,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </p>
                 </>
               ) : (
-                'Carregando...'
+                "Carregando..."
               )}
             </div>
           </div>
-          <Button asChild variant={'ghost'} size={'icon'}>
+          <Button asChild variant={"ghost"} size={"icon"}>
             <SignOutButton>
               <span>
                 <LogOut />

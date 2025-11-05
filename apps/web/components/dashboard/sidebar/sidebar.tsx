@@ -1,28 +1,28 @@
-'use client'
+"use client"
 
-import { userJWT } from '@fixr/schemas/auth'
-import { PanelLeft, Search } from 'lucide-react'
-import { z } from 'zod'
-import { Avatar } from '@/components/account/profile-avatar'
-import { ModeToggle } from '@/components/mode-toggle'
-import { TextLogo } from '@/components/svg/TextLogo'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { useSidebarStore } from '@/lib/hooks/stores/use-sidebar-store'
-import { useMediaQuery } from '@/lib/hooks/use-media-query'
-import { cn } from '@/lib/utils'
-import { AccountPopover } from '../account-popover'
-import { SidebarButton } from './sidebar-button'
-import { sidebarSections } from './sidebar-routes'
+import { userJWT } from "@fixr/schemas/auth"
+import { PanelLeft, Search } from "lucide-react"
+import { z } from "zod"
+import { Avatar } from "@/components/account/profile-avatar"
+import { ModeToggle } from "@/components/mode-toggle"
+import { TextLogo } from "@/components/svg/TextLogo"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useSidebarStore } from "@/lib/hooks/stores/use-sidebar-store"
+import { useMediaQuery } from "@/lib/hooks/use-media-query"
+import { cn } from "@/lib/utils"
+import { AccountPopover } from "../account-popover"
+import { SidebarButton } from "./sidebar-button"
+import { sidebarSections } from "./sidebar-routes"
 
 export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
   const { isOpen, close } = useSidebarStore()
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
+  const isDesktop = useMediaQuery("(min-width: 1024px)")
 
   return (
     <>
       <aside
-        data-state={isOpen ? 'open' : 'closed'}
+        data-state={isOpen ? "open" : "closed"}
         className={cn(
           `w-[286px] h-[calc(100dvh-(2*0.625rem))] left-2.5 top-2.5 z-99
                     fixed rounded-md border border-border bg-background flex flex-col justify-between select-none transition-transform`,
@@ -32,7 +32,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
       >
         <div className="flex w-full justify-between items-center px-5">
           <TextLogo className="size-16 text-primary" />
-          <Button variant={'ghost'} size={'icon'} onClick={close}>
+          <Button variant={"ghost"} size={"icon"} onClick={close}>
             <PanelLeft className="text-muted-foreground" />
           </Button>
         </div>
@@ -57,23 +57,23 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
           </div>
           <div className="w-full px-5">
             <Button
-              variant={'outline'}
+              variant={"outline"}
               className="h-8.5 bg-muted/50 hover:bg-muted text-muted-foreground px-3 text-[0.8rem] w-full justify-between"
             >
               <div className="inline-flex items-center gap-1.5">
-                <Search className={'size-4'} />
+                <Search className={"size-4"} />
                 Acesso rápido
               </div>
               <div className="inline-flex items-center gap-1.5">
                 <Badge
                   className="rounded-[4px] px-0.5 min-w-5 bg-background text-muted-foreground grid place-items-center"
-                  variant={'outline'}
+                  variant={"outline"}
                 >
                   ⌘
                 </Badge>
                 <Badge
                   className="rounded-[4px] px-0.5 min-w-5 bg-background text-muted-foreground grid place-items-center"
-                  variant={'outline'}
+                  variant={"outline"}
                 >
                   K
                 </Badge>
@@ -88,8 +88,8 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
                         linear-gradient(to bottom, transparent, white 1rem),
                         linear-gradient(to top, transparent, white 1rem)
                     `,
-            maskComposite: 'intersect',
-            WebkitMaskComposite: 'destination-in',
+            maskComposite: "intersect",
+            WebkitMaskComposite: "destination-in",
           }}
         >
           {sidebarSections.map((section, i) => (
@@ -119,11 +119,11 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
       </aside>
       <div
         className={cn(
-          'fixed w-full h-dvh z-98 bg-background/5 backdrop-blur-xs transition-all',
-          isDesktop && 'hidden',
+          "fixed w-full h-dvh z-98 bg-background/5 backdrop-blur-xs transition-all",
+          isDesktop && "hidden",
           !isDesktop && !isOpen
-            ? 'opacity-0 pointer-events-none'
-            : 'opacity-100 pointer-events-auto',
+            ? "opacity-0 pointer-events-none"
+            : "opacity-100 pointer-events-auto",
         )}
         onClick={close}
       ></div>

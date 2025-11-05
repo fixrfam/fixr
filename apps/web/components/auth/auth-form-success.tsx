@@ -1,6 +1,6 @@
-import { ArrowRight, CircleCheck } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '../ui/button'
+import { ArrowRight, CircleCheck } from "lucide-react"
+import Link from "next/link"
+import { Button } from "../ui/button"
 
 export default function AuthFormSuccess({
   title,

@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import { useParams, usePathname } from 'next/navigation'
-import { Logo } from '@/components/svg/Logo'
-import { getDashboardRouteName } from '@/lib/utils/getDashboardRouteName'
-import { DashLink } from '../dash-link'
-import { FloatingToggle } from './floating-toggle'
+import { useParams, usePathname } from "next/navigation"
+import { Logo } from "@/components/svg/Logo"
+import { getDashboardRouteName } from "@/lib/utils/getDashboardRouteName"
+import { DashLink } from "../dash-link"
+import { FloatingToggle } from "./floating-toggle"
 
 export function Header() {
   const pathname = usePathname()

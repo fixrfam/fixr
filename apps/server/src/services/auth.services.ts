@@ -1,17 +1,17 @@
-import { db } from '@fixr/db/connection'
+import { db } from "@fixr/db/connection"
 import {
   clients,
   companies,
   employees,
   refreshTokens,
   users,
-} from '@fixr/db/schema'
-import { createUserSchema, jwtPayload, userSchema } from '@fixr/schemas/auth'
-import { eq, sql } from 'drizzle-orm'
-import { TokenPayload } from 'google-auth-library'
-import { z } from 'zod'
-import { redis } from '../config/redis'
-import { CACHE_TTL, jwtPayloadCacheKey, userCacheKey } from '../helpers/cache'
+} from "@fixr/db/schema"
+import { createUserSchema, jwtPayload, userSchema } from "@fixr/schemas/auth"
+import { eq, sql } from "drizzle-orm"
+import { TokenPayload } from "google-auth-library"
+import { z } from "zod"
+import { redis } from "../config/redis"
+import { CACHE_TTL, jwtPayloadCacheKey, userCacheKey } from "../helpers/cache"
 
 export async function queryUserById(id: string) {
   const cacheKey = userCacheKey(id)
@@ -42,7 +42,7 @@ export async function queryUserById(id: string) {
     .where(eq(users.id, id))
     .limit(1)
 
-  await redis.set(cacheKey, JSON.stringify(user), 'EX', CACHE_TTL)
+  await redis.set(cacheKey, JSON.stringify(user), "EX", CACHE_TTL)
 
   return userSchema.parse(user)
 }
@@ -122,7 +122,7 @@ export async function queryJWTPayloadByUserId(userId: string) {
 
   console.log(payload)
 
-  await redis.set(cacheKey, JSON.stringify(payload), 'EX', CACHE_TTL)
+  await redis.set(cacheKey, JSON.stringify(payload), "EX", CACHE_TTL)
 
   return jwtPayload.parse(payload)
 }
@@ -149,7 +149,7 @@ export async function queryTokenData(token: string) {
 }
 
 export async function createUser(
-  user: Omit<z.infer<typeof createUserSchema>, 'password'> & {
+  user: Omit<z.infer<typeof createUserSchema>, "password"> & {
     passwordHash: string
   },
 ) {

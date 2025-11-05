@@ -1,17 +1,17 @@
-'use client'
+"use client"
 
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import HomeDark from '@/public/home_dark.webp'
-import HomeLight from '@/public/home_light.webp'
-import Grid from '../../Grid'
+import { motion } from "framer-motion"
+import Image from "next/image"
+import HomeDark from "@/public/home_dark.webp"
+import HomeLight from "@/public/home_light.webp"
+import Grid from "../../Grid"
 
 export const AppPreview = () => {
   return (
     <motion.div
       initial={{ y: 10, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       className="p-1 lg:p-2 rounded-2xl lg:rounded-4xl border-accent border-2 relative bg-background"
     >
       <div
@@ -30,12 +30,12 @@ export const AppPreview = () => {
         className="absolute z-1 w-full h-1/4 top-[30px] left-1/2 -translate-x-1/2 -translate-y-full"
         style={{
           maskImage:
-            'radial-gradient(ellipse 60% 100% at 50% 100%, black 20%, transparent 80%)',
+            "radial-gradient(ellipse 60% 100% at 50% 100%, black 20%, transparent 80%)",
           WebkitMaskImage:
-            'radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 80%)',
+            "radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 80%)",
         }}
       >
-        <Grid stroke={'var(--primary)'} className="stroke-red-300 opacity-10" />
+        <Grid stroke={"var(--primary)"} className="stroke-red-300 opacity-10" />
       </div>
     </motion.div>
   )

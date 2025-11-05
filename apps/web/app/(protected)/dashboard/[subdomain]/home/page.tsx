@@ -1,4 +1,4 @@
-import { Heading } from '@/components/dashboard/heading'
+import { Heading } from "@/components/dashboard/heading"
 
 export default function Home() {
   return (

@@ -1,19 +1,19 @@
-import { roleLabels } from '@fixr/constants/roles'
-import { accountSchema } from '@fixr/schemas/account'
-import { employeeRoles } from '@fixr/schemas/roles'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { BriefcaseBusiness, Building2 } from 'lucide-react'
-import { z } from 'zod'
-import { Avatar } from '@/components/account/profile-avatar'
-import { Settings } from '@/components/account/settings'
-import { SignOutButton } from '@/components/auth/signout-button'
-import { Heading } from '@/components/dashboard/heading'
-import { Separator } from '@/components/ui/separator'
-import { axios } from '@/lib/auth/axios'
+import { roleLabels } from "@fixr/constants/roles"
+import { accountSchema } from "@fixr/schemas/account"
+import { employeeRoles } from "@fixr/schemas/roles"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { BriefcaseBusiness, Building2 } from "lucide-react"
+import { z } from "zod"
+import { Avatar } from "@/components/account/profile-avatar"
+import { Settings } from "@/components/account/settings"
+import { SignOutButton } from "@/components/auth/signout-button"
+import { Heading } from "@/components/dashboard/heading"
+import { Separator } from "@/components/ui/separator"
+import { axios } from "@/lib/auth/axios"
 
 export default async function ServerPage() {
   const res =
-    await axios.get<ApiResponse<z.infer<typeof accountSchema>>>('/account')
+    await axios.get<ApiResponse<z.infer<typeof accountSchema>>>("/account")
 
   const content = res.data.data
 
@@ -25,7 +25,7 @@ export default async function ServerPage() {
           description="Gerencie as configurações da sua conta."
         />
         <div className="flex gap-2 items-center">
-          <SignOutButton variant={'outline'}>Sair</SignOutButton>
+          <SignOutButton variant={"outline"}>Sair</SignOutButton>
         </div>
       </div>
       <div className="w-full flex flex-col lg:flex-row gap-10">
@@ -38,9 +38,9 @@ export default async function ServerPage() {
           <div className="space-y-5">
             <div>
               <h2
-                className={`text-3xl w-full tracking-tight truncate ${content?.displayName && 'font-semibold'}`}
+                className={`text-3xl w-full tracking-tight truncate ${content?.displayName && "font-semibold"}`}
               >
-                {content?.displayName ?? 'Sem nome de exibição'}
+                {content?.displayName ?? "Sem nome de exibição"}
               </h2>
               <p className="text-muted-foreground">{content?.email}</p>
             </div>

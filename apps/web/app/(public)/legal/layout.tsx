@@ -1,5 +1,5 @@
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function MdxLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +14,7 @@ export default function MdxLayout({ children }: { children: React.ReactNode }) {
         ></div>
       </div>
       <main className="max-w-7xl mx-auto z-10 relative px-6 pt-32">
-        <Link href={'/'} className="text-muted-foreground text-sm">
+        <Link href={"/"} className="text-muted-foreground text-sm">
           <ArrowLeft className="scale-75 inline-block" /> Voltar para o início
         </Link>
         <div className="flex gap-4 items-center flex-wrap my-6">

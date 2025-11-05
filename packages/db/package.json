@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "tsc --watch",
-    "build": "tsc",
+    "build": "biome check && tsc",
     "migrate": "dotenv -- tsx src/migrate.ts",
     "generate": "dotenv -- drizzle-kit generate",
     "studio": "dotenv -- drizzle-kit studio",

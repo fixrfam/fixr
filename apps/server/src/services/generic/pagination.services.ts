@@ -1,9 +1,9 @@
-import { db } from '@fixr/db/connection'
-import { count, getTableColumns, SQL } from 'drizzle-orm'
-import { AnyMySqlColumn, MySqlTable } from 'drizzle-orm/mysql-core'
+import { db } from "@fixr/db/connection"
+import { count, getTableColumns, SQL } from "drizzle-orm"
+import { AnyMySqlColumn, MySqlTable } from "drizzle-orm/mysql-core"
 
 type Join = {
-  type: 'inner' | 'left' | 'right' | 'full'
+  type: "inner" | "left" | "right" | "full"
   table: MySqlTable
   on: SQL
 }
@@ -37,16 +37,16 @@ export async function getPaginatedRecords({
   if (joins) {
     for (const join of joins) {
       switch (join.type) {
-        case 'inner':
+        case "inner":
           baseQuery.innerJoin(join.table, join.on)
           break
-        case 'left':
+        case "left":
           baseQuery.leftJoin(join.table, join.on)
           break
-        case 'right':
+        case "right":
           baseQuery.rightJoin(join.table, join.on)
           break
-        case 'full':
+        case "full":
           baseQuery.fullJoin(join.table, join.on)
           break
       }

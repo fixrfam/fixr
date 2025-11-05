@@ -5,9 +5,9 @@ import {
   Link,
   Row,
   Section,
-} from '@react-email/components'
-import React from 'react'
-import { whiteLogoUrl } from '../src'
+} from "@react-email/components"
+import React from "react"
+import { whiteLogoUrl } from "../src"
 
 export const FixrHeader = () => {
   return (

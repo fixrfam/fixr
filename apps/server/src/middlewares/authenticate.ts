@@ -1,7 +1,7 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { apiResponse, httpStatusCodes } from '../helpers/response'
-import { queryUserById } from '../services/auth.services'
-import { isFastifyError } from './utils'
+import { FastifyReply, FastifyRequest } from "fastify"
+import { apiResponse, httpStatusCodes } from "../helpers/response"
+import { queryUserById } from "../services/auth.services"
+import { isFastifyError } from "./utils"
 
 export const authenticate = async (
   req: FastifyRequest,
@@ -19,9 +19,9 @@ export const authenticate = async (
       return res.status(404).send(
         apiResponse({
           status: 404,
-          error: 'Not Found',
-          code: 'user_not_found',
-          message: 'User not found',
+          error: "Not Found",
+          code: "user_not_found",
+          message: "User not found",
           data: null,
         }),
       )

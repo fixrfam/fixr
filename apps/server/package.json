@@ -9,7 +9,7 @@
     "test": "dotenv -- vitest",
     "start": "dotenv -- tsx src/server.ts",
     "dev": "dotenv -- tsx watch src/server.ts",
-    "build": "dotenv -- tsup src",
+    "build": "biome check && dotenv -- tsup src",
     "lint": "biome check",
     "lint:write": "biome check --write"
   },

@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { use, useState } from 'react'
-import AuthFormSuccess from '@/components/auth/auth-form-success'
-import { ResetPasswordForm } from '@/components/reset-password-form'
+import { use, useState } from "react"
+import AuthFormSuccess from "@/components/auth/auth-form-success"
+import { ResetPasswordForm } from "@/components/reset-password-form"
 
 export default function ChangePasswordPage(props: {
   params: Promise<{ token: string }>

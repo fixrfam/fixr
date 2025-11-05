@@ -1,9 +1,9 @@
-import { db } from '@fixr/db/connection'
-import { companies, employees, users } from '@fixr/db/schema'
-import { createCompanySchema } from '@fixr/schemas/companies'
-import { eq } from 'drizzle-orm'
-import { z } from 'zod'
-import { hashPassword } from '../pwd'
+import { db } from "@fixr/db/connection"
+import { companies, employees, users } from "@fixr/db/schema"
+import { createCompanySchema } from "@fixr/schemas/companies"
+import { eq } from "drizzle-orm"
+import { z } from "zod"
+import { hashPassword } from "../pwd"
 
 export async function getEmployeeByCpf(cpf: string) {
   const [data] = await db.select().from(employees).where(eq(employees.cpf, cpf))
@@ -47,8 +47,8 @@ export async function createOrgWithAdmin(
 
   const [employeeId] = await db.insert(employees).values({
     cpf: data.owner_cpf,
-    name: 'Admin',
-    role: 'admin',
+    name: "Admin",
+    role: "admin",
     userId: adminId!.id,
     companyId: orgId!.id,
   }) // Without this $inferInsert type assingning, this bug shows up: https://github.com/drizzle-team/drizzle-orm/issues/2889#issuecomment-232316575

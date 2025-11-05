@@ -1,28 +1,28 @@
-import { userJWT } from '@fixr/schemas/auth'
-import { Settings } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { z } from 'zod'
-import { emailDisplayName } from '@/lib/auth/utils'
-import { cn } from '@/lib/utils'
-import { Avatar, AvatarProps } from '../account/profile-avatar'
-import { SignOutButton } from '../auth/signout-button'
-import { Button } from '../ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { DashLink } from './dash-link'
+import { userJWT } from "@fixr/schemas/auth"
+import { Settings } from "lucide-react"
+import { useParams } from "next/navigation"
+import { z } from "zod"
+import { emailDisplayName } from "@/lib/auth/utils"
+import { cn } from "@/lib/utils"
+import { Avatar, AvatarProps } from "../account/profile-avatar"
+import { SignOutButton } from "../auth/signout-button"
+import { Button } from "../ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { DashLink } from "./dash-link"
 
 export function AccountPopover({
   session,
   showData,
-  variant = 'rounded',
+  variant = "rounded",
   className,
 }: {
   session: z.infer<typeof userJWT>
-  variant?: AvatarProps['variant']
+  variant?: AvatarProps["variant"]
   className?: string
   showData?: boolean
 }) {
   const displayName =
-    session.displayName || emailDisplayName(session.email || '')
+    session.displayName || emailDisplayName(session.email || "")
   const params = useParams<{ subdomain: string }>()
 
   return (
@@ -30,12 +30,12 @@ export function AccountPopover({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            'flex gap-4 items-center min-w-0 cursor-pointer',
+            "flex gap-4 items-center min-w-0 cursor-pointer",
             className,
           )}
         >
           <Avatar
-            fallbackHash={session?.id ?? ''}
+            fallbackHash={session?.id ?? ""}
             className="size-9! hover:cursor-pointer"
             variant={variant}
             src={session.avatarUrl}
@@ -60,7 +60,7 @@ export function AccountPopover({
             className="cursor-pointer"
           >
             <Avatar
-              fallbackHash={session?.id ?? ''}
+              fallbackHash={session?.id ?? ""}
               className="size-12 text-4xl"
               variant="square"
               src={session.avatarUrl}

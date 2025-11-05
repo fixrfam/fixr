@@ -1,17 +1,17 @@
-'use client'
+"use client"
 
-import { confirmPasswordResetSchema as baseConfirmPasswordResetSchema } from '@fixr/schemas/credentials'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import axios, { AxiosError } from 'axios'
-import { Loader2, Lock } from 'lucide-react'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api, cn } from '@/lib/utils'
-import { Button } from './ui/button'
+import { confirmPasswordResetSchema as baseConfirmPasswordResetSchema } from "@fixr/schemas/credentials"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import axios, { AxiosError } from "axios"
+import { Loader2, Lock } from "lucide-react"
+import { Dispatch, SetStateAction, useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api, cn } from "@/lib/utils"
+import { Button } from "./ui/button"
 import {
   Form,
   FormControl,
@@ -20,8 +20,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from './ui/form'
-import { Input } from './ui/input'
+} from "./ui/form"
+import { Input } from "./ui/input"
 
 export function ResetPasswordForm({
   onSuccess,
@@ -36,37 +36,37 @@ export function ResetPasswordForm({
     .extend({
       password: z
         .string()
-        .min(8, { message: 'Deve ter pelo menos 8 caracteres.' })
-        .max(128, { message: 'Deve ter no máximo 128 caracteres.' })
+        .min(8, { message: "Deve ter pelo menos 8 caracteres." })
+        .max(128, { message: "Deve ter no máximo 128 caracteres." })
         .refine((password) => /[A-Z]/.test(password), {
-          message: 'Deve conter pelo menos uma letra maiúscula.',
+          message: "Deve conter pelo menos uma letra maiúscula.",
         })
         .refine((password) => /[a-z]/.test(password), {
-          message: 'Deve conter pelo menos uma letra minúscula.',
+          message: "Deve conter pelo menos uma letra minúscula.",
         })
         .refine((password) => /[0-9]/.test(password), {
-          message: 'Deve conter pelo menos um número.',
+          message: "Deve conter pelo menos um número.",
         })
         .refine((password) => /[#?!@$%^&*-]/.test(password), {
-          message: 'Deve conter pelo menos um caractere especial.',
+          message: "Deve conter pelo menos um caractere especial.",
         }),
       confirmPassword: z
-        .string({ required_error: 'Por favor, confirme sua senha.' })
-        .min(1, { message: 'Confirme sua senha.' }),
+        .string({ required_error: "Por favor, confirme sua senha." })
+        .min(1, { message: "Confirme sua senha." }),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: 'As senhas não coincidem.',
-      path: ['confirmPassword'],
+      message: "As senhas não coincidem.",
+      path: ["confirmPassword"],
     })
 
   const form = useForm<z.infer<typeof confirmPasswordResetSchema>>({
     resolver: zodResolver(confirmPasswordResetSchema),
     defaultValues: {
       token: token,
-      password: '',
-      confirmPassword: '',
+      password: "",
+      confirmPassword: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   const { formState } = form
@@ -75,7 +75,7 @@ export function ResetPasswordForm({
     setLoading(true)
     try {
       const res = await axios.put<ApiResponse>(
-        api('/credentials/password/reset'),
+        api("/credentials/password/reset"),
         { token: token, password: values.password },
         {
           withCredentials: true,
@@ -107,7 +107,7 @@ export function ResetPasswordForm({
   return (
     <Form {...form}>
       <form
-        className={cn('flex flex-col gap-6')}
+        className={cn("flex flex-col gap-6")}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -168,7 +168,7 @@ export function ResetPasswordForm({
             disabled={loading || !formState.isValid}
           >
             {!loading ? (
-              'Alterar senha'
+              "Alterar senha"
             ) : (
               <Loader2 className="animate-spin size-4" />
             )}

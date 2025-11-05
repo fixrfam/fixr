@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import { ExternalLink } from 'lucide-react'
-import Link from 'next/link'
-import { ModeToggle } from '@/components/mode-toggle'
-import { TextLogo } from '@/components/svg/TextLogo'
-import { Button } from '@/components/ui/button'
-import { useScrollPosition } from '@/lib/hooks/use-scroll-position'
-import { cn } from '@/lib/utils'
+import { ExternalLink } from "lucide-react"
+import Link from "next/link"
+import { ModeToggle } from "@/components/mode-toggle"
+import { TextLogo } from "@/components/svg/TextLogo"
+import { Button } from "@/components/ui/button"
+import { useScrollPosition } from "@/lib/hooks/use-scroll-position"
+import { cn } from "@/lib/utils"
 
 export default function Header() {
   const { hasScrolled } = useScrollPosition()
@@ -18,7 +18,7 @@ export default function Header() {
       <div
         className={cn(
           `w-full transition-all duration-500 flex justify-between items-center`,
-          hasScrolled ? 'max-w-7xl' : 'max-w-full',
+          hasScrolled ? "max-w-7xl" : "max-w-full",
         )}
       >
         <div className="flex gap-8">
@@ -36,7 +36,7 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex gap-2">
-          <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? '/'}>
+          <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
             <Button
               variant="outline"
               className="font-light hidden lg:block"
@@ -48,7 +48,7 @@ export default function Header() {
           <Link href="/auth/login" prefetch>
             <Button size="sm">Entrar</Button>
           </Link>
-          <ModeToggle size={'sm'} />
+          <ModeToggle size={"sm"} />
         </div>
       </div>
     </header>

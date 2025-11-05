@@ -1,11 +1,11 @@
-import { db } from '@fixr/db/connection'
-import { clients, companies, employees, users } from '@fixr/db/schema'
-import { accountSchema } from '@fixr/schemas/account'
-import { jwtPayload } from '@fixr/schemas/auth'
-import { eq, sql } from 'drizzle-orm'
-import { z } from 'zod'
-import { redis } from '../config/redis'
-import { accountCacheKey, CACHE_TTL } from '../helpers/cache'
+import { db } from "@fixr/db/connection"
+import { clients, companies, employees, users } from "@fixr/db/schema"
+import { accountSchema } from "@fixr/schemas/account"
+import { jwtPayload } from "@fixr/schemas/auth"
+import { eq, sql } from "drizzle-orm"
+import { z } from "zod"
+import { redis } from "../config/redis"
+import { accountCacheKey, CACHE_TTL } from "../helpers/cache"
 
 export async function queryAccountById(id: string) {
   const cacheKey = accountCacheKey(id)
@@ -46,7 +46,7 @@ export async function queryAccountById(id: string) {
     .where(eq(users.id, id))
     .limit(1)
 
-  await redis.set(cacheKey, JSON.stringify(account), 'EX', CACHE_TTL)
+  await redis.set(cacheKey, JSON.stringify(account), "EX", CACHE_TTL)
 
   return accountSchema.parse(account)
 }

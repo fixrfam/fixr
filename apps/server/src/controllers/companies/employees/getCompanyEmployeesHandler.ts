@@ -1,18 +1,18 @@
 import {
   employees as employeesTable,
   users as usersTable,
-} from '@fixr/db/schema'
-import { jwtPayload } from '@fixr/schemas/auth'
-import { getPaginatedDataSchema } from '@fixr/schemas/utils'
-import { and, asc, desc, eq, like } from 'drizzle-orm'
-import { FastifyReply } from 'fastify'
-import { z } from 'zod'
-import { apiResponse, paginatedData } from '@/src/helpers/response'
-import { queryCompanyBySubdomain } from '@/src/services/companies/companies.services'
+} from "@fixr/db/schema"
+import { jwtPayload } from "@fixr/schemas/auth"
+import { getPaginatedDataSchema } from "@fixr/schemas/utils"
+import { and, asc, desc, eq, like } from "drizzle-orm"
+import { FastifyReply } from "fastify"
+import { z } from "zod"
+import { apiResponse, paginatedData } from "@/src/helpers/response"
+import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services"
 import {
   getPaginatedCount,
   getPaginatedRecords,
-} from '@/src/services/generic/pagination.services'
+} from "@/src/services/generic/pagination.services"
 
 export async function getCompanyEmployeesHandler({
   userJwt,
@@ -31,8 +31,8 @@ export async function getCompanyEmployeesHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'company_not_found',
+        error: "Not Found",
+        code: "company_not_found",
         message: "There's no companies bound to your account",
         data: null,
       }),
@@ -43,9 +43,9 @@ export async function getCompanyEmployeesHandler({
     return response.status(403).send(
       apiResponse({
         status: 403,
-        error: 'Forbidden',
-        code: 'not_allowed',
-        message: 'You are not authorized to access this company.',
+        error: "Forbidden",
+        code: "not_allowed",
+        message: "You are not authorized to access this company.",
         data: null,
       }),
     )
@@ -57,13 +57,13 @@ export async function getCompanyEmployeesHandler({
 
   //If there is no sort arg, fallback to newer records.
   const order =
-    sort === 'newer' || !sort
+    sort === "newer" || !sort
       ? desc(employeesTable.createdAt)
       : asc(employeesTable.createdAt)
 
   const filter = and(
     eq(employeesTable.companyId, company.id),
-    like(employeesTable.name, `%${query ?? ''}%`), //like "%%" to fetch all if there is no query
+    like(employeesTable.name, `%${query ?? ""}%`), //like "%%" to fetch all if there is no query
   )
 
   const [presentations, totalRecords] = await Promise.all([
@@ -92,7 +92,7 @@ export async function getCompanyEmployeesHandler({
       order: order,
       joins: [
         {
-          type: 'inner',
+          type: "inner",
           table: usersTable,
           on: eq(usersTable.id, employeesTable.userId),
         },
@@ -113,8 +113,8 @@ export async function getCompanyEmployeesHandler({
       apiResponse({
         status: 200,
         error: null,
-        message: 'Company employees successfully retrieved.',
-        code: 'get_company_employees_success',
+        message: "Company employees successfully retrieved.",
+        code: "get_company_employees_success",
         data: paginatedData({
           records: [],
           pagination: {
@@ -136,9 +136,9 @@ export async function getCompanyEmployeesHandler({
     return response.status(416).send(
       apiResponse({
         status: 416,
-        error: 'Range Not Satisfiable',
-        code: 'page_out_of_bounds',
-        message: 'The requested page exceeds the total number of pages.',
+        error: "Range Not Satisfiable",
+        code: "page_out_of_bounds",
+        message: "The requested page exceeds the total number of pages.",
         data: null,
       }),
     )
@@ -159,8 +159,8 @@ export async function getCompanyEmployeesHandler({
     apiResponse({
       status: 200,
       error: null,
-      message: 'Company employees successfully retrieved.',
-      code: 'get_company_employees_success',
+      message: "Company employees successfully retrieved.",
+      code: "get_company_employees_success",
       data: paginatedData({
         records: presentations,
         pagination: {

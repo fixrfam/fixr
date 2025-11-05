@@ -1,17 +1,17 @@
-import { jwtPayload } from '@fixr/schemas/auth'
-import { FastifyReply } from 'fastify'
-import { apiResponse } from '@/src/helpers/response'
-import { signJWT } from '../../helpers/jwt'
-import { generateRefreshToken } from '../../helpers/tokens'
+import { jwtPayload } from "@fixr/schemas/auth"
+import { FastifyReply } from "fastify"
+import { apiResponse } from "@/src/helpers/response"
+import { signJWT } from "../../helpers/jwt"
+import { generateRefreshToken } from "../../helpers/tokens"
 import {
   queryJWTPayloadByUserId,
   queryTokenData,
-} from '../../services/auth.services'
+} from "../../services/auth.services"
 import {
   deleteRefreshToken,
   setJWTCookie,
   setRefreshToken,
-} from '../../services/tokens.services'
+} from "../../services/tokens.services"
 
 /*
 This function is used to revalidate the JWT token
@@ -31,9 +31,9 @@ export async function revalidateHandler({
     return response.status(400).send(
       apiResponse({
         status: 400,
-        error: 'Bad Request',
-        code: 'no_refresh_provided',
-        message: 'No refresh token provided',
+        error: "Bad Request",
+        code: "no_refresh_provided",
+        message: "No refresh token provided",
         data: null,
       }),
     )
@@ -45,9 +45,9 @@ export async function revalidateHandler({
     return response.status(401).send(
       apiResponse({
         status: 401,
-        error: 'Unauthorized',
-        code: 'invalid_refresh',
-        message: 'Invalid refresh token',
+        error: "Unauthorized",
+        code: "invalid_refresh",
+        message: "Invalid refresh token",
         data: null,
       }),
     )
@@ -57,9 +57,9 @@ export async function revalidateHandler({
     return response.status(410).send(
       apiResponse({
         status: 410,
-        error: 'Gone',
-        code: 'refresh_expired',
-        message: 'Refresh token expired',
+        error: "Gone",
+        code: "refresh_expired",
+        message: "Refresh token expired",
         data: null,
       }),
     )
@@ -71,9 +71,9 @@ export async function revalidateHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not found',
-        code: 'user_not_found',
-        message: 'User not found',
+        error: "Not found",
+        code: "user_not_found",
+        message: "User not found",
         data: null,
       }),
     )
@@ -99,8 +99,8 @@ export async function revalidateHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'revalidate_success',
-      message: 'JWT revalidated successfully',
+      code: "revalidate_success",
+      message: "JWT revalidated successfully",
       data: {
         token: jwt,
       },

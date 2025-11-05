@@ -1,15 +1,15 @@
-'use client'
+"use client"
 
-import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from '@fixr/schemas/credentials'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import { AxiosError } from 'axios'
-import { Loader2, Save } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@fixr/schemas/credentials"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import { AxiosError } from "axios"
+import { Loader2, Save } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -18,12 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { axios } from '@/lib/auth/axios'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api } from '@/lib/utils'
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { axios } from "@/lib/auth/axios"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api } from "@/lib/utils"
 import {
   Form,
   FormControl,
@@ -31,7 +31,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from '../ui/form'
+} from "../ui/form"
 
 export function ChangePassword() {
   const [loading, setLoading] = useState(false)
@@ -42,36 +42,36 @@ export function ChangePassword() {
       .extend({
         new: z
           .string()
-          .min(8, { message: 'A senha deve ter pelo menos 8 caracteres.' })
-          .max(128, { message: 'A senha deve ter no máximo 128 caracteres.' })
+          .min(8, { message: "A senha deve ter pelo menos 8 caracteres." })
+          .max(128, { message: "A senha deve ter no máximo 128 caracteres." })
           .refine((password) => /[A-Z]/.test(password), {
-            message: 'A senha deve conter pelo menos uma letra maiúscula.',
+            message: "A senha deve conter pelo menos uma letra maiúscula.",
           })
           .refine((password) => /[a-z]/.test(password), {
-            message: 'A senha deve conter pelo menos uma letra minúscula.',
+            message: "A senha deve conter pelo menos uma letra minúscula.",
           })
           .refine((password) => /[0-9]/.test(password), {
-            message: 'A senha deve conter pelo menos um número.',
+            message: "A senha deve conter pelo menos um número.",
           })
           .refine((password) => /[#?!@$%^&*-]/.test(password), {
-            message: 'A senha deve conter pelo menos um caractere especial.',
+            message: "A senha deve conter pelo menos um caractere especial.",
           }),
         confirmNew: z
-          .string({ required_error: 'Por favor, confirme sua senha.' })
-          .min(1, { message: 'Confirme sua senha.' }),
+          .string({ required_error: "Por favor, confirme sua senha." })
+          .min(1, { message: "Confirme sua senha." }),
       })
       .refine((data) => data.new === data.confirmNew, {
-        message: 'As senhas não coincidem.',
-        path: ['confirmNew'],
+        message: "As senhas não coincidem.",
+        path: ["confirmNew"],
       })
 
   const form = useForm<z.infer<typeof changePasswordAuthenticatedSchema>>({
     resolver: zodResolver(changePasswordAuthenticatedSchema),
     defaultValues: {
-      old: '',
-      new: '',
+      old: "",
+      new: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   const { formState } = form
@@ -82,7 +82,7 @@ export function ChangePassword() {
     setLoading(true)
     try {
       const res = await axios.put<ApiResponse>(
-        api('/credentials/password'),
+        api("/credentials/password"),
         values,
         {
           withCredentials: true,
@@ -115,7 +115,7 @@ export function ChangePassword() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={'sm'}>Mudar</Button>
+        <Button size={"sm"}>Mudar</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

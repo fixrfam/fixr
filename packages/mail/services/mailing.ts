@@ -1,15 +1,15 @@
-import dotenv from 'dotenv'
-import nodemailer from 'nodemailer'
-import { resend } from '../config/resend'
-import { renderEmail as renderDeletionEmail } from '../emails/AccountDeletion'
+import dotenv from "dotenv"
+import nodemailer from "nodemailer"
+import { resend } from "../config/resend"
+import { renderEmail as renderDeletionEmail } from "../emails/AccountDeletion"
 import {
   type EmailProps as InviteEmailProps,
   renderEmail as renderInviteEmail,
-} from '../emails/Invite'
-import { renderEmail as renderPasswordResetEmail } from '../emails/PasswordReset'
-import { renderEmail as renderVerificationEmail } from '../emails/Verification'
+} from "../emails/Invite"
+import { renderEmail as renderPasswordResetEmail } from "../emails/PasswordReset"
+import { renderEmail as renderVerificationEmail } from "../emails/Verification"
 
-dotenv.config({ path: '../.env' })
+dotenv.config({ path: "../.env" })
 
 interface EmailCommonProps {
   to: string
@@ -26,7 +26,7 @@ const sendEmail = async ({
 }) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Fixr - Comunicação <no-reply@mail.fixr.com.br>',
+      from: "Fixr - Comunicação <no-reply@mail.fixr.com.br>",
       to: [to],
       subject: subject,
       html: html,
@@ -108,7 +108,7 @@ export const sendPasswordResetEmail = async ({
   })
 
 // Extracts display name from an email
-export const emailDisplayName = (email: string) => email.split('@')[0]
+export const emailDisplayName = (email: string) => email.split("@")[0]
 
 export const emails = {
   sendInviteEmail,

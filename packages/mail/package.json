@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
+    "dev": "biome check && tsc --watch",
     "studio": "email dev",
     "export": "email export",
     "lint": "biome check",

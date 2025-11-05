@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -13,12 +13,12 @@ export function parseJwt(token?: string) {
   if (!token) return null
 
   try {
-    const [, payload] = token.split('.')
+    const [, payload] = token.split(".")
     if (!payload) return null
 
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/")
     const raw = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))
-    const json = new TextDecoder('utf-8').decode(raw)
+    const json = new TextDecoder("utf-8").decode(raw)
 
     return JSON.parse(json)
   } catch {
@@ -26,7 +26,7 @@ export function parseJwt(token?: string) {
   }
 }
 
-export const isClientSide = (): boolean => typeof window !== 'undefined'
+export const isClientSide = (): boolean => typeof window !== "undefined"
 
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = {
   [K in Keys]: Required<Pick<T, K>> & Partial<Omit<T, K>>

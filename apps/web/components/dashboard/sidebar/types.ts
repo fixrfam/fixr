@@ -1,4 +1,4 @@
-import * as icons from 'lucide-react'
+import * as icons from "lucide-react"
 
 export type BaseItem = {
   readonly id: string
@@ -7,12 +7,12 @@ export type BaseItem = {
 }
 
 export type RouteItem = BaseItem & {
-  readonly type: 'route'
+  readonly type: "route"
   readonly href: string
 }
 
 export type MenuItem = BaseItem & {
-  readonly type: 'menu'
+  readonly type: "menu"
   readonly items: readonly SidebarItem[]
 }
 

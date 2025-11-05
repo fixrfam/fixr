@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "tsc --watch",
-    "build": "tsc",
+    "build": "biome check && tsc",
     "lint": "biome check",
     "lint:write": "biome check --write"
   },

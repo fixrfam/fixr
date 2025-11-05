@@ -1,15 +1,15 @@
-'use client'
+"use client"
 
-import { ApiResponse, PaginatedData } from '@fixr/schemas/utils'
-import { useQuery } from '@tanstack/react-query'
-import { AxiosResponse } from 'axios'
-import { useParams } from 'next/navigation'
-import { z } from 'zod'
-import { columns, dataSchema } from '@/components/dashboard/employees/columns'
-import { DataTable } from '@/components/dashboard/employees/data-table'
-import { Heading } from '@/components/dashboard/heading'
-import { Skeleton } from '@/components/ui/skeleton'
-import { axios } from '@/lib/auth/axios'
+import { ApiResponse, PaginatedData } from "@fixr/schemas/utils"
+import { useQuery } from "@tanstack/react-query"
+import { AxiosResponse } from "axios"
+import { useParams } from "next/navigation"
+import { z } from "zod"
+import { columns, dataSchema } from "@/components/dashboard/employees/columns"
+import { DataTable } from "@/components/dashboard/employees/data-table"
+import { Heading } from "@/components/dashboard/heading"
+import { Skeleton } from "@/components/ui/skeleton"
+import { axios } from "@/lib/auth/axios"
 
 export default function EmployeesPage() {
   const params = useParams<{ subdomain: string }>()
@@ -17,7 +17,7 @@ export default function EmployeesPage() {
   const { isPending, data } = useQuery<
     AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof dataSchema>>>>
   >({
-    queryKey: ['employeesData'],
+    queryKey: ["employeesData"],
     queryFn: async () =>
       await axios.get(`/companies/${params.subdomain}/employees?page=1`),
   })
@@ -27,8 +27,8 @@ export default function EmployeesPage() {
   return (
     <div className="flex flex-col gap-2">
       <Heading
-        title={'Funcionários'}
-        description={'Veja ou gerencie os funcionários da sua empresa'}
+        title={"Funcionários"}
+        description={"Veja ou gerencie os funcionários da sua empresa"}
       />
       {!isPending ? (
         <DataTable data={records} columns={columns} />

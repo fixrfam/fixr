@@ -1,8 +1,8 @@
-import { db } from '@fixr/db/connection'
-import { companies, companySelectSchema } from '@fixr/db/schema'
-import { eq } from 'drizzle-orm'
-import { redis } from '@/src/config/redis'
-import { CACHE_TTL, companyCacheKey } from '@/src/helpers/cache'
+import { db } from "@fixr/db/connection"
+import { companies, companySelectSchema } from "@fixr/db/schema"
+import { eq } from "drizzle-orm"
+import { redis } from "@/src/config/redis"
+import { CACHE_TTL, companyCacheKey } from "@/src/helpers/cache"
 
 export async function queryCompanyById(id: string) {
   const cacheKey = companyCacheKey(id)
@@ -18,7 +18,7 @@ export async function queryCompanyById(id: string) {
     .where(eq(companies.id, id))
     .limit(1)
 
-  await redis.set(cacheKey, JSON.stringify(company), 'EX', CACHE_TTL)
+  await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL)
 
   return companySelectSchema.parse(company)
 }
@@ -37,7 +37,7 @@ export async function queryCompanyBySubdomain(subdomain: string) {
     .where(eq(companies.subdomain, subdomain))
     .limit(1)
 
-  await redis.set(cacheKey, JSON.stringify(company), 'EX', CACHE_TTL)
+  await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL)
 
   return companySelectSchema.parse(company)
 }

@@ -1,19 +1,19 @@
-'use client'
+"use client"
 
-import { roleLabels } from '@fixr/constants/roles'
-import { employeeSelectSchema } from '@fixr/db/schema'
-import { accountSchema } from '@fixr/schemas/account'
-import { ColumnDef } from '@tanstack/react-table'
+import { roleLabels } from "@fixr/constants/roles"
+import { employeeSelectSchema } from "@fixr/db/schema"
+import { accountSchema } from "@fixr/schemas/account"
+import { ColumnDef } from "@tanstack/react-table"
 import {
   ArrowRight,
   BriefcaseBusiness,
   MoreHorizontal,
   PencilLine,
   Trash2,
-} from 'lucide-react'
-import { z } from 'zod'
-import { Avatar } from '@/components/account/profile-avatar'
-import { Button } from '@/components/ui/button'
+} from "lucide-react"
+import { z } from "zod"
+import { Avatar } from "@/components/account/profile-avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +21,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const dataSchema = employeeSelectSchema.extend({
@@ -35,8 +35,8 @@ export const dataSchema = employeeSelectSchema.extend({
 
 export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
   {
-    accessorKey: 'name',
-    header: 'Funcionário',
+    accessorKey: "name",
+    header: "Funcionário",
     cell: ({ row }) => {
       return (
         <div className="inline-flex items-center gap-3">
@@ -56,8 +56,8 @@ export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
     },
   },
   {
-    accessorKey: 'role',
-    header: 'Cargo',
+    accessorKey: "role",
+    header: "Cargo",
     cell: ({ row }) => {
       return (
         <div className="inline-flex items-center gap-2">
@@ -70,16 +70,16 @@ export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
     },
   },
   {
-    accessorKey: 'account.email',
-    header: 'Email',
+    accessorKey: "account.email",
+    header: "Email",
   },
   {
-    accessorKey: 'cpf',
-    header: 'CPF',
+    accessorKey: "cpf",
+    header: "CPF",
     cell: ({ row }) => {
       return row.original.cpf.replace(
         /(\d{3})(\d{3})(\d{3})(\d{2})/,
-        '$1.$2.$3-$4',
+        "$1.$2.$3-$4",
       )
     },
   },
@@ -88,21 +88,21 @@ export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
   //     header: "Celular",
   // },
   {
-    accessorKey: 'createdAt',
-    header: 'Cadastrado em',
+    accessorKey: "createdAt",
+    header: "Cadastrado em",
     cell: ({ row }) => {
-      const date = new Intl.DateTimeFormat('pt-BR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      const date = new Intl.DateTimeFormat("pt-BR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       }).format(new Date(row.original.createdAt))
 
       return date
     },
   },
   {
-    id: 'actions',
-    header: 'Ações',
+    id: "actions",
+    header: "Ações",
     cell: () => {
       return (
         <DropdownMenu>

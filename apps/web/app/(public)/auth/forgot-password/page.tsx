@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import AuthFormSuccess from '@/components/auth/auth-form-success'
-import { ForgotPasswordForm } from '@/components/forgot-password-form'
+import { useState } from "react"
+import AuthFormSuccess from "@/components/auth/auth-form-success"
+import { ForgotPasswordForm } from "@/components/forgot-password-form"
 
 export default function ForgotPassword() {
   const [success, setSuccess] = useState(false)

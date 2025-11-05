@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import { toast } from '@pheralb/toast'
-import { Loader2, LogOut } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import React, { FormEvent, useState } from 'react'
-import { Button, ButtonProps } from '../ui/button'
+import { toast } from "@pheralb/toast"
+import { Loader2, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
+import React, { FormEvent, useState } from "react"
+import { Button, ButtonProps } from "../ui/button"
 
 const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => {
@@ -17,9 +17,9 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
       const fetchSignout = async () => {
         setLoading(true)
-        const response = await fetch('/api/auth/signout', {
-          method: 'GET',
-          credentials: 'include',
+        const response = await fetch("/api/auth/signout", {
+          method: "GET",
+          credentials: "include",
         })
 
         if (response.redirected) {
@@ -28,11 +28,11 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }
 
       toast.loading({
-        text: 'Saindo, aguarde um momento...',
+        text: "Saindo, aguarde um momento...",
         options: {
           promise: fetchSignout(),
-          success: 'Até logo!',
-          error: 'Erro ao sair, tente novamente.',
+          success: "Até logo!",
+          error: "Erro ao sair, tente novamente.",
           autoDismiss: false,
         },
       })
@@ -48,6 +48,6 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   },
 )
-SignOutButton.displayName = 'SignOutButton'
+SignOutButton.displayName = "SignOutButton"
 
 export { SignOutButton }

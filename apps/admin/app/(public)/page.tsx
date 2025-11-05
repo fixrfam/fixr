@@ -4,11 +4,11 @@ import {
   SignInButton,
   SignOutButton,
   UserButton,
-} from '@clerk/nextjs'
-import { Lock, LogOut } from 'lucide-react'
-import Link from 'next/link'
-import Fixr from '@/components/Fixr'
-import { Button } from '@/components/ui/button'
+} from "@clerk/nextjs"
+import { Lock, LogOut } from "lucide-react"
+import Link from "next/link"
+import Fixr from "@/components/Fixr"
+import { Button } from "@/components/ui/button"
 
 export default function Home() {
   return (
@@ -30,8 +30,8 @@ export default function Home() {
         <SignedOut>
           <Button asChild>
             <SignInButton
-              forceRedirectUrl={'/dash'}
-              fallbackRedirectUrl={'/dash'}
+              forceRedirectUrl={"/dash"}
+              fallbackRedirectUrl={"/dash"}
             >
               Entrar
             </SignInButton>
@@ -44,7 +44,7 @@ export default function Home() {
               <Link href="/dash">Dashboard</Link>
             </Button>
             <div className="inline-flex gap-2 items-center">
-              <Button asChild variant={'ghost'}>
+              <Button asChild variant={"ghost"}>
                 <SignOutButton>
                   <span>
                     Sair <LogOut />

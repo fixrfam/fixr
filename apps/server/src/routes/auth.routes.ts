@@ -1,28 +1,28 @@
-import { cookieKey } from '@fixr/constants/cookies'
+import { cookieKey } from "@fixr/constants/cookies"
 import {
   createUserSchema,
   googleCallbackSchema,
   loginUserSchema,
   verifyEmailSchema,
-} from '@fixr/schemas/auth'
-import { FastifyRequest } from 'fastify'
+} from "@fixr/schemas/auth"
+import { FastifyRequest } from "fastify"
 import {
   googleCallbackHandler,
   googleLoginHandler,
-} from '../controllers/auth/googleAuthHandler'
-import { loginHandler } from '../controllers/auth/loginHandler'
-import { registerHandler } from '../controllers/auth/registerHandler'
-import { revalidateHandler } from '../controllers/auth/revalidateHandler'
-import { signOutHandler } from '../controllers/auth/signOutHandler'
-import { verifyHandler } from '../controllers/auth/verifyHandler'
-import { authDocs } from '../docs/auth.docs'
-import { apiResponse } from '../helpers/response'
-import { FastifyTypedInstance } from '../interfaces/fastify'
-import { withErrorHandler } from '../middlewares/withErrorHandler'
+} from "../controllers/auth/googleAuthHandler"
+import { loginHandler } from "../controllers/auth/loginHandler"
+import { registerHandler } from "../controllers/auth/registerHandler"
+import { revalidateHandler } from "../controllers/auth/revalidateHandler"
+import { signOutHandler } from "../controllers/auth/signOutHandler"
+import { verifyHandler } from "../controllers/auth/verifyHandler"
+import { authDocs } from "../docs/auth.docs"
+import { apiResponse } from "../helpers/response"
+import { FastifyTypedInstance } from "../interfaces/fastify"
+import { withErrorHandler } from "../middlewares/withErrorHandler"
 
 export async function authRoutes(fastify: FastifyTypedInstance) {
   fastify.post(
-    '/register',
+    "/register",
     {
       schema: authDocs.registerSchema,
     },
@@ -32,9 +32,9 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
       return response.status(500).send(
         apiResponse({
           status: 501,
-          error: 'Not implemented',
-          code: 'not_implemented',
-          message: 'This endpoint is not implemented or disabled.',
+          error: "Not implemented",
+          code: "not_implemented",
+          message: "This endpoint is not implemented or disabled.",
           data: null,
         }),
       )
@@ -42,7 +42,7 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.post(
-    '/login',
+    "/login",
     { schema: authDocs.loginSchema },
     withErrorHandler(async (request, response) => {
       const body = await loginUserSchema.parseAsync(request.body)
@@ -52,7 +52,7 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.get(
-    '/verify',
+    "/verify",
     { schema: authDocs.verifySchema },
     withErrorHandler(
       async (
@@ -70,27 +70,27 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.get(
-    '/signout',
+    "/signout",
     { schema: authDocs.signOutSchema },
     withErrorHandler(async (request, response) => {
-      const refreshToken = request.cookies[cookieKey('refreshToken')]
+      const refreshToken = request.cookies[cookieKey("refreshToken")]
 
       await signOutHandler({ refreshToken, response })
     }),
   )
 
   fastify.post(
-    '/token',
+    "/token",
     { schema: authDocs.revalidateSchema },
     withErrorHandler(async (request, response) => {
-      const refreshToken = request.cookies[cookieKey('refreshToken')]
+      const refreshToken = request.cookies[cookieKey("refreshToken")]
 
       await revalidateHandler({ refreshToken, response })
     }),
   )
 
   fastify.get(
-    '/google',
+    "/google",
     { schema: authDocs.googleLoginSchema },
     withErrorHandler(async (request, response) => {
       await googleLoginHandler({ request, response })
@@ -98,7 +98,7 @@ export async function authRoutes(fastify: FastifyTypedInstance) {
   )
 
   fastify.get(
-    '/google/callback',
+    "/google/callback",
     { schema: authDocs.googleCallbackSchema },
     withErrorHandler(
       async (

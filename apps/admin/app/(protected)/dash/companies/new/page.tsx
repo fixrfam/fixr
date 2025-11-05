@@ -1,5 +1,5 @@
-import { CreateCompany } from '@/components/dash/forms/CreateCompany'
-import { DashHeader } from '@/components/dash/header'
+import { CreateCompany } from "@/components/dash/forms/CreateCompany"
+import { DashHeader } from "@/components/dash/header"
 
 export default function NewCompanyPage() {
   return (

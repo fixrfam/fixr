@@ -1,7 +1,7 @@
-'use client'
-import { motion } from 'framer-motion'
-import React from 'react'
-import { cn } from '@/lib/utils'
+"use client"
+import { motion } from "framer-motion"
+import React from "react"
+import { cn } from "@/lib/utils"
 
 export const LampContainer = ({
   children,
@@ -13,19 +13,19 @@ export const LampContainer = ({
   return (
     <div
       className={cn(
-        'relative flex min-h-screen flex-col items-center justify-center overflow-hidden w-full rounded-md z-0 pointer-events-none',
+        "relative flex min-h-screen flex-col items-center justify-center overflow-hidden w-full rounded-md z-0 pointer-events-none",
         className,
       )}
     >
       <div className="relative flex w-full flex-1 scale-y-125 items-center justify-center isolate z-0 ">
         <motion.div
           id="lglow"
-          initial={{ opacity: 0.5, width: '15rem' }}
-          whileInView={{ opacity: 1, width: '30rem' }}
+          initial={{ opacity: 0.5, width: "15rem" }}
+          whileInView={{ opacity: 1, width: "30rem" }}
           transition={{
             delay: 0.3,
             duration: 0.8,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
           style={{
             backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
@@ -37,12 +37,12 @@ export const LampContainer = ({
         </motion.div>
         <motion.div
           id="rglow"
-          initial={{ opacity: 0.5, width: '15rem' }}
-          whileInView={{ opacity: 1, width: '30rem' }}
+          initial={{ opacity: 0.5, width: "15rem" }}
+          whileInView={{ opacity: 1, width: "30rem" }}
           transition={{
             delay: 0.3,
             duration: 0.8,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
           style={{
             backgroundImage: `conic-gradient(var(--conic-position), var(--tw-gradient-stops))`,
@@ -66,23 +66,23 @@ export const LampContainer = ({
         ></div>
         <motion.div
           id="largeglow"
-          initial={{ width: '8rem' }}
-          whileInView={{ width: '16rem' }}
+          initial={{ width: "8rem" }}
+          whileInView={{ width: "16rem" }}
           transition={{
             delay: 0.3,
             duration: 0.8,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
           className="absolute inset-auto z-30 h-36 w-64 -translate-y-24 rounded-full bg-primary-300 blur-2xl"
         ></motion.div>
         <motion.div
           id="bulb"
-          initial={{ width: '15rem' }}
-          whileInView={{ width: '30rem' }}
+          initial={{ width: "15rem" }}
+          whileInView={{ width: "30rem" }}
           transition={{
             delay: 0.3,
             duration: 0.8,
-            ease: 'easeInOut',
+            ease: "easeInOut",
           }}
           className="absolute inset-auto z-50 h-0.5 w-120 -translate-y-28 bg-primary-300"
         ></motion.div>

@@ -1,4 +1,4 @@
-import Link, { LinkProps } from 'next/link'
+import Link, { LinkProps } from "next/link"
 
 export function DashLink({
   subdomain,

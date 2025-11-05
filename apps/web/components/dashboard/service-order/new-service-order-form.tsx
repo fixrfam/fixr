@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import { createOrderServiceSchema } from '@fixr/schemas/service-orders'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { UserPlus } from 'lucide-react'
-import { ComponentPropsWithoutRef } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { createOrderServiceSchema } from "@fixr/schemas/service-orders"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { UserPlus } from "lucide-react"
+import { ComponentPropsWithoutRef } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -14,8 +14,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
@@ -23,34 +23,34 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
-import { NewClientForm } from '../clients/new-client-form'
+} from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+import { NewClientForm } from "../clients/new-client-form"
 
 export function NewServiceOrderForm({
   className,
   ...props
-}: ComponentPropsWithoutRef<'form'>) {
+}: ComponentPropsWithoutRef<"form">) {
   const form = useForm<z.infer<typeof createOrderServiceSchema>>({
     resolver: zodResolver(createOrderServiceSchema),
     defaultValues: {
-      customerCpf: '',
+      customerCpf: "",
     },
   })
 
   const handleCustomerCreated = (cpf: string) => {
-    form.setValue('customerCpf', cpf)
+    form.setValue("customerCpf", cpf)
   }
 
   const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
-    console.log('Ordem de serviço a ser criada:', values)
+    console.log("Ordem de serviço a ser criada:", values)
   }
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('space-y-4', className)}
+        className={cn("space-y-4", className)}
         {...props}
       >
         <div className="flex items-end gap-4">

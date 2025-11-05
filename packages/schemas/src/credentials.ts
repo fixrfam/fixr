@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { passwordSchema } from './auth'
+import { z } from "zod"
+import { passwordSchema } from "./auth"
 
 export const changePasswordAuthenticatedSchema = z.object({
   old: z.string(),

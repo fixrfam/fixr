@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "dotenv -- next dev --turbopack",
-    "build": "dotenv -- next build",
+    "build": "biome check && dotenv -- next build",
     "start": "dotenv -- next start",
     "lint": "biome check",
     "lint:write": "biome check --write"

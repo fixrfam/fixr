@@ -28,7 +28,7 @@ function seedrand(seed: string): void {
 
 function rand(): number {
   if (randseed.some((value) => value === undefined)) {
-    throw new Error('randseed is not properly initialized')
+    throw new Error("randseed is not properly initialized")
   }
   const t = (randseed[0] ?? 0) ^ ((randseed[0] ?? 0) << 11)
   randseed[0] = randseed[1] ?? 0

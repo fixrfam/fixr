@@ -1,25 +1,25 @@
 /* eslint-disable @next/next/no-img-element */
 
-import BoringAvatar from 'boring-avatars'
-import { forwardRef, HTMLAttributes } from 'react'
-import { cn, RequireAtLeastOne } from '@/lib/utils'
+import BoringAvatar from "boring-avatars"
+import { forwardRef, HTMLAttributes } from "react"
+import { cn, RequireAtLeastOne } from "@/lib/utils"
 
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
   RequireAtLeastOne<{ src?: string | null; fallbackHash?: string }> & {
-    variant?: 'rounded' | 'square'
-    fallbackType?: 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring' | 'bauhaus'
+    variant?: "rounded" | "square"
+    fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring" | "bauhaus"
   }
 
 const avatarColors = [
-  '#b9daff',
-  '#89c4ff',
-  '#51a3ff',
-  '#297eff',
-  '#1f65fe',
-  '#0b45ea',
-  '#1039bd',
-  '#1039bd',
-  '#11225a',
+  "#b9daff",
+  "#89c4ff",
+  "#51a3ff",
+  "#297eff",
+  "#1f65fe",
+  "#0b45ea",
+  "#1039bd",
+  "#1039bd",
+  "#11225a",
 ]
 
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
@@ -29,18 +29,18 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       src,
       fallbackHash,
       className,
-      variant = 'rounded',
-      fallbackType = 'beam' as const,
+      variant = "rounded",
+      fallbackType = "beam" as const,
       ...props
     },
     ref,
   ) => {
-    const round = { square: 'rounded-md', rounded: 'rounded-full' }
+    const round = { square: "rounded-md", rounded: "rounded-full" }
 
     return (
       <div
         className={cn(
-          'aspect-square overflow-clip border border-border flex items-center justify-center',
+          "aspect-square overflow-clip border border-border flex items-center justify-center",
           round[variant],
           className,
         )}
@@ -52,7 +52,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
             name={fallbackHash}
             variant={fallbackType}
             className="size-full"
-            square={variant === 'square'}
+            square={variant === "square"}
             colors={avatarColors}
           />
         )}
@@ -67,4 +67,4 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
     )
   },
 )
-Avatar.displayName = 'ProfileAvatar'
+Avatar.displayName = "ProfileAvatar"

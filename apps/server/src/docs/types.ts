@@ -1,5 +1,5 @@
-import { FastifySchema } from 'fastify'
-import { z } from 'zod'
+import { FastifySchema } from "fastify"
+import { z } from "zod"
 
 export type RouteDoc = FastifySchema
 
@@ -17,7 +17,7 @@ export const zodResponseSchema = <T extends z.ZodTypeAny>({
   message,
   code,
   data,
-}: Omit<ApiResponseSchema, 'data'> & { data: T | null }) => {
+}: Omit<ApiResponseSchema, "data"> & { data: T | null }) => {
   return z.object({
     status: z.literal(status),
     error: z.literal(error),

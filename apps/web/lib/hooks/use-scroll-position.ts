@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react"
 
 /**
  * useScrollPosition
@@ -23,13 +23,13 @@ export const useScrollPosition = (): {
       setScrollY(window.scrollY)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener("scroll", handleScroll, { passive: true })
 
     // Initialize scrollY in case user is already scrolled
     handleScroll()
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 

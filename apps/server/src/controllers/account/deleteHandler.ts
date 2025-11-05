@@ -1,17 +1,17 @@
-import { APP_NAME } from '@fixr/constants/app'
-import { cookieKey } from '@fixr/constants/cookies'
-import { emailDisplayName, sendAccountDeletionEmail } from '@fixr/mail/services'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { env } from '@/src/env'
-import { apiResponse } from '@/src/helpers/response'
-import { queryAccountById } from '../../services/account.services'
-import { deleteUser } from '../../services/auth.services'
+import { APP_NAME } from "@fixr/constants/app"
+import { cookieKey } from "@fixr/constants/cookies"
+import { emailDisplayName, sendAccountDeletionEmail } from "@fixr/mail/services"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { env } from "@/src/env"
+import { apiResponse } from "@/src/helpers/response"
+import { queryAccountById } from "../../services/account.services"
+import { deleteUser } from "../../services/auth.services"
 import {
   createOneTimeToken,
   deleteUserExpiredTokensByUserId,
   getUserOneTimeTokens,
   queryOneTimeToken,
-} from '../../services/tokens.services'
+} from "../../services/tokens.services"
 
 export async function requestAccountDeletionHandler({
   userId,
@@ -26,14 +26,14 @@ export async function requestAccountDeletionHandler({
   const oneTimeTokens = await getUserOneTimeTokens(userId)
 
   for (const token of oneTimeTokens) {
-    if (token.tokenType === 'account_deletion') {
+    if (token.tokenType === "account_deletion") {
       return response.status(409).send(
         apiResponse({
           status: 409,
-          error: 'Conflict',
-          code: 'existing_deletion_request',
+          error: "Conflict",
+          code: "existing_deletion_request",
           message:
-            'Deletion request already exists. Finish it or wait until expiration to request a new one.',
+            "Deletion request already exists. Finish it or wait until expiration to request a new one.",
           data: null,
         }),
       )
@@ -45,7 +45,7 @@ export async function requestAccountDeletionHandler({
   const oneTimeToken = await createOneTimeToken({
     userId: userId,
     email: account.email,
-    tokenType: 'account_deletion',
+    tokenType: "account_deletion",
   })
 
   const redirectUrl = `${env.FRONTEND_URL}/auth/login`
@@ -63,8 +63,8 @@ export async function requestAccountDeletionHandler({
     apiResponse({
       status: 201,
       error: null,
-      code: 'deletion_request_accepted',
-      message: 'Deletion request accepted, confirm email.',
+      code: "deletion_request_accepted",
+      message: "Deletion request accepted, confirm email.",
       data: null,
     }),
   )
@@ -86,9 +86,9 @@ export async function confirmAccountDeletionHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'token_not_found',
-        message: 'Token not found',
+        error: "Not Found",
+        code: "token_not_found",
+        message: "Token not found",
         data: null,
       }),
     )
@@ -98,21 +98,21 @@ export async function confirmAccountDeletionHandler({
     return response.status(410).send(
       apiResponse({
         status: 410,
-        error: 'Gone',
-        code: 'token_expired',
-        message: 'Token expired',
+        error: "Gone",
+        code: "token_expired",
+        message: "Token expired",
         data: null,
       }),
     )
   }
 
-  if (oneTimeToken.tokenType !== 'account_deletion') {
+  if (oneTimeToken.tokenType !== "account_deletion") {
     return response.status(400).send(
       apiResponse({
         status: 400,
-        error: 'Bad Request',
-        code: 'invalid_token',
-        message: 'Invalid token',
+        error: "Bad Request",
+        code: "invalid_token",
+        message: "Invalid token",
         data: null,
       }),
     )
@@ -123,10 +123,10 @@ export async function confirmAccountDeletionHandler({
 
   if (redirectUrl) {
     return response
-      .setCookie(cookieKey('showDeletedDialog'), 'true', {
-        path: '/',
+      .setCookie(cookieKey("showDeletedDialog"), "true", {
+        path: "/",
         httpOnly: false,
-        sameSite: 'none',
+        sameSite: "none",
         secure: true,
       })
       .status(302)
@@ -137,8 +137,8 @@ export async function confirmAccountDeletionHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'account_deletion_success',
-      message: 'Account deleted sucessfully',
+      code: "account_deletion_success",
+      message: "Account deleted sucessfully",
       data: null,
     }),
   )

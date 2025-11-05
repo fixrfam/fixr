@@ -1,5 +1,5 @@
-import { Column, Hr, Row, Section, Text } from '@react-email/components'
-import React from 'react'
+import { Column, Hr, Row, Section, Text } from "@react-email/components"
+import React from "react"
 
 export function PlatformFunctionalities() {
   return (

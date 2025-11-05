@@ -1,23 +1,23 @@
-'use client'
+"use client"
 
-import { cnpj, cpf, unmask } from '@fixr/constants/masks'
-import { defaultMessages, messages } from '@fixr/constants/messages'
-import { createCompanySchema } from '@fixr/schemas/companies'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMaskito } from '@maskito/react'
-import { toast } from '@pheralb/toast'
-import axios, { AxiosError, AxiosResponse } from 'axios'
-import { ChevronsUpDown, Dices, Loader2, Plus } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { cnpj, cpf, unmask } from "@fixr/constants/masks"
+import { defaultMessages, messages } from "@fixr/constants/messages"
+import { createCompanySchema } from "@fixr/schemas/companies"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMaskito } from "@maskito/react"
+import { toast } from "@pheralb/toast"
+import axios, { AxiosError, AxiosResponse } from "axios"
+import { ChevronsUpDown, Dices, Loader2, Plus } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+} from "@/components/ui/collapsible"
 import {
   Form,
   FormControl,
@@ -26,10 +26,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import PasswordInput from '@/components/ui/password-input'
-import { generateRandomPassword, tryCatch } from '@/lib/utils'
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import PasswordInput from "@/components/ui/password-input"
+import { generateRandomPassword, tryCatch } from "@/lib/utils"
 
 export function CreateCompany() {
   const [loading, setLoading] = useState(false)
@@ -37,14 +37,14 @@ export function CreateCompany() {
   const form = useForm<z.infer<typeof createCompanySchema>>({
     resolver: zodResolver(createCompanySchema),
     defaultValues: {
-      name: '',
-      cnpj: '',
-      address: '',
-      subdomain: '',
-      owner_email: '',
-      owner_password: '',
+      name: "",
+      cnpj: "",
+      address: "",
+      subdomain: "",
+      owner_email: "",
+      owner_password: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   async function onSubmit(values: z.infer<typeof createCompanySchema>) {
@@ -60,7 +60,7 @@ export function CreateCompany() {
     try {
       const { data: response, error } = await tryCatch<
         AxiosResponse<ApiResponse>
-      >(axios.post('/api/companies', formatted))
+      >(axios.post("/api/companies", formatted))
 
       if (error && error instanceof AxiosError) {
         const message =
@@ -89,7 +89,7 @@ export function CreateCompany() {
   const cpfMask = useMaskito({ options: { mask: cpf } })
 
   function setPwd() {
-    form.setValue('owner_password', generateRandomPassword())
+    form.setValue("owner_password", generateRandomPassword())
     form.trigger()
   }
 
@@ -126,7 +126,7 @@ export function CreateCompany() {
                   placeholder="12.345.678/0001-00"
                   {...field}
                   ref={cnpjMask}
-                  onInput={(e) => form.setValue('cnpj', e.currentTarget.value)}
+                  onInput={(e) => form.setValue("cnpj", e.currentTarget.value)}
                 />
               </FormControl>
               <FormMessage />
@@ -144,10 +144,10 @@ export function CreateCompany() {
                 <Input placeholder="example" {...field} />
               </FormControl>
               <FormDescription>
-                Domínio -{' '}
-                {form.getValues('subdomain').length
-                  ? form.getValues('subdomain')
-                  : 'exemplo'}
+                Domínio -{" "}
+                {form.getValues("subdomain").length
+                  ? form.getValues("subdomain")
+                  : "exemplo"}
                 .fixr.ricardo.gg
               </FormDescription>
               <FormMessage />
@@ -182,7 +182,7 @@ export function CreateCompany() {
                   {...field}
                   ref={cpfMask}
                   onInput={(e) =>
-                    form.setValue('owner_cpf', e.currentTarget.value)
+                    form.setValue("owner_cpf", e.currentTarget.value)
                   }
                 />
               </FormControl>
@@ -205,7 +205,7 @@ export function CreateCompany() {
                   />
                   <Button
                     type="button"
-                    variant={'outline'}
+                    variant={"outline"}
                     onClick={() => setPwd()}
                   >
                     <Dices className="size-4" />

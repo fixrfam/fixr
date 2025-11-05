@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { ArrowLeft, Construction } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { ArrowLeft, Construction } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
 export default function NotFound() {
   const router = useRouter()
@@ -21,7 +21,7 @@ export default function NotFound() {
             pela paciência!
           </p>
         </div>
-        <Button variant={'default'} onClick={() => router.back()}>
+        <Button variant={"default"} onClick={() => router.back()}>
           <ArrowLeft /> Voltar
         </Button>
       </div>

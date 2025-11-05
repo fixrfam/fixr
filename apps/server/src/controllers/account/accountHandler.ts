@@ -1,8 +1,8 @@
-import { accountSchema } from '@fixr/schemas/account'
-import { FastifyReply } from 'fastify'
+import { accountSchema } from "@fixr/schemas/account"
+import { FastifyReply } from "fastify"
 
-import { apiResponse } from '@/src/helpers/response'
-import { queryAccountById } from '../../services/account.services'
+import { apiResponse } from "@/src/helpers/response"
+import { queryAccountById } from "../../services/account.services"
 
 export async function getAccountHandler({
   userId,
@@ -17,8 +17,8 @@ export async function getAccountHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'get_account_success',
-      message: 'Account retrieved successfully.',
+      code: "get_account_success",
+      message: "Account retrieved successfully.",
       data: accountSchema.parse(account),
     }),
   )

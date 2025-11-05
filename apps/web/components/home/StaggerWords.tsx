@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion"
 
 export default function StaggerWords({
   children,
@@ -9,11 +9,11 @@ export default function StaggerWords({
   children: string
   speed?: number
 }) {
-  const text = typeof children === 'string' ? children : ''
+  const text = typeof children === "string" ? children : ""
 
   return (
     <>
-      {text.split(' ').map((word, i) => (
+      {text.split(" ").map((word, i) => (
         <motion.span
           initial={{ y: 10, opacity: 0 }}
           whileInView={{ y: 0, opacity: 100 }}

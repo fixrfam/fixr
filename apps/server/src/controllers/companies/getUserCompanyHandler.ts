@@ -1,9 +1,9 @@
-import { companySelectSchema } from '@fixr/db/schema'
-import { jwtPayload } from '@fixr/schemas/auth'
-import { FastifyReply } from 'fastify'
-import { z } from 'zod'
-import { apiResponse } from '@/src/helpers/response'
-import { queryCompanyById } from '@/src/services/companies/companies.services'
+import { companySelectSchema } from "@fixr/db/schema"
+import { jwtPayload } from "@fixr/schemas/auth"
+import { FastifyReply } from "fastify"
+import { z } from "zod"
+import { apiResponse } from "@/src/helpers/response"
+import { queryCompanyById } from "@/src/services/companies/companies.services"
 
 export async function getUserCompanyHandler({
   userJwt,
@@ -17,7 +17,7 @@ export async function getUserCompanyHandler({
       apiResponse({
         status: 404,
         error: null,
-        code: 'company_not_found',
+        code: "company_not_found",
         message: "There's no companies bound to your account",
         data: null,
       }),
@@ -30,8 +30,8 @@ export async function getUserCompanyHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'get_company_success',
-      message: 'Company retrieved successfully.',
+      code: "get_company_success",
+      message: "Company retrieved successfully.",
       data: companySelectSchema.parse(company),
     }),
   )

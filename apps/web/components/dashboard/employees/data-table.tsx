@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import {
   ColumnDef,
@@ -8,18 +8,18 @@ import {
   getFilteredRowModel,
   useReactTable,
   VisibilityState,
-} from '@tanstack/react-table'
-import { ChevronDown, Plus, Search } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+} from "@tanstack/react-table"
+import { ChevronDown, Plus, Search } from "lucide-react"
+import { useParams } from "next/navigation"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -27,8 +27,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { DashLink } from '../dash-link'
+} from "@/components/ui/table"
+import { DashLink } from "../dash-link"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -64,9 +64,9 @@ export function DataTable<TData, TValue>({
           <Search className="absolute top-1/2 -translate-y-1/2 left-3 size-4 text-muted-foreground" />
           <Input
             placeholder="Procurar funcionários..."
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
+              table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="w-full max-w-md pl-9"
           />
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
             </DropdownMenuContent>
           </DropdownMenu>
           <DashLink
-            href={'/employees/new'}
+            href={"/employees/new"}
             prefetch
             subdomain={params.subdomain}
           >
@@ -135,7 +135,7 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="h-18 py-3">

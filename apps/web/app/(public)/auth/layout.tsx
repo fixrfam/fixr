@@ -1,9 +1,9 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { BlurFade } from '@/components/magicui/blur-fade'
-import { TextAnimate } from '@/components/magicui/text-animate'
-import { Logo } from '@/components/svg/Logo'
-import LoginBg from '@/public/login_bg.webp'
+import Image from "next/image"
+import Link from "next/link"
+import { BlurFade } from "@/components/magicui/blur-fade"
+import { TextAnimate } from "@/components/magicui/text-animate"
+import { Logo } from "@/components/svg/Logo"
+import LoginBg from "@/public/login_bg.webp"
 
 export default function AuthLayout({
   children,
@@ -32,7 +32,7 @@ export default function AuthLayout({
               >
                 Gerenciando
               </TextAnimate>
-              <br />{' '}
+              <br />{" "}
               <TextAnimate
                 animation="blurInUp"
                 by="character"
@@ -40,7 +40,7 @@ export default function AuthLayout({
                 delay={0.15 * 2}
               >
                 serviços
-              </TextAnimate>{' '}
+              </TextAnimate>{" "}
               <TextAnimate
                 animation="blurInUp"
                 by="character"
@@ -50,7 +50,7 @@ export default function AuthLayout({
                 com
               </TextAnimate>
               <br />
-              {''}
+              {""}
               <TextAnimate
                 animation="blurInUp"
                 by="character"

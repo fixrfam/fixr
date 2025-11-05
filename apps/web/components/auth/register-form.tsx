@@ -1,20 +1,20 @@
-'use client'
+"use client"
 
-import { createUserSchema as baseCreateUserSchema } from '@fixr/schemas/auth'
-import { type ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import { AxiosError } from 'axios'
-import { Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { axios } from '@/lib/auth/axios'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api, cn } from '@/lib/utils'
+import { createUserSchema as baseCreateUserSchema } from "@fixr/schemas/auth"
+import { type ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import { AxiosError } from "axios"
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { Dispatch, SetStateAction, useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { axios } from "@/lib/auth/axios"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api, cn } from "@/lib/utils"
 import {
   Form,
   FormControl,
@@ -22,7 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
+} from "../ui/form"
 
 export function RegisterForm({
   onSuccess,
@@ -35,36 +35,36 @@ export function RegisterForm({
     .extend({
       password: z
         .string()
-        .min(8, { message: 'A senha deve ter no mínimo 8 caracteres.' })
-        .max(128, { message: 'A senha deve ter no máximo 128 caracteres.' })
+        .min(8, { message: "A senha deve ter no mínimo 8 caracteres." })
+        .max(128, { message: "A senha deve ter no máximo 128 caracteres." })
         .refine((password) => /[A-Z]/.test(password), {
-          message: 'A senha deve conter pelo menos um caractere maiúsculo.',
+          message: "A senha deve conter pelo menos um caractere maiúsculo.",
         })
         .refine((password) => /[a-z]/.test(password), {
-          message: 'A senha deve conter pelo menos um caractere minúsculo.',
+          message: "A senha deve conter pelo menos um caractere minúsculo.",
         })
         .refine((password) => /[0-9]/.test(password), {
-          message: 'A senha deve conter pelo menos um número.',
+          message: "A senha deve conter pelo menos um número.",
         })
         .refine((password) => /[#?!@$%^&*-]/.test(password), {
-          message: 'A senha deve conter pelo menos um caractere especial.',
+          message: "A senha deve conter pelo menos um caractere especial.",
         }),
       confirmPassword: z
-        .string({ required_error: 'Confirme sua senha.' })
-        .min(1, { message: 'Confirme sua senha.' }),
+        .string({ required_error: "Confirme sua senha." })
+        .min(1, { message: "Confirme sua senha." }),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: 'As senhas não coincidem.',
-      path: ['confirmPassword'],
+      message: "As senhas não coincidem.",
+      path: ["confirmPassword"],
     })
 
   const form = useForm<z.infer<typeof createUserSchema>>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   const { formState } = form
@@ -72,7 +72,7 @@ export function RegisterForm({
   async function onSubmit(values: z.infer<typeof createUserSchema>) {
     setLoading(true)
     try {
-      const res = await axios.post<ApiResponse>(api('/auth/register'), values)
+      const res = await axios.post<ApiResponse>(api("/auth/register"), values)
       const message = messages[res.data.code] ?? fallbackMessages.success
 
       if (res.status === 201) {
@@ -100,7 +100,7 @@ export function RegisterForm({
   return (
     <Form {...form}>
       <form
-        className={cn('flex flex-col gap-6')}
+        className={cn("flex flex-col gap-6")}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -183,10 +183,10 @@ export function RegisterForm({
           className="w-full"
           disabled={loading || !formState.isValid}
         >
-          {!loading ? 'Cadastrar' : <Loader2 className="animate-spin size-4" />}
+          {!loading ? "Cadastrar" : <Loader2 className="animate-spin size-4" />}
         </Button>
         <div className="text-center text-sm">
-          Já tem uma conta?{' '}
+          Já tem uma conta?{" "}
           <Link href="/auth/login" className="underline underline-offset-4">
             Faça login
           </Link>

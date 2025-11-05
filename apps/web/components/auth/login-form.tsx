@@ -1,25 +1,25 @@
-'use client'
+"use client"
 
-import { cookieKey } from '@fixr/constants/cookies'
-import { loginUserSchema } from '@fixr/schemas/auth'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import axios, { AxiosError } from 'axios'
-import { AlertCircleIcon, Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api, cn, parseJwt } from '@/lib/utils'
-import CookieAlert from '../cookie-alert'
-import { Google } from '../svg/Google'
-import { Logo } from '../svg/Logo'
-import { AlertDescription, AlertTitle } from '../ui/alert'
+import { cookieKey } from "@fixr/constants/cookies"
+import { loginUserSchema } from "@fixr/schemas/auth"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import axios, { AxiosError } from "axios"
+import { AlertCircleIcon, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api, cn, parseJwt } from "@/lib/utils"
+import CookieAlert from "../cookie-alert"
+import { Google } from "../svg/Google"
+import { Logo } from "../svg/Logo"
+import { AlertDescription, AlertTitle } from "../ui/alert"
 import {
   Form,
   FormControl,
@@ -27,7 +27,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
+} from "../ui/form"
 
 export function LoginForm({ errors }: { errors?: { google?: string } }) {
   const [loading, setLoading] = useState(false)
@@ -36,10 +36,10 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
   const form = useForm<z.infer<typeof loginUserSchema>>({
     resolver: zodResolver(loginUserSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   const { formState } = form
@@ -50,7 +50,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
     setLoading(true)
     try {
       const res = await axios.post<ApiResponse<{ token: string }>>(
-        api('/auth/login'),
+        api("/auth/login"),
         values,
         {
           withCredentials: true,
@@ -89,7 +89,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
   return (
     <Form {...form}>
       <form
-        className={cn('flex flex-col gap-6')}
+        className={cn("flex flex-col gap-6")}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -151,7 +151,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
             className="w-full"
             disabled={loading || !formState.isValid}
           >
-            {!loading ? 'Entrar' : <Loader2 className="animate-spin size-4" />}
+            {!loading ? "Entrar" : <Loader2 className="animate-spin size-4" />}
           </Button>
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
             <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -174,7 +174,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
           </Button>
           {errors && errors.google && (
             <CookieAlert
-              cookieKey={cookieKey('googleAuthError')}
+              cookieKey={cookieKey("googleAuthError")}
               show={Boolean(errors?.google)}
               variant="destructive"
               className="border-destructive/50 bg-destructive/20"

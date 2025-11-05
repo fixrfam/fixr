@@ -5,7 +5,7 @@ interface FastifyErrorLike extends Error {
 }
 
 export function isFastifyError(err: unknown): err is FastifyErrorLike {
-  if (typeof err !== 'object' || err === null) return false
+  if (typeof err !== "object" || err === null) return false
   const errorObj = err as Record<string, unknown>
-  return typeof errorObj.code === 'string' && typeof errorObj.name === 'string'
+  return typeof errorObj.code === "string" && typeof errorObj.name === "string"
 }

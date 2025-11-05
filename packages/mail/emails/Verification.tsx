@@ -9,9 +9,9 @@ import {
   Preview,
   Section,
   Text,
-} from '@react-email/components'
-import { render } from '@react-email/render'
-import * as React from 'react'
+} from "@react-email/components"
+import { render } from "@react-email/render"
+import * as React from "react"
 
 interface EmailProps {
   displayName: string
@@ -21,7 +21,7 @@ interface EmailProps {
 
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
-  : ''
+  : ""
 
 export const VerificationEmail = ({
   displayName,
@@ -63,64 +63,64 @@ export const VerificationEmail = ({
 )
 
 VerificationEmail.PreviewProps = {
-  displayName: 'alanturing',
+  displayName: "alanturing",
 } as EmailProps
 
 export default VerificationEmail
 
 const main = {
-  backgroundColor: '#ffffff',
-  color: '#24292e',
+  backgroundColor: "#ffffff",
+  color: "#24292e",
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
 }
 
 const container = {
-  maxWidth: '480px',
-  margin: '0 auto',
-  padding: '20px 0 48px',
+  maxWidth: "480px",
+  margin: "0 auto",
+  padding: "20px 0 48px",
 }
 
 const title = {
-  fontSize: '24px',
+  fontSize: "24px",
   lineHeight: 1.25,
 }
 
 const section = {
-  padding: '24px',
-  border: 'solid 1px #dedede',
-  borderRadius: '5px',
-  textAlign: 'center' as const,
+  padding: "24px",
+  border: "solid 1px #dedede",
+  borderRadius: "5px",
+  textAlign: "center" as const,
 }
 
 const text = {
-  margin: '0 0 10px 0',
-  textAlign: 'left' as const,
+  margin: "0 0 10px 0",
+  textAlign: "left" as const,
 }
 
 const button = {
-  fontSize: '14px',
-  backgroundColor: '#000000',
-  color: '#fff',
+  fontSize: "14px",
+  backgroundColor: "#000000",
+  color: "#fff",
   lineHeight: 1.5,
-  borderRadius: '0.5em',
-  padding: '12px 24px',
+  borderRadius: "0.5em",
+  padding: "12px 24px",
 }
 
 const links = {
-  textAlign: 'center' as const,
+  textAlign: "center" as const,
 }
 
 const link = {
-  color: '#0366d6',
-  fontSize: '12px',
+  color: "#0366d6",
+  fontSize: "12px",
 }
 
 const footer = {
-  color: '#6a737d',
-  fontSize: '12px',
-  textAlign: 'center' as const,
-  marginTop: '60px',
+  color: "#6a737d",
+  fontSize: "12px",
+  textAlign: "center" as const,
+  marginTop: "60px",
 }
 
 export async function renderEmail({
@@ -141,7 +141,7 @@ export async function renderEmail({
       />,
     )
   } catch (error) {
-    console.error('Failed to render email', error)
+    console.error("Failed to render email", error)
     throw new Error(`Failed to render email ${error}`)
   }
 }

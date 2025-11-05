@@ -1,14 +1,14 @@
-'use client'
+"use client"
 
-import { ReactNode, useState } from 'react'
-import { cn, isClientSide } from '@/lib/utils'
-import { Alert, AlertProps } from './ui/alert'
+import { ReactNode, useState } from "react"
+import { cn, isClientSide } from "@/lib/utils"
+import { Alert, AlertProps } from "./ui/alert"
 
 export type CookieAlertProps = {
   show: boolean
   cookieKey: string
   children: ReactNode
-} & Omit<AlertProps, 'dismissable' | 'onDismiss'>
+} & Omit<AlertProps, "dismissable" | "onDismiss">
 
 export default function CookieAlert({
   show,
@@ -27,7 +27,7 @@ export default function CookieAlert({
 
   return (
     <Alert
-      className={cn('border-destructive/50 bg-destructive/20', className)}
+      className={cn("border-destructive/50 bg-destructive/20", className)}
       dismissable={true as const}
       onDismiss={() => setShowAlert(false)}
       {...props}

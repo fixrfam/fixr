@@ -1,13 +1,13 @@
-'use client'
+"use client"
 
-import { EyeIcon, EyeOffIcon } from 'lucide-react'
-import { forwardRef, useId, useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { forwardRef, useId, useState } from "react"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 const PasswordInput = forwardRef<
   HTMLInputElement,
-  React.ComponentPropsWithoutRef<'input'>
+  React.ComponentPropsWithoutRef<"input">
 >((props, ref) => {
   const id = useId()
   const [isVisible, setIsVisible] = useState<boolean>(false)
@@ -15,20 +15,20 @@ const PasswordInput = forwardRef<
   const toggleVisibility = () => setIsVisible((prevState) => !prevState)
 
   return (
-    <div className={cn('relative', props.className)}>
+    <div className={cn("relative", props.className)}>
       <Input
         id={id}
         ref={ref}
-        className={cn('pe-9', props.className)}
+        className={cn("pe-9", props.className)}
         placeholder="Password"
-        type={isVisible ? 'text' : 'password'}
+        type={isVisible ? "text" : "password"}
         {...props}
       />
       <button
         className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
         type="button"
         onClick={toggleVisibility}
-        aria-label={isVisible ? 'Hide password' : 'Show password'}
+        aria-label={isVisible ? "Hide password" : "Show password"}
         aria-pressed={isVisible}
         aria-controls="password"
       >
@@ -42,6 +42,6 @@ const PasswordInput = forwardRef<
   )
 })
 
-PasswordInput.displayName = 'PasswordInput'
+PasswordInput.displayName = "PasswordInput"
 
 export default PasswordInput

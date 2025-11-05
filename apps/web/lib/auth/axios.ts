@@ -1,11 +1,11 @@
-import { cookieKey } from '@fixr/constants/cookies'
+import { cookieKey } from "@fixr/constants/cookies"
 import axios, {
   AxiosError,
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
-} from 'axios'
-import { parseCookies } from 'nookies'
-import { isClientSide, parseJwt } from '../utils'
+} from "axios"
+import { parseCookies } from "nookies"
+import { isClientSide, parseJwt } from "../utils"
 
 const axiosClient = axios.create({
   withCredentials: true,
@@ -36,12 +36,12 @@ const processQueue = (error: AxiosError | null) => {
  */
 axiosClient.interceptors.request.use(async (config) => {
   if (!isClientSide()) {
-    const { cookies } = await import('next/headers')
+    const { cookies } = await import("next/headers")
     const cookiesString = (await cookies())
       .getAll()
       .map((item) => `${item.name}=${item.value}`)
-      .join('; ')
-    config.headers.set('Cookie', cookiesString)
+      .join("; ")
+    config.headers.set("Cookie", cookiesString)
   }
 
   return config
@@ -53,7 +53,7 @@ axiosClient.interceptors.request.use(async (config) => {
 axiosClient.interceptors.request.use(
   async (config) => {
     const cookies = parseCookies()
-    const jwt = cookies[cookieKey('session')]
+    const jwt = cookies[cookieKey("session")]
     const payload = parseJwt(jwt as string)
 
     if (!jwt || (payload && payload.exp * 1000 < Date.now())) {
@@ -61,16 +61,16 @@ axiosClient.interceptors.request.use(
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
-            credentials: 'include',
+            credentials: "include",
             body: JSON.stringify({}),
           },
         )
-        const setCookie = res.headers.get('Set-Cookie')
-        config.headers.set('Set-Cookie', setCookie)
+        const setCookie = res.headers.get("Set-Cookie")
+        config.headers.set("Set-Cookie", setCookie)
       } catch (error) {
         return Promise.reject(error)
       }
@@ -90,8 +90,8 @@ axios.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
-      !originalRequest?.url?.includes('/auth') &&
-      !originalRequest?.url?.includes('/api')
+      !originalRequest?.url?.includes("/auth") &&
+      !originalRequest?.url?.includes("/api")
     ) {
       if (!isRefreshing) {
         isRefreshing = true
@@ -100,18 +100,18 @@ axios.interceptors.response.use(
           const refresh = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
             {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
-              credentials: 'include',
+              credentials: "include",
               body: JSON.stringify({}),
             },
           )
           isRefreshing = false
-          const setCookie = refresh.headers.get('Set-Cookie')
+          const setCookie = refresh.headers.get("Set-Cookie")
           processQueue(null)
-          originalRequest?.headers.set('Set-Cookie', setCookie)
+          originalRequest?.headers.set("Set-Cookie", setCookie)
           return axiosClient.request(
             originalRequest as InternalAxiosRequestConfig,
           )

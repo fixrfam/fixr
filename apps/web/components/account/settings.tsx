@@ -3,9 +3,9 @@ import {
   SettingsCardContent,
   SettingsCardFooter,
   SettingsCardTitle,
-} from '../settings-card'
-import { ChangePassword } from './change-password'
-import { DeleteAccount } from './delete-account'
+} from "../settings-card"
+import { ChangePassword } from "./change-password"
+import { DeleteAccount } from "./delete-account"
 
 export function Settings() {
   return (

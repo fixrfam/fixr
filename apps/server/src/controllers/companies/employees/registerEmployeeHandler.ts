@@ -1,20 +1,20 @@
-import { APP_NAME } from '@fixr/constants/app'
-import { createEmailQueue, queueEmail } from '@fixr/mail/queue'
-import { jwtPayload } from '@fixr/schemas/auth'
-import { createEmployeeSchema } from '@fixr/schemas/employees'
-import { employeeRoles } from '@fixr/schemas/roles'
-import { FastifyReply } from 'fastify'
-import { z } from 'zod'
-import { redis } from '@/src/config/redis'
-import { env } from '@/src/env'
-import { generateRandomPassword } from '@/src/helpers/generate-password'
-import { apiResponse } from '@/src/helpers/response'
-import { queryUserByEmail } from '@/src/services/auth.services'
-import { queryCompanyBySubdomain } from '@/src/services/companies/companies.services'
+import { APP_NAME } from "@fixr/constants/app"
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue"
+import { jwtPayload } from "@fixr/schemas/auth"
+import { createEmployeeSchema } from "@fixr/schemas/employees"
+import { employeeRoles } from "@fixr/schemas/roles"
+import { FastifyReply } from "fastify"
+import { z } from "zod"
+import { redis } from "@/src/config/redis"
+import { env } from "@/src/env"
+import { generateRandomPassword } from "@/src/helpers/generate-password"
+import { apiResponse } from "@/src/helpers/response"
+import { queryUserByEmail } from "@/src/services/auth.services"
+import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services"
 import {
   createEmployeeAndAccount,
   getEmployeeByCpf,
-} from '@/src/services/companies/employees/employees.services'
+} from "@/src/services/companies/employees/employees.services"
 
 export async function registerEmployeeHandler({
   userJwt,
@@ -31,15 +31,15 @@ export async function registerEmployeeHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'company_not_found',
+        error: "Not Found",
+        code: "company_not_found",
         message: "There's no companies bound to your account",
         data: null,
       }),
     )
   }
 
-  const allowedRoles = ['admin', 'manager'] as z.infer<typeof employeeRoles>[]
+  const allowedRoles = ["admin", "manager"] as z.infer<typeof employeeRoles>[]
   const isSameCompany = userJwt.company.subdomain === subdomain
   const isPrivilegedUser = allowedRoles.includes(userJwt.company.role)
 
@@ -47,9 +47,9 @@ export async function registerEmployeeHandler({
     return response.status(403).send(
       apiResponse({
         status: 403,
-        error: 'Forbidden',
-        code: 'not_allowed',
-        message: 'You are not allowed to perform this action.',
+        error: "Forbidden",
+        code: "not_allowed",
+        message: "You are not allowed to perform this action.",
         data: null,
       }),
     )
@@ -57,15 +57,15 @@ export async function registerEmployeeHandler({
 
   // Managers cannot create admin employees.
   const violatesRoleHierarchy =
-    userJwt.company.role === 'manager' && data.role === 'admin'
+    userJwt.company.role === "manager" && data.role === "admin"
 
   if (violatesRoleHierarchy) {
     return response.status(403).send(
       apiResponse({
         status: 403,
-        error: 'Forbidden',
-        code: 'violates_role_hierarchy',
-        message: 'Managers may only create subordinate accounts.',
+        error: "Forbidden",
+        code: "violates_role_hierarchy",
+        message: "Managers may only create subordinate accounts.",
         data: null,
       }),
     )
@@ -85,9 +85,9 @@ export async function registerEmployeeHandler({
     return response.status(409).send(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'email_already_used',
-        message: 'Email is already registered.',
+        error: "Conflict",
+        code: "email_already_used",
+        message: "Email is already registered.",
         data: null,
       }),
     )
@@ -97,9 +97,9 @@ export async function registerEmployeeHandler({
     return response.status(409).send(
       apiResponse({
         status: 409,
-        error: 'Conflict',
-        code: 'cpf_conflict',
-        message: 'Cpf is already registered.',
+        error: "Conflict",
+        code: "cpf_conflict",
+        message: "Cpf is already registered.",
         data: null,
       }),
     )
@@ -115,7 +115,7 @@ export async function registerEmployeeHandler({
   const emailQueue = createEmailQueue(redis)
 
   await queueEmail(emailQueue, {
-    job: 'sendInviteEmail',
+    job: "sendInviteEmail",
     payload: {
       to: data.email,
       appName: APP_NAME,
@@ -130,8 +130,8 @@ export async function registerEmployeeHandler({
     apiResponse({
       status: 201,
       error: null,
-      code: 'create_employee_success',
-      message: 'Employee created successfully.',
+      code: "create_employee_success",
+      message: "Employee created successfully.",
       data: null,
     }),
   )

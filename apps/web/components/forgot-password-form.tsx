@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { requestPasswordResetSchema } from '@fixr/schemas/credentials'
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import axios, { AxiosError } from 'axios'
-import { Loader2, ShieldQuestion } from 'lucide-react'
-import Link from 'next/link'
-import { Dispatch, SetStateAction, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api, cn } from '@/lib/utils'
-import { Button } from './ui/button'
+import { requestPasswordResetSchema } from "@fixr/schemas/credentials"
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import axios, { AxiosError } from "axios"
+import { Loader2, ShieldQuestion } from "lucide-react"
+import Link from "next/link"
+import { Dispatch, SetStateAction, useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api, cn } from "@/lib/utils"
+import { Button } from "./ui/button"
 import {
   Form,
   FormControl,
@@ -20,8 +20,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from './ui/form'
-import { Input } from './ui/input'
+} from "./ui/form"
+import { Input } from "./ui/input"
 
 export function ForgotPasswordForm({
   onSuccess,
@@ -33,9 +33,9 @@ export function ForgotPasswordForm({
   const form = useForm<z.infer<typeof requestPasswordResetSchema>>({
     resolver: zodResolver(requestPasswordResetSchema),
     defaultValues: {
-      email: '',
+      email: "",
     },
-    mode: 'all',
+    mode: "all",
   })
 
   const { formState } = form
@@ -44,7 +44,7 @@ export function ForgotPasswordForm({
     setLoading(true)
     try {
       const res = await axios.post<ApiResponse>(
-        api('/credentials/password/reset'),
+        api("/credentials/password/reset"),
         values,
         {
           withCredentials: true,
@@ -76,7 +76,7 @@ export function ForgotPasswordForm({
   return (
     <Form {...form}>
       <form
-        className={cn('flex flex-col gap-6')}
+        className={cn("flex flex-col gap-6")}
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex flex-col items-center gap-2 text-center">
@@ -115,7 +115,7 @@ export function ForgotPasswordForm({
             disabled={loading || !formState.isValid}
           >
             {!loading ? (
-              'Redefinir senha'
+              "Redefinir senha"
             ) : (
               <Loader2 className="animate-spin size-4" />
             )}

@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
-import localFont from 'next/font/local'
-import '../../globals.css'
-import { ClerkProvider } from '@clerk/nextjs'
-import { AppSidebar } from '@/components/sidebar/app-sidebar'
-import { ThemeProvider } from '@/components/theme-provider'
-import { ThemedToaster } from '@/components/themed-toaster'
+import type { Metadata } from "next"
+import localFont from "next/font/local"
+import "../../globals.css"
+import { ClerkProvider } from "@clerk/nextjs"
+import { AppSidebar } from "@/components/sidebar/app-sidebar"
+import { ThemeProvider } from "@/components/theme-provider"
+import { ThemedToaster } from "@/components/themed-toaster"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,33 +12,33 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { Separator } from '@/components/ui/separator'
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar'
+} from "@/components/ui/sidebar"
 
 const geistSans = localFont({
-  src: '../../fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
+  src: "../../fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
 })
 const inter = localFont({
-  src: '../../fonts/InterVF.ttf',
-  variable: '--font-inter',
-  weight: '100 200 300 400 500 600 700 800 900',
+  src: "../../fonts/InterVF.ttf",
+  variable: "--font-inter",
+  weight: "100 200 300 400 500 600 700 800 900",
 })
 const geistMono = localFont({
-  src: '../../fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
+  src: "../../fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
 })
 
 export const metadata: Metadata = {
-  title: 'Fixr Admin',
-  description: 'Painel de administrador',
+  title: "Fixr Admin",
+  description: "Painel de administrador",
 }
 
 export default function RootLayout({

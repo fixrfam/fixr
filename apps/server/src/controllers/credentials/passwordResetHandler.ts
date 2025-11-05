@@ -1,22 +1,22 @@
-import { APP_NAME } from '@fixr/constants/app'
-import { createEmailQueue, queueEmail } from '@fixr/mail/queue'
-import { emailDisplayName } from '@fixr/mail/services'
-import { confirmPasswordResetSchema } from '@fixr/schemas/credentials'
-import { FastifyReply } from 'fastify'
-import { z } from 'zod'
-import { redis } from '@/src/config/redis'
-import { env } from '@/src/env'
-import { hashPassword } from '@/src/helpers/hash-password'
-import { apiResponse } from '@/src/helpers/response'
-import { queryUserByEmail } from '@/src/services/auth.services'
-import { updateUserPassword } from '@/src/services/credentials.services'
+import { APP_NAME } from "@fixr/constants/app"
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue"
+import { emailDisplayName } from "@fixr/mail/services"
+import { confirmPasswordResetSchema } from "@fixr/schemas/credentials"
+import { FastifyReply } from "fastify"
+import { z } from "zod"
+import { redis } from "@/src/config/redis"
+import { env } from "@/src/env"
+import { hashPassword } from "@/src/helpers/hash-password"
+import { apiResponse } from "@/src/helpers/response"
+import { queryUserByEmail } from "@/src/services/auth.services"
+import { updateUserPassword } from "@/src/services/credentials.services"
 import {
   createOneTimeToken,
   deleteOneTimeToken,
   deleteUserExpiredTokensByEmail,
   getUserOneTimeTokensWithEmail,
   queryOneTimeToken,
-} from '@/src/services/tokens.services'
+} from "@/src/services/tokens.services"
 
 export async function requestPasswordResetHandler({
   email,
@@ -29,14 +29,14 @@ export async function requestPasswordResetHandler({
   const oneTimeTokens = await getUserOneTimeTokensWithEmail(email)
 
   for (const token of oneTimeTokens) {
-    if (token.tokenType === 'password_reset') {
+    if (token.tokenType === "password_reset") {
       return response.status(409).send(
         apiResponse({
           status: 409,
-          error: 'Conflict',
-          code: 'existing_password_reset_request',
+          error: "Conflict",
+          code: "existing_password_reset_request",
           message:
-            'Password reset request already exists. Finish it or wait until expiration (30 minutes from request) to issue a new one.',
+            "Password reset request already exists. Finish it or wait until expiration (30 minutes from request) to issue a new one.",
           data: null,
         }),
       )
@@ -49,9 +49,9 @@ export async function requestPasswordResetHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'user_not_found',
-        message: 'User not found',
+        error: "Not Found",
+        code: "user_not_found",
+        message: "User not found",
         data: null,
       }),
     )
@@ -60,7 +60,7 @@ export async function requestPasswordResetHandler({
   const oneTimeToken = await createOneTimeToken({
     userId: user.id,
     email: user.email,
-    tokenType: 'password_reset',
+    tokenType: "password_reset",
   })
 
   const verificationUrl = `${env.FRONTEND_URL}/auth/forgot-password/${encodeURIComponent(oneTimeToken.token)}`
@@ -68,7 +68,7 @@ export async function requestPasswordResetHandler({
   const emailQueue = createEmailQueue(redis)
 
   await queueEmail(emailQueue, {
-    job: 'sendPasswordResetEmail',
+    job: "sendPasswordResetEmail",
     payload: {
       to: user.email,
       appName: APP_NAME,
@@ -81,8 +81,8 @@ export async function requestPasswordResetHandler({
     apiResponse({
       status: 201,
       error: null,
-      code: 'password_reset_request_accepted',
-      message: 'Reset request accepted, confirm email.',
+      code: "password_reset_request_accepted",
+      message: "Reset request accepted, confirm email.",
       data: null,
     }),
   )
@@ -102,9 +102,9 @@ export async function confirmPasswordResetHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'token_not_found',
-        message: 'Token not found',
+        error: "Not Found",
+        code: "token_not_found",
+        message: "Token not found",
         data: null,
       }),
     )
@@ -113,20 +113,20 @@ export async function confirmPasswordResetHandler({
     return response.status(410).send(
       apiResponse({
         status: 410,
-        error: 'Gone',
-        code: 'token_expired',
-        message: 'Token expired',
+        error: "Gone",
+        code: "token_expired",
+        message: "Token expired",
         data: null,
       }),
     )
   }
-  if (oneTimeToken.tokenType !== 'password_reset') {
+  if (oneTimeToken.tokenType !== "password_reset") {
     return response.status(400).send(
       apiResponse({
         status: 400,
-        error: 'Bad Request',
-        code: 'invalid_token',
-        message: 'Invalid token',
+        error: "Bad Request",
+        code: "invalid_token",
+        message: "Invalid token",
         data: null,
       }),
     )
@@ -142,8 +142,8 @@ export async function confirmPasswordResetHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'password_update_success',
-      message: 'Password updated successfully!',
+      code: "password_update_success",
+      message: "Password updated successfully!",
       data: null,
     }),
   )
@@ -162,9 +162,9 @@ export async function validatePasswordResetTokenHandler({
     return response.status(404).send(
       apiResponse({
         status: 404,
-        error: 'Not Found',
-        code: 'token_not_found',
-        message: 'Token not found',
+        error: "Not Found",
+        code: "token_not_found",
+        message: "Token not found",
         data: null,
       }),
     )
@@ -173,20 +173,20 @@ export async function validatePasswordResetTokenHandler({
     return response.status(410).send(
       apiResponse({
         status: 410,
-        error: 'Gone',
-        code: 'token_expired',
-        message: 'Token expired',
+        error: "Gone",
+        code: "token_expired",
+        message: "Token expired",
         data: null,
       }),
     )
   }
-  if (oneTimeToken.tokenType !== 'password_reset') {
+  if (oneTimeToken.tokenType !== "password_reset") {
     return response.status(400).send(
       apiResponse({
         status: 400,
-        error: 'Bad Request',
-        code: 'invalid_token',
-        message: 'Invalid token',
+        error: "Bad Request",
+        code: "invalid_token",
+        message: "Invalid token",
         data: null,
       }),
     )
@@ -196,8 +196,8 @@ export async function validatePasswordResetTokenHandler({
     apiResponse({
       status: 200,
       error: null,
-      code: 'password_reset_token_valid',
-      message: 'The provided token is a valid one.',
+      code: "password_reset_token_valid",
+      message: "The provided token is a valid one.",
       data: { valid: true },
     }),
   )

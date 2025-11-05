@@ -1,13 +1,13 @@
-import { Feather } from 'lucide-react'
-import { LampContainer } from '@/components/ui/lamp'
-import { cn } from '@/lib/utils'
+import { Feather } from "lucide-react"
+import { LampContainer } from "@/components/ui/lamp"
+import { cn } from "@/lib/utils"
 
 export default function Features({ className }: { className?: string }) {
   return (
     <section
       id="features"
       className={cn(
-        'w-full max-w-7xl min-h-96 flex flex-col gap-4 lg::gap-10 items-center relative',
+        "w-full max-w-7xl min-h-96 flex flex-col gap-4 lg::gap-10 items-center relative",
         className,
       )}
     >
@@ -19,7 +19,7 @@ export default function Features({ className }: { className?: string }) {
       </div>
       <div className="space-y-4">
         <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-center">
-          Seu <span className="font-heading">trabalho</span>, mais{' '}
+          Seu <span className="font-heading">trabalho</span>, mais{" "}
           <span className="font-heading">fácil</span>
         </h2>
         <p className="text-base md:text-lg lg:text-2xl font-light text-center">

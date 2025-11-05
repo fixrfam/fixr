@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
-import { toast } from '@pheralb/toast'
-import { ReactNode, useState } from 'react'
-import { Button } from './ui/button'
-import { Dialog, DialogContent } from './ui/dialog'
+import { toast } from "@pheralb/toast"
+import { ReactNode, useState } from "react"
+import { Button } from "./ui/button"
+import { Dialog, DialogContent } from "./ui/dialog"
 
 export default function CookieDialog({
   cookieKey,

@@ -1,7 +1,7 @@
-import { cookieKey } from '@fixr/constants/cookies'
-import { ArrowRight, Trash2 } from 'lucide-react'
-import CookieDialog from '../cookie-dialog'
-import { Logo } from '../svg/Logo'
+import { cookieKey } from "@fixr/constants/cookies"
+import { ArrowRight, Trash2 } from "lucide-react"
+import CookieDialog from "../cookie-dialog"
+import { Logo } from "../svg/Logo"
 
 export function AuthDialogs({
   showVerifiedDialog,
@@ -13,7 +13,7 @@ export function AuthDialogs({
   return (
     <>
       <CookieDialog
-        cookieKey={cookieKey('showVerifiedDialog')}
+        cookieKey={cookieKey("showVerifiedDialog")}
         close={{
           cta: (
             <>
@@ -21,8 +21,8 @@ export function AuthDialogs({
             </>
           ),
           toast: {
-            text: 'Entre para explorar o app.',
-            description: 'Estamos esperando por voc!',
+            text: "Entre para explorar o app.",
+            description: "Estamos esperando por voc!",
           },
         }}
         open={showVerifiedDialog}
@@ -48,12 +48,12 @@ export function AuthDialogs({
         </div>
       </CookieDialog>
       <CookieDialog
-        cookieKey={cookieKey('showDeletedDialog')}
+        cookieKey={cookieKey("showDeletedDialog")}
         close={{
-          cta: 'Fechar',
+          cta: "Fechar",
           toast: {
-            text: 'Até mais!',
-            description: 'A sua conta foi excluída. Volte quando quiser.',
+            text: "Até mais!",
+            description: "A sua conta foi excluída. Volte quando quiser.",
           },
         }}
         open={showDeletedDialog}

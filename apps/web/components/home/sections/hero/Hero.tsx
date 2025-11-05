@@ -1,9 +1,9 @@
-import { ExternalLink, WandSparkles } from 'lucide-react'
-import Link from 'next/link'
-import { BlurFade } from '@/components/magicui/blur-fade'
-import { TextAnimate } from '@/components/magicui/text-animate'
-import { Button } from '@/components/ui/button'
-import { AppPreview } from './AppPreview'
+import { ExternalLink, WandSparkles } from "lucide-react"
+import Link from "next/link"
+import { BlurFade } from "@/components/magicui/blur-fade"
+import { TextAnimate } from "@/components/magicui/text-animate"
+import { Button } from "@/components/ui/button"
+import { AppPreview } from "./AppPreview"
 
 export default function Hero() {
   return (
@@ -20,7 +20,7 @@ export default function Hero() {
             <h1 className="text-2xl sm:text-5xl lg:text-4xl 2lg:text-5xl xl:text-5.5xl font-light">
               <TextAnimate as="span" animation="blurInUp" by="character">
                 O jeito
-              </TextAnimate>{' '}
+              </TextAnimate>{" "}
               <TextAnimate
                 className="font-heading"
                 as="span"
@@ -29,7 +29,7 @@ export default function Hero() {
                 delay={0.3}
               >
                 fácil
-              </TextAnimate>{' '}
+              </TextAnimate>{" "}
               <TextAnimate
                 as="span"
                 animation="blurInUp"
@@ -69,9 +69,9 @@ export default function Hero() {
                 </Link>
               </BlurFade>
               <BlurFade delay={0.3 * 2 + 0.15} inView>
-                <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? '/'}>
+                <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
                   <Button variant="outline" className="font-light">
-                    Documentação{' '}
+                    Documentação{" "}
                     <ExternalLink className="w-5 h-5 inline-block ml-2" />
                   </Button>
                 </Link>

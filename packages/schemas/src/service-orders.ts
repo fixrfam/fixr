@@ -1,5 +1,5 @@
-import { cpf } from '@fixr/schemas/common'
-import { z } from 'zod'
+import { cpf } from "@fixr/schemas/common"
+import { z } from "zod"
 
 export const createOrderServiceSchema = z.object({
   customerCpf: cpf,

@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { ApiResponse } from '@fixr/schemas/utils'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from '@pheralb/toast'
-import { AxiosError } from 'axios'
-import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { axios } from '@/lib/auth/axios'
-import { fallbackMessages, messages } from '@/lib/messages'
-import { api } from '@/lib/utils'
+import { ApiResponse } from "@fixr/schemas/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "@pheralb/toast"
+import { AxiosError } from "axios"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { axios } from "@/lib/auth/axios"
+import { fallbackMessages, messages } from "@/lib/messages"
+import { api } from "@/lib/utils"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '../ui/alert-dialog'
+} from "../ui/alert-dialog"
 import {
   Form,
   FormControl,
@@ -30,7 +30,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
+} from "../ui/form"
 
 export function DeleteAccount() {
   const [loading, setLoading] = useState(false)
@@ -38,14 +38,14 @@ export function DeleteAccount() {
 
   const requestAccountDeletionSchema = z.object({
     confirmPhrase: z.string().regex(/^delete my account$/, {
-      message: 'Frase inválida.',
+      message: "Frase inválida.",
     }),
   })
 
   const form = useForm<z.infer<typeof requestAccountDeletionSchema>>({
     resolver: zodResolver(requestAccountDeletionSchema),
-    defaultValues: { confirmPhrase: '' },
-    mode: 'all',
+    defaultValues: { confirmPhrase: "" },
+    mode: "all",
   })
 
   const { formState } = form
@@ -55,7 +55,7 @@ export function DeleteAccount() {
     setLoading(true)
     try {
       const res = await axios.post<ApiResponse>(
-        api('/account/request-deletion'),
+        api("/account/request-deletion"),
         {
           withCredentials: true,
         },
@@ -87,7 +87,7 @@ export function DeleteAccount() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button size={'sm'} variant={'destructive'}>
+        <Button size={"sm"} variant={"destructive"}>
           Solicitar exclusão
         </Button>
       </AlertDialogTrigger>
@@ -127,7 +127,7 @@ export function DeleteAccount() {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <Button
-            variant={'destructive'}
+            variant={"destructive"}
             type="submit"
             disabled={loading || !formState.isValid}
             form="change_password"
