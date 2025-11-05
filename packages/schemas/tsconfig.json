@@ -5,11 +5,11 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
     "esModuleInterop": true,
-    "types": ["next/types/global"],
-    "rootDir": "./"
+    "types": ["next/types/global"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

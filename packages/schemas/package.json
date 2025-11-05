@@ -9,52 +9,52 @@
   },
   "exports": {
     "./account": {
-      "types": "./src/account.ts",
+      "types": "./dist/account.d.ts",
       "default": "./dist/account.js"
     },
     "./auth": {
-      "types": "./src/auth.ts",
+      "types": "./dist/auth.d.ts",
       "default": "./dist/auth.js"
     },
     "./roles": {
-      "types": "./src/roles.ts",
+      "types": "./dist/roles.d.ts",
       "default": "./dist/roles.js"
     },
     "./credentials": {
-      "types": "./src/credentials.ts",
+      "types": "./dist/credentials.d.ts",
       "default": "./dist/credentials.js"
     },
     "./utils": {
-      "types": "./src/utils.ts",
+      "types": "./dist/utils.d.ts",
       "default": "./dist/utils.js"
     },
     "./companies": {
-      "types": "./src/companies.ts",
+      "types": "./dist/companies.d.ts",
       "default": "./dist/companies.js"
     },
     "./employees": {
-      "types": "./src/employees.ts",
+      "types": "./dist/employees.d.ts",
       "default": "./dist/employees.js"
     },
     "./common": {
-      "types": "./src/common.ts",
+      "types": "./dist/common.d.ts",
       "default": "./dist/common.js"
     },
     "./clients": {
-      "types": "./src/clients.ts",
+      "types": "./dist/clients.d.ts",
       "default": "./dist/clients.js"
     },
     "./service-orders": {
-      "types": "./src/service-orders.ts",
+      "types": "./dist/service-orders.d.ts",
       "default": "./dist/service-orders.js"
     }
   },
   "devDependencies": {
-    "zod": "latest",
     "@fixr/typescript-config": "*",
     "@types/eslint": "^8.56.5",
     "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "zod": "latest"
   },
   "dependencies": {
     "zod": "latest"
