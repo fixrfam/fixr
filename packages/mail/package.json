@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "biome check && tsc --watch",
+    "build": "biome check && tsc",
+    "dev": "tsc --watch",
     "studio": "email dev",
     "export": "email export",
     "lint": "biome check",
