@@ -19,7 +19,7 @@ interface EmailProps {
   verificationUrl: string
 }
 
-const baseUrl = process.env.VERCEL_URL
+const _baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : ""
 
@@ -107,11 +107,11 @@ const button = {
   padding: "12px 24px",
 }
 
-const links = {
+const _links = {
   textAlign: "center" as const,
 }
 
-const link = {
+const _link = {
   color: "#0366d6",
   fontSize: "12px",
 }

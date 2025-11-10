@@ -45,13 +45,11 @@ export async function createOrgWithAdmin(
     })
     .$returningId()
 
-  const [employeeId] = await db.insert(employees).values({
+  await db.insert(employees).values({
     cpf: data.owner_cpf,
     name: "Admin",
     role: "admin",
     userId: adminId!.id,
     companyId: orgId!.id,
   }) // Without this $inferInsert type assingning, this bug shows up: https://github.com/drizzle-team/drizzle-orm/issues/2889#issuecomment-232316575
-
-  console.log({ orgId, adminId, employeeId })
 }

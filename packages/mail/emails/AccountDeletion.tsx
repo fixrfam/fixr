@@ -101,11 +101,11 @@ const button = {
   padding: "12px 24px",
 }
 
-const links = {
+const _links = {
   textAlign: "center" as const,
 }
 
-const link = {
+const _link = {
   color: "#0366d6",
   fontSize: "12px",
 }
