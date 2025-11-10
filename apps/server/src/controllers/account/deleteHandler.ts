@@ -25,19 +25,18 @@ export async function requestAccountDeletionHandler({
   await deleteUserExpiredTokensByUserId(userId)
   const oneTimeTokens = await getUserOneTimeTokens(userId)
 
-  for (const token of oneTimeTokens) {
-    if (token.tokenType === "account_deletion") {
-      return response.status(409).send(
-        apiResponse({
-          status: 409,
-          error: "Conflict",
-          code: "existing_deletion_request",
-          message:
-            "Deletion request already exists. Finish it or wait until expiration to request a new one.",
-          data: null,
-        }),
-      )
-    }
+  // Use Array.some() for better performance when checking existence
+  if (oneTimeTokens.some((token) => token.tokenType === "account_deletion")) {
+    return response.status(409).send(
+      apiResponse({
+        status: 409,
+        error: "Conflict",
+        code: "existing_deletion_request",
+        message:
+          "Deletion request already exists. Finish it or wait until expiration to request a new one.",
+        data: null,
+      }),
+    )
   }
 
   const account = await queryAccountById(userId)

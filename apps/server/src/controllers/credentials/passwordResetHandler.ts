@@ -28,19 +28,18 @@ export async function requestPasswordResetHandler({
   await deleteUserExpiredTokensByEmail(email)
   const oneTimeTokens = await getUserOneTimeTokensWithEmail(email)
 
-  for (const token of oneTimeTokens) {
-    if (token.tokenType === "password_reset") {
-      return response.status(409).send(
-        apiResponse({
-          status: 409,
-          error: "Conflict",
-          code: "existing_password_reset_request",
-          message:
-            "Password reset request already exists. Finish it or wait until expiration (30 minutes from request) to issue a new one.",
-          data: null,
-        }),
-      )
-    }
+  // Use Array.some() for better performance when checking existence
+  if (oneTimeTokens.some((token) => token.tokenType === "password_reset")) {
+    return response.status(409).send(
+      apiResponse({
+        status: 409,
+        error: "Conflict",
+        code: "existing_password_reset_request",
+        message:
+          "Password reset request already exists. Finish it or wait until expiration (30 minutes from request) to issue a new one.",
+        data: null,
+      }),
+    )
   }
 
   const user = await queryUserByEmail(email)
