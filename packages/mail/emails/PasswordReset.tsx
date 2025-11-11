@@ -23,7 +23,7 @@ interface EmailProps {
   verificationUrl: string
 }
 
-const baseUrl = process.env.VERCEL_URL
+const _baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : ""
 
@@ -102,30 +102,30 @@ const main = {
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
 }
 
-const container = {
+const _container = {
   maxWidth: "480px",
   margin: "0 auto",
   padding: "20px 0 48px",
 }
 
-const title = {
+const _title = {
   fontSize: "24px",
   lineHeight: 1.25,
 }
 
-const section = {
+const _section = {
   padding: "24px",
   border: "solid 1px #dedede",
   borderRadius: "5px",
   textAlign: "center" as const,
 }
 
-const text = {
+const _text = {
   margin: "0 0 10px 0",
   textAlign: "left" as const,
 }
 
-const button = {
+const _button = {
   fontSize: "14px",
   backgroundColor: "#000000",
   color: "#fff",
@@ -134,16 +134,16 @@ const button = {
   padding: "12px 24px",
 }
 
-const links = {
+const _links = {
   textAlign: "center" as const,
 }
 
-const link = {
+const _link = {
   color: "#0366d6",
   fontSize: "12px",
 }
 
-const footer = {
+const _footer = {
   color: "#6a737d",
   fontSize: "12px",
   textAlign: "center" as const,

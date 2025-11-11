@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 
 export async function hashPassword(password: string) {
-  const salt = await bcrypt.genSalt(10)
-  return await bcrypt.hash(password, salt)
+  // Using rounds parameter directly is more efficient than generating salt separately
+  return await bcrypt.hash(password, 10)
 }

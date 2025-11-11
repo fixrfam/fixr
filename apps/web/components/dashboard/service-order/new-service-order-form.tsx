@@ -43,7 +43,7 @@ export function NewServiceOrderForm({
   }
 
   const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
-    console.log("Ordem de serviço a ser criada:", values)
+    // TODO: Implement service order creation API call
   }
 
   return (

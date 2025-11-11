@@ -120,8 +120,6 @@ export async function queryJWTPayloadByUserId(userId: string) {
     .leftJoin(companies, eq(employees.companyId, companies.id))
     .where(eq(users.id, userId))
 
-  console.log(payload)
-
   await redis.set(cacheKey, JSON.stringify(payload), "EX", CACHE_TTL)
 
   return jwtPayload.parse(payload)
@@ -193,9 +191,8 @@ export async function updateUserWithGoogleData({
     jwt: jwtPayloadCacheKey(userId),
   }
 
-  for (const [_, key] of Object.entries(invalidate)) {
-    await redis.del(key)
-  }
+  // Use Promise.all for parallel cache invalidation instead of sequential loop
+  await Promise.all(Object.values(invalidate).map((key) => redis.del(key)))
 
   return await db
     .update(users)
