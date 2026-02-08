@@ -1,9 +1,9 @@
-import { z } from "zod"
-import { employeeRoles } from "./roles"
+import { z } from "zod";
+import { employeeRoles } from "./roles";
 
 export const accountSchema = z
   .object({
-    id: z.string().cuid2(),
+    id: z.cuid2(),
     email: z.string().email({ message: "Invalid email address" }),
     avatarUrl: z.string().url().nullable(),
     displayName: z.string().min(3).max(100).nullable(),
@@ -22,9 +22,9 @@ export const accountSchema = z
   })
   .describe(
     "The account object, contains only non-sentitive data. User password will **NEVER** be returned in responses, not even in hashed format.",
-  )
+  );
 
 export const confirmAccountDeletionSchema = z.object({
   token: z.string(),
   redirectUrl: z.string().optional(),
-})
+});
