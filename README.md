@@ -209,7 +209,7 @@ cd fixr
 2. Instale as dependências de todos os apps e pacotes:
 
 ```bash
-npm install
+bun install
 ```
 
 3. Duplique o arquivo `.env.example` e preencha as variáveis de ambiente conforme indicado. As chaves do **Resend**, **Clerk** e **Google OAuth** devem ser obtidas nos respectivos serviços.
@@ -281,13 +281,13 @@ docker compose up -d
 2. Rode as migrations para criar as tabelas no banco:
 
 ```bash
-npm run migrate
+bun run migrate
 ```
 
 3. Inicie os apps:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 - A API estará disponível em: `http://localhost:3333`
