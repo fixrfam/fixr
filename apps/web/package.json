@@ -11,10 +11,10 @@
     "lint:write": "biome check --write"
   },
   "dependencies": {
-    "@fixr/constants": "*",
-    "@fixr/db": "*",
-    "@fixr/schemas": "*",
-    "@fixr/typescript-config": "*",
+    "@fixr/constants": "workspace:*",
+    "@fixr/db": "workspace:*",
+    "@fixr/schemas": "workspace:*",
+    "@fixr/typescript-config": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
     "@maskito/react": "^3.8.0",
     "@mdx-js/loader": "^3.1.1",

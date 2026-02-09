@@ -12,28 +12,28 @@
   "exports": {
     "./app": {
       "types": "./src/app.ts",
-      "default": "./dist/app.js"
+      "default": "./src/app.ts"
     },
     "./cookies": {
       "types": "./src/cookies.ts",
-      "default": "./dist/cookies.js"
+      "default": "./src/cookies.ts"
     },
     "./masks": {
       "types": "./src/masks.ts",
-      "default": "./dist/masks.js"
+      "default": "./src/masks.ts"
     },
     "./messages": {
       "types": "./src/messages.ts",
-      "default": "./dist/messages.js"
+      "default": "./src/messages.ts"
     },
     "./roles": {
       "types": "./src/roles.ts",
-      "default": "./dist/roles.js"
+      "default": "./src/roles.ts"
     }
   },
   "devDependencies": {
-    "@fixr/typescript-config": "*",
-    "@fixr/schemas": "*",
+    "@fixr/typescript-config": "workspace:*",
+    "@fixr/schemas": "workspace:*",
     "@biomejs/biome": "2.3.3",
     "@types/eslint": "^8.56.5",
     "@types/node": "^20.11.24",

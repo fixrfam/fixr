@@ -13,25 +13,17 @@
     "lint:write": "biome check --write"
   },
   "exports": {
-    "./app": {
-      "types": "./src/app.ts",
-      "default": "./dist/app.js"
-    },
-    "./cookies": {
-      "types": "./src/cookies.ts",
-      "default": "./dist/cookies.js"
-    },
     "./connection": {
       "types": "./src/connection.ts",
-      "default": "./dist/src/connection.js"
+      "default": "./src/connection.ts"
     },
     "./schema": {
       "types": "./src/schema/index.ts",
-      "default": "./dist/src/schema/index.js"
+      "default": "./src/schema/index.ts"
     }
   },
   "devDependencies": {
-    "@fixr/typescript-config": "*",
+    "@fixr/typescript-config": "workspace:*",
     "@biomejs/biome": "2.3.3",
     "@types/eslint": "^8.56.5",
     "@types/node": "^20.11.24",

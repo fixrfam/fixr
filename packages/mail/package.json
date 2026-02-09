@@ -14,19 +14,15 @@
   "exports": {
     "./services": {
       "types": "./services/mailing.ts",
-      "default": "./dist/services/mailing.js"
+      "default": "./services/mailing.ts"
     },
     "./queue": {
       "types": "./services/queue/queue.ts",
-      "default": "./dist/services/queue/queue.js"
-    },
-    "./worker": {
-      "types": "./services/worker/worker.ts",
-      "default": "./dist/services/worker/worker.js"
+      "default": "./services/queue/queue.ts"
     }
   },
   "dependencies": {
-    "@fixr/constants": "*",
+    "@fixr/constants": "workspace:*",
     "@react-email/components": "0.0.34",
     "@react-email/tailwind": "1.0.4",
     "@types/node": "^20.11.24",
