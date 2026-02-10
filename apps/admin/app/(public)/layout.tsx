@@ -35,7 +35,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased font-[family-name:var(--font-inter)]`}
+          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased font-(family-name:--font-inter)`}
         >
           <ThemeProvider
             attribute="class"

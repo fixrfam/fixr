@@ -40,7 +40,7 @@ export default function Home() {
         <SignedIn>
           <hr></hr>
           <div className="flex justify-between items-center ">
-            <Button asChild className="flex-grow max-w-xs">
+            <Button asChild className="grow max-w-xs">
               <Link href="/dash">Dashboard</Link>
             </Button>
             <div className="inline-flex gap-2 items-center">

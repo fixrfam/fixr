@@ -22,17 +22,20 @@
     }
   },
   "dependencies": {
+    "@biomejs/biome": "2.3.3",
     "@fixr/constants": "workspace:*",
     "@react-email/components": "0.0.34",
     "@react-email/tailwind": "1.0.4",
     "@types/node": "^20.11.24",
+    "@types/nodemailer": "^7.0.9",
     "bullmq": "^5.48.0",
+    "ioredis": "^5.9.2",
+    "nodemailer": "^8.0.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "resend": "^4.5.1",
     "typescript": "^5.3.3",
-    "zod": "^3.25.28",
-    "@biomejs/biome": "2.3.3"
+    "zod": "^3.25.28"
   },
   "devDependencies": {
     "@types/react": "19.0.1",

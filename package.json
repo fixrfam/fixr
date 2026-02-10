@@ -30,6 +30,9 @@
   "packageManager": "bun@1.3.6",
   "workspaces": ["apps/*", "packages/*"],
   "dependencies": {
+    "@paralleldrive/cuid2": "^3.3.0",
+    "@react-email/render": "^2.0.4",
+    "dotenv": "^17.2.4",
     "dotenv-cli": "^8.0.0"
   }
 }
