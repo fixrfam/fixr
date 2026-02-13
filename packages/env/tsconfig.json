@@ -1,0 +1,6 @@
+{
+  "extends": "@fixr/typescript-config/base.json",
+  "compilerOptions": {
+    "strictNullChecks": true,
+  },
+}

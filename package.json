@@ -1,5 +1,5 @@
 {
-  "name": "turbo",
+  "name": "fixr",
   "private": true,
   "scripts": {
     "dev": "dotenv -- bun run --elide-lines 0 --filter './apps/*' dev",
