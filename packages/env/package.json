@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.1",
-    "@types/bun": "1.3.6",
-    "dotenv": "^16.4.5",
-    "zod": "^4.3.6"
+    "@types/bun": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@fixr/typescript-config": "workspace:*",
+    "@fixr/typescript-config": "catalog:",
     "@fixr/infra": "workspace:*",
-    "typescript": "5"
+    "typescript": "catalog:"
   }
 }

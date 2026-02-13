@@ -8,12 +8,12 @@
     "destroy": "alchemy destroy"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "zod": "^4.3.6"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fixr/typescript-config": "workspace:*",
     "alchemy": "^0.82.1",
-    "typescript": "5"
+    "typescript": "catalog:"
   }
 }
