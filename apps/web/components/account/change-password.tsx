@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@fixr/schemas/credentials"
-import { ApiResponse } from "@fixr/schemas/utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "@pheralb/toast"
-import { AxiosError } from "axios"
-import { Loader2, Save } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
+import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@fixr/schemas/credentials";
+import { ApiResponse } from "@fixr/schemas/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@pheralb/toast";
+import { AxiosError } from "axios";
+import { Loader2, Save } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +18,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { axios } from "@/lib/auth/axios"
-import { fallbackMessages, messages } from "@/lib/messages"
-import { api } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { axios } from "@/lib/auth/axios";
+import { fallbackMessages, messages } from "@/lib/messages";
+import { api } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -31,11 +31,11 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "../ui/form"
+} from "../ui/form";
 
 export function ChangePassword() {
-  const [loading, setLoading] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const changePasswordAuthenticatedSchema =
     baseChangePasswordAuthenticatedSchema
@@ -63,7 +63,7 @@ export function ChangePassword() {
       .refine((data) => data.new === data.confirmNew, {
         message: "As senhas não coincidem.",
         path: ["confirmNew"],
-      })
+      });
 
   const form = useForm<z.infer<typeof changePasswordAuthenticatedSchema>>({
     resolver: zodResolver(changePasswordAuthenticatedSchema),
@@ -72,14 +72,14 @@ export function ChangePassword() {
       new: "",
     },
     mode: "all",
-  })
+  });
 
-  const { formState } = form
+  const { formState } = form;
 
   async function onSubmit(
     values: z.infer<typeof changePasswordAuthenticatedSchema>,
   ) {
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await axios.put<ApiResponse>(
         api("/credentials/password"),
@@ -87,28 +87,28 @@ export function ChangePassword() {
         {
           withCredentials: true,
         },
-      )
+      );
       if (res.status === 200) {
-        const message = messages[res.data.code] ?? fallbackMessages.success
-        setOpen(false)
+        const message = messages[res.data.code] ?? fallbackMessages.success;
+        setOpen(false);
 
         toast.success({
           text: message.title,
           description: message.description,
-        })
+        });
       }
     } catch (error) {
       if (error instanceof AxiosError) {
-        const errorData = error.response?.data as ApiResponse
-        const message = messages[errorData.code] ?? fallbackMessages.error
+        const errorData = error.response?.data as ApiResponse;
+        const message = messages[errorData.code] ?? fallbackMessages.error;
 
         toast.error({
           text: message.title,
           description: message.description,
-        })
+        });
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -222,5 +222,5 @@ export function ChangePassword() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
