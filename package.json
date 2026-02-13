@@ -15,7 +15,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "migrate": "dotenv -- bun run --elide-lines 0 --filter @fixr/db migrate",
     "generate": "dotenv -- bun run --elide-lines 0 --filter @fixr/db generate",
-    "studio": "dotenv -- bun run --elide-lines 0 --filter @fixr/db studio"
+    "studio": "dotenv -- bun run --elide-lines 0 --filter @fixr/db studio",
+    "prepare": "husky"
   },
   "workspaces": {
     "packages": [
