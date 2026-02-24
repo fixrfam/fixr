@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useParams, usePathname } from "next/navigation"
-import { Logo } from "@/components/svg/Logo"
-import { getDashboardRouteName } from "@/lib/utils/getDashboardRouteName"
-import { DashLink } from "../dash-link"
-import { FloatingToggle } from "./floating-toggle"
+import { useParams, usePathname } from "next/navigation";
+import { Logo } from "@/components/svg/Logo";
+import { getDashboardRouteName } from "@/lib/utils/get-dashboard-route-name";
+import { DashLink } from "../dash-link";
+import { FloatingToggle } from "./floating-toggle";
 
 export function Header() {
-  const pathname = usePathname()
-  const params = useParams<{ subdomain: string }>()
+	const pathname = usePathname();
+	const params = useParams<{ subdomain: string }>();
 
-  return (
-    <header className="lg:hidden absolute w-full h-16 z-97 flex items-center justify-between bg-background/90 backdrop-blur-xs px-4 border-border/30 border-b">
-      <DashLink href="/home" subdomain={params.subdomain}>
-        <Logo className="size-8" />
-      </DashLink>
-      <p className="text-sm">{getDashboardRouteName(pathname)}</p>
-      <FloatingToggle className="relative z-101" />
-    </header>
-  )
+	return (
+		<header className="absolute z-97 flex h-16 w-full items-center justify-between border-border/30 border-b bg-background/90 px-4 backdrop-blur-xs lg:hidden">
+			<DashLink href="/home" subdomain={params.subdomain}>
+				<Logo className="size-8" />
+			</DashLink>
+			<p className="text-sm">{getDashboardRouteName(pathname)}</p>
+			<FloatingToggle className="relative z-101" />
+		</header>
+	);
 }

@@ -29,6 +29,10 @@
     "./roles": {
       "types": "./src/roles.ts",
       "default": "./src/roles.ts"
+    },
+    "./enforcements": {
+      "types": "./src/enforcements.ts",
+      "default": "./src/enforcements.ts"
     }
   },
   "devDependencies": {

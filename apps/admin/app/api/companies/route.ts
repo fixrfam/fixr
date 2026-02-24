@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 		createCompanySchema.parseAsync(await req.json())
 	);
 
-	if (error)
+	if (error) {
 		return NextResponse.json(
 			apiResponse({
 				status: 400,
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 				data: null,
 			})
 		);
+	}
 
 	const formatted = {
 		...data,
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
 			getCompanyBySubdomain(formatted.subdomain),
 		]);
 
-	if (existingEmployee)
+	if (existingEmployee) {
 		return NextResponse.json(
 			apiResponse({
 				status: 409,
@@ -57,8 +58,9 @@ export async function POST(req: NextRequest) {
 			}),
 			{ status: 409 }
 		);
+	}
 
-	if (existingCompany)
+	if (existingCompany) {
 		return NextResponse.json(
 			apiResponse({
 				status: 409,
@@ -69,8 +71,9 @@ export async function POST(req: NextRequest) {
 			}),
 			{ status: 409 }
 		);
+	}
 
-	if (existingEmail)
+	if (existingEmail) {
 		return NextResponse.json(
 			apiResponse({
 				status: 409,
@@ -81,8 +84,9 @@ export async function POST(req: NextRequest) {
 			}),
 			{ status: 409 }
 		);
+	}
 
-	if (existingSubdomain)
+	if (existingSubdomain) {
 		return NextResponse.json(
 			apiResponse({
 				status: 409,
@@ -93,6 +97,7 @@ export async function POST(req: NextRequest) {
 			}),
 			{ status: 409 }
 		);
+	}
 
 	await createOrgWithAdmin(data);
 

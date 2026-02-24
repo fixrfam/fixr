@@ -1,3 +1,5 @@
+import { join } from "node:path";
+import { cwd } from "node:process";
 import { fastifyCookie } from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import { fastifyJwt } from "@fastify/jwt";
@@ -6,6 +8,7 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { APP_NAME } from "@fixr/constants/app";
 import { companySelectSchema } from "@fixr/db/schema";
+import { env } from "@fixr/env/server";
 import { accountSchema } from "@fixr/schemas/account";
 import { apiResponseSchema } from "@fixr/schemas/utils";
 import scalarUi from "@scalar/fastify-api-reference";
@@ -20,14 +23,11 @@ import {
 	validatorCompiler,
 	type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { join } from "path";
-import { cwd } from "process";
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./docs/main";
-import { env } from "@fixr/env/server";
 import { apiResponse } from "./helpers/response";
-import { startEmailWorker } from "./queue/workers/emailWorker";
+import { startEmailWorker } from "./queue/workers/email-worker";
 import { accountRoutes } from "./routes/account.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { companiesRoutes } from "./routes/companies/companies.routes";
@@ -50,7 +50,7 @@ const envToLogger = {
 
 //Set Zod as the default request/response data serializer
 const server = fastify({
-	logger: envToLogger["development"],
+	logger: envToLogger.development,
 	allowErrorHandlerOverride: true,
 }).withTypeProvider<ZodTypeProvider>();
 
@@ -178,7 +178,7 @@ server.register(fastifyCors, {
 console.log(process.env);
 
 //Map the zod errors to standard response
-server.setErrorHandler((error, request, reply) => {
+server.setErrorHandler((error, _request, reply) => {
 	if (error instanceof ZodError) {
 		reply.status(400).send(
 			apiResponse({

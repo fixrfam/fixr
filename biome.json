@@ -24,7 +24,9 @@
       "!**/.svelte-kit",
       "!**/wrangler.jsonc",
       "!**/.source",
-      "!**/convex/_generated"
+      "!**/convex/_generated",
+      "!**/components/ui/**/*",
+      "!**/components/magicui/**/*"
     ]
   },
   "formatter": {
@@ -50,11 +52,7 @@
           "level": "warn",
           "fix": "safe",
           "options": {
-            "functions": [
-              "clsx",
-              "cva",
-              "cn"
-            ]
+            "functions": ["clsx", "cva", "cn"]
           }
         }
       },
@@ -68,11 +66,15 @@
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        "noUselessElse": "error",
+        "noNonNullAssertion": "off"
       },
       "performance": {
-        "noBarrelFile": "warn",
-        "noNamespaceImport": "warn"
+        "noBarrelFile": "off",
+        "noNamespaceImport": "off"
+      },
+      "suspicious": {
+        "noBitwiseOperators": "off"
       }
     }
   },
@@ -86,8 +88,5 @@
       "tailwindDirectives": true
     }
   },
-  "extends": [
-    "ultracite/biome/core",
-    "ultracite/biome/react"
-  ]
+  "extends": ["ultracite/biome/core", "ultracite/biome/react"]
 }
