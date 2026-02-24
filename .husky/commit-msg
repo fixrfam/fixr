@@ -1,0 +1,29 @@
+#!/bin/sh
+
+msg=$(cat "$1")
+
+pattern='^(feat|fix|docs|refactor|chore|test|build|ci|perf|style)\([A-Z][A-Za-z0-9]*\): .+'
+
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RESET="\033[0m"
+
+if echo "$msg" | grep -Eq "$pattern"; then
+  exit 0
+fi
+
+echo ""
+echo "${RED}✖ Invalid commit message.${RESET}"
+echo ""
+echo "Use this format:"
+echo "  ${GREEN}action(Scope): Message${RESET}"
+echo "Example:"
+echo "  ${GREEN}feat(Auth): Add login endpoint${RESET}"
+echo ""
+echo "${YELLOW}Rules:${RESET} Action must be lowercase, Scope must start with uppercase and Message must not be empty."
+echo "Your message was:"
+echo "  $msg"
+echo ""
+
+exit 1
