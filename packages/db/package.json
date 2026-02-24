@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@fixr/typescript-config": "workspace:*",
+    "@fixr/env": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@types/eslint": "^8.56.5",
     "@types/bun": "catalog:",

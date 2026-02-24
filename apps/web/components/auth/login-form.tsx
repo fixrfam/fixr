@@ -28,6 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form"
+import { env } from "@fixr/env/web"
 
 export function LoginForm({ errors }: { errors?: { google?: string } }) {
   const [loading, setLoading] = useState(false)
@@ -83,7 +84,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 
   function handleGoogleLogin() {
     setGoogleLoading(true)
-    router.push(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`)
+    router.push(`${env.NEXT_PUBLIC_API_URL}/auth/google`)
   }
 
   return (

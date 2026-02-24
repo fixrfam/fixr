@@ -7,6 +7,7 @@ import { TextLogo } from "@/components/svg/TextLogo"
 import { Button } from "@/components/ui/button"
 import { useScrollPosition } from "@/lib/hooks/use-scroll-position"
 import { cn } from "@/lib/utils"
+import { env } from "@fixr/env/web"
 
 export default function Header() {
   const { hasScrolled } = useScrollPosition()
@@ -36,7 +37,7 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex gap-2">
-          <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
+          <Link href={env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
             <Button
               variant="outline"
               className="font-light hidden lg:block"

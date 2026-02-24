@@ -1,6 +1,7 @@
 import { cookieKey } from "@fixr/constants/cookies"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
+import { env } from "@fixr/env/web"
 
 export async function GET() {
   const cookieStore = await cookies()
@@ -9,6 +10,6 @@ export async function GET() {
   cookieStore.delete(cookieKey("refreshToken"))
 
   return NextResponse.redirect(
-    new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL),
+    new URL("/auth/login", env.NEXT_PUBLIC_APP_URL),
   )
 }

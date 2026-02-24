@@ -42,14 +42,16 @@
       "ioredis": "5.9.2",
       "bullmq": "5.67.3",
       "@react-email/components": "0.0.34",
-      "nodemailer": "8.0.1"
+      "nodemailer": "8.0.1",
+      "vitest": "^4.0.18"
     }
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^3.3.0",
     "@react-email/render": "^2.0.4",
     "dotenv": "^17.2.4",
-    "dotenv-cli": "^8.0.0"
+    "dotenv-cli": "^8.0.0",
+    "vitest": "catalog:"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

@@ -2,6 +2,7 @@ import { cookieKey } from "@fixr/constants/cookies"
 import { userJWT } from "@fixr/schemas/auth"
 import { NextRequest, NextResponse } from "next/server"
 import { parseJwt } from "./lib/utils"
+import { env } from "@fixr/env/web"
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get(cookieKey("session"))?.value
@@ -27,13 +28,13 @@ export async function middleware(request: NextRequest) {
       const tokenValidationResponse = await validatePasswordResetToken(request)
       if (!tokenValidationResponse) {
         return NextResponse.redirect(
-          new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL),
+          new URL("/auth/login", env.NEXT_PUBLIC_APP_URL),
         )
       }
     } catch (error) {
       console.error("Error during password reset token validation:", error)
       return NextResponse.redirect(
-        new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL),
+        new URL("/auth/login", env.NEXT_PUBLIC_APP_URL),
       )
     }
   }
@@ -54,7 +55,7 @@ export async function middleware(request: NextRequest) {
     // If the user is at the loginPath and has a valid token, they need to go to dashboard.
     if (token || refreshToken) {
       return NextResponse.redirect(
-        new URL("/dashboard/account", process.env.NEXT_PUBLIC_APP_URL),
+        new URL("/dashboard/account", env.NEXT_PUBLIC_APP_URL),
       )
     }
 
@@ -73,7 +74,7 @@ export async function middleware(request: NextRequest) {
 
       if (isProtectedRoute) {
         return NextResponse.redirect(
-          new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL),
+          new URL("/auth/login", env.NEXT_PUBLIC_APP_URL),
         )
       }
 
@@ -96,7 +97,7 @@ export async function middleware(request: NextRequest) {
         : `/dashboard/${userTenant}`
 
       return NextResponse.redirect(
-        new URL(redirectPath, process.env.NEXT_PUBLIC_APP_URL),
+        new URL(redirectPath, env.NEXT_PUBLIC_APP_URL),
       )
     }
   }
@@ -106,7 +107,7 @@ export async function middleware(request: NextRequest) {
 
 async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
   const revalidateResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
+    `${env.NEXT_PUBLIC_API_URL}/auth/token`,
     {
       method: "POST",
       headers: {
@@ -131,14 +132,14 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
   // Handle invalid refresh token: redirect to signout route which will clear cookies and redirect to login
   if (revalidateResponse.status === 401) {
     return NextResponse.redirect(
-      new URL("/api/auth/signout", process.env.NEXT_PUBLIC_APP_URL),
+      new URL("/api/auth/signout", env.NEXT_PUBLIC_APP_URL),
     )
   }
 
   // Revalidation failed: redirect to login
   if (isProtectedRoute) {
     return NextResponse.redirect(
-      new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL),
+      new URL("/auth/login", env.NEXT_PUBLIC_APP_URL),
     )
   }
 
@@ -152,7 +153,7 @@ async function validatePasswordResetToken(
   const token = urlParts[urlParts.length - 1]
 
   const tokenValidationResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/credentials/password/reset?token=${token}`,
+    `${env.NEXT_PUBLIC_API_URL}/credentials/password/reset?token=${token}`,
     {
       method: "GET",
       headers: {

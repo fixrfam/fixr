@@ -6,7 +6,7 @@ import {
 import { createUserSchema } from "@fixr/schemas/auth"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-import { env } from "@/src/env"
+import { env } from "@fixr/env/server"
 import { apiResponse } from "@/src/helpers/response"
 import { hashPassword } from "../../helpers/hash-password"
 import {

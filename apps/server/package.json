@@ -38,6 +38,7 @@
     "@fixr/mail": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
+    "@fixr/env": "workspace:*",
     "@paralleldrive/cuid2": "^2.2.2",
     "@react-email/components": "^0.0.22",
     "@react-email/render": "0.0.17",

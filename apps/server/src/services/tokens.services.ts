@@ -3,7 +3,7 @@ import { db } from "@fixr/db/connection"
 import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema"
 import { and, eq, gte, sql } from "drizzle-orm"
 import { FastifyReply } from "fastify"
-import { env } from "../env"
+import { env } from "@fixr/env/server"
 import { generateOneTimeToken } from "../helpers/tokens"
 
 export interface RefreshToken {

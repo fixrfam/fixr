@@ -1,11 +1,14 @@
 {
-  "name": "@sign/env",
+  "name": "@fixr/env",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
     "./server": "./src/server.ts",
-    "./web": "./src/web.ts"
+    "./web": "./src/web.ts",
+    "./admin": "./src/admin.ts",
+    "./mail": "./src/mail.ts",
+    "./db": "./src/db.ts"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.1",

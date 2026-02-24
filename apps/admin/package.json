@@ -18,6 +18,7 @@
     "@fixr/mail": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
+    "@fixr/env": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@maskito/core": "^3.4.0",
     "@maskito/react": "^3.4.0",

@@ -4,6 +4,7 @@ import { BlurFade } from "@/components/magicui/blur-fade"
 import { TextAnimate } from "@/components/magicui/text-animate"
 import { Button } from "@/components/ui/button"
 import { AppPreview } from "./AppPreview"
+import { env } from "@fixr/env/web"
 
 export default function Hero() {
   return (
@@ -69,7 +70,7 @@ export default function Hero() {
                 </Link>
               </BlurFade>
               <BlurFade delay={0.3 * 2 + 0.15} inView>
-                <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
+                <Link href={env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
                   <Button variant="outline" className="font-light">
                     Documentação{" "}
                     <ExternalLink className="w-5 h-5 inline-block ml-2" />

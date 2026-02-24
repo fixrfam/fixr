@@ -4,6 +4,7 @@ import Link from "next/link"
 import { BackButton } from "@/components/dashboard/back-button"
 import { Button } from "@/components/ui/button"
 import Figure from "../../../public/og_image.jpg"
+import { env } from "@fixr/env/web"
 
 export default function DowntimePage() {
   return (
@@ -51,12 +52,12 @@ export default function DowntimePage() {
         </p>
 
         <div className="flex gap-4">
-          <Link href={process.env.NEXT_PUBLIC_LINKTREE_URL ?? "/"}>
+          <Link href={env.NEXT_PUBLIC_LINKTREE_URL ?? "/"}>
             <Button className="font-light">
               Linktree <ExternalLink className="w-5 h-5 inline-block" />
             </Button>
           </Link>
-          <Link href={process.env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
+          <Link href={env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
             <Button variant="outline" className="font-light">
               Documentação <ExternalLink className="w-5 h-5 inline-block" />
             </Button>

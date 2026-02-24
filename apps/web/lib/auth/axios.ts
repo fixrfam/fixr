@@ -6,10 +6,11 @@ import axios, {
 } from "axios"
 import { parseCookies } from "nookies"
 import { isClientSide, parseJwt } from "../utils"
+import { env } from "@fixr/env/web"
 
 const axiosClient = axios.create({
   withCredentials: true,
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: env.NEXT_PUBLIC_API_URL,
 })
 
 let isRefreshing = false
@@ -59,7 +60,7 @@ axiosClient.interceptors.request.use(
     if (!jwt || (payload && payload.exp * 1000 < Date.now())) {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
+          `${env.NEXT_PUBLIC_API_URL}/auth/token`,
           {
             method: "POST",
             headers: {
@@ -98,7 +99,7 @@ axios.interceptors.response.use(
 
         try {
           const refresh = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/token`,
+            `${env.NEXT_PUBLIC_API_URL}/auth/token`,
             {
               method: "POST",
               headers: {
