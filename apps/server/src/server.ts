@@ -175,8 +175,6 @@ server.register(fastifyCors, {
 	credentials: true,
 });
 
-console.log(process.env);
-
 //Map the zod errors to standard response
 server.setErrorHandler((error, _request, reply) => {
 	if (error instanceof ZodError) {

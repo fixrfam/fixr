@@ -11,7 +11,6 @@ export const env = createEnv({
 			.min(32)
 			.describe("Cookie encryption secret"),
 		COOKIE_DOMAIN: z.string().describe("Domain for cookies"),
-		GOOGLE_CLIENT_ID: z.string().describe("Google OAuth client ID"),
 		GOOGLE_AUTH_CLIENT_ID: z
 			.string()
 			.describe("Google OAuth client ID (legacy)"),
@@ -19,7 +18,7 @@ export const env = createEnv({
 			.string()
 			.describe("Google OAuth client secret"),
 		GOOGLE_AUTH_REDIRECT_URI: z.url().describe("Google OAuth redirect URI"),
-		NODE_PORT: z.number().describe("Node.js server port"),
+		NODE_PORT: z.coerce.number().describe("Node.js server port"),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development")

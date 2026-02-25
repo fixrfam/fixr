@@ -100,7 +100,7 @@ export async function googleCallbackHandler({
 
 		const ticket = await client.verifyIdToken({
 			idToken,
-			audience: process.env.GOOGLE_CLIENT_ID!,
+			audience: env.GOOGLE_AUTH_CLIENT_ID,
 		});
 
 		const payload = ticket.getPayload();
