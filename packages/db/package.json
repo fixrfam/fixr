@@ -4,13 +4,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "biome check && tsc",
-    "migrate": "dotenv -- tsx src/migrate.ts",
-    "generate": "dotenv -- drizzle-kit generate",
-    "studio": "dotenv -- drizzle-kit studio",
-    "lint": "biome check",
-    "lint:write": "biome check --write"
+    "db:push": "dotenv -- drizzle-kit push",
+    "db:generate": "dotenv -- drizzle-kit generate",
+    "db:studio": "dotenv -- drizzle-kit studio",
+    "db:migrate": "dotenv -- tsx src/migrate.ts",
+    "db:start": "docker compose up -d",
+    "db:watch": "docker compose up",
+    "db:stop": "docker compose stop",
+    "db:down": "docker compose down"
   },
   "exports": {
     "./connection": {
