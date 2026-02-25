@@ -14,11 +14,10 @@ O **Fixr** foi desenvolvido como parte da disciplina de **Projeto Integrador** d
 #### Criado com
 
 [![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.sh/)
 [![Fastify](https://img.shields.io/badge/-Fastify-000000?style=flat&logo=fastify&logoColor=white)](https://www.fastify.io/)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=fff)](https://www.mysql.com/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=fff)](https://redis.io/)
-[![Turborepo](https://img.shields.io/badge/Turborepo-000000?logo=turborepo&logoColor=fff)](https://turborepo.org/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/)
 [![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=fff)](https://jwt.io/)
 [![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
@@ -59,21 +58,24 @@ Além disso, o Fixr implementa um **modelo de permissões de acesso** que organi
 
 ### Arquitetura
 
-O **Fixr** adota uma arquitetura moderna, organizada em um **monorepo** que centraliza frontend, backend e pacotes compartilhados, permitindo **reuso de código, consistência entre aplicações e automação de tarefas** por meio do **Turborepo**.
+O **Fixr** adota uma arquitetura moderna, organizada em um **monorepo** que centraliza frontend, backend e pacotes compartilhados, permitindo **reuso de código, consistência entre aplicações e automação de tarefas**. O projeto utiliza **Bun** como runtime e gerenciador de pacotes, oferecendo maior performance e compatibilidade com o ecossistema JavaScript/TypeScript.
 
 A estrutura principal do repositório é:
 
 ```
 apps/
- ├─ web/       → Aplicação principal para clientes e técnicos (Next.js)
- ├─ admin/     → Painel administrativo interno para gerentes e administradores
- └─ server/    → API REST em Fastify, responsável por toda a lógica de negócios e integração com o banco de dados
+ ├─ web/                → Aplicação principal para clientes e técnicos (Next.js)
+ ├─ admin/              → Painel administrativo interno para gerentes e administradores (Next.js)
+ └─ server/             → API REST em Fastify, responsável por toda a lógica de negócios e integração com o banco de dados
 
 packages/
- ├─ db/        → Schemas, migrações e conexão com o banco de dados (Drizzle ORM + MySQL)
- ├─ schemas/   → Schemas Zod compartilhados entre frontend e backend para validação consistente
- ├─ constants/ → Constantes e enums do sistema
- └─ mail/      → Templates de email em React e configuração da fila de processamento com BullMQ
+ ├─ db/                 → Schemas, migrações e conexão com o banco de dados (Drizzle ORM + MySQL)
+ ├─ schemas/            → Schemas Zod compartilhados entre frontend e backend para validação consistente
+ ├─ constants/          → Constantes e enums do sistema
+ ├─ env/                → Configuração centralizada de variáveis de ambiente com validação via Zod
+ ├─ infra/              → Implementação da infraestrutura de deploy
+ ├─ mail/               → Templates de email em React e configuração da fila de processamento com BullMQ
+ └─ typescript-config/  → Configurações TypeScript compartilhadas entre os projetos
 ```
 
 #### Backend
@@ -129,7 +131,7 @@ O **Fixr** foi desenvolvido utilizando tecnologias modernas e consolidadas, que 
 
 #### Backend
 
-- [**Node.js**](https://nodejs.org/): Ambiente de execução rápido e escalável para o servidor.
+- [**Bun**](https://bun.sh/): Runtime JavaScript/TypeScript de alta performance, utilizado como ambiente de execução e gerenciador de pacotes.
 - [**Fastify**](https://www.fastify.io/): Framework leve e de alta performance para construção da API REST.
 - [**Drizzle ORM**](https://orm.drizzle.team/): Mapeamento objeto-relacional para MySQL, simplificando consultas e migrações.
 - [**MySQL**](https://www.mysql.com/): Banco de dados relacional confiável para armazenar informações estruturadas.
@@ -143,8 +145,9 @@ O **Fixr** foi desenvolvido utilizando tecnologias modernas e consolidadas, que 
 #### Infraestrutura
 
 - [**Docker**](https://www.docker.com/): Conteinerização completa do ambiente de desenvolvimento e produção.
-- [**Turborepo**](https://turbo.build/repo): Orquestração de monorepo, compartilhamento de pacotes e automação de tarefas de build e deploy.
+- [**Bun Workspaces**](https://bun.sh/docs/install/workspaces): Gerenciamento de monorepo com workspaces nativos do Bun, permitindo compartilhamento eficiente de pacotes e dependências.
 - [**TypeScript**](https://www.typescriptlang.org/): Tipagem estática para maior segurança e manutenção do código.
+- [**Husky**](https://typicode.github.io/husky/): Git hooks para automação de tarefas pré-commit (formatação e validação de tipos).
 
 ---
 
@@ -155,24 +158,30 @@ O repositório do **Fixr** segue uma organização em **monorepo**, separando cl
 ```bash
 fixr/
 ├─ apps/
-│  ├─ web/        # Aplicação principal para usuários e clientes, desenvolvida em Next.js
-│  ├─ admin/      # Painel administrativo interno, destinado a gerentes e administradores
-│  └─ server/     # API REST construída com Fastify, responsável pela lógica de negócios e integração com o banco de dados
+│  ├─ web/                # Aplicação principal para usuários e clientes (Next.js)
+│  ├─ admin/              # Painel administrativo interno (Next.js)
+│  └─ server/             # API REST construída com Fastify
 │
 ├─ packages/
-│  ├─ db/         # Schemas, conexões e migrações do banco de dados (Drizzle + MySQL)
-│  ├─ schemas/    # Schemas Zod compartilhados entre frontend e backend para validação consistente
-│  ├─ constants/  # Constantes globais e enums do sistema
-│  └─ mail/       # Templates de e-mail em React e configuração da fila de envio com BullMQ
+│  ├─ db/                 # Schemas, conexões e migrações do banco de dados (Drizzle + MySQL)
+│  ├─ schemas/            # Schemas Zod compartilhados entre frontend e backend
+│  ├─ constants/          # Constantes globais e enums do sistema
+│  ├─ env/                # Configuração centralizada de variáveis de ambiente
+│  ├─ infra/              # Infraestrutura de deploy
+│  ├─ mail/               # Templates de e-mail em React e fila de envio (BullMQ)
+│  └─ typescript-config/  # Configurações TypeScript compartilhadas
 │
-└─ turbo.json     # Configuração do Turborepo para orquestração de pacotes e tarefas
+├─ .husky/                # Git hooks para pré-commit (formatação e type-checking)
+└─ package.json           # Configuração do monorepo com Bun workspaces
 ```
 
 Essa estrutura permite:
 
-- Desenvolvimento independente de frontend e backend.
-- Reuso de código e validações compartilhadas.
-- Escalabilidade e organização de tarefas via Turborepo.
+- **Desenvolvimento independente** de frontend e backend
+- **Reuso de código** e validações compartilhadas entre projetos
+- **Gerenciamento centralizado** de variáveis de ambiente com validação
+- **Automação de tarefas** via Bun workspaces e scripts do package.json
+- **Qualidade de código** garantida por hooks pré-commit
 
 ---
 
@@ -193,9 +202,9 @@ A documentação é projetada para facilitar futuras **integrações com ERPs e 
 
 Para rodar o **Fixr** localmente, você precisará ter instalados em sua máquina:
 
+- [Bun](https://bun.sh/) (v1.3.6 ou superior)
 - [Docker](https://www.docker.com/)
 - [Git](https://git-scm.com/)
-- [Node.js](https://nodejs.org/)
 
 #### Passos
 
@@ -212,87 +221,120 @@ cd fixr
 bun install
 ```
 
-3. Duplique o arquivo `.env.example` e preencha as variáveis de ambiente conforme indicado. As chaves do **Resend**, **Clerk** e **Google OAuth** devem ser obtidas nos respectivos serviços.
+3. Configure as variáveis de ambiente:
+
+O projeto utiliza um **sistema centralizado de variáveis de ambiente** através do pacote `@fixr/env`. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ---
 
-#### Variáveis Globais
-
-Essas variáveis são usadas tanto pelo **Docker Compose** quanto pelos apps, sendo interpoladas, por exemplo, na conexão com o banco de dados:
+#### Variáveis de Ambiente
 
 ```env
+# Banco de Dados (MySQL)
 MYSQL_ROOT_PASSWORD="docker"
 MYSQL_DATABASE="fixr"
 MYSQL_USER="fixr"
 MYSQL_PASSWORD="fixr"
-
-REDIS_PASSWORD="docker"
-
-# Não altere estas linhas
-REDIS_URL="redis://default:${REDIS_PASSWORD}@localhost:6379/0"
 DB_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@localhost:3306/${MYSQL_DATABASE}"
-```
 
-#### Variáveis do Servidor
+# Redis
+REDIS_PASSWORD="docker"
+REDIS_URL="redis://default:${REDIS_PASSWORD}@localhost:6379/0"
 
-```env
+# Servidor (API)
+NODE_PORT="3333"
 FRONTEND_URL="http://localhost:3000"
-
-RESEND_KEY="re_{$}"
-
-JWT_SECRET=""
-COOKIE_ENCRYPTION_SECRET=""
+JWT_SECRET="seu-jwt-secret-aqui"
+COOKIE_ENCRYPTION_SECRET="seu-cookie-secret-aqui"
 COOKIE_DOMAIN="localhost"
 
-GOOGLE_AUTH_CLIENT_ID=""
-GOOGLE_AUTH_CLIENT_SECRET=""
+# Autenticação OAuth (Google)
+GOOGLE_AUTH_CLIENT_ID="seu-google-client-id"
+GOOGLE_AUTH_CLIENT_SECRET="seu-google-client-secret"
 GOOGLE_AUTH_REDIRECT_URI="http://localhost:3333/auth/google/callback"
 
-NODE_PORT="3333"
-```
+# Email (Resend)
+RESEND_KEY="re_seu-resend-key"
 
-#### Variáveis do Web App
-
-```env
+# Web App (Frontend Principal)
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_API_URL="http://localhost:3333"
 NEXT_PUBLIC_DOCS_URL="https://docs.fixr.com.br"
 NEXT_PUBLIC_LINKTREE_URL="https://linktr.ee/fixrfam"
+
+# Admin Panel (Painel Administrativo)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_seu-clerk-key"
+CLERK_SECRET_KEY="sk_test_seu-clerk-secret"
 ```
 
-#### Variáveis do Painel Admin
-
-```env
-NEXT_PUBLIC_API_URL="http://localhost:3333"
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_{$}"
-CLERK_SECRET_KEY="sk_test_{$}"
-```
+> **Nota:** As variáveis são validadas automaticamente pelo pacote `@fixr/env` usando Zod, garantindo que todas as configurações necessárias estejam presentes antes da inicialização dos apps.
 
 ---
 
 #### Inicializando o Projeto
 
-1. Crie os containers com Docker:
+1. **Inicie os containers Docker** (MySQL e Redis):
 
 ```bash
-docker compose up -d
+bun run db:start
 ```
 
-2. Rode as migrations para criar as tabelas no banco:
+2. **Execute as migrations** para criar as tabelas no banco:
 
 ```bash
-bun run migrate
+bun run db:migrate
 ```
 
-3. Inicie os apps:
+3. **Inicie os aplicativos em modo desenvolvimento**:
 
 ```bash
 bun run dev
 ```
 
-- A API estará disponível em: `http://localhost:3333`
-- O frontend estará disponível em: `http://localhost:3000`
-- O painel administrativo estará disponível em: `http://localhost:6969`
+Os serviços estarão disponíveis em:
+- **API REST:** `http://localhost:3333`
+- **Web App:** `http://localhost:3000`
+- **Admin Panel:** `http://localhost:6969`
+- **Documentação API (Scalar):** `http://localhost:3333/docs`
+- **Drizzle Studio:** Execute `bun run db:studio` para acessar
+
+#### Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+bun run dev              # Inicia todos os apps em modo desenvolvimento
+bun run check-types      # Executa verificação de tipos em todos os projetos
+
+# Build
+bun run build            # Build completo (pacotes + apps)
+bun run build:packages   # Build apenas dos pacotes
+bun run build:apps       # Build apenas dos apps
+
+# Banco de Dados
+bun run db:start         # Inicia containers Docker (MySQL + Redis)
+bun run db:stop          # Para os containers
+bun run db:migrate       # Executa migrations
+bun run db:generate      # Gera migrations a partir dos schemas
+bun run db:studio        # Abre Drizzle Studio (GUI do banco)
+bun run db:push          # Push direto do schema (desenvolvimento)
+
+# Formatação e Lint
+bun run format           # Formata código com Ultracite
+bun run lint             # Executa linting
+bun run lint:write       # Corrige problemas de lint automaticamente
+```
+
+#### Pre-commit Hooks
+
+O projeto possui hooks automáticos que são executados antes de cada commit:
+- **Formatação automática** com Ultracite
+- **Verificação de tipos** com TypeScript
+- ❌ Commits são bloqueados se houver erros de tipo
+
+Para configurar os hooks após clonar o repositório:
+```bash
+bun install  # Husky será configurado automaticamente
+```
 
 ---
 
