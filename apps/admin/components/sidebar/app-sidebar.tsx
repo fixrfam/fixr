@@ -3,7 +3,7 @@
 import { SignOutButton, UserButton, useUser } from "@clerk/nextjs";
 import { Building2, LogOut } from "lucide-react";
 import type * as React from "react";
-import FixrIcon from "@/components/FixrIcon";
+import FixrIcon from "@/components/fixr-icon";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { TeamSwitcher } from "@/components/sidebar/team-switcher";
 import {

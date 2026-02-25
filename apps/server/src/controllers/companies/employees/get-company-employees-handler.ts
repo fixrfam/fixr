@@ -1,10 +1,10 @@
+import { and, asc, desc, eq, like } from "@fixr/db/connection";
 import {
 	employees as employeesTable,
 	users as usersTable,
 } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { getPaginatedDataSchema } from "@fixr/schemas/utils";
-import { and, asc, desc, eq, like } from "drizzle-orm";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { apiResponse, paginatedData } from "@/src/helpers/response";
@@ -66,7 +66,7 @@ export async function getCompanyEmployeesHandler({
 		like(employeesTable.name, `%${query ?? ""}%`) //like "%%" to fetch all if there is no query
 	);
 
-	const [presentations, totalRecords] = await Promise.all([
+	const [presentations, totalRecords] = (await Promise.all([
 		getPaginatedRecords({
 			table: employeesTable,
 			select: {
@@ -102,7 +102,26 @@ export async function getCompanyEmployeesHandler({
 			table: employeesTable,
 			where: filter,
 		}),
-	]);
+	])) as [
+		{
+			id: string;
+			name: string;
+			cpf: string;
+			phone: string | null;
+			role: "admin" | "manager" | "technician" | "warehouse" | "financial";
+			createdAt: Date;
+			userId: string;
+			companyId: string;
+			account: {
+				id: string;
+				email: string;
+				avatarUrl: string | null;
+				createdAt: Date;
+				verified: boolean | null;
+			};
+		}[],
+		number,
+	];
 
 	/**
 	 * If there is no records that match the query or no presentations were found,

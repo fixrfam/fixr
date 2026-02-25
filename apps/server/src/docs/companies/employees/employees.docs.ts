@@ -26,7 +26,8 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
 			message: "Company employees successfully retrieved.",
 			code: "get_company_employees_success",
 			data: paginatedDataSchema(
-				employeeSelectSchema.extend({
+				z.object({
+					...employeeSelectSchema.shape,
 					account: accountSchema.pick({
 						id: true,
 						email: true,
@@ -71,7 +72,7 @@ const registerEmployeeSchema: FastifySchema = {
 
 When an employee is registered, an email with the provided/generated password is sent to the employee mailbox.,
 
-Rules: 
+Rules:
 - Only company \`managers\` or \`admins\` can register employees.
 - Managers can only register \`technicians\` and \`managers\`, not \`admins\`.
 `,

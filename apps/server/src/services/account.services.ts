@@ -1,7 +1,6 @@
-import { db } from "@fixr/db/connection";
+import { db, eq, sql } from "@fixr/db/connection";
 import { clients, companies, employees, users } from "@fixr/db/schema";
 import { accountSchema } from "@fixr/schemas/account";
-import { eq, sql } from "drizzle-orm";
 import { redis } from "../config/redis";
 import { accountCacheKey, CACHE_TTL } from "../helpers/cache";
 

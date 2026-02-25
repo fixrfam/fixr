@@ -1,7 +1,6 @@
-import { db } from "@fixr/db/connection";
+import { db, eq } from "@fixr/db/connection";
 import { companies, employees, users } from "@fixr/db/schema";
 import type { createCompanySchema } from "@fixr/schemas/companies";
-import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { hashPassword } from "../pwd";
 
@@ -49,10 +48,10 @@ export async function createOrgWithAdmin(
 		.$returningId();
 
 	await db.insert(employees).values({
-		cpf: data.owner_cpf,
 		name: "Admin",
-		role: "admin",
-		userId: adminId?.id,
-		companyId: orgId?.id,
-	}); // Without this $inferInsert type assingning, this bug shows up: https://github.com/drizzle-team/drizzle-orm/issues/2889#issuecomment-232316575
+		cpf: data.owner_cpf,
+		role: "admin" as const,
+		userId: adminId?.id as string,
+		companyId: orgId?.id as string,
+	});
 }

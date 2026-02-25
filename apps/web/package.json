@@ -8,7 +8,8 @@
     "build": "biome check && dotenv -- next build",
     "start": "dotenv -- next start",
     "lint": "biome check",
-    "lint:write": "biome check --write"
+    "lint:write": "biome check --write",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fixr/constants": "workspace:*",

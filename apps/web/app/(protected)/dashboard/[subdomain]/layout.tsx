@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Sidebar } from "@/components/dashboard/sidebar/sidebar";
 import { SessionProvider } from "@/lib/hooks/use-session";
-import QueryClientWrapper from "@/lib/QueryClient";
+import QueryClientWrapper from "@/lib/query-client";
 import "../../../globals.css";
 import { cookies } from "next/headers";
 import { Header } from "@/components/dashboard/sidebar/header";

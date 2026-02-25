@@ -1,17 +1,21 @@
-import { db } from "@fixr/db/connection";
-import { count, getTableColumns, type SQL } from "drizzle-orm";
-import type { AnyMySqlColumn, MySqlTable } from "drizzle-orm/mysql-core";
+import {
+	count,
+	db,
+	getTableColumns,
+	type MySqlTable,
+	type SQL,
+} from "@fixr/db/connection";
 
 interface Join {
 	type: "inner" | "left" | "right" | "full";
-	table: MySqlTable;
+	table: unknown;
 	on: SQL;
 }
 
 /**
  * Fetches a paginated range of records from a given table.
  */
-export async function getPaginatedRecords({
+export async function getPaginatedRecords<T = unknown>({
 	table,
 	select,
 	skip,
@@ -20,37 +24,39 @@ export async function getPaginatedRecords({
 	order,
 	joins,
 }: {
-	table: MySqlTable;
+	table: unknown;
 	skip: number;
 	take: number;
-	select?: Record<
-		string,
-		AnyMySqlColumn | SQL | Record<string, AnyMySqlColumn>
-	>;
+	select?: T;
 	where?: SQL;
 	joins?: Join[];
 	order: SQL;
 }) {
+	const tableRef = table as MySqlTable;
 	const baseQuery = db
-		.select(select ?? getTableColumns(table))
-		.from(table)
-		.where(where)
-		.orderBy(order);
+		.select(select ?? getTableColumns(tableRef))
+		.from(tableRef)
+		.$dynamic();
+
+	if (where) {
+		baseQuery.where(where);
+	}
 
 	if (joins) {
 		for (const join of joins) {
+			const joinTable = join.table as MySqlTable;
 			switch (join.type) {
 				case "inner":
-					baseQuery.innerJoin(join.table, join.on);
+					baseQuery.innerJoin(joinTable, join.on);
 					break;
 				case "left":
-					baseQuery.leftJoin(join.table, join.on);
+					baseQuery.leftJoin(joinTable, join.on);
 					break;
 				case "right":
-					baseQuery.rightJoin(join.table, join.on);
+					baseQuery.rightJoin(joinTable, join.on);
 					break;
 				case "full":
-					baseQuery.fullJoin(join.table, join.on);
+					baseQuery.fullJoin(joinTable, join.on);
 					break;
 				default:
 					break;
@@ -58,9 +64,10 @@ export async function getPaginatedRecords({
 		}
 	}
 
-	const query = baseQuery.limit(take).offset(skip);
+	const query = baseQuery.orderBy(order).limit(take).offset(skip);
 
-	return await query;
+	// Cast the result to the expected type inferred from the select parameter (or table columns)
+	return (await query) as unknown[];
 }
 
 /**
@@ -70,9 +77,16 @@ export async function getPaginatedCount({
 	table,
 	where,
 }: {
-	table: MySqlTable;
+	table: unknown;
 	where?: SQL;
 }) {
-	const [amount] = await db.select({ count: count() }).from(table).where(where);
+	const tableRef = table as MySqlTable;
+	const query = db.select({ count: count() }).from(tableRef).$dynamic();
+
+	if (where) {
+		query.where(where);
+	}
+
+	const [amount] = await query;
 	return amount.count;
 }

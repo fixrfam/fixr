@@ -1,4 +1,4 @@
-import { db } from "@fixr/db/connection";
+import { db, eq, sql } from "@fixr/db/connection";
 import {
 	clients,
 	companies,
@@ -11,7 +11,7 @@ import {
 	jwtPayload,
 	userSchema,
 } from "@fixr/schemas/auth";
-import { eq, sql } from "drizzle-orm";
+
 import type { TokenPayload } from "google-auth-library";
 import type { z } from "zod";
 import { redis } from "../config/redis";

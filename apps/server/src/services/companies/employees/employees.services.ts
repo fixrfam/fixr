@@ -1,8 +1,7 @@
 import { unmask } from "@fixr/constants/masks";
-import { db } from "@fixr/db/connection";
+import { db, eq } from "@fixr/db/connection";
 import { employees, users } from "@fixr/db/schema";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
-import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import { hashPassword } from "@/src/helpers/hash-password";
 

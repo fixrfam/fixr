@@ -1,8 +1,7 @@
 import { cookieKey } from "@fixr/constants/cookies";
-import { db } from "@fixr/db/connection";
+import { and, db, eq, gte, sql } from "@fixr/db/connection";
 import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema";
 import { env } from "@fixr/env/server";
-import { and, eq, gte, sql } from "drizzle-orm";
 import type { FastifyReply } from "fastify";
 import { generateOneTimeToken } from "../helpers/tokens";
 

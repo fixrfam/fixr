@@ -63,12 +63,13 @@ export const columns: ColumnDef<z.infer<typeof dataSchema>>[] = [
 		accessorKey: "role",
 		header: "Cargo",
 		cell: ({ row }) => {
+			const role = row.original.role as keyof typeof roleLabels;
 			return (
 				<div className="inline-flex items-center gap-2">
 					<div className="rounded-md bg-primary/30 p-1 text-primary">
 						<BriefcaseBusiness className="size-4" />
 					</div>
-					{roleLabels[row.original.role]}
+					{roleLabels[role]}
 				</div>
 			);
 		},

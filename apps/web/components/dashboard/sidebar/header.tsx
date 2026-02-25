@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { Logo } from "@/components/svg/Logo";
+import { Logo } from "@/components/svg/logo";
 import { getDashboardRouteName } from "@/lib/utils/get-dashboard-route-name";
 import { DashLink } from "../dash-link";
 import { FloatingToggle } from "./floating-toggle";

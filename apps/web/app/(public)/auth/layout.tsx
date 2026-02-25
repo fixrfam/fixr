@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { TextAnimate } from "@/components/magicui/text-animate";
-import { Logo } from "@/components/svg/Logo";
+import { Logo } from "@/components/svg/logo";
 import LoginBg from "@/public/login_bg.webp";
 
 export default function AuthLayout({

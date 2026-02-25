@@ -1,5 +1,3 @@
-bun test
-
 #!/bin/sh
 # Exit on any error
 set -e
@@ -64,7 +62,23 @@ fi
 # Check if staged files actually changed
 NEW_STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
 if [ "$STAGED_HASH" != "$NEW_STAGED_HASH" ]; then
-  echo "✨ Files formatted by Ultracite"
+  echo "Files formatted by Ultracite!"
 fi
 
-exit $FORMAT_EXIT_CODE
+# Exit if formatting failed
+if [ $FORMAT_EXIT_CODE -ne 0 ]; then
+  exit $FORMAT_EXIT_CODE
+fi
+
+# Run type checking
+echo "🔍 Running type checks..."
+bun run check-types
+TYPE_CHECK_EXIT_CODE=$?
+
+if [ $TYPE_CHECK_EXIT_CODE -ne 0 ]; then
+  echo "❌ Type check failed"
+  exit $TYPE_CHECK_EXIT_CODE
+fi
+
+echo "Type check passed!"
+exit 0

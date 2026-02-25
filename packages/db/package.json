@@ -11,7 +11,8 @@
     "db:start": "docker compose up -d",
     "db:watch": "docker compose up",
     "db:stop": "docker compose stop",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "check-types": "tsc --noEmit"
   },
   "exports": {
     "./connection": {
@@ -29,14 +30,15 @@
     "@biomejs/biome": "catalog:",
     "@types/eslint": "^8.56.5",
     "@types/bun": "catalog:",
+    "drizzle-kit": "^0.30.0",
     "typescript": "catalog:"
   },
   "dependencies": {
     "chalk": "^5.6.2",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.38.3",
-    "drizzle-zod": "^0.7.0",
-    "mysql2": "^3.13.0",
+    "drizzle-orm": "catalog:",
+    "drizzle-zod": "catalog:",
+    "mysql2": "catalog:",
     "zod": "catalog:"
   }
 }

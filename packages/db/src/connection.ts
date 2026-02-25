@@ -6,3 +6,6 @@ import * as schema from "./schema";
 const poolConnection = mysql.createPool(env.DB_URL);
 
 export const db = drizzle(poolConnection, { schema, mode: "default" });
+
+export * from "drizzle-orm";
+export { MySqlTable } from "drizzle-orm/mysql-core";

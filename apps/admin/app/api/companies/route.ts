@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 		createCompanySchema.parseAsync(await req.json())
 	);
 
-	if (error) {
+	if (error || !data) {
 		return NextResponse.json(
 			apiResponse({
 				status: 400,
