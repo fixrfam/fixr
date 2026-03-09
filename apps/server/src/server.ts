@@ -167,7 +167,9 @@ server.register(employeesRoutes, {
 });
 
 server.get("/", (_, reply) => {
-	reply.status(200).send("OK");
+	reply
+		.status(200)
+		.send("Hello from Fixr API! Reach the documentation at /docs");
 });
 
 server.register(fastifyCors, {

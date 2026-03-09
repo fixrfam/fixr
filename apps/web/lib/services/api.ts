@@ -8,7 +8,8 @@ export async function getApiHealthStatus() {
 		return false;
 	}
 
-	const healthy = res.status === 200 && res.data === "OK";
+	const healthy =
+		res.status === 200 && res.data.includes("Hello from Fixr API");
 
 	return healthy;
 }

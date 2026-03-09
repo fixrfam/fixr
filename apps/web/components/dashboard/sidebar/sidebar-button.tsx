@@ -46,9 +46,9 @@ export function SidebarButton({
 							: "0.5rem",
 					}}
 				>
-					{active && nestingLevel && (
+					{active && nestingLevel ? (
 						<div className="absolute left-[calc(1rem-0.5px)] h-1/2 w-px bg-primary" />
-					)}
+					) : null}
 					<Icon className="size-4" />
 					{label}
 				</div>
