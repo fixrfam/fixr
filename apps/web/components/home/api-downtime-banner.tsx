@@ -15,7 +15,7 @@ export function ApiDowntimeBanner() {
 	}
 
 	return (
-		<div className="fixed bottom-2 z-97">
+		<div className="fixed bottom-2 left-1/2 z-97 -translate-x-1/2 rounded-full bg-background">
 			<input className="peer hidden" id="hide-api-banner" type="checkbox" />
 			<div className="flex items-center justify-center rounded-full bg-amber-500/30 px-3 py-1.5 peer-checked:hidden">
 				<p className="items-center text-center text-amber-900 text-xs dark:text-amber-400">
