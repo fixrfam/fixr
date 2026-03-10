@@ -9,7 +9,21 @@ const dbUrl = env.DB_URL.replace("postgres:5432", "localhost:5432");
 
 (async () => {
 	console.log("Connecting to database:", dbUrl);
-	const connection = await mysql.createConnection(dbUrl);
+
+	const url = new URL(dbUrl);
+
+	const connection = await mysql.createConnection({
+		host: url.hostname,
+		port: Number(url.port) || 4000,
+		user: decodeURIComponent(url.username),
+		password: decodeURIComponent(url.password),
+		database: url.pathname.slice(1),
+		ssl: {
+			minVersion: "TLSv1.2",
+		},
+		multipleStatements: true,
+	});
+
 	const db = drizzle(connection, { logger: true });
 
 	console.log("Migrations folder:", path.resolve("drizzle"));

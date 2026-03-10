@@ -2,12 +2,13 @@ import alchemy from "alchemy";
 import { Nextjs } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
-config({ path: "../../apps/web/.env" });
-config({ path: "../../apps/server/.env" });
-config({ path: "../../apps/admin/.env" });
-config({ path: "../../packages/db/.env" });
-config({ path: "../../packages/mail/.env" });
-config({ path: "../../packages/infra/.env" });
+config({ path: ".env.production" });
+config({ path: "../../apps/web/.env.production" });
+config({ path: "../../apps/server/.env.production" });
+config({ path: "../../apps/admin/.env.production" });
+config({ path: "../../packages/db/.env.production" });
+config({ path: "../../packages/mail/.env.production" });
+config({ path: "../../packages/infra/.env.production" });
 
 const app = await alchemy("fixr");
 
@@ -76,7 +77,7 @@ console.log(`🚀 Server deployed at: ${server.url}`);
 export const web = await Nextjs("web", {
 	cwd: "../../apps/web",
 	adopt: true,
-	domains: ["cf.fixr.com.br"],
+	domains: process.env.FRONTEND_PUBLIC_DOMAINS!.split(",").map((d) => d.trim()),
 	bindings: {
 		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL as string,
 		NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL as string,
@@ -88,7 +89,7 @@ export const web = await Nextjs("web", {
 export const admin = await Nextjs("admin", {
 	cwd: "../../apps/admin",
 	adopt: true,
-	domains: ["admin.cf.fixr.com.br"],
+	domains: process.env.ADMIN_PUBLIC_DOMAINS!.split(",").map((d) => d.trim()),
 	bindings: {
 		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY as string,
 		REDIS_URL: process.env.REDIS_URL as string,
