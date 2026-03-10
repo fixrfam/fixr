@@ -9,6 +9,7 @@
     "ignoreUnknown": false,
     "includes": [
       "!**/.next",
+      "!**/.open-next",
       "!**/dist",
       "!**/.turbo",
       "!**/dev-dist",

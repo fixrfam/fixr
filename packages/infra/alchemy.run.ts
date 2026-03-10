@@ -1,4 +1,5 @@
 import alchemy from "alchemy";
+import { Nextjs } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
 config({ path: "../../apps/web/.env" });
@@ -71,4 +72,31 @@ export const server = await Worker("server", {
 console.log(`🚀 Server deployed at: ${server.url}`);
 */
 // Finalize the application
+
+export const web = await Nextjs("web", {
+	cwd: "../../apps/web",
+	adopt: true,
+	domains: ["cf.fixr.com.br"],
+	bindings: {
+		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL as string,
+		NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL as string,
+		NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL as string,
+		NEXT_PUBLIC_LINKTREE_URL: process.env.NEXT_PUBLIC_LINKTREE_URL as string,
+	},
+});
+
+export const admin = await Nextjs("admin", {
+	cwd: "../../apps/admin",
+	adopt: true,
+	domains: ["admin.cf.fixr.com.br"],
+	bindings: {
+		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY as string,
+		REDIS_URL: process.env.REDIS_URL as string,
+		FRONTEND_URL: process.env.FRONTEND_URL as string,
+		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env
+			.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY as string,
+		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL as string,
+	},
+});
+
 await app.finalize();

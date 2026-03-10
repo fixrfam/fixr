@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@fixr/typescript-config": "workspace:*",
+    "alchemy": "^0.82.1",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "alchemy": "^0.82.1"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@fixr/typescript-config": "workspace:*",
