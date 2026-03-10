@@ -1,10 +1,9 @@
-import type { userJWT } from "@fixr/schemas/auth";
 import {
 	changePasswordAuthenticatedSchema,
 	confirmPasswordResetSchema,
 	requestPasswordResetSchema,
 } from "@fixr/schemas/credentials";
-import type { FastifyRequest } from "fastify";
+import { Elysia, t } from "elysia";
 import { z } from "zod";
 import { changePasswordAuthenticatedHandler } from "../controllers/credentials/change-password-authenticated-handler";
 import {
@@ -12,63 +11,76 @@ import {
 	requestPasswordResetHandler,
 	validatePasswordResetTokenHandler,
 } from "../controllers/credentials/password-reset-handler";
-import { credentialDocs } from "../docs/credentials.docs";
-import type { FastifyTypedInstance } from "../interfaces/fastify";
+import type { AuthenticatedContext } from "../helpers/elysia";
 import { authenticate } from "../middlewares/authenticate";
-import { withErrorHandler } from "../middlewares/with-error-handler";
 
-export function credentialsRoutes(fastify: FastifyTypedInstance) {
-	fastify.put(
+export const credentialsRoutes = new Elysia({ prefix: "/credentials" })
+	.use(authenticate)
+	.put(
 		"/password",
-		{
-			preHandler: authenticate,
-			schema: credentialDocs.changePasswordAuthenticatedSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = changePasswordAuthenticatedSchema.parse(request.body);
-
-			await changePasswordAuthenticatedHandler({
+		async (ctx) => {
+			const { userJwt, body, set } = ctx as unknown as AuthenticatedContext & {
+				body: { old: string; new: string };
+				set: { status: number };
+			};
+			const validBody = changePasswordAuthenticatedSchema.parse(body);
+			const result = await changePasswordAuthenticatedHandler({
 				user: userJwt,
-				body,
-				response,
+				body: validBody,
 			});
-		})
-	);
-
-	fastify.post(
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			body: t.Object({
+				old: t.String({ minLength: 1 }),
+				new: t.String({ minLength: 8 }),
+			}),
+		}
+	)
+	.post(
 		"/password/reset",
-		{ schema: credentialDocs.requestPasswordResetSchema },
-		withErrorHandler(async (request, response) => {
-			const body = requestPasswordResetSchema.parse(request.body);
-			await requestPasswordResetHandler({ email: body.email, response });
-		})
-	);
-
-	fastify.put(
+		async ({ body, set }) => {
+			const validBody = requestPasswordResetSchema.parse(body);
+			const result = await requestPasswordResetHandler({
+				email: validBody.email,
+			});
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			body: t.Object({
+				email: t.String({ format: "email" }),
+			}),
+		}
+	)
+	.put(
 		"/password/reset",
-		{ schema: credentialDocs.confirmPasswordResetSchema },
-		withErrorHandler(async (request, response) => {
-			const body = confirmPasswordResetSchema.parse(request.body);
-			await confirmPasswordResetHandler({ body, response });
-		})
-	);
-
-	fastify.get(
+		async ({ body, set }) => {
+			const validBody = confirmPasswordResetSchema.parse(body);
+			const result = await confirmPasswordResetHandler({ body: validBody });
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			body: t.Object({
+				token: t.String(),
+				password: t.String({ minLength: 8 }),
+			}),
+		}
+	)
+	.get(
 		"/password/reset",
-		{ schema: credentialDocs.validatePasswordResetTokenSchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{ Querystring: { token: string } }>,
-				response
-			) => {
-				const query = await z
-					.object({ token: z.string() })
-					.parseAsync(request.query);
-				const token = decodeURIComponent(query.token);
-
-				await validatePasswordResetTokenHandler({ token, response });
-			}
-		)
+		async ({ query, set }) => {
+			const validated = await z.object({ token: z.string() }).parseAsync(query);
+			const token = decodeURIComponent(validated.token);
+			const result = await validatePasswordResetTokenHandler({ token });
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			query: t.Object({
+				token: t.String(),
+			}),
+		}
 	);
-}

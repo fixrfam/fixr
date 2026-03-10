@@ -1,7 +1,6 @@
-import type { CookieSerializeOptions } from "@fastify/cookie";
 import { cookieKey } from "@fixr/constants/cookies";
 import { env } from "@fixr/env/server";
-import type { FastifyReply, FastifyRequest } from "fastify";
+import { jwtPayload } from "@fixr/schemas/auth";
 import { OAuth2Client } from "google-auth-library";
 import { signJWT } from "@/src/helpers/jwt";
 import { apiResponse } from "@/src/helpers/response";
@@ -21,20 +20,14 @@ const GOOGLE_CREDS = {
 
 const client = new OAuth2Client(GOOGLE_CREDS);
 
-/**
- * Inicia o processo de login com o Google OAuth2.
- *
- * Este endpoint redireciona o usuário para a tela de consentimento da Google,
- * onde ele autoriza o aplicativo a acessar seu e-mail e perfil.
- * Após a autorização, a Google redireciona de volta para `/auth/google/callback`
- * com um código de autorização (`code`).
- */
-export function googleLoginHandler({
-	response,
-}: {
-	request: FastifyRequest;
-	response: FastifyReply;
-}) {
+const errorCookieOptions = {
+	path: "/",
+	httpOnly: false,
+	sameSite: "none" as const,
+	secure: true,
+};
+
+export function googleLoginHandler() {
 	const params = {
 		client_id: GOOGLE_CREDS.clientId,
 		redirect_uri: GOOGLE_CREDS.redirectUri,
@@ -43,59 +36,49 @@ export function googleLoginHandler({
 	};
 
 	const query = new URLSearchParams(params).toString();
-	const url = `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
-
-	return response.redirect(url);
+	return `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
 }
 
-/**
- * Manipula o callback do Google após a autorização OAuth2.
- *
- * Este endpoint:
- * 1. Troca o código de autorização (`code`) pelos tokens de acesso e ID.
- * 2. Verifica o ID token e extrai os dados do usuário.
- * 3. Valida se o e-mail retornado existe e está verificado.
- * 4. Atualiza os dados do usuário com as informações mais recentes da Google.
- * 5. Gera novo JWT + refresh token.
- * 6. Define os cookies e redireciona para o dashboard.
- *
- * Caso ocorra algum erro, redireciona de volta para `/auth/login` com um cookie
- * que indica o tipo de falha (ex.: e-mail não verificado, usuário inexistente, etc).
- */
 export async function googleCallbackHandler({
 	code,
-	response,
+	cookie,
 }: {
 	code: string;
-	response: FastifyReply;
-}) {
+	cookie: Record<string, { value: string }>;
+}): Promise<
+	| { status: number; redirect: string }
+	| { status: number; response: ReturnType<typeof apiResponse> }
+> {
 	if (!code) {
-		return response.status(422).send(
-			apiResponse({
+		return {
+			status: 422,
+			response: apiResponse({
 				status: 422,
 				error: "Unprocessable Entity",
 				code: "missing_code",
 				message: "Missing authorization code from Google",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 
+	const authLoginUrl = `${env.FRONTEND_URL}/auth/login`;
+
 	try {
-		// Troca o código de autorização pelos tokens da Google
 		const { tokens } = await client.getToken(code);
 		const idToken = tokens.id_token;
 
 		if (!idToken) {
-			return response.status(502).send(
-				apiResponse({
+			return {
+				status: 502,
+				response: apiResponse({
 					status: 502,
 					error: "Bad Gateway",
 					code: "missing_id_token",
 					message: "No ID token returned from Google",
 					data: null,
-				})
-			);
+				}),
+			};
 		}
 
 		const ticket = await client.verifyIdToken({
@@ -105,72 +88,60 @@ export async function googleCallbackHandler({
 
 		const payload = ticket.getPayload();
 
-		const authLoginUrl = `${env.FRONTEND_URL}/auth/login`;
-		const errorCookieSettings: CookieSerializeOptions = {
-			path: "/",
-			httpOnly: false,
-			sameSite: "none",
-			secure: true,
-		};
-
 		if (!payload?.email) {
-			return response
-				.setCookie(
-					cookieKey("googleAuthError"),
-					"gacc_missing_email",
-					errorCookieSettings
-				)
-				.status(302)
-				.redirect(authLoginUrl);
+			(cookie as unknown as Record<string, unknown>)[
+				cookieKey("googleAuthError")
+			] = {
+				value: "gacc_missing_email",
+				...errorCookieOptions,
+			};
+			return { status: 302, redirect: authLoginUrl };
 		}
 
 		const user = await queryUserByEmail(payload.email.toLowerCase());
 
-		// Apenas usuários já cadastrados conseguem acessar o sistema com o Google
 		if (!user) {
-			return response
-				.setCookie(
-					cookieKey("googleAuthError"),
-					"gacc_user_not_found",
-					errorCookieSettings
-				)
-				.status(302)
-				.redirect(authLoginUrl);
+			(cookie as unknown as Record<string, unknown>)[
+				cookieKey("googleAuthError")
+			] = {
+				value: "gacc_user_not_found",
+				...errorCookieOptions,
+			};
+			return { status: 302, redirect: authLoginUrl };
 		}
 
 		if (!(user.verified && payload.email_verified)) {
-			return response
-				.setCookie(
-					cookieKey("googleAuthError"),
-					"gacc_email_not_verified",
-					errorCookieSettings
-				)
-				.status(302)
-				.redirect(authLoginUrl);
+			(cookie as unknown as Record<string, unknown>)[
+				cookieKey("googleAuthError")
+			] = {
+				value: "gacc_email_not_verified",
+				...errorCookieOptions,
+			};
+			return { status: 302, redirect: authLoginUrl };
 		}
 
 		await updateUserWithGoogleData({ userId: user.id, data: payload });
 		const payloadJWT = await queryJWTPayloadByUserId(user.id);
 
-		const token = signJWT({ payload: payloadJWT });
-
+		const token = await signJWT({ payload: jwtPayload.parse(payloadJWT) });
 		const refreshToken = generateRefreshToken();
-		await setRefreshToken(response, refreshToken, user.id);
-		setJWTCookie(response, token);
+
+		await setRefreshToken(cookie, refreshToken, user.id);
+		setJWTCookie(cookie, token);
 
 		const dashboardUrl = `${env.FRONTEND_URL}/dashboard`;
-
-		return response.redirect(dashboardUrl);
+		return { status: 302, redirect: dashboardUrl };
 	} catch (err) {
 		console.error(err);
-		return response.status(500).send(
-			apiResponse({
+		return {
+			status: 500,
+			response: apiResponse({
 				status: 500,
 				error: "Internal Server Error",
 				code: "google_auth_failed",
 				message: "Failed to authenticate with Google",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 }

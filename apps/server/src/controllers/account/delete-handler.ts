@@ -5,7 +5,6 @@ import {
 	emailDisplayName,
 	sendAccountDeletionEmail,
 } from "@fixr/mail/services";
-import type { FastifyReply, FastifyRequest } from "fastify";
 import { apiResponse } from "@/src/helpers/response";
 import { queryAccountById } from "../../services/account.services";
 import { deleteUser } from "../../services/auth.services";
@@ -18,28 +17,26 @@ import {
 
 export async function requestAccountDeletionHandler({
 	userId,
-	request,
-	response,
+	requestUrl,
 }: {
 	userId: string;
-	request: FastifyRequest;
-	response: FastifyReply;
+	requestUrl: string;
 }) {
 	await deleteUserExpiredTokensByUserId(userId);
 	const oneTimeTokens = await getUserOneTimeTokens(userId);
 
-	// Use Array.some() for better performance when checking existence
 	if (oneTimeTokens.some((token) => token.tokenType === "account_deletion")) {
-		return response.status(409).send(
-			apiResponse({
+		return {
+			status: 409,
+			response: apiResponse({
 				status: 409,
 				error: "Conflict",
 				code: "existing_deletion_request",
 				message:
 					"Deletion request already exists. Finish it or wait until expiration to request a new one.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const account = await queryAccountById(userId);
@@ -51,8 +48,7 @@ export async function requestAccountDeletionHandler({
 	});
 
 	const redirectUrl = `${env.FRONTEND_URL}/auth/login`;
-
-	const verificationUrl = `${request.protocol}://${request.host}/account/confirm-deletion?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+	const verificationUrl = `${requestUrl}/account/confirm-deletion?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
 
 	await sendAccountDeletionEmail({
 		to: account.email,
@@ -61,87 +57,94 @@ export async function requestAccountDeletionHandler({
 		displayName: account.displayName ?? emailDisplayName(account.email),
 	});
 
-	return response.status(201).send(
-		apiResponse({
+	return {
+		status: 201,
+		response: apiResponse({
 			status: 201,
 			error: null,
 			code: "deletion_request_accepted",
 			message: "Deletion request accepted, confirm email.",
 			data: null,
-		})
-	);
+		}),
+	} as const;
 }
 
 export async function confirmAccountDeletionHandler({
 	token,
 	redirectUrl,
-	response,
+	cookie,
 }: {
 	token: string;
 	redirectUrl?: string;
-	response: FastifyReply;
-}) {
+	cookie: Record<string, { value: string }>;
+}): Promise<
+	| { status: number; redirect: string }
+	| { status: number; response: ReturnType<typeof apiResponse> }
+> {
 	const oneTimeToken = await queryOneTimeToken(token);
 
-	//Checks if the token exists, if it's not expired and if it's a deletion token
 	if (!oneTimeToken) {
-		return response.status(404).send(
-			apiResponse({
+		return {
+			status: 404,
+			response: apiResponse({
 				status: 404,
 				error: "Not Found",
 				code: "token_not_found",
 				message: "Token not found",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 
 	if (oneTimeToken.expiresAt < new Date()) {
-		return response.status(410).send(
-			apiResponse({
+		return {
+			status: 410,
+			response: apiResponse({
 				status: 410,
 				error: "Gone",
 				code: "token_expired",
 				message: "Token expired",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 
 	if (oneTimeToken.tokenType !== "account_deletion") {
-		return response.status(400).send(
-			apiResponse({
+		return {
+			status: 400,
+			response: apiResponse({
 				status: 400,
 				error: "Bad Request",
 				code: "invalid_token",
 				message: "Invalid token",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 
-	//If all checks succeed, delete the user and the token will be automatically cascade deleted
 	await deleteUser(oneTimeToken.user.id);
 
 	if (redirectUrl) {
-		return response
-			.setCookie(cookieKey("showDeletedDialog"), "true", {
-				path: "/",
-				httpOnly: false,
-				sameSite: "none",
-				secure: true,
-			})
-			.status(302)
-			.redirect(decodeURIComponent(redirectUrl));
+		(cookie as unknown as Record<string, unknown>)[
+			cookieKey("showDeletedDialog")
+		] = {
+			value: "true",
+			path: "/",
+			httpOnly: false,
+			sameSite: "none",
+			secure: true,
+		};
+		return { status: 302, redirect: decodeURIComponent(redirectUrl) };
 	}
 
-	return response.status(200).send(
-		apiResponse({
+	return {
+		status: 200,
+		response: apiResponse({
 			status: 200,
 			error: null,
 			code: "account_deletion_success",
-			message: "Account deleted sucessfully",
+			message: "Account deleted successfully",
 			data: null,
-		})
-	);
+		}),
+	};
 }

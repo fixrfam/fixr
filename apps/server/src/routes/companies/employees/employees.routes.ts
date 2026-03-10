@@ -1,59 +1,79 @@
-import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { getPaginatedDataSchema } from "@fixr/schemas/utils";
-import type { z } from "zod";
+import { Elysia, t } from "elysia";
 import { getCompanyEmployeesHandler } from "@/src/controllers/companies/employees/get-company-employees-handler";
 import { registerEmployeeHandler } from "@/src/controllers/companies/employees/register-employee-handler";
-import { employeesDocs } from "@/src/docs/companies/employees/employees.docs";
-import type { FastifyTypedInstance } from "@/src/interfaces/fastify";
 import { authenticateEmployee } from "@/src/middlewares/authenticate-employee";
-import { withErrorHandler } from "@/src/middlewares/with-error-handler";
+import type { AuthenticatedContext } from "../../../helpers/elysia";
 
-export function employeesRoutes(fastify: FastifyTypedInstance) {
-	// Get company employees (paginated)
-	fastify.get(
+export const employeesRoutes = new Elysia({
+	prefix: "/companies/:subdomain/employees",
+})
+	.use(authenticateEmployee)
+	.get(
 		"/",
-		{
-			preHandler: authenticateEmployee,
-			schema: employeesDocs.getCompanyEmployeesSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const { query, sort, page, perPage } = getPaginatedDataSchema.parse(
-				request.query
-			);
-			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-
-			await getCompanyEmployeesHandler({
-				subdomain,
-				userJwt,
-				response,
+		async (ctx) => {
+			const { params, query, userJwt, set } =
+				ctx as unknown as AuthenticatedContext & {
+					params: { subdomain: string };
+					query: Record<string, string>;
+					set: { status: number };
+				};
+			const { subdomain } = getCompanyNestedDataSchema.parse(params);
+			const {
+				query: q,
+				sort,
 				page,
 				perPage,
-				query,
+			} = getPaginatedDataSchema.parse(query);
+			const result = await getCompanyEmployeesHandler({
+				subdomain,
+				userJwt,
+				page,
+				perPage,
+				query: q,
 				sort,
 			});
-		})
-	);
-
-	fastify.post(
-		"/",
-		{
-			preHandler: authenticateEmployee,
-			schema: employeesDocs.registerEmployeeSchema,
+			set.status = result.status;
+			return result.response;
 		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = await createEmployeeSchema.parseAsync(request.body);
-			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-
-			await registerEmployeeHandler({
+		{
+			query: t.Object({
+				query: t.Optional(t.String()),
+				sort: t.Optional(t.String()),
+				page: t.Optional(t.Numeric()),
+				perPage: t.Optional(t.Numeric()),
+			}),
+		}
+	)
+	.post(
+		"/",
+		async (ctx) => {
+			const { params, body, userJwt, set } =
+				ctx as unknown as AuthenticatedContext & {
+					params: { subdomain: string };
+					body: Record<string, unknown>;
+					set: { status: number };
+				};
+			const { subdomain } = getCompanyNestedDataSchema.parse(params);
+			const validBody = await createEmployeeSchema.parseAsync(body);
+			const result = await registerEmployeeHandler({
 				userJwt,
-				data: body,
+				data: validBody,
 				subdomain,
-				response,
 			});
-		})
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			body: t.Object({
+				name: t.String(),
+				email: t.String({ format: "email" }),
+				cpf: t.String(),
+				role: t.String(),
+				phone: t.Optional(t.String()),
+				password: t.Optional(t.String()),
+			}),
+		}
 	);
-}

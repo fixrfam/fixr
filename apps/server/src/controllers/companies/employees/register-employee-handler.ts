@@ -4,7 +4,6 @@ import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { employeeRoles } from "@fixr/schemas/roles";
-import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "@/src/config/redis";
 import { generateRandomPassword } from "@/src/helpers/generate-password";
@@ -20,23 +19,22 @@ export async function registerEmployeeHandler({
 	userJwt,
 	subdomain,
 	data,
-	response,
 }: {
 	userJwt: z.infer<typeof jwtPayload>;
 	subdomain: string;
 	data: z.infer<typeof createEmployeeSchema>;
-	response: FastifyReply;
 }) {
 	if (!userJwt.company) {
-		return response.status(404).send(
-			apiResponse({
+		return {
+			status: 404,
+			response: apiResponse({
 				status: 404,
 				error: "Not Found",
 				code: "company_not_found",
 				message: "There's no companies bound to your account",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const allowedRoles = ["admin", "manager"] as z.infer<typeof employeeRoles>[];
@@ -44,31 +42,32 @@ export async function registerEmployeeHandler({
 	const isPrivilegedUser = allowedRoles.includes(userJwt.company.role);
 
 	if (!(isSameCompany && isPrivilegedUser)) {
-		return response.status(403).send(
-			apiResponse({
+		return {
+			status: 403,
+			response: apiResponse({
 				status: 403,
 				error: "Forbidden",
 				code: "not_allowed",
 				message: "You are not allowed to perform this action.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
-	// Managers cannot create admin employees.
 	const violatesRoleHierarchy =
 		userJwt.company.role === "manager" && data.role === "admin";
 
 	if (violatesRoleHierarchy) {
-		return response.status(403).send(
-			apiResponse({
+		return {
+			status: 403,
+			response: apiResponse({
 				status: 403,
 				error: "Forbidden",
 				code: "violates_role_hierarchy",
 				message: "Managers may only create subordinate accounts.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const existingEmailQuery = queryUserByEmail(data.email);
@@ -82,27 +81,29 @@ export async function registerEmployeeHandler({
 	]);
 
 	if (existingEmail) {
-		return response.status(409).send(
-			apiResponse({
+		return {
+			status: 409,
+			response: apiResponse({
 				status: 409,
 				error: "Conflict",
 				code: "email_already_used",
 				message: "Email is already registered.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	if (existingCpf) {
-		return response.status(409).send(
-			apiResponse({
+		return {
+			status: 409,
+			response: apiResponse({
 				status: 409,
 				error: "Conflict",
 				code: "cpf_conflict",
 				message: "Cpf is already registered.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const employeePassword = data.password ?? generateRandomPassword();
@@ -126,13 +127,14 @@ export async function registerEmployeeHandler({
 		},
 	});
 
-	return response.status(201).send(
-		apiResponse({
+	return {
+		status: 201,
+		response: apiResponse({
 			status: 201,
 			error: null,
 			code: "create_employee_success",
 			message: "Employee created successfully.",
 			data: null,
-		})
-	);
+		}),
+	} as const;
 }

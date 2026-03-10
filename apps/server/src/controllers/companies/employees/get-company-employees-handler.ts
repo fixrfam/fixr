@@ -5,7 +5,6 @@ import {
 } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { getPaginatedDataSchema } from "@fixr/schemas/utils";
-import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { apiResponse, paginatedData } from "@/src/helpers/response";
 import { queryCompanyBySubdomain } from "@/src/services/companies/companies.services";
@@ -21,41 +20,40 @@ export async function getCompanyEmployeesHandler({
 	perPage,
 	query,
 	sort,
-	response,
 }: {
 	userJwt: z.infer<typeof jwtPayload>;
 	subdomain: string;
-	response: FastifyReply;
 } & z.infer<typeof getPaginatedDataSchema>) {
 	if (!userJwt.company) {
-		return response.status(404).send(
-			apiResponse({
+		return {
+			status: 404,
+			response: apiResponse({
 				status: 404,
 				error: "Not Found",
 				code: "company_not_found",
 				message: "There's no companies bound to your account",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	if (userJwt.company.subdomain !== subdomain) {
-		return response.status(403).send(
-			apiResponse({
+		return {
+			status: 403,
+			response: apiResponse({
 				status: 403,
 				error: "Forbidden",
 				code: "not_allowed",
 				message: "You are not authorized to access this company.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const company = await queryCompanyBySubdomain(subdomain);
 
 	const PER_PAGE = perPage ?? 10;
 
-	//If there is no sort arg, fallback to newer records.
 	const order =
 		sort === "newer" || !sort
 			? desc(employeesTable.createdAt)
@@ -63,7 +61,7 @@ export async function getCompanyEmployeesHandler({
 
 	const filter = and(
 		eq(employeesTable.companyId, company.id),
-		like(employeesTable.name, `%${query ?? ""}%`) //like "%%" to fetch all if there is no query
+		like(employeesTable.name, `%${query ?? ""}%`)
 	);
 
 	const [presentations, totalRecords] = (await Promise.all([
@@ -102,34 +100,12 @@ export async function getCompanyEmployeesHandler({
 			table: employeesTable,
 			where: filter,
 		}),
-	])) as [
-		{
-			id: string;
-			name: string;
-			cpf: string;
-			phone: string | null;
-			role: "admin" | "manager" | "technician" | "warehouse" | "financial";
-			createdAt: Date;
-			userId: string;
-			companyId: string;
-			account: {
-				id: string;
-				email: string;
-				avatarUrl: string | null;
-				createdAt: Date;
-				verified: boolean | null;
-			};
-		}[],
-		number,
-	];
+	])) as [unknown[], number];
 
-	/**
-	 * If there is no records that match the query or no presentations were found,
-	 * we still return 200, with an empty array
-	 */
 	if (totalRecords === 0) {
-		return response.status(200).send(
-			apiResponse({
+		return {
+			status: 200,
+			response: apiResponse({
 				status: 200,
 				error: null,
 				message: "Company employees successfully retrieved.",
@@ -144,38 +120,33 @@ export async function getCompanyEmployeesHandler({
 						prev_page: null,
 					},
 				}),
-			})
-		);
+			}),
+		} as const;
 	}
 
-	//The total amount of pages is the total_records divided by the amount PER_PAGE, rounded up
 	const total_pages = Math.ceil(totalRecords / PER_PAGE);
 
 	if (page > total_pages) {
-		return response.status(416).send(
-			apiResponse({
+		return {
+			status: 416,
+			response: apiResponse({
 				status: 416,
 				error: "Range Not Satisfiable",
 				code: "page_out_of_bounds",
 				message: "The requested page exceeds the total number of pages.",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
-	/**
-	 * If the records that were in the previous pages (pages * PER_PAGE),
-	 * added to the current page records (+ presentations.length),
-	 * are smaller than the total records (< totalRecords.count),
-	 * we can assume that there is a following page.
-	 */
 	const next_page =
 		PER_PAGE * (page - 1) + presentations.length < totalRecords
 			? page + 1
 			: null;
 
-	return response.status(200).send(
-		apiResponse({
+	return {
+		status: 200,
+		response: apiResponse({
 			status: 200,
 			error: null,
 			message: "Company employees successfully retrieved.",
@@ -190,6 +161,6 @@ export async function getCompanyEmployeesHandler({
 					prev_page: page > 1 ? page - 1 : null,
 				},
 			}),
-		})
-	);
+		}),
+	} as const;
 }

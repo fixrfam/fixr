@@ -1,44 +1,27 @@
-import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyBySubdomainSchema } from "@fixr/schemas/companies";
-import type { z } from "zod";
+import { Elysia } from "elysia";
 import { getCompanyBySubdomainHandler } from "@/src/controllers/companies/get-company-by-id-handler";
 import { getUserCompanyHandler } from "@/src/controllers/companies/get-user-company-handler";
-import { companiesDocs } from "@/src/docs/companies/companies.docs";
-import type { FastifyTypedInstance } from "@/src/interfaces/fastify";
 import { authenticateEmployee } from "@/src/middlewares/authenticate-employee";
-import { withErrorHandler } from "@/src/middlewares/with-error-handler";
+import type { AuthenticatedContext } from "../../helpers/elysia";
 
-export function companiesRoutes(fastify: FastifyTypedInstance) {
-	fastify.get(
-		"/",
-		{
-			preHandler: authenticateEmployee,
-			schema: companiesDocs.getUserCompanySchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-
-			await getUserCompanyHandler({ userJwt, response });
-		})
-	);
-
-	fastify.get(
-		"/:subdomain",
-		{
-			preHandler: authenticateEmployee,
-			schema: companiesDocs.getCompanyByIdSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const params = await getCompanyBySubdomainSchema.parseAsync(
-				request.params
-			);
-
-			await getCompanyBySubdomainHandler({
-				subdomain: params.subdomain,
-				userJwt,
-				response,
-			});
-		})
-	);
-}
+export const companiesRoutes = new Elysia({ prefix: "/companies" })
+	.use(authenticateEmployee)
+	.get("/", async (ctx) => {
+		const { userJwt, set } = ctx as unknown as AuthenticatedContext & {
+			set: { status: number };
+		};
+		const result = await getUserCompanyHandler({ userJwt });
+		set.status = result.status;
+		return result.response;
+	})
+	.get("/:subdomain", async (ctx) => {
+		const { params, userJwt, set } = ctx as unknown as AuthenticatedContext & {
+			params: { subdomain: string };
+			set: { status: number };
+		};
+		const { subdomain } = await getCompanyBySubdomainSchema.parseAsync(params);
+		const result = await getCompanyBySubdomainHandler({ subdomain, userJwt });
+		set.status = result.status;
+		return result.response;
+	});

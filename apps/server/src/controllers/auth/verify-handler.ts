@@ -1,5 +1,4 @@
 import { cookieKey } from "@fixr/constants/cookies";
-import type { FastifyReply } from "fastify";
 import { apiResponse } from "@/src/helpers/response";
 import { setUserVerified } from "../../services/auth.services";
 import {
@@ -10,73 +9,79 @@ import {
 export async function verifyHandler({
 	token,
 	redirectUrl,
-	response,
+	cookie,
 }: {
 	token: string;
 	redirectUrl?: string;
-	response: FastifyReply;
-}) {
+	cookie: Record<string, { value: string }>;
+}): Promise<
+	| { status: number; redirect: string; cookie?: Record<string, unknown> }
+	| { status: number; response: ReturnType<typeof apiResponse> }
+> {
 	const oneTimeToken = await queryOneTimeToken(token);
 
-	//Checks if the token exists, if it's not expired and if it's a confirmation token
 	if (!oneTimeToken) {
-		return response.status(404).send(
-			apiResponse({
+		return {
+			status: 404,
+			response: apiResponse({
 				status: 404,
 				error: "Not Found",
 				code: "token_not_found",
 				message: "Token not found",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 	if (oneTimeToken.expiresAt < new Date()) {
-		return response.status(410).send(
-			apiResponse({
+		return {
+			status: 410,
+			response: apiResponse({
 				status: 410,
 				error: "Gone",
 				code: "token_expired",
 				message: "Token expired",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 	if (oneTimeToken.tokenType !== "confirmation") {
-		return response.status(400).send(
-			apiResponse({
+		return {
+			status: 400,
+			response: apiResponse({
 				status: 400,
 				error: "Bad Request",
 				code: "invalid_token",
 				message: "Invalid token",
 				data: null,
-			})
-		);
+			}),
+		};
 	}
 
-	//If all checks succeed, update the user to be verified and delete the token
 	const verifyUser = setUserVerified(oneTimeToken.user.id);
 	const deleteToken = deleteOneTimeToken(oneTimeToken.token);
 	await Promise.all([verifyUser, deleteToken]);
 
 	if (redirectUrl) {
-		return response
-			.setCookie(cookieKey("showVerifiedDialog"), "true", {
-				path: "/",
-				httpOnly: false,
-				sameSite: "none",
-				secure: true,
-			})
-			.status(302)
-			.redirect(decodeURIComponent(redirectUrl));
+		(cookie as unknown as Record<string, unknown>)[
+			cookieKey("showVerifiedDialog")
+		] = {
+			value: "true",
+			path: "/",
+			httpOnly: false,
+			sameSite: "none",
+			secure: true,
+		};
+		return { status: 302, redirect: decodeURIComponent(redirectUrl) };
 	}
 
-	return response.status(200).send(
-		apiResponse({
+	return {
+		status: 200,
+		response: apiResponse({
 			status: 200,
 			error: null,
 			code: "email_verify_success",
 			message: "Email verified successfully",
 			data: null,
-		})
-	);
+		}),
+	};
 }

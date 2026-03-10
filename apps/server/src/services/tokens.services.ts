@@ -2,7 +2,6 @@ import { cookieKey } from "@fixr/constants/cookies";
 import { and, db, eq, gte, sql } from "@fixr/db/connection";
 import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema";
 import { env } from "@fixr/env/server";
-import type { FastifyReply } from "fastify";
 import { generateOneTimeToken } from "../helpers/tokens";
 
 export interface RefreshToken {
@@ -10,20 +9,30 @@ export interface RefreshToken {
 	expires: Date;
 }
 
-export async function setRefreshToken(
-	response: FastifyReply,
-	token: RefreshToken,
-	userId: string
-) {
-	const cookieOptions = {
-		httpOnly: true,
-		expires: token.expires, // Adds 7 days to the current date
-		path: "/",
-		sameSite: "none" as const,
-		secure: true,
-		domain: env.COOKIE_DOMAIN,
-	};
+export interface CookieSetter {
+	set(name: string, value: string, opts?: Record<string, unknown>): void;
+}
 
+/** Cookie options for the refresh token (httpOnly, 7d, secure) */
+export const refreshTokenCookieOptions = {
+	httpOnly: true,
+	path: "/",
+	sameSite: "none" as const,
+	secure: true,
+	domain: env.COOKIE_DOMAIN,
+};
+
+/** Cookie options for the JWT session token (NOT httpOnly — accessible by JS for Bearer usage) */
+export const sessionCookieOptions = {
+	path: "/",
+	httpOnly: false,
+	sameSite: "none" as const,
+	expires: new Date(Date.now() + 5 * 60 * 1000),
+	secure: true,
+	domain: env.COOKIE_DOMAIN,
+};
+
+export async function persistRefreshToken(token: RefreshToken, userId: string) {
 	/**
 	 * We need to allow multiple sessions per user, so we insert the token and then delete only the expired ones, not all.
 	 */
@@ -44,26 +53,53 @@ export async function setRefreshToken(
 
 	// Executing both operations in parallel cuz they don't depend on each other.
 	await Promise.allSettled([createRefresh, deleteExpired]);
+}
 
-	response.setCookie(cookieKey("refreshToken"), token.token, cookieOptions);
+export function setRefreshTokenCookie(
+	cookie: Record<string, { value: string }>,
+	token: RefreshToken
+) {
+	(
+		cookie as unknown as {
+			[key: string]: {
+				value: string;
+				domain: string;
+				httpOnly: boolean;
+				path: string;
+				sameSite: string;
+				secure: boolean;
+				expires: Date;
+			};
+		}
+	)[cookieKey("refreshToken")] = {
+		value: token.token,
+		...refreshTokenCookieOptions,
+		expires: token.expires,
+	};
+}
+
+export function setJWTCookie(
+	cookie: Record<string, { value: string }>,
+	token: string
+) {
+	(cookie as unknown as Record<string, unknown>)[cookieKey("session")] = {
+		value: token,
+		...sessionCookieOptions,
+		expires: new Date(Date.now() + 5 * 60 * 1000),
+	};
+}
+
+export async function setRefreshToken(
+	cookie: Record<string, { value: string }>,
+	token: RefreshToken,
+	userId: string
+) {
+	await persistRefreshToken(token, userId);
+	setRefreshTokenCookie(cookie, token);
 }
 
 export async function deleteRefreshToken(token: string) {
 	return await db.delete(refreshTokens).where(eq(refreshTokens.token, token));
-}
-
-export function setJWTCookie(response: FastifyReply, token: string) {
-	const cookieOptions = {
-		path: "/",
-		httpOnly: false,
-		sameSite: "none" as const,
-		// expires: new Date(Date.now() + 10 * 1000),
-		expires: new Date(Date.now() + 5 * 60 * 1000),
-		secure: true,
-		domain: env.COOKIE_DOMAIN,
-	};
-
-	response.setCookie(cookieKey("session"), token, cookieOptions);
 }
 
 export async function createOneTimeToken({

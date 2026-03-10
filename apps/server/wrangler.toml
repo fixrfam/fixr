@@ -1,0 +1,11 @@
+name = "fixr-api"
+main = "src/server.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+bucket = "./public"
+
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<your-hyperdrive-id>"

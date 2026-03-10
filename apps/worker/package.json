@@ -1,0 +1,32 @@
+{
+  "name": "worker",
+  "version": "1.0.0",
+  "description": "Fixr BullMQ worker. Runs on Cloudflare Workers with nodejs_compat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -- tsx watch src/index.ts",
+    "dev:cf": "dotenv -- wrangler dev --port 8788",
+    "deploy": "dotenv -- wrangler deploy",
+    "check-types": "tsc --noEmit",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
+  },
+  "dependencies": {
+    "@fixr/constants": "workspace:*",
+    "@fixr/env": "workspace:*",
+    "@fixr/mail": "workspace:*",
+    "bullmq": "catalog:",
+    "chalk": "^5.4.1",
+    "ioredis": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/bun": "catalog:",
+    "@fixr/typescript-config": "workspace:*",
+    "dotenv": "catalog:",
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

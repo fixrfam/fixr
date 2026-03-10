@@ -1,6 +1,5 @@
 import { jwtPayload, type loginUserSchema } from "@fixr/schemas/auth";
-import bcrypt from "bcrypt";
-import type { FastifyReply } from "fastify";
+import bcrypt from "bcryptjs";
 import type { z } from "zod";
 import { apiResponse } from "@/src/helpers/response";
 import { signJWT } from "../../helpers/jwt";
@@ -13,75 +12,70 @@ import { setJWTCookie, setRefreshToken } from "../../services/tokens.services";
 
 export async function loginHandler({
 	body,
-	response,
+	cookie,
 }: {
 	body: z.infer<typeof loginUserSchema>;
-	response: FastifyReply;
+	cookie: Record<string, { value: string }>;
 }) {
 	const email = body.email.toLowerCase();
-	//First check if the user exists
-
 	const user = await queryUserByEmail(email);
 
 	if (!user) {
-		return response.status(404).send(
-			apiResponse({
+		return {
+			status: 404,
+			response: apiResponse({
 				status: 404,
 				error: "Not Found",
 				code: "user_not_found",
 				message: "User not found",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	if (!user.verified) {
-		return response.status(403).send(
-			apiResponse({
+		return {
+			status: 403,
+			response: apiResponse({
 				status: 403,
 				error: "Forbidden",
 				code: "email_not_verified",
 				message: "Email not verified",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
-	//Then compares the sent password with the hashed password on the database
 	const validPassword = await bcrypt.compare(body.password, user.passwordHash);
 
 	if (!validPassword) {
-		return response.status(401).send(
-			apiResponse({
+		return {
+			status: 401,
+			response: apiResponse({
 				status: 401,
 				error: "Unauthorized",
 				code: "invalid_password",
 				message: "Invalid password",
 				data: null,
-			})
-		);
+			}),
+		} as const;
 	}
 
 	const payload = await queryJWTPayloadByUserId(user.id);
-
-	//If the password is valid, sign the JWT and set the new refresh token
-	const token = signJWT({
-		payload: jwtPayload.parse(payload),
-	});
-
+	const token = await signJWT({ payload: jwtPayload.parse(payload) });
 	const refreshToken = generateRefreshToken();
-	await setRefreshToken(response, refreshToken, user.id);
-	setJWTCookie(response, token);
 
-	return response.status(200).send(
-		apiResponse({
+	await setRefreshToken(cookie, refreshToken, user.id);
+	setJWTCookie(cookie, token);
+
+	return {
+		status: 200,
+		response: apiResponse({
 			status: 200,
 			error: null,
 			code: "login_success",
 			message: "Logged in successfully",
-			data: {
-				token,
-			},
-		})
-	);
+			data: { token },
+		}),
+	} as const;
 }

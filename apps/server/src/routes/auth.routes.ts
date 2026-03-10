@@ -5,7 +5,7 @@ import {
 	loginUserSchema,
 	verifyEmailSchema,
 } from "@fixr/schemas/auth";
-import type { FastifyRequest } from "fastify";
+import { Elysia, t } from "elysia";
 import {
 	googleCallbackHandler,
 	googleLoginHandler,
@@ -14,103 +14,116 @@ import { loginHandler } from "../controllers/auth/login-handler";
 import { revalidateHandler } from "../controllers/auth/revalidate-handler";
 import { signOutHandler } from "../controllers/auth/signout-handler";
 import { verifyHandler } from "../controllers/auth/verify-handler";
-import { authDocs } from "../docs/auth.docs";
 import { apiResponse } from "../helpers/response";
-import type { FastifyTypedInstance } from "../interfaces/fastify";
-import { withErrorHandler } from "../middlewares/with-error-handler";
 
-export function authRoutes(fastify: FastifyTypedInstance) {
-	fastify.post(
+export const authRoutes = new Elysia({ prefix: "/auth" })
+	.post(
 		"/register",
-		{
-			schema: authDocs.registerSchema,
+		async ({ body, set }) => {
+			// biome-ignore lint/correctness/noUnusedVariables: validate schema shape
+			const _validated = await createUserSchema.parseAsync(body);
+			set.status = 501;
+			return apiResponse({
+				status: 501,
+				error: "Not implemented",
+				code: "not_implemented",
+				message: "This endpoint is not implemented or disabled.",
+				data: null,
+			});
 		},
-		withErrorHandler(async (request, response) => {
-			await createUserSchema.parseAsync(request.body);
-
-			return response.status(500).send(
-				apiResponse({
-					status: 501,
-					error: "Not implemented",
-					code: "not_implemented",
-					message: "This endpoint is not implemented or disabled.",
-					data: null,
-				})
-			);
-		})
-	);
-
-	fastify.post(
+		{
+			body: t.Object({
+				email: t.String({ format: "email" }),
+				password: t.String({ minLength: 8 }),
+			}),
+		}
+	)
+	.post(
 		"/login",
-		{ schema: authDocs.loginSchema },
-		withErrorHandler(async (request, response) => {
-			const body = await loginUserSchema.parseAsync(request.body);
-
-			await loginHandler({ body, response });
-		})
-	);
-
-	fastify.get(
+		async ({ body, cookie, set }) => {
+			const validBody = await loginUserSchema.parseAsync(body);
+			const result = await loginHandler({
+				body: validBody,
+				cookie: cookie as unknown as Record<string, { value: string }>,
+			});
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			body: t.Object({
+				email: t.String({ format: "email" }),
+				password: t.String({ minLength: 1 }),
+			}),
+		}
+	)
+	.get(
 		"/verify",
-		{ schema: authDocs.verifySchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{
-					Querystring: { token: string; redirectUrl?: string };
-				}>,
-				response
-			) => {
-				const query = await verifyEmailSchema.parseAsync(request.query);
-				const token = decodeURIComponent(query.token);
-
-				await verifyHandler({
-					token,
-					redirectUrl: query.redirectUrl,
-					response,
-				});
+		async ({ query, cookie, set }) => {
+			const validated = await verifyEmailSchema.parseAsync(query);
+			const token = decodeURIComponent(validated.token);
+			const result = await verifyHandler({
+				token,
+				redirectUrl: validated.redirectUrl,
+				cookie: cookie as unknown as Record<string, { value: string }>,
+			});
+			if ("redirect" in result) {
+				set.status = result.status;
+				set.redirect = result.redirect;
+				return;
 			}
-		)
-	);
-
-	fastify.get(
-		"/signout",
-		{ schema: authDocs.signOutSchema },
-		withErrorHandler(async (request, response) => {
-			const refreshToken = request.cookies[cookieKey("refreshToken")];
-
-			await signOutHandler({ refreshToken, response });
-		})
-	);
-
-	fastify.post(
-		"/token",
-		{ schema: authDocs.revalidateSchema },
-		withErrorHandler(async (request, response) => {
-			const refreshToken = request.cookies[cookieKey("refreshToken")];
-
-			await revalidateHandler({ refreshToken, response });
-		})
-	);
-
-	fastify.get(
-		"/google",
-		{ schema: authDocs.googleLoginSchema },
-		withErrorHandler(async (request, response) => {
-			await googleLoginHandler({ request, response });
-		})
-	);
-
-	fastify.get(
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			query: t.Object({
+				token: t.String(),
+				redirectUrl: t.Optional(t.String()),
+			}),
+		}
+	)
+	.get("/signout", async ({ cookie, set }) => {
+		const refreshToken = cookie[cookieKey("refreshToken")]?.value as
+			| string
+			| undefined;
+		const result = await signOutHandler({ refreshToken });
+		set.status = result.status;
+		return result.response;
+	})
+	.post("/token", async ({ cookie, set }) => {
+		const refreshToken = cookie[cookieKey("refreshToken")]?.value as
+			| string
+			| undefined;
+		const result = await revalidateHandler({
+			refreshToken,
+			cookie: cookie as unknown as Record<string, { value: string }>,
+		});
+		set.status = result.status;
+		return result.response;
+	})
+	.get("/google", ({ set }) => {
+		const url = googleLoginHandler();
+		set.status = 302;
+		set.redirect = url;
+	})
+	.get(
 		"/google/callback",
-		{ schema: authDocs.googleCallbackSchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{ Querystring: { code: string } }>,
-				response
-			) => {
-				const { code } = await googleCallbackSchema.parseAsync(request.query);
-				await googleCallbackHandler({ response, code });
+		async ({ query, cookie, set }) => {
+			const { code } = await googleCallbackSchema.parseAsync(query);
+			const result = await googleCallbackHandler({
+				code,
+				cookie: cookie as unknown as Record<string, { value: string }>,
+			});
+			if ("redirect" in result) {
+				set.status = result.status;
+				set.redirect = result.redirect;
+				return;
 			}
-		)
+			set.status = result.status;
+			return result.response;
+		},
+		{
+			query: t.Object({
+				code: t.String(),
+			}),
+		}
 	);
-}

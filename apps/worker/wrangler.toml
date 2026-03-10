@@ -1,0 +1,7 @@
+name = "fixr-worker"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# The worker doesn't serve HTTP traffic — it processes queues.
+# No assets needed.

@@ -1,243 +1,70 @@
-import { join } from "node:path";
-import { cwd } from "node:process";
-import { fastifyCookie } from "@fastify/cookie";
-import fastifyCors from "@fastify/cors";
-import { fastifyJwt } from "@fastify/jwt";
-import { fastifyStatic } from "@fastify/static";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
+import { cookie } from "@elysiajs/cookie";
+import { cors } from "@elysiajs/cors";
+import { node } from "@elysiajs/node";
 import { APP_NAME } from "@fixr/constants/app";
-import { companySelectSchema } from "@fixr/db/schema";
 import { env } from "@fixr/env/server";
-import { accountSchema } from "@fixr/schemas/account";
-import { apiResponseSchema } from "@fixr/schemas/utils";
-import scalarUi from "@scalar/fastify-api-reference";
-import chalk from "chalk";
-import { fastify } from "fastify";
-import {
-	createJsonSchemaTransformObject,
-	hasZodFastifySchemaValidationErrors,
-	isResponseSerializationError,
-	jsonSchemaTransform,
-	serializerCompiler,
-	validatorCompiler,
-	type ZodTypeProvider,
-} from "fastify-type-provider-zod";
+import { Elysia } from "elysia";
 import { ZodError } from "zod";
-import { cookieKey } from "./../../../packages/constants/src/cookies";
-import { apiDescription } from "./docs/main";
 import { apiResponse } from "./helpers/response";
-import { startEmailWorker } from "./queue/workers/email-worker";
 import { accountRoutes } from "./routes/account.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { companiesRoutes } from "./routes/companies/companies.routes";
 import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 import { credentialsRoutes } from "./routes/credentials.routes";
 
-const envToLogger = {
-	development: {
-		transport: {
-			target: "pino-pretty",
-			options: {
-				ignore: "pid,hostname",
-				translateTime: "HH:MM:ss Z",
-			},
-		},
-	},
-	production: true,
-	test: false,
-};
+const isCloudflare = process.env.CF_WORKER === "true";
 
-//Set Zod as the default request/response data serializer
-const server = fastify({
-	logger: envToLogger.development,
-	allowErrorHandlerOverride: true,
-}).withTypeProvider<ZodTypeProvider>();
-
-server.setValidatorCompiler(validatorCompiler);
-server.setSerializerCompiler(serializerCompiler);
-
-//Set Swagger as the openapi docs generator
-server.register(fastifySwagger, {
-	openapi: {
-		info: {
-			title: `${APP_NAME} API`,
-			version: "1.0.0",
-			summary: `${APP_NAME} API`,
-			description: apiDescription,
-		},
-		tags: [
-			{
-				name: "Auth",
-				description:
-					"Routes used for authentication (register, login and confirmations)",
-			},
-			{
-				name: "Account",
-				description: "Edit account data or delete it through these routes.",
-			},
-			{
-				name: "Credentials",
-				description: "Change account credentials (password) in different ways.",
-			},
-			{
-				name: "Companies",
-				description: "Company management.",
-			},
-			{
-				name: "Companies/Employees",
-				description: "Manage company employees.",
-			},
-		],
-		security: [],
-		components: {
-			securitySchemes: {
-				JWT: {
-					type: "http",
-					scheme: "bearer",
-					bearerFormat: "Bearer",
-				},
-			},
-		},
-	},
-	transform: jsonSchemaTransform,
-	transformObject: createJsonSchemaTransformObject({
-		schemas: {
-			Response: apiResponseSchema,
-			User: accountSchema,
-			Company: companySelectSchema,
-		},
-	}),
-});
-
-//Set Scalar as the frontend for the docs
-server.register(scalarUi, {
-	routePrefix: "/docs",
-	configuration: {
-		url: "/reference/json",
-		metaData: {
-			title: `Docs - ${APP_NAME} API`,
-		},
-		favicon: "/public/favicon.ico",
-		theme: "none",
-	},
-});
-
-//Also register Swagger for the classic API reference
-server.register(fastifySwaggerUi, {
-	routePrefix: "/reference",
-});
-
-//Register routes and plugins.
-server.register(fastifyJwt, {
-	secret: env.JWT_SECRET,
-	cookie: {
-		cookieName: cookieKey("session"),
-		signed: false,
-	},
-});
-
-server.register(fastifyCookie, {
-	secret: env.COOKIE_ENCRYPTION_SECRET,
-});
-
-server.register(fastifyStatic, {
-	root: join(cwd(), "public"),
-	prefix: "/public/",
-});
-
-server.register(authRoutes, {
-	prefix: "/auth",
-});
-
-server.register(accountRoutes, {
-	prefix: "/account",
-});
-
-server.register(credentialsRoutes, {
-	prefix: "/credentials",
-});
-
-server.register(companiesRoutes, {
-	prefix: "/companies",
-});
-
-server.register(employeesRoutes, {
-	prefix: "/companies/:subdomain/employees",
-});
-
-server.get("/", (_, reply) => {
-	reply
-		.status(200)
-		.send("Hello from Fixr API! Reach the documentation at /docs");
-});
-
-server.register(fastifyCors, {
-	origin: [env.FRONTEND_URL, `http://localhost:${env.NODE_PORT}`],
-	credentials: true,
-});
-
-//Map the zod errors to standard response
-server.setErrorHandler((error, _request, reply) => {
-	if (error instanceof ZodError) {
-		reply.status(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "bad_request",
-				message: "Type validation failed",
-				data: error.issues,
+const createApp = () =>
+	new Elysia({ adapter: isCloudflare ? undefined : node() })
+		.use(
+			cors({
+				origin: [env.FRONTEND_URL, `http://localhost:${env.NODE_PORT ?? 8787}`],
+				credentials: true,
 			})
-		);
-		return;
-	}
-
-	reply.send(error);
-});
-
-server.setErrorHandler((error, request, response) => {
-	if (hasZodFastifySchemaValidationErrors(error)) {
-		return response.code(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "request_validation_error",
-				message: "Request doesn't match the schema",
-				data: {
-					issues: error.validation,
-					method: request.method,
-					url: request.url,
-				},
+		)
+		.use(
+			cookie({
+				secret: env.COOKIE_ENCRYPTION_SECRET,
 			})
-		);
-	}
+		)
+		.use(authRoutes)
+		.use(accountRoutes)
+		.use(credentialsRoutes)
+		.use(companiesRoutes)
+		.use(employeesRoutes)
+		.get("/", () => `Hello from Elysia ${APP_NAME} API!`)
+		.onError(({ error, set }) => {
+			if (error instanceof ZodError) {
+				set.status = 400;
+				return apiResponse({
+					status: 400,
+					error: "Bad Request",
+					code: "bad_request",
+					message: "Type validation failed",
+					data: error.issues,
+				});
+			}
 
-	if (isResponseSerializationError(error)) {
-		return response.code(500).send(
-			apiResponse({
+			console.error("Unhandled error:", error);
+			set.status = 500;
+			return apiResponse({
 				status: 500,
 				error: "Internal Server Error",
-				code: "response_serialization_failed",
-				message: "Response doesn't match the schema",
-				data: error,
-			})
-		);
-	}
-});
+				code: "internal_error",
+				message: "Something went wrong.",
+				data: null,
+			});
+		});
 
-//Run server.
-server
-	.listen({
-		port: Number(env.NODE_PORT),
-		host: "::",
-	})
-	.then(() => {
-		console.log(
-			chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
-		);
-	});
+let app = createApp();
 
-// Start the email worker
-startEmailWorker();
+if (isCloudflare) {
+	app = app.compile();
+}
 
-export default server;
+const port = Number(env.NODE_PORT) || 3333;
+app.listen(port);
+
+console.log(`🚀 Server running at http://localhost:${port}`);
+
+export default app;
