@@ -24,6 +24,10 @@ export const env = createEnv({
 			.default("development")
 			.describe("Node environment"),
 		FRONTEND_URL: z.url().describe("Frontend application URL"),
+		WORKER_ENV: z
+			.enum(["local", "production"])
+			.default("local")
+			.describe("Cloudflare Workers enviroment"),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

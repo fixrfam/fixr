@@ -12,7 +12,7 @@ import { companiesRoutes } from "./routes/companies/companies.routes";
 import { employeesRoutes } from "./routes/companies/employees/employees.routes";
 import { credentialsRoutes } from "./routes/credentials.routes";
 
-const isCloudflare = process.env.CF_WORKER === "true";
+const isCloudflare = env.WORKER_ENV === "production";
 
 const createApp = () =>
 	new Elysia({ adapter: isCloudflare ? undefined : node() })
@@ -32,7 +32,11 @@ const createApp = () =>
 		.use(credentialsRoutes)
 		.use(companiesRoutes)
 		.use(employeesRoutes)
-		.get("/", () => `Hello from Elysia ${APP_NAME} API!`)
+		.get(
+			"/",
+			() =>
+				`Hello from Elysia ${APP_NAME} API! Visit our documentation at /docs`
+		)
 		.onError(({ error, set }) => {
 			if (error instanceof ZodError) {
 				set.status = 400;
@@ -65,6 +69,6 @@ if (isCloudflare) {
 const port = Number(env.NODE_PORT) || 3333;
 app.listen(port);
 
-console.log(`🚀 Server running at http://localhost:${port}`);
+console.log(`Server running at http://localhost:${port}`);
 
 export default app;

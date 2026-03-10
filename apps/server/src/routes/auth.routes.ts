@@ -20,7 +20,6 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 	.post(
 		"/register",
 		async ({ body, set }) => {
-			// biome-ignore lint/correctness/noUnusedVariables: validate schema shape
 			const _validated = await createUserSchema.parseAsync(body);
 			set.status = 501;
 			return apiResponse({
