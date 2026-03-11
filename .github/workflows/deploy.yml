@@ -43,7 +43,7 @@ jobs:
       - name: Deploy with Alchemy
         run: |
           echo "Deploying stage: $STAGE"
-          bun run deploy --stage "$STAGE"
+          bun run deploy:ci --stage "$STAGE"
         env:
           # Alchemy / state
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
@@ -101,7 +101,7 @@ jobs:
           fi
 
       - name: Destroy preview environment
-        run: bun alchemy destroy --stage "$STAGE"
+        run: bun run destroy:ci --stage "$STAGE"
         env:
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
           ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
