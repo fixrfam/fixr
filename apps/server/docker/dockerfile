@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala dependências
-RUN npm install
+RUN bun install
 
 # Copia o restante dos arquivos
 COPY . .
@@ -20,10 +20,10 @@ RUN npx turbo prune server --docker
 WORKDIR /app/out/full
 
 # Instala dependências na pasta de build
-RUN npm install
+RUN bun install
 
 # Gera build
-RUN npm run build
+RUN bun run build
 
 # Define comando de inicialização
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start"]

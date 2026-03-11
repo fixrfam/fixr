@@ -1,51 +1,54 @@
-"use client"
+"use client";
 
-import { ApiResponse, PaginatedData } from "@fixr/schemas/utils"
-import { useQuery } from "@tanstack/react-query"
-import { AxiosResponse } from "axios"
-import { useParams } from "next/navigation"
-import { z } from "zod"
-import { columns, dataSchema } from "@/components/dashboard/employees/columns"
-import { DataTable } from "@/components/dashboard/employees/data-table"
-import { Heading } from "@/components/dashboard/heading"
-import { Skeleton } from "@/components/ui/skeleton"
-import { axios } from "@/lib/auth/axios"
+import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
+import { useQuery } from "@tanstack/react-query";
+import type { AxiosResponse } from "axios";
+import { useParams } from "next/navigation";
+import type { z } from "zod";
+import {
+	columns,
+	type dataSchema,
+} from "@/components/dashboard/employees/columns";
+import { DataTable } from "@/components/dashboard/employees/data-table";
+import { Heading } from "@/components/dashboard/heading";
+import { Skeleton } from "@/components/ui/skeleton";
+import { axios } from "@/lib/auth/axios";
 
 export default function EmployeesPage() {
-  const params = useParams<{ subdomain: string }>()
+	const params = useParams<{ subdomain: string }>();
 
-  const { isPending, data } = useQuery<
-    AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof dataSchema>>>>
-  >({
-    queryKey: ["employeesData"],
-    queryFn: async () =>
-      await axios.get(`/companies/${params.subdomain}/employees?page=1`),
-  })
+	const { isPending, data } = useQuery<
+		AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof dataSchema>>>>
+	>({
+		queryKey: ["employeesData"],
+		queryFn: async () =>
+			await axios.get(`/companies/${params.subdomain}/employees?page=1`),
+	});
 
-  const records = data?.data.data?.records ?? []
+	const records = data?.data.data?.records ?? [];
 
-  return (
-    <div className="flex flex-col gap-2">
-      <Heading
-        title={"Funcionários"}
-        description={"Veja ou gerencie os funcionários da sua empresa"}
-      />
-      {!isPending ? (
-        <DataTable data={records} columns={columns} />
-      ) : (
-        <div className="mt-4 space-y-2">
-          <div className="w-full flex justify-between">
-            <div className="flex">
-              <Skeleton className="w-64 h-10" />
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="w-24 h-10" />
-              <Skeleton className="w-32 h-10" />
-            </div>
-          </div>
-          <Skeleton className="w-full h-96 rounded-md" />
-        </div>
-      )}
-    </div>
-  )
+	return (
+		<div className="flex flex-col gap-2">
+			<Heading
+				description={"Veja ou gerencie os funcionários da sua empresa"}
+				title={"Funcionários"}
+			/>
+			{isPending ? (
+				<div className="mt-4 space-y-2">
+					<div className="flex w-full justify-between">
+						<div className="flex">
+							<Skeleton className="h-10 w-64" />
+						</div>
+						<div className="flex gap-2">
+							<Skeleton className="h-10 w-24" />
+							<Skeleton className="h-10 w-32" />
+						</div>
+					</div>
+					<Skeleton className="h-96 w-full rounded-md" />
+				</div>
+			) : (
+				<DataTable columns={columns} data={records} />
+			)}
+		</div>
+	);
 }

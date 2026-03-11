@@ -1,0 +1,21 @@
+{
+  "name": "@fixr/infra",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "alchemy dev",
+    "deploy": "alchemy deploy",
+    "destroy": "alchemy destroy"
+  },
+  "dependencies": {
+    "@fixr/typescript-config": "workspace:*",
+    "alchemy": "^0.82.1",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@fixr/typescript-config": "workspace:*",
+    "alchemy": "^0.82.1",
+    "typescript": "catalog:"
+  }
+}
