@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # compute stage: pr-N for PRs, prod for main branch, otherwise branch name
+  STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || (github.ref == 'refs/heads/main' && 'prod' || github.ref_name) }}
+
+jobs:
+  deploy:
+    # skip this job when a PR is closed (cleanup job handles destruction)
+    if: ${{ github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy with Alchemy
+        run: |
+          echo "Deploying stage: $STAGE"
+          bun alchemy deploy --stage "$STAGE"
+        env:
+          # Alchemy / state
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
+
+          # Cloudflare (used by alchemy/cloudflare)
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+
+          # App-specific environment variables (bind to Nextjs)
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_DOCS_URL: ${{ secrets.NEXT_PUBLIC_DOCS_URL }}
+          NEXT_PUBLIC_LINKTREE_URL: ${{ secrets.NEXT_PUBLIC_LINKTREE_URL }}
+
+          FRONTEND_PUBLIC_DOMAINS: ${{ secrets.FRONTEND_PUBLIC_DOMAINS }}
+          ADMIN_PUBLIC_DOMAINS: ${{ secrets.ADMIN_PUBLIC_DOMAINS }}
+
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+          # GitHub / PR metadata for the script
+          PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup:
+    # runs only when a PR is closed
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Safety check - don't destroy prod
+        run: |
+          if [ "${{ env.STAGE }}" = "prod" ]; then
+            echo "ERROR: refusing to destroy prod environment in cleanup job"
+            exit 1
+          fi
+
+      - name: Destroy preview environment
+        run: bun alchemy destroy --stage "$STAGE"
+        env:
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
+
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+
+          PULL_REQUEST: ${{ github.event.number }}
