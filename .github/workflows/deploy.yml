@@ -43,7 +43,7 @@ jobs:
       - name: Deploy with Alchemy
         run: |
           echo "Deploying stage: $STAGE"
-          bun alchemy deploy --stage "$STAGE"
+          bun run deploy --stage "$STAGE"
         env:
           # Alchemy / state
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
