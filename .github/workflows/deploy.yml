@@ -38,7 +38,11 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
+        run: |
+          rm -rf node_modules
+          bun install --no-cache
+        env:
+          ALCHEMY_TELEMETRY_DISABLED: "1"
 
       - name: Deploy with Alchemy
         run: |
@@ -46,6 +50,7 @@ jobs:
           bun run deploy:ci --stage "$STAGE"
         env:
           # Alchemy / state
+          ALCHEMY_TELEMETRY_DISABLED: "1"
           ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
           ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
 
