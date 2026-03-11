@@ -4,44 +4,41 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "biome check && tsc",
-    "migrate": "dotenv -- tsx src/migrate.ts",
-    "generate": "dotenv -- drizzle-kit generate",
-    "studio": "dotenv -- drizzle-kit studio",
-    "lint": "biome check",
-    "lint:write": "biome check --write"
+    "db:push": "dotenv -- drizzle-kit push",
+    "db:generate": "dotenv -- drizzle-kit generate",
+    "db:studio": "dotenv -- drizzle-kit studio",
+    "db:migrate": "dotenv -- tsx src/migrate.ts",
+    "db:start": "docker compose up -d",
+    "db:watch": "docker compose up",
+    "db:stop": "docker compose stop",
+    "db:down": "docker compose down",
+    "check-types": "tsc --noEmit"
   },
   "exports": {
-    "./app": {
-      "types": "./src/app.ts",
-      "default": "./dist/app.js"
-    },
-    "./cookies": {
-      "types": "./src/cookies.ts",
-      "default": "./dist/cookies.js"
-    },
     "./connection": {
       "types": "./src/connection.ts",
-      "default": "./dist/src/connection.js"
+      "default": "./src/connection.ts"
     },
     "./schema": {
       "types": "./src/schema/index.ts",
-      "default": "./dist/src/schema/index.js"
+      "default": "./src/schema/index.ts"
     }
   },
   "devDependencies": {
-    "@fixr/typescript-config": "*",
-    "@biomejs/biome": "2.3.3",
+    "@fixr/typescript-config": "workspace:*",
+    "@fixr/env": "workspace:*",
+    "@biomejs/biome": "catalog:",
     "@types/eslint": "^8.56.5",
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "@types/bun": "catalog:",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "catalog:"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.38.3",
-    "drizzle-zod": "^0.7.0",
-    "zod": "^3.23.8",
-    "mysql2": "^3.13.0"
+    "chalk": "^5.6.2",
+    "dotenv": "catalog:",
+    "drizzle-orm": "catalog:",
+    "drizzle-zod": "catalog:",
+    "mysql2": "catalog:",
+    "zod": "catalog:"
   }
 }

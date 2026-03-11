@@ -11,55 +11,55 @@
   },
   "exports": {
     "./account": {
-      "types": "./dist/account.d.ts",
-      "default": "./dist/account.js"
+      "types": "./src/account.ts",
+      "default": "./src/account.ts"
     },
     "./auth": {
-      "types": "./dist/auth.d.ts",
-      "default": "./dist/auth.js"
+      "types": "./src/auth.ts",
+      "default": "./src/auth.ts"
     },
     "./roles": {
-      "types": "./dist/roles.d.ts",
-      "default": "./dist/roles.js"
+      "types": "./src/roles.ts",
+      "default": "./src/roles.ts"
     },
     "./credentials": {
-      "types": "./dist/credentials.d.ts",
-      "default": "./dist/credentials.js"
+      "types": "./src/credentials.ts",
+      "default": "./src/credentials.ts"
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "default": "./dist/utils.js"
+      "types": "./src/utils.ts",
+      "default": "./src/utils.ts"
     },
     "./companies": {
-      "types": "./dist/companies.d.ts",
-      "default": "./dist/companies.js"
+      "types": "./src/companies.ts",
+      "default": "./src/companies.ts"
     },
     "./employees": {
-      "types": "./dist/employees.d.ts",
-      "default": "./dist/employees.js"
+      "types": "./src/employees.ts",
+      "default": "./src/employees.ts"
     },
     "./common": {
-      "types": "./dist/common.d.ts",
-      "default": "./dist/common.js"
+      "types": "./src/common.ts",
+      "default": "./src/common.ts"
     },
     "./clients": {
-      "types": "./dist/clients.d.ts",
-      "default": "./dist/clients.js"
+      "types": "./src/clients.ts",
+      "default": "./src/clients.ts"
     },
     "./service-orders": {
-      "types": "./dist/service-orders.d.ts",
-      "default": "./dist/service-orders.js"
+      "types": "./src/service-orders.ts",
+      "default": "./src/service-orders.ts"
     }
   },
   "devDependencies": {
-    "@fixr/typescript-config": "*",
+    "@fixr/typescript-config": "workspace:*",
     "@types/eslint": "^8.56.5",
-    "@types/node": "^20.11.24",
-    "@biomejs/biome": "2.3.3",
-    "typescript": "^5.3.3",
-    "zod": "latest"
+    "@types/bun": "catalog:",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
   },
   "dependencies": {
-    "zod": "latest"
+    "zod": "catalog:"
   }
 }

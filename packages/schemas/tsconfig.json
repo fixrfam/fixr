@@ -8,8 +8,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
-    "esModuleInterop": true,
-    "types": ["next/types/global"]
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

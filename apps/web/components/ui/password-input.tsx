@@ -1,47 +1,47 @@
-"use client"
+"use client";
 
-import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { forwardRef, useId, useState } from "react"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { forwardRef, useId, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const PasswordInput = forwardRef<
-  HTMLInputElement,
-  React.ComponentPropsWithoutRef<"input">
+	HTMLInputElement,
+	React.ComponentPropsWithoutRef<"input">
 >((props, ref) => {
-  const id = useId()
-  const [isVisible, setIsVisible] = useState<boolean>(false)
+	const id = useId();
+	const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const toggleVisibility = () => setIsVisible((prevState) => !prevState)
+	const toggleVisibility = () => setIsVisible((prevState) => !prevState);
 
-  return (
-    <div className={cn("relative", props.className)}>
-      <Input
-        id={id}
-        ref={ref}
-        className={cn("pe-9", props.className)}
-        placeholder="Password"
-        type={isVisible ? "text" : "password"}
-        {...props}
-      />
-      <button
-        className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-hidden focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-        type="button"
-        onClick={toggleVisibility}
-        aria-label={isVisible ? "Hide password" : "Show password"}
-        aria-pressed={isVisible}
-        aria-controls="password"
-      >
-        {isVisible ? (
-          <EyeOffIcon size={16} aria-hidden="true" />
-        ) : (
-          <EyeIcon size={16} aria-hidden="true" />
-        )}
-      </button>
-    </div>
-  )
-})
+	return (
+		<div className={cn("relative", props.className)}>
+			<Input
+				className={cn("pe-9", props.className)}
+				id={id}
+				placeholder="Password"
+				ref={ref}
+				type={isVisible ? "text" : "password"}
+				{...props}
+			/>
+			<button
+				aria-controls="password"
+				aria-label={isVisible ? "Hide password" : "Show password"}
+				aria-pressed={isVisible}
+				className="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md text-muted-foreground/80 outline-hidden transition-[color,box-shadow] hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+				onClick={toggleVisibility}
+				type="button"
+			>
+				{isVisible ? (
+					<EyeOffIcon aria-hidden="true" size={16} />
+				) : (
+					<EyeIcon aria-hidden="true" size={16} />
+				)}
+			</button>
+		</div>
+	);
+});
 
-PasswordInput.displayName = "PasswordInput"
+PasswordInput.displayName = "PasswordInput";
 
-export default PasswordInput
+export default PasswordInput;

@@ -1,73 +1,92 @@
-import { db } from "@fixr/db/connection"
-import { count, getTableColumns, SQL } from "drizzle-orm"
-import { AnyMySqlColumn, MySqlTable } from "drizzle-orm/mysql-core"
+import {
+	count,
+	db,
+	getTableColumns,
+	type MySqlTable,
+	type SQL,
+} from "@fixr/db/connection";
 
-type Join = {
-  type: "inner" | "left" | "right" | "full"
-  table: MySqlTable
-  on: SQL
+interface Join {
+	type: "inner" | "left" | "right" | "full";
+	table: unknown;
+	on: SQL;
 }
 
 /**
  * Fetches a paginated range of records from a given table.
  */
-export async function getPaginatedRecords({
-  table,
-  select,
-  skip,
-  take,
-  where,
-  order,
-  joins,
+export async function getPaginatedRecords<T = unknown>({
+	table,
+	select,
+	skip,
+	take,
+	where,
+	order,
+	joins,
 }: {
-  table: MySqlTable
-  skip: number
-  take: number
-  select?: Record<string, AnyMySqlColumn | SQL | Record<string, AnyMySqlColumn>>
-  where?: SQL
-  joins?: Join[]
-  order: SQL
+	table: unknown;
+	skip: number;
+	take: number;
+	select?: T;
+	where?: SQL;
+	joins?: Join[];
+	order: SQL;
 }) {
-  const baseQuery = db
-    .select(select ?? getTableColumns(table))
-    .from(table)
-    .where(where)
-    .orderBy(order)
+	const tableRef = table as MySqlTable;
+	const baseQuery = db
+		.select(select ?? getTableColumns(tableRef))
+		.from(tableRef)
+		.$dynamic();
 
-  if (joins) {
-    for (const join of joins) {
-      switch (join.type) {
-        case "inner":
-          baseQuery.innerJoin(join.table, join.on)
-          break
-        case "left":
-          baseQuery.leftJoin(join.table, join.on)
-          break
-        case "right":
-          baseQuery.rightJoin(join.table, join.on)
-          break
-        case "full":
-          baseQuery.fullJoin(join.table, join.on)
-          break
-      }
-    }
-  }
+	if (where) {
+		baseQuery.where(where);
+	}
 
-  const query = baseQuery.limit(take).offset(skip)
+	if (joins) {
+		for (const join of joins) {
+			const joinTable = join.table as MySqlTable;
+			switch (join.type) {
+				case "inner":
+					baseQuery.innerJoin(joinTable, join.on);
+					break;
+				case "left":
+					baseQuery.leftJoin(joinTable, join.on);
+					break;
+				case "right":
+					baseQuery.rightJoin(joinTable, join.on);
+					break;
+				case "full":
+					baseQuery.fullJoin(joinTable, join.on);
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
-  return await query
+	const query = baseQuery.orderBy(order).limit(take).offset(skip);
+
+	// Cast the result to the expected type inferred from the select parameter (or table columns)
+	return (await query) as unknown[];
 }
 
 /**
  * Counts the total number of records matching the given condition.
  */
 export async function getPaginatedCount({
-  table,
-  where,
+	table,
+	where,
 }: {
-  table: MySqlTable
-  where?: SQL
+	table: unknown;
+	where?: SQL;
 }) {
-  const [amount] = await db.select({ count: count() }).from(table).where(where)
-  return amount.count
+	const tableRef = table as MySqlTable;
+	const query = db.select({ count: count() }).from(tableRef).$dynamic();
+
+	if (where) {
+		query.where(where);
+	}
+
+	const [amount] = await query;
+	return amount.count;
 }

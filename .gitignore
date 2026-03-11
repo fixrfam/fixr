@@ -20,6 +20,9 @@ coverage
 # Turbo
 .turbo
 
+# Bun
+.bun
+
 # Vercel
 .vercel
 
@@ -28,6 +31,7 @@ coverage
 out/
 build
 dist
+wrangler.jsonc
 
 
 # Debug
