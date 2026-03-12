@@ -70,8 +70,25 @@ jobs:
 
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+          # Authentication & Security
+          RESEND_KEY: ${{ secrets.RESEND_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          COOKIE_ENCRYPTION_SECRET: ${{ secrets.COOKIE_ENCRYPTION_SECRET }}
+          COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
+          GOOGLE_AUTH_CLIENT_ID: ${{ secrets.GOOGLE_AUTH_CLIENT_ID }}
+          GOOGLE_AUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_AUTH_CLIENT_SECRET }}
+          GOOGLE_AUTH_REDIRECT_URI: ${{ secrets.GOOGLE_AUTH_REDIRECT_URI }}
+
+          # Database
+          DB_URL: ${{ secrets.DB_URL }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
 
           # GitHub / PR metadata for the script
           PULL_REQUEST: ${{ github.event.number }}
