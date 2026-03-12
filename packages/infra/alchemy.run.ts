@@ -29,7 +29,7 @@ safeLoad("../../packages/mail/.env.production");
 safeLoad("../../packages/infra/.env.production");
 
 const app = await alchemy("fixr", {
-	stateStore: (scope) => new CloudflareStateStore(scope),
+	stateStore: (scope) => new CloudflareStateStore(scope, { forceUpdate: true }),
 });
 
 const parseDomains = (envName: string) =>
