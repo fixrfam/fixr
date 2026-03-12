@@ -8,6 +8,7 @@
     "build:packages": "dotenv -- bun run --elide-lines 0 --filter './packages/*' build",
     "build:apps": "dotenv -- bun run --elide-lines 0 --filter './apps/*' build",
     "build:server": "dotenv -- bun run --elide-lines 0 --filter server build",
+    "build:workers": "dotenv -- bun run --elide-lines 0 --filter workers build",
     "build:web": "dotenv -- bun run --elide-lines 0 --filter web build",
     "build:admin": "dotenv -- bun run --elide-lines 0 --filter admin build",
     "lint": "dotenv -- bun run --elide-lines 0 --filter '*' lint",
