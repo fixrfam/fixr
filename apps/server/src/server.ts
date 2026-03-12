@@ -27,7 +27,6 @@ import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./docs/main";
 import { apiResponse } from "./helpers/response";
-import { startEmailWorker } from "./queue/workers/email-worker";
 import { accountRoutes } from "./routes/account.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { companiesRoutes } from "./routes/companies/companies.routes";
@@ -236,8 +235,5 @@ server
 			chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
 		);
 	});
-
-// Start the email worker
-startEmailWorker();
 
 export default server;
