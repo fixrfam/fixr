@@ -32,8 +32,20 @@ const app = await alchemy("fixr", {
 	stateStore: (scope) => new CloudflareStateStore(scope, { forceUpdate: true }),
 });
 
-const parseDomains = (envName: string) =>
-	(process.env[envName]?.split(",").map((d) => d.trim()) ?? []).filter(Boolean);
+interface CloudFlareDomainConfig {
+	domainName: string;
+	adopt?: boolean;
+}
+
+const parseDomains = (envName: string): CloudFlareDomainConfig[] => {
+	const domains = process.env[envName]?.split(",").map((d) => d.trim());
+
+	const mapped = domains?.map((domain) => {
+		return { domainName: domain, adopt: true };
+	});
+
+	return mapped ?? [];
+};
 
 export const web = await Nextjs("web", {
 	cwd: "../../apps/web",
