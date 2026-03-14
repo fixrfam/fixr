@@ -1,0 +1,38 @@
+{
+  "name": "workers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "workers.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "dotenv -- vitest",
+    "start": "dotenv -- tsx src/index.ts",
+    "dev": "dotenv -- tsx watch src/index.ts",
+    "build": "biome check && dotenv -- tsup src",
+    "lint": "biome check",
+    "lint:write": "biome check --write",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/bun": "catalog:",
+    "tsx": "^4.19.2"
+  },
+  "dependencies": {
+    "@fixr/constants": "workspace:*",
+    "@fixr/env": "workspace:*",
+    "@fixr/mail": "workspace:*",
+    "@fixr/typescript-config": "workspace:*",
+    "bullmq": "catalog:",
+    "chalk": "^5.4.1",
+    "dotenv": "catalog:",
+    "ioredis": "catalog:",
+    "tsup": "^8.3.5",
+    "typescript": "catalog:",
+    "vitest": "^2.0.5"
+  }
+}

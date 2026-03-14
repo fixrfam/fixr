@@ -5,9 +5,6 @@ import chalk from "chalk";
 import type { Redis } from "ioredis";
 import { redis } from "@/src/config/redis";
 
-/* The email worker processes the queue jobs.
-- It listen to any job with the key "email", retrieve the payload and run the corresponding action with it.
-*/
 const createEmailWorker = (connection: Redis): Worker<EmailJobData> =>
 	new Worker<EmailJobData>(
 		"email",
