@@ -7,13 +7,15 @@ const DB_URL = env.DB_URL;
 
 const url = new URL(DB_URL);
 
+const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+
 const poolConnection = mysql.createPool({
 	host: url.hostname,
 	port: Number(url.port),
 	user: url.username,
 	password: url.password,
 	database: url.pathname.slice(1),
-	ssl: {},
+	ssl: isLocal ? undefined : { rejectUnauthorized: false },
 	connectionLimit: 10,
 });
 

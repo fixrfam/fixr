@@ -1,3 +1,5 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { resend } from "../config/resend";
 import { renderEmail as renderDeletionEmail } from "../emails/account-deletion";
@@ -8,7 +10,10 @@ import {
 import { renderEmail as renderPasswordResetEmail } from "../emails/password-reset";
 import { renderEmail as renderVerificationEmail } from "../emails/verification";
 
-dotenv.config({ path: "../.env" });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({ path: join(__dirname, "../.env") });
 
 interface EmailCommonProps {
 	to: string;

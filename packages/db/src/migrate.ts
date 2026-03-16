@@ -12,15 +12,17 @@ const dbUrl = env.DB_URL.replace("postgres:5432", "localhost:5432");
 
 	const url = new URL(dbUrl);
 
+	const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+
 	const connection = await mysql.createConnection({
 		host: url.hostname,
 		port: Number(url.port) || 4000,
 		user: decodeURIComponent(url.username),
 		password: decodeURIComponent(url.password),
 		database: url.pathname.slice(1),
-		ssl: {
-			minVersion: "TLSv1.2",
-		},
+		ssl: isLocal
+			? undefined
+			: { minVersion: "TLSv1.2", rejectUnauthorized: false },
 		multipleStatements: true,
 	});
 

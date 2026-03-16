@@ -2,7 +2,7 @@
   "name": "fixr",
   "private": true,
   "scripts": {
-    "dev": "dotenv -- bun run --filter './apps/*' dev",
+    "dev": "dotenv -- bun run --elide-lines 0 --filter './apps/*' dev",
     "start": "dotenv -- bun run --filter './apps/*' start",
     "build": "bun run --elide-lines 0 build:packages && bun run --elide-lines 0 build:apps",
     "build:packages": "dotenv -- bun run --elide-lines 0 --filter './packages/*' build",

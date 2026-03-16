@@ -11,9 +11,6 @@ const __dirname = dirname(__filename);
 // Load .env from the db package directory
 config({ path: join(__dirname, "../../db/.env") });
 
-// Also load from the current working directory (for overrides)
-config();
-
 export const env = createEnv({
 	server: {
 		DB_URL: z.url().describe("Database connection URL (legacy)"),

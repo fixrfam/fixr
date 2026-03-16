@@ -8,7 +8,8 @@
     "./web": "./src/web.ts",
     "./admin": "./src/admin.ts",
     "./mail": "./src/mail.ts",
-    "./db": "./src/db.ts"
+    "./db": "./src/db.ts",
+    "./workers": "./src/workers.ts"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.1",
