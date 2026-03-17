@@ -15,6 +15,7 @@
     "@fixr/constants": "workspace:*",
     "@fixr/db": "workspace:*",
     "@fixr/env": "workspace:*",
+    "@fixr/permissions": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
     "@hookform/resolvers": "^5.2.0",
