@@ -27,6 +27,7 @@ import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./docs/main";
 import { apiResponse } from "./helpers/response";
+import { rbacPlugin } from "./middlewares/rbac";
 import { accountRoutes } from "./routes/account.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { companiesRoutes } from "./routes/companies/companies.routes";
@@ -139,6 +140,8 @@ server.register(fastifyJwt, {
 server.register(fastifyCookie, {
 	secret: env.COOKIE_ENCRYPTION_SECRET,
 });
+
+server.register(rbacPlugin);
 
 server.register(fastifyStatic, {
 	root: join(cwd(), "public"),
