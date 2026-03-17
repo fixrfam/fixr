@@ -1,0 +1,50 @@
+{
+  "name": "@fixr/permissions",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "biome check && tsc",
+    "lint": "biome check",
+    "lint:write": "biome check --write"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./abilities": {
+      "types": "./src/abilities.ts",
+      "default": "./src/abilities.ts"
+    },
+    "./accessor": {
+      "types": "./src/accessor.ts",
+      "default": "./src/accessor.ts"
+    },
+    "./permissions": {
+      "types": "./src/permissions.ts",
+      "default": "./src/permissions.ts"
+    },
+    "./react": {
+      "types": "./src/react.tsx",
+      "default": "./src/react.tsx"
+    }
+  },
+  "devDependencies": {
+    "@fixr/typescript-config": "workspace:*",
+    "@fixr/schemas": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/eslint": "^8.56.5",
+    "@types/bun": "catalog:",
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
+  }
+}
