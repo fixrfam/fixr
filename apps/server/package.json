@@ -37,6 +37,7 @@
     "@fixr/constants": "workspace:*",
     "@fixr/db": "workspace:*",
     "@fixr/mail": "workspace:*",
+    "@fixr/permissions": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
     "@fixr/env": "workspace:*",
