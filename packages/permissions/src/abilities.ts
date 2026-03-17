@@ -5,6 +5,7 @@ import { type Permission, permissions } from "./permissions";
 export type EmployeeRole = z.infer<typeof employeeRoles>;
 
 const roleAbilities: Record<EmployeeRole, Permission[]> = {
+	guest: [],
 	technician: [
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.update,
