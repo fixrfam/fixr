@@ -1,3 +1,4 @@
+import { createAbility, permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
@@ -20,6 +21,14 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
+			const ability = createAbility(userJwt.company?.role ?? "technician");
+
+			if (ability.cannot(permissions.employees.read)) {
+				return response.status(403).send({
+					message: "You don't have permission to view employees",
+				});
+			}
+
 			const { query, sort, page, perPage } = getPaginatedDataSchema.parse(
 				request.query
 			);
@@ -45,6 +54,14 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
+			const ability = createAbility(userJwt.company?.role ?? "technician");
+
+			if (ability.cannot(permissions.employees.create)) {
+				return response.status(403).send({
+					message: "You don't have permission to create employees",
+				});
+			}
+
 			const body = await createEmployeeSchema.parseAsync(request.body);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
