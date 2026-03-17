@@ -12,11 +12,11 @@ declare module "fastify" {
 
 // biome-ignore lint/suspicious/useAwait: <We need to make this plugin async so it doesnt block IO, despite having no await expression>
 export const rbacPlugin: FastifyPluginAsync = async (fastify) => {
-	fastify.decorateRequest("ability", createAbility("technician"));
+	fastify.decorateRequest("ability", createAbility("guest"));
 
 	fastify.addHook("onRequest", (request, _reply, done) => {
 		const user = request.user as z.infer<typeof userJWT> | undefined;
-		const role = user?.company?.role ?? "technician";
+		const role = user?.company?.role ?? "guest";
 		request.ability = createAbility(role);
 		done();
 	});

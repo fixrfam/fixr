@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const employeeRoles = z.enum([
-	"admin",
-	"manager",
+	"guest",
+	"technician",
 	"warehouse",
 	"financial",
-	"technician",
+	"manager",
+	"admin",
 ]);
