@@ -1,4 +1,6 @@
 import { Column, Hr, Row, Section, Text } from "@react-email/components";
+// biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
+import React from "react";
 
 export function PlatformFunctionalities() {
 	return (
