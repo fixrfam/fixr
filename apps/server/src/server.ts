@@ -179,24 +179,6 @@ server.register(fastifyCors, {
 	credentials: true,
 });
 
-//Map the zod errors to standard response
-server.setErrorHandler((error, _request, reply) => {
-	if (error instanceof ZodError) {
-		reply.status(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "bad_request",
-				message: "Type validation failed",
-				data: error.issues,
-			})
-		);
-		return;
-	}
-
-	reply.send(error);
-});
-
 server.setErrorHandler((error, request, response) => {
 	if (hasZodFastifySchemaValidationErrors(error)) {
 		return response.code(400).send(
@@ -225,6 +207,28 @@ server.setErrorHandler((error, request, response) => {
 			})
 		);
 	}
+
+	if (error instanceof ZodError) {
+		return response.status(400).send(
+			apiResponse({
+				status: 400,
+				error: "Bad Request",
+				code: "bad_request",
+				message: "Type validation failed",
+				data: error.issues,
+			})
+		);
+	}
+
+	response.status(500).send(
+		apiResponse({
+			status: 500,
+			error: "Internal Server Error",
+			code: "internal_error",
+			message: "Something went wrong",
+			data: error,
+		})
+	);
 });
 
 //Run server.
