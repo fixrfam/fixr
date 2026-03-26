@@ -8,12 +8,10 @@ export const authenticateEmployee = async (
 	res: FastifyReply
 ): Promise<void> => {
 	try {
-		// Validate JWT; this populates req.user if successful
 		await req.jwtVerify();
 
 		const { id } = req.user;
 
-		// Verify that the user exists in the database
 		const user = await queryUserById(id);
 		if (!user) {
 			return res.status(404).send(
@@ -29,7 +27,7 @@ export const authenticateEmployee = async (
 		if (user.profileType !== "employee") {
 			return res.status(403).send(
 				apiResponse({
-					status: 404,
+					status: 403,
 					error: "Forbidden",
 					code: "not_allowed",
 					message: "You are not allowed to perform this action.",
@@ -49,6 +47,6 @@ export const authenticateEmployee = async (
 				})
 			);
 		}
-		return res.send(error);
+		throw error;
 	}
 };

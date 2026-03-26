@@ -3,6 +3,7 @@ import type { Permission } from "@fixr/permissions/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
+import { apiResponse } from "../helpers/response";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -12,7 +13,7 @@ declare module "fastify" {
 
 // biome-ignore lint/suspicious/useAwait: <We need to make this plugin async so it doesnt block IO, despite having no await expression>
 export const rbacPlugin: FastifyPluginAsync = async (fastify) => {
-	fastify.decorateRequest("ability", createAbility("guest"));
+	fastify.decorateRequest("ability", { getter: () => createAbility("guest") });
 
 	fastify.addHook("onRequest", (request, _reply, done) => {
 		const user = request.user as z.infer<typeof userJWT> | undefined;
@@ -25,10 +26,16 @@ export const rbacPlugin: FastifyPluginAsync = async (fastify) => {
 export function requirePermission(permission: Permission) {
 	return (request: FastifyRequest, reply: FastifyReply): void => {
 		if (request.ability.cannot(permission)) {
-			reply.status(403).send({
-				message: `You don't have the required permissions to perform this action`,
-				code: "FORBIDDEN",
-			});
+			reply.status(403).send(
+				apiResponse({
+					status: 403,
+					error: "Forbidden",
+					code: "missing_required_permissions",
+					message:
+						"You dont have the required permissions to perform this action",
+					data: null,
+				})
+			);
 		}
 	};
 }
