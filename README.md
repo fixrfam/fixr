@@ -359,8 +359,9 @@ O desenvolvimento do **Fixr** acompanha os trabalhos realizados nos semestres da
 
 - **1º Semestre** – [VI_CATI_FAM_17_02_2024 (p. 329)](https://vemprafam.com.br/wp-content/uploads/2025/07/VI_CATI%20FAM_17_02_2024%205.pdf?_t=1751486084#page=329)
 - **2º Semestre** – [VII_CATI_FAM_17_03_2024 (p. 252)](https://vemprafam.com.br/wp-content/uploads/2025/07/VII_CATI%20FAM_17_03_2024%204.pdf?_t=1751486070#page=252)
+- **3º Semestre** – [I_CONTEEX_FAM_18_07_2025 (p. 526)](https://www.vemprafam.com.br/wp-content/uploads/2026/03/Rev.%20Intera%C3%A7%C3%A3o_18072025_1Conteex.pdf#page=526).
 
-Os artigos referentes ao **3º e 4º semestres** ainda serão publicados e atualizados neste README assim que disponíveis.
+O artigo referente ao 4º semestre** ainda será publicado e atualizado neste README assim que disponível.
 
 #### Referências
 
