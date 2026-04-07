@@ -2,28 +2,19 @@
 
 import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Clock3, UserPlus } from "lucide-react";
-import { type ComponentPropsWithoutRef, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { UserPlus } from "lucide-react";
+import { type ComponentPropsWithoutRef, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-interface Option {
+interface DeviceOption {
 	id: string;
-	name: string;
-}
-interface CategoriaOption {
-	id: string;
-	name: string;
-}
-interface ModeloOption {
-	id: string;
-	name: string;
-}
-interface EmployeeOption {
-	id: string;
-	name: string;
+	marca: string;
+	categoria: string;
+	modelo: string;
 }
 
 import {
@@ -60,129 +51,79 @@ export function NewServiceOrderForm({
 	const form = useForm<z.infer<typeof createOrderServiceSchema>>({
 		resolver: zodResolver(createOrderServiceSchema),
 		defaultValues: {
-			customerCpf: "",
-			customerImei: "",
-			openData: "",
-			openHora: "",
-			descricao: "",
-			observacoes: "",
-			marcaId: "",
-			categoriaId: "",
-			modeloId: "",
-			creatorEmployeeId: "",
+			customerCPF: "",
+			deviceIMEI: "",
+			description: "",
+			notes: "",
+			deviceId: "",
+			assigned_to: "",
 		},
 		mode: "all",
 	});
 
 	const handleCustomerCreated = (cpf: string) => {
-		form.setValue("customerCpf", cpf);
+		form.setValue("customerCPF", cpf);
 	};
 
 	const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
 		console.log("Ordem de serviço a ser criada:", values);
 	};
 
-	const [marcas, setMarcas] = useState<Option[]>([]);
-	const [loadingMarcas, setLoadingMarcas] = useState(false);
+	const [selectedMarca, setSelectedMarca] = useState("");
+	const [selectedCategoria, setSelectedCategoria] = useState("");
 
-	useEffect(() => {
-		const loadMarcas = async () => {
-			setLoadingMarcas(true);
-			try {
-				const res = await fetch("/api/marcas"); //alterar dps a rota correta
-				const data = await res.json();
-				setMarcas(data);
-			} finally {
-				setLoadingMarcas(false);
+	const { data: devices = [], isLoading: loadingDevices } = useQuery<
+		DeviceOption[]
+	>({
+		queryKey: ["devices"],
+		queryFn: async () => {
+			const res = await fetch("/api/devices");
+			if (!res.ok) {
+				throw new Error("Erro ao carregar devices");
 			}
-		};
-		loadMarcas();
-	}, []);
+			return res.json();
+		},
+	});
 
-	const [categorias, setCategorias] = useState<CategoriaOption[]>([]);
-	const [loadingCategorias, setLoadingCategorias] = useState(false);
+	const marcas = useMemo(() => {
+		return [...new Set(devices.map((device) => device.marca))];
+	}, [devices]);
 
-	useEffect(() => {
-		const loadCategorias = async () => {
-			setLoadingCategorias(true);
-			try {
-				const res = await fetch("/api/categorias-aparelho"); //alterar dps a rota correta
-				const data = await res.json();
-				setCategorias(data);
-			} finally {
-				setLoadingCategorias(false);
-			}
-		};
+	const categorias = useMemo(() => {
+		if (!selectedMarca) {
+			return [];
+		}
+		return [
+			...new Set(
+				devices
+					.filter((device) => device.marca === selectedMarca)
+					.map((device) => device.categoria)
+			),
+		];
+	}, [devices, selectedMarca]);
 
-		loadCategorias();
-	}, []);
+	const modelos = useMemo(() => {
+		if (!(selectedMarca && selectedCategoria)) {
+			return [];
+		}
 
-	const [modelos, setModelos] = useState<ModeloOption[]>([]);
-	const [loadingModelos, setLoadingModelos] = useState(false);
+		return devices.filter(
+			(device) =>
+				device.marca === selectedMarca && device.categoria === selectedCategoria
+		);
+	}, [devices, selectedMarca, selectedCategoria]);
 
-	const marcaId = form.watch("marcaId");
-	const categoriaId = form.watch("categoriaId");
+	const modeloPlaceholder = useMemo(() => {
+		if (!(selectedMarca && selectedCategoria)) {
+			return "Selecione marca e categoria primeiro";
+		}
 
-	useEffect(() => {
-		const loadModelos = async () => {
-			if (!(marcaId && categoriaId)) {
-				setModelos([]);
-				form.setValue("modeloId", "");
-				return;
-			}
+		if (loadingDevices) {
+			return "Carregando modelos...";
+		}
 
-			setLoadingModelos(true);
-			try {
-				const params = new URLSearchParams({ marcaId, categoriaId });
-				const res = await fetch(`/api/modelos?${params.toString()}`);
-				const data = await res.json();
-				setModelos(data);
-			} finally {
-				setLoadingModelos(false);
-			}
-		};
-
-		loadModelos();
-	}, [marcaId, categoriaId, form]);
-
-	const preencherHoraAtual = () => {
-		const agora = new Date();
-		const hora = agora.toLocaleTimeString("pt-BR", {
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: false,
-		});
-
-		form.setValue("openHora", hora, {
-			shouldValidate: true,
-			shouldDirty: true,
-		});
-	};
-
-	const [employees, setEmployees] = useState<EmployeeOption[]>([]);
-	const [loadingEmployees, setLoadingEmployees] = useState(false);
-
-	useEffect(() => {
-		const loadEmployees = async () => {
-			setLoadingEmployees(true);
-			try {
-				const res = await fetch("/api/employees");
-				const data = await res.json();
-				setEmployees(data);
-			} finally {
-				setLoadingEmployees(false);
-			}
-		};
-
-		loadEmployees();
-	}, []);
-
-	let modeloPlaceholder = "Selecione marca e categoria primeiro";
-	if (marcaId && categoriaId) {
-		modeloPlaceholder = loadingModelos
-			? "Carregando modelos..."
-			: "Selecione um modelo";
-	}
+		return "Selecione um modelo";
+	}, [selectedMarca, selectedCategoria, loadingDevices]);
 
 	return (
 		<Form {...form}>
@@ -195,7 +136,7 @@ export function NewServiceOrderForm({
 					<div className="flex flex-grow flex-col gap-4">
 						<FormField
 							control={form.control}
-							name="customerCpf"
+							name="customerCPF"
 							render={({ field }) => (
 								<FormItem className="flex-grow">
 									<FormLabel>CPF do cliente</FormLabel>
@@ -216,12 +157,12 @@ export function NewServiceOrderForm({
 												const data = await res.json();
 
 												if (data.exists) {
-													form.setError("customerCpf", {
+													form.setError("customerCPF", {
 														type: "manual",
 														message: "Este CPF já está cadastrado.",
 													});
 												} else {
-													form.clearErrors("customerCpf");
+													form.clearErrors("customerCPF");
 												}
 											}}
 										/>
@@ -252,46 +193,10 @@ export function NewServiceOrderForm({
 						</SheetContent>
 					</Sheet>
 				</div>
-				<FormField
-					control={form.control}
-					name="openData"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>Data da Abertura</FormLabel>
-							<FormControl>
-								<Input type="date" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="openHora"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>Hora da Abertura</FormLabel>
-							<FormControl>
-								<div className="relative">
-									<Input placeholder="HH:MM" {...field} className="pr-10" />
-									<button
-										aria-label="Preencher hora atual"
-										className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-										onClick={preencherHoraAtual}
-										type="button"
-									>
-										<Clock3 className="size-4" />
-									</button>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
 
 				<FormField
 					control={form.control}
-					name="descricao"
+					name="description"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
 							<FormLabel>Defeito relatado pelo cliente</FormLabel>
@@ -303,83 +208,80 @@ export function NewServiceOrderForm({
 					)}
 				/>
 
-				<FormField
-					control={form.control}
-					name="marcaId"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>Marca</FormLabel>
-							<FormControl>
-								<Select
-									disabled={loadingMarcas}
-									onValueChange={field.onChange}
-									value={field.value ?? ""}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue
-											placeholder={
-												loadingMarcas ? "Carregando..." : "Selecione uma marca"
-											}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{marcas.map((m) => (
-											<SelectItem key={m.id} value={m.id}>
-												{m.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				<FormItem className="flex-grow">
+					<FormLabel>Marca</FormLabel>
+					<FormControl>
+						<Select
+							disabled={loadingDevices}
+							onValueChange={(value) => {
+								setSelectedMarca(value);
+								setSelectedCategoria("");
+								form.setValue("deviceId", "", { shouldValidate: true });
+							}}
+							value={selectedMarca}
+						>
+							<SelectTrigger className="w-full">
+								<SelectValue
+									placeholder={
+										loadingDevices ? "Carregando..." : "Selecione uma marca"
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{marcas.map((marca) => (
+									<SelectItem key={marca} value={marca}>
+										{marca}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+
+				<FormItem className="flex-grow">
+					<FormLabel>Categoria do aparelho</FormLabel>
+					<FormControl>
+						<Select
+							disabled={!selectedMarca || loadingDevices}
+							onValueChange={(value) => {
+								setSelectedCategoria(value);
+								form.setValue("deviceId", "", { shouldValidate: true });
+							}}
+							value={selectedCategoria}
+						>
+							<SelectTrigger className="w-full">
+								<SelectValue
+									placeholder={
+										loadingDevices
+											? "Carregando categorias..."
+											: "Selecione uma categoria"
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{categorias.map((categoria) => (
+									<SelectItem key={categoria} value={categoria}>
+										{categoria}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
 
 				<FormField
 					control={form.control}
-					name="categoriaId"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>Categoria do aparelho</FormLabel>
-							<FormControl>
-								<Select
-									disabled={loadingCategorias}
-									onValueChange={field.onChange}
-									value={field.value ?? ""}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue
-											placeholder={
-												loadingCategorias
-													? "Carregando categorias..."
-													: "Selecione uma categoria"
-											}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{categorias.map((categoria) => (
-											<SelectItem key={categoria.id} value={categoria.id}>
-												{categoria.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="modeloId"
+					name="deviceId"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
 							<FormLabel>Modelo</FormLabel>
 							<FormControl>
 								<Select
-									disabled={!(marcaId && categoriaId) || loadingModelos}
+									disabled={
+										!(selectedMarca && selectedCategoria) || loadingDevices
+									}
 									onValueChange={field.onChange}
 									value={field.value ?? ""}
 								>
@@ -389,7 +291,7 @@ export function NewServiceOrderForm({
 									<SelectContent>
 										{modelos.map((modelo) => (
 											<SelectItem key={modelo.id} value={modelo.id}>
-												{modelo.name}
+												{modelo.modelo}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -402,7 +304,7 @@ export function NewServiceOrderForm({
 
 				<FormField
 					control={form.control}
-					name="customerImei"
+					name="deviceIMEI"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
 							<FormLabel>Número de IMEI</FormLabel>
@@ -413,44 +315,10 @@ export function NewServiceOrderForm({
 						</FormItem>
 					)}
 				/>
-				<FormField
-					control={form.control}
-					name="creatorEmployeeId"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>Criador da ordem</FormLabel>
-							<FormControl>
-								<Select
-									disabled={loadingEmployees}
-									onValueChange={field.onChange}
-									value={field.value ?? ""}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue
-											placeholder={
-												loadingEmployees
-													? "Carregando funcionários..."
-													: "Selecione o funcionário"
-											}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{employees.map((employee) => (
-											<SelectItem key={employee.id} value={employee.id}>
-												{employee.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
 
 				<FormField
 					control={form.control}
-					name="observacoes"
+					name="notes"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
 							<FormLabel>Observações</FormLabel>
