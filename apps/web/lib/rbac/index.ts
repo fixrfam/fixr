@@ -1,7 +1,7 @@
-export { routeRules, type RouteRule } from "./routes";
 export {
-  matchRoute,
-  isPublicRoute,
-  getRequiredPermission,
-  getRequiredRoles,
+	getRequiredPermission,
+	getRequiredRoles,
+	isPublicRoute,
+	matchRoute,
 } from "./match-route";
+export { type RouteRule, routeRules } from "./routes";
