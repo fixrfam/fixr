@@ -175,6 +175,7 @@
         "@fixr/constants": "workspace:*",
         "@fixr/db": "workspace:*",
         "@fixr/env": "workspace:*",
+        "@fixr/mock": "workspace:*",
         "@fixr/schemas": "workspace:*",
         "@fixr/typescript-config": "workspace:*",
         "@hookform/resolvers": "^5.2.0",
@@ -345,6 +346,9 @@
         "@types/react-dom": "catalog:",
         "react-email": "3.0.7",
       },
+    },
+    "packages/mock": {
+      "name": "@fixr/mock",
     },
     "packages/schemas": {
       "name": "@fixr/schemas",
@@ -752,6 +756,8 @@
     "@fixr/infra": ["@fixr/infra@workspace:packages/infra"],
 
     "@fixr/mail": ["@fixr/mail@workspace:packages/mail"],
+
+    "@fixr/mock": ["@fixr/mock@workspace:packages/mock"],
 
     "@fixr/schemas": ["@fixr/schemas@workspace:packages/schemas"],
 

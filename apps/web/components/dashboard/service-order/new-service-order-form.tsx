@@ -1,5 +1,6 @@
 "use client";
 
+import { getDevices } from "@fixr/mock";
 import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -76,13 +77,8 @@ export function NewServiceOrderForm({
 		DeviceOption[]
 	>({
 		queryKey: ["devices"],
-		queryFn: async () => {
-			const res = await fetch("/api/devices");
-			if (!res.ok) {
-				throw new Error("Erro ao carregar devices");
-			}
-			return res.json();
-		},
+		queryFn: getDevices,
+		//TODO: implementar fetch real para devices
 	});
 
 	const marcas = useMemo(() => {

@@ -17,6 +17,7 @@
     "@fixr/env": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
+    "@fixr/mock": "workspace:*",
     "@hookform/resolvers": "^5.2.0",
     "@maskito/react": "^3.8.0",
     "@mdx-js/loader": "^3.1.1",
