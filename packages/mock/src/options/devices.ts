@@ -1,3 +1,5 @@
+import { randomDelay } from "../async";
+
 export interface DeviceOption {
 	id: string;
 	marca: string;
@@ -165,7 +167,7 @@ export const mockDevices: DeviceOption[] = [
 	},
 ];
 
-export function getDevices(): DeviceOption[] {
-	// TODO: Replace with API call to /api/devices
+export async function getDevices(): Promise<DeviceOption[]> {
+	await randomDelay(); // Simulate API delay
 	return mockDevices;
 }

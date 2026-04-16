@@ -1,3 +1,5 @@
+import { randomDelay } from "../async";
+
 export interface EmployeeOption {
 	id: string;
 	name: string;
@@ -11,7 +13,7 @@ export const mockEmployees: EmployeeOption[] = [
 	{ id: "005", name: "Pedro Ferreira" },
 ];
 
-export function getEmployees(): EmployeeOption[] {
-	// TODO: Replace with API call to /api/employees
+export async function getEmployees(): Promise<EmployeeOption[]> {
+	await randomDelay(); // Simulate API delay
 	return mockEmployees;
 }
