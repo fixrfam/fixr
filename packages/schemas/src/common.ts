@@ -17,3 +17,6 @@ export const cpf = z
 	.regex(/([0-9]{3}[.]?[0-9]{3}[.]?[0-9]{3}[-]?[0-9]{2})/, {
 		message: "Formato inválido.",
 	});
+export const formattedIMEI = z.string().regex(/([0-9]{15})/, {
+	message: "Formato inválido.",
+});

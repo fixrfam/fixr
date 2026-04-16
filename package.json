@@ -75,6 +75,7 @@
     "husky": "latest",
     "lint-staged": "latest",
     "prettier": "^3.2.5",
+    "tsx": "^4.21.0",
     "typescript": "5.5.4",
     "ultracite": "7.0.12",
     "web": "workspace:*"
