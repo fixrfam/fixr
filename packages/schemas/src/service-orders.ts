@@ -10,4 +10,8 @@ export const createOrderServiceSchema = z.object({
 	assigned_to: z
 		.string()
 		.min(1, "Selecione o funcionário responsável pela ordem de serviço"),
+	images: z
+		.array(z.instanceof(File))
+		.min(3, "Adicione pelo menos três fotos do aparelho")
+		.max(15, "Adicione no máximo cinco fotos do aparelho"),
 });

@@ -4,7 +4,7 @@ import { getDevices } from "@fixr/mock";
 import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { UserPlus } from "lucide-react";
+import { ImagePlus, Trash2, UserPlus } from "lucide-react";
 import { type ComponentPropsWithoutRef, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -45,6 +45,18 @@ import {
 import { cn } from "@/lib/utils";
 import { NewClientForm } from "../clients/new-client-form";
 
+function fileToDataUrl(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(String(reader.result));
+		reader.onerror = () => reject(new Error("Erro ao ler imagem"));
+		reader.readAsDataURL(file);
+	});
+}
+function getFilePreviewKey(file: File): string {
+	return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
 export function NewServiceOrderForm({
 	className,
 	...props
@@ -58,6 +70,7 @@ export function NewServiceOrderForm({
 			notes: "",
 			deviceId: "",
 			assigned_to: "",
+			images: [],
 		},
 		mode: "all",
 	});
@@ -120,6 +133,22 @@ export function NewServiceOrderForm({
 
 		return "Selecione um modelo";
 	}, [selectedMarca, selectedCategoria, loadingDevices]);
+
+	const selectedImages = form.watch("images") ?? [];
+
+	const { data: previewUrlsByKey = {} } = useQuery<Record<string, string>>({
+		queryKey: ["image-previews", selectedImages.map(getFilePreviewKey)],
+		enabled: selectedImages.length > 0,
+		queryFn: () =>
+			Promise.all(
+				selectedImages.map(async (file) => {
+					const key = getFilePreviewKey(file);
+					const url = await fileToDataUrl(file);
+					return [key, url] as const;
+				})
+			).then((entries) => Object.fromEntries(entries)),
+		staleTime: Number.POSITIVE_INFINITY,
+	});
 
 	return (
 		<Form {...form}>
@@ -323,6 +352,87 @@ export function NewServiceOrderForm({
 									placeholder="Adicione observações sobre a ordem de serviço"
 									{...field}
 								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="images"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Fotos do aparelho</FormLabel>
+							<FormControl>
+								<div className="space-y-3">
+									<input
+										accept="image/*"
+										className="hidden"
+										id="images-upload"
+										multiple
+										onChange={(e) => {
+											const files = Array.from(e.target.files ?? []);
+											field.onChange(files);
+										}}
+										type="file"
+									/>
+
+									<label
+										className="flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-muted-foreground text-sm hover:bg-accent hover:text-foreground"
+										htmlFor="images-upload"
+									>
+										<span>
+											{selectedImages.length > 0
+												? `${selectedImages.length} imagem(ns) selecionada(s)`
+												: "Selecione fotos do aparelho (PNG, JPG, WEBP)"}
+										</span>
+										<ImagePlus className="h-4 w-4" />
+									</label>
+
+									{selectedImages.length > 0 ? (
+										<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+											{selectedImages.map((file) => {
+												const fileKey = getFilePreviewKey(file);
+												const url = previewUrlsByKey[fileKey];
+
+												if (!url) {
+													return null;
+												}
+
+												return (
+													<div
+														className="relative aspect-square overflow-hidden rounded-md border"
+														key={fileKey}
+													>
+														<img
+															alt={file.name}
+															className="h-full w-full object-cover"
+															height={320}
+															src={url}
+															width={320}
+														/>
+
+														<button
+															aria-label={`Remover ${file.name}`}
+															className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+															onClick={() => {
+																const nextFiles = selectedImages.filter(
+																	(currentFile) =>
+																		getFilePreviewKey(currentFile) !== fileKey
+																);
+																field.onChange(nextFiles);
+															}}
+															type="button"
+														>
+															<Trash2 className="h-4 w-4" />
+														</button>
+													</div>
+												);
+											})}
+										</div>
+									) : null}
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
