@@ -1,5 +1,7 @@
 import type { RouteRule } from "./routes";
 
+type Nullable<T> = T | null;
+
 interface RouteMatch {
 	rule: RouteRule;
 	params: Record<string, string>;
@@ -33,7 +35,7 @@ function getRouteMatcher(pattern: string) {
 export function matchRoute(
 	pathname: string,
 	rules: RouteRule[]
-): RouteMatch | null {
+): Nullable<RouteMatch> {
 	for (const rule of rules) {
 		const { regex, paramNames } = getRouteMatcher(rule.path);
 		const match = regex.exec(pathname);
@@ -62,15 +64,27 @@ export function isPublicRoute(pathname: string, rules: RouteRule[]): boolean {
 export function getRequiredPermission(
 	pathname: string,
 	rules: RouteRule[]
-): string | null {
+): Nullable<string> {
 	const match = matchRoute(pathname, rules);
-	return match?.rule.permission ?? null;
+	if (!match) {
+		return null;
+	}
+	if (match.rule.permission === undefined) {
+		return null;
+	}
+	return match.rule.permission;
 }
 
 export function getRequiredRoles(
 	pathname: string,
 	rules: RouteRule[]
-): readonly string[] | null {
+): Nullable<readonly string[]> {
 	const match = matchRoute(pathname, rules);
-	return match?.rule.roles ?? null;
+	if (!match) {
+		return null;
+	}
+	if (match.rule.roles === undefined) {
+		return null;
+	}
+	return match.rule.roles;
 }

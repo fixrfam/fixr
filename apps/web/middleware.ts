@@ -108,18 +108,33 @@ export async function middleware(request: NextRequest) {
 			);
 		}
 
-		// RBAC: Check route permissions
+		/**
+		 * Role-Based Access Control (RBAC) enforcement.
+		 *
+		 * Resolves the user's role from the JWT payload and evaluates
+		 * both role and permission requirements defined in the route rules.
+		 * If the user lacks the necessary role or permission, they are
+		 * redirected to the home dashboard.
+		 */
 		const pathname = request.nextUrl.pathname;
 		const userRole = payload?.company?.role ?? "guest";
 
-		// Skip permission check for public routes
+		/**
+		 * Public routes (e.g., login, support) are accessible without
+		 * authorization checks. Only protected routes with defined
+		 * permissions or roles proceed to RBAC evaluation.
+		 */
 		if (!isPublicRoute(pathname, routeRules)) {
 			const requiredPerm = getRequiredPermission(pathname, routeRules);
 			const requiredRoles = getRequiredRoles(pathname, routeRules);
 
 			const ability = createAbility(userRole);
 
-			// Check role-based access first
+			/**
+			 * Role-based gate: if the route specifies required roles,
+			 * verify the user's role is included. Redirects to home
+			 * when the user lacks an appropriate role.
+			 */
 			if (requiredRoles && requiredRoles.length > 0) {
 				const hasRequiredRole = requiredRoles.includes(userRole);
 				if (!hasRequiredRole) {
@@ -127,7 +142,11 @@ export async function middleware(request: NextRequest) {
 				}
 			}
 
-			// Check permission-based access
+			/**
+			 * Permission-based gate: if the route requires a specific
+			 * permission, verify the user's ability grants it.
+			 * Redirects to home when the user lacks the required permission.
+			 */
 			if (requiredPerm && ability.cannot(requiredPerm as never)) {
 				return redirectToHome(userTenant);
 			}
