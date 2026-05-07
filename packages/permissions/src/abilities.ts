@@ -5,7 +5,6 @@ import { type Permission, permissions } from "./permissions";
 export type EmployeeRole = z.infer<typeof employeeRoles>;
 
 const baseEmployee: Permission[] = [
-	permissions.auth.login,
 	permissions.account.read,
 	permissions.account.update,
 	permissions.companies.read,
@@ -56,7 +55,6 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	admin: [
 		...baseEmployee,
-		permissions.auth.register,
 		permissions.companies.update,
 		permissions.employees.read,
 		permissions.employees.create,

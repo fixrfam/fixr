@@ -1,11 +1,8 @@
 export const permissions = {
-	auth: {
-		login: "auth:login",
-		register: "auth:register",
-	},
 	account: {
 		read: "account:read",
 		update: "account:update",
+		delete: "account:delete",
 	},
 	companies: {
 		read: "companies:read",
