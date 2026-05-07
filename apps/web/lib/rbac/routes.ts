@@ -18,10 +18,6 @@ export const routeRules: RouteRule[] = [
 	{ path: "/downtime", public: true },
 
 	{
-		path: "/dashboard/:subdomain",
-		permission: permissions.companies.read,
-	},
-	{
 		path: "/dashboard/:subdomain/home",
 		permission: permissions.serviceOrders.read,
 	},
@@ -149,9 +145,13 @@ export const routeRules: RouteRule[] = [
 		path: "/dashboard/:subdomain/logs",
 		permission: permissions.settings.read,
 	},
-
 	{
 		path: "/dashboard/:subdomain/notifications",
+		permission: permissions.companies.read,
+	},
+	// Catch-all: must be last so more specific routes match first
+	{
+		path: "/dashboard/:subdomain",
 		permission: permissions.companies.read,
 	},
 ];

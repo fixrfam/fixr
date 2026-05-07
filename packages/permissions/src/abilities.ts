@@ -4,20 +4,29 @@ import { type Permission, permissions } from "./permissions";
 
 export type EmployeeRole = z.infer<typeof employeeRoles>;
 
+const basePermissions: Permission[] = [
+	permissions.auth.login,
+	permissions.companies.read,
+	permissions.settings.read,
+];
+
 const roleAbilities: Record<EmployeeRole, Permission[]> = {
-	guest: [],
+	guest: [...basePermissions],
 	technician: [
+		...basePermissions,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.update,
 		permissions.serviceOrders.changeStatus,
 		permissions.customers.read,
 	],
 	warehouse: [
+		...basePermissions,
 		permissions.inventory.read,
 		permissions.inventory.update,
 		permissions.serviceOrders.read,
 	],
 	financial: [
+		...basePermissions,
 		permissions.serviceOrders.read,
 		permissions.customers.read,
 		permissions.invoices.read,
@@ -27,6 +36,7 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.estimates.create,
 	],
 	manager: [
+		...basePermissions,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.create,
 		permissions.serviceOrders.update,
@@ -45,12 +55,10 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.invoices.generate,
 		permissions.invoices.send,
 		permissions.employees.read,
-		permissions.companies.read,
 	],
 	admin: [
-		permissions.auth.login,
+		...basePermissions,
 		permissions.auth.register,
-		permissions.companies.read,
 		permissions.companies.update,
 		permissions.employees.read,
 		permissions.employees.create,
@@ -84,10 +92,9 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.suppliers.create,
 		permissions.suppliers.update,
 		permissions.suppliers.delete,
-		permissions.settings.read,
 		permissions.settings.update,
 		permissions.settings.security,
 	],
 };
 
-export { roleAbilities };
+export { basePermissions, roleAbilities };
