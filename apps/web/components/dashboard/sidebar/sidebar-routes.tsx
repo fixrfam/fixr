@@ -1,3 +1,4 @@
+import { permissions } from "@fixr/permissions/permissions";
 import type { SidebarSection } from "./types";
 
 export const sidebarSections: readonly SidebarSection[] = [
@@ -10,6 +11,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/home",
 				type: "route",
 				icon: "Home",
+				permission: permissions.serviceOrders.read,
 			},
 			{
 				id: "notifications",
@@ -17,6 +19,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/notifications",
 				type: "route",
 				icon: "Bell",
+				permission: permissions.companies.read,
 			},
 			{
 				id: "logs",
@@ -24,6 +27,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/logs",
 				type: "route",
 				icon: "List",
+				permission: permissions.logs.read,
 			},
 			{
 				id: "settings",
@@ -36,6 +40,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 						href: "/account",
 						type: "route",
 						icon: "User",
+						permission: permissions.companies.read,
 					},
 					{
 						id: "security",
@@ -43,6 +48,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 						href: "/settings/security",
 						type: "route",
 						icon: "Shield",
+						permission: permissions.settings.security,
 					},
 				],
 				type: "menu",
@@ -50,7 +56,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 		],
 	},
 	{
-		title: "Funcionalidades",
+		title: "Módulos",
 		items: [
 			{
 				id: "service-orders",
@@ -58,6 +64,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/service-orders",
 				type: "route",
 				icon: "Clipboard",
+				permission: permissions.serviceOrders.read,
 			},
 			{
 				id: "estimates",
@@ -65,6 +72,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/estimates",
 				type: "route",
 				icon: "HandCoins",
+				permission: permissions.estimates.read,
 			},
 			{
 				id: "suppliers",
@@ -72,6 +80,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/suppliers",
 				type: "route",
 				icon: "Package",
+				permission: permissions.suppliers.read,
 			},
 			{
 				id: "parts",
@@ -79,6 +88,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/parts",
 				type: "route",
 				icon: "Puzzle",
+				permission: permissions.parts.read,
 			},
 			{
 				id: "inventory",
@@ -86,6 +96,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/inventory",
 				type: "route",
 				icon: "Warehouse",
+				permission: permissions.inventory.read,
 			},
 			{
 				id: "support",
@@ -100,6 +111,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/customers",
 				type: "route",
 				icon: "Users",
+				permission: permissions.customers.read,
 			},
 			{
 				id: "devices",
@@ -107,6 +119,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/devices",
 				type: "route",
 				icon: "MonitorSmartphone",
+				permission: permissions.devices.read,
 			},
 		],
 	},
@@ -119,6 +132,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 				href: "/employees",
 				type: "route",
 				icon: "ContactRound",
+				permission: permissions.employees.read,
 			},
 		],
 	},

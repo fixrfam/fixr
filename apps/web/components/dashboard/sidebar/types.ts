@@ -1,3 +1,4 @@
+import type { Permission } from "@fixr/permissions";
 import type * as icons from "lucide-react";
 
 export interface BaseItem {
@@ -9,6 +10,7 @@ export interface BaseItem {
 export type RouteItem = BaseItem & {
 	readonly type: "route";
 	readonly href: string;
+	permission?: Permission;
 };
 
 export type MenuItem = BaseItem & {

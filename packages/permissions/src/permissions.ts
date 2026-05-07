@@ -3,15 +3,34 @@ export const permissions = {
 		login: "auth:login",
 		register: "auth:register",
 	},
+	account: {
+		read: "account:read",
+		update: "account:update",
+	},
 	companies: {
 		read: "companies:read",
 		update: "companies:update",
+	},
+	logs: {
+		read: "logs:read",
+	},
+	devices: {
+		read: "devices:read",
+		create: "devices:create",
+		update: "devices:update",
+		delete: "devices:delete",
 	},
 	employees: {
 		read: "employees:read",
 		create: "employees:create",
 		update: "employees:update",
 		delete: "employees:delete",
+	},
+	parts: {
+		read: "parts:read",
+		create: "parts:create",
+		update: "parts:update",
+		delete: "parts:delete",
 	},
 	serviceOrders: {
 		read: "serviceOrders:read",
@@ -27,12 +46,6 @@ export const permissions = {
 		update: "estimates:update",
 		delete: "estimates:delete",
 		sendToCustomer: "estimates:sendToCustomer",
-	},
-	invoices: {
-		read: "invoices:read",
-		create: "invoices:create",
-		generate: "invoices:generate",
-		send: "invoices:send",
 	},
 	customers: {
 		read: "customers:read",
@@ -58,53 +71,12 @@ export const permissions = {
 		update: "settings:update",
 		security: "settings:security",
 	},
-	clientPortal: {
-		readOwnDevices: "clientPortal:readOwnDevices",
-		readOwnServiceOrders: "clientPortal:readOwnServiceOrders",
-		readOwnInvoices: "clientPortal:readOwnInvoices",
-	},
 } as const;
 
-export type Permission =
-	| "auth:login"
-	| "auth:register"
-	| "companies:read"
-	| "companies:update"
-	| "employees:read"
-	| "employees:create"
-	| "employees:update"
-	| "employees:delete"
-	| "serviceOrders:read"
-	| "serviceOrders:create"
-	| "serviceOrders:update"
-	| "serviceOrders:delete"
-	| "serviceOrders:changeStatus"
-	| "serviceOrders:assign"
-	| "estimates:read"
-	| "estimates:create"
-	| "estimates:update"
-	| "estimates:delete"
-	| "estimates:sendToCustomer"
-	| "invoices:read"
-	| "invoices:create"
-	| "invoices:generate"
-	| "invoices:send"
-	| "customers:read"
-	| "customers:create"
-	| "customers:update"
-	| "customers:delete"
-	| "inventory:read"
-	| "inventory:create"
-	| "inventory:update"
-	| "inventory:delete"
-	| "inventory:adjust"
-	| "suppliers:read"
-	| "suppliers:create"
-	| "suppliers:update"
-	| "suppliers:delete"
-	| "settings:read"
-	| "settings:update"
-	| "settings:security"
-	| "clientPortal:readOwnDevices"
-	| "clientPortal:readOwnServiceOrders"
-	| "clientPortal:readOwnInvoices";
+type NestedValues<T> = T extends string
+	? T
+	: {
+			[K in keyof T]: NestedValues<T[K]>;
+		}[keyof T];
+
+export type Permission = NestedValues<typeof permissions>;

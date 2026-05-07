@@ -4,39 +4,40 @@ import { type Permission, permissions } from "./permissions";
 
 export type EmployeeRole = z.infer<typeof employeeRoles>;
 
-const basePermissions: Permission[] = [
+const baseEmployee: Permission[] = [
 	permissions.auth.login,
+	permissions.account.read,
+	permissions.account.update,
 	permissions.companies.read,
 	permissions.settings.read,
+	permissions.settings.update,
+	permissions.settings.security,
+	permissions.customers.read,
 ];
 
 const roleAbilities: Record<EmployeeRole, Permission[]> = {
-	guest: [...basePermissions],
+	guest: [],
 	technician: [
-		...basePermissions,
+		...baseEmployee,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.update,
 		permissions.serviceOrders.changeStatus,
-		permissions.customers.read,
 	],
 	warehouse: [
-		...basePermissions,
+		...baseEmployee,
 		permissions.inventory.read,
 		permissions.inventory.update,
-		permissions.serviceOrders.read,
 	],
 	financial: [
-		...basePermissions,
-		permissions.serviceOrders.read,
-		permissions.customers.read,
-		permissions.invoices.read,
-		permissions.invoices.create,
-		permissions.invoices.generate,
+		...baseEmployee,
 		permissions.estimates.read,
 		permissions.estimates.create,
+		permissions.estimates.update,
+		permissions.estimates.delete,
+		permissions.estimates.sendToCustomer,
 	],
 	manager: [
-		...basePermissions,
+		...baseEmployee,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.create,
 		permissions.serviceOrders.update,
@@ -50,14 +51,11 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.estimates.create,
 		permissions.estimates.update,
 		permissions.estimates.sendToCustomer,
-		permissions.invoices.read,
-		permissions.invoices.create,
-		permissions.invoices.generate,
-		permissions.invoices.send,
 		permissions.employees.read,
+		permissions.employees.create,
 	],
 	admin: [
-		...basePermissions,
+		...baseEmployee,
 		permissions.auth.register,
 		permissions.companies.update,
 		permissions.employees.read,
@@ -79,10 +77,6 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.estimates.update,
 		permissions.estimates.delete,
 		permissions.estimates.sendToCustomer,
-		permissions.invoices.read,
-		permissions.invoices.create,
-		permissions.invoices.generate,
-		permissions.invoices.send,
 		permissions.inventory.read,
 		permissions.inventory.create,
 		permissions.inventory.update,
@@ -94,7 +88,15 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.suppliers.delete,
 		permissions.settings.update,
 		permissions.settings.security,
+		permissions.parts.read,
+		permissions.parts.create,
+		permissions.parts.update,
+		permissions.parts.delete,
+		permissions.devices.read,
+		permissions.devices.create,
+		permissions.devices.update,
+		permissions.devices.delete,
 	],
 };
 
-export { basePermissions, roleAbilities };
+export { baseEmployee as basePermissions, roleAbilities };

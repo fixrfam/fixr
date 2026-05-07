@@ -19,7 +19,7 @@ export const routeRules: RouteRule[] = [
 
 	{
 		path: "/dashboard/:subdomain/home",
-		permission: permissions.serviceOrders.read,
+		permission: permissions.companies.read,
 	},
 	{
 		path: "/dashboard/:subdomain/account",
@@ -76,19 +76,6 @@ export const routeRules: RouteRule[] = [
 	{
 		path: "/dashboard/:subdomain/estimates/:id",
 		permission: permissions.estimates.read,
-	},
-
-	{
-		path: "/dashboard/:subdomain/invoices",
-		permission: permissions.invoices.read,
-	},
-	{
-		path: "/dashboard/:subdomain/invoices/new",
-		permission: permissions.invoices.create,
-	},
-	{
-		path: "/dashboard/:subdomain/invoices/:id",
-		permission: permissions.invoices.read,
 	},
 
 	{
