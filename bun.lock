@@ -129,6 +129,7 @@
         "@fixr/db": "workspace:*",
         "@fixr/env": "workspace:*",
         "@fixr/mail": "workspace:*",
+        "@fixr/permissions": "workspace:*",
         "@fixr/schemas": "workspace:*",
         "@fixr/typescript-config": "workspace:*",
         "@paralleldrive/cuid2": "^2.2.2",
@@ -349,6 +350,25 @@
     },
     "packages/mock": {
       "name": "@fixr/mock",
+    "packages/permissions": {
+      "name": "@fixr/permissions",
+      "version": "0.0.0",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@fixr/schemas": "workspace:*",
+        "@fixr/typescript-config": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/eslint": "^8.56.5",
+        "@types/react": "catalog:",
+        "react": "catalog:",
+        "typescript": "catalog:",
+      },
+      "peerDependencies": {
+        "react": "catalog:",
+      },
     },
     "packages/schemas": {
       "name": "@fixr/schemas",
@@ -758,6 +778,7 @@
     "@fixr/mail": ["@fixr/mail@workspace:packages/mail"],
 
     "@fixr/mock": ["@fixr/mock@workspace:packages/mock"],
+    "@fixr/permissions": ["@fixr/permissions@workspace:packages/permissions"],
 
     "@fixr/schemas": ["@fixr/schemas@workspace:packages/schemas"],
 

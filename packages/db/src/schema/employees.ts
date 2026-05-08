@@ -11,11 +11,12 @@ import { companies } from "./companies";
 import { users } from "./users";
 
 export const rolesEnum = mysqlEnum("roles", [
-	"admin",
-	"manager",
+	"guest",
 	"technician",
 	"warehouse",
 	"financial",
+	"manager",
+	"admin",
 ]);
 
 export const employees = mysqlTable("employees", {

@@ -1,3 +1,4 @@
+import { permissions } from "@fixr/permissions";
 import { confirmAccountDeletionSchema } from "@fixr/schemas/account";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { FastifyRequest } from "fastify";
@@ -10,12 +11,16 @@ import {
 import { accountDocs } from "../docs/account.docs";
 import type { FastifyTypedInstance } from "../interfaces/fastify";
 import { authenticate } from "../middlewares/authenticate";
+import { requirePermission } from "../middlewares/rbac";
 import { withErrorHandler } from "../middlewares/with-error-handler";
 
 export function accountRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/",
-		{ preHandler: authenticate, schema: accountDocs.getAccountSchema },
+		{
+			preHandler: [authenticate, requirePermission(permissions.account.read)],
+			schema: accountDocs.getAccountSchema,
+		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 
@@ -25,7 +30,10 @@ export function accountRoutes(fastify: FastifyTypedInstance) {
 
 	fastify.post(
 		"/request-deletion",
-		{ preHandler: authenticate, schema: accountDocs.requestDeletionSchema },
+		{
+			preHandler: [authenticate, requirePermission(permissions.account.delete)],
+			schema: accountDocs.requestDeletionSchema,
+		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 

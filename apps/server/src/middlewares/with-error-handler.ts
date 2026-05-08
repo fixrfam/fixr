@@ -5,9 +5,17 @@ export function withErrorHandler<
 	TRequest extends FastifyRequest = FastifyRequest,
 >(handler: (req: TRequest, res: FastifyReply) => Promise<void>) {
 	return async (req: TRequest, res: FastifyReply) => {
+		if (res.sent) {
+			return;
+		}
+
 		try {
 			await handler(req, res);
 		} catch (err) {
+			if (res.sent) {
+				return;
+			}
+
 			console.error("Unexpected error:", err);
 
 			return res.status(500).send(
