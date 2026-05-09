@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Button } from "@/components/ui/button";
-import Figure from "../../../public/og_image.jpg";
 
 export default function DowntimePage() {
 	return (
@@ -18,7 +17,7 @@ export default function DowntimePage() {
 				<Image
 					alt="Fixr Banner"
 					className="w-full rounded-lg border border-border"
-					src={Figure}
+					src={"/og_image.jpg"}
 				/>
 
 				<p className="text-muted-foreground">

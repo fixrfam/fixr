@@ -1,8 +1,10 @@
+import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { getPaginatedDataSchema } from "@fixr/schemas/utils";
 import type { z } from "zod";
+import { requirePermission } from "@/src/core/middlewares/rbac";
 import { employeesDocs } from "../../../core/docs/companies/employees/employees.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
@@ -11,15 +13,18 @@ import { EmployeesController } from "../controllers";
 
 /** @description Employees routes plugin */
 export function employeesRoutes(fastify: FastifyTypedInstance) {
-	// Get company employees (paginated)
 	fastify.get(
 		"/",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.employees.read),
+			],
 			schema: employeesDocs.getCompanyEmployeesSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
+
 			const { query, sort, page, perPage } = getPaginatedDataSchema.parse(
 				request.query
 			);
@@ -40,7 +45,10 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
 		"/",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.employees.create),
+			],
 			schema: employeesDocs.registerEmployeeSchema,
 		},
 		withErrorHandler(async (request, response) => {

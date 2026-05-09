@@ -1,6 +1,8 @@
+import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyBySubdomainSchema } from "@fixr/schemas/companies";
 import type { z } from "zod";
+import { requirePermission } from "@/src/core/middlewares/rbac";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
@@ -12,7 +14,10 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.companies.read),
+			],
 			schema: companiesDocs.getUserCompanySchema,
 		},
 		withErrorHandler(async (request, response) => {
@@ -25,7 +30,10 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/:subdomain",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.companies.read),
+			],
 			schema: companiesDocs.getCompanyByIdSchema,
 		},
 		withErrorHandler(async (request, response) => {

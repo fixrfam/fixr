@@ -28,6 +28,7 @@ import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
+import { rbacPlugin } from "./core/middlewares/rbac";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { companiesRoutes } from "./modules/companies/routes";
@@ -141,6 +142,8 @@ server.register(fastifyCookie, {
 	secret: env.COOKIE_ENCRYPTION_SECRET,
 });
 
+server.register(rbacPlugin);
+
 server.register(fastifyStatic, {
 	root: join(cwd(), "public"),
 	prefix: "/public/",
@@ -177,24 +180,6 @@ server.register(fastifyCors, {
 	credentials: true,
 });
 
-//Map the zod errors to standard response
-server.setErrorHandler((error, _request, reply) => {
-	if (error instanceof ZodError) {
-		reply.status(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "bad_request",
-				message: "Type validation failed",
-				data: error.issues,
-			})
-		);
-		return;
-	}
-
-	reply.send(error);
-});
-
 server.setErrorHandler((error, request, response) => {
 	if (error instanceof AppError) {
 		return error.send(response);
@@ -224,6 +209,18 @@ server.setErrorHandler((error, request, response) => {
 				code: "response_serialization_failed",
 				message: "Response doesn't match the schema",
 				data: error,
+			})
+		);
+	}
+
+	if (error instanceof ZodError) {
+		return response.status(400).send(
+			apiResponse({
+				status: 400,
+				error: "Bad Request",
+				code: "bad_request",
+				message: "Type validation failed",
+				data: error.issues,
 			})
 		);
 	}
