@@ -26,6 +26,7 @@ import {
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
+import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
@@ -195,6 +196,10 @@ server.setErrorHandler((error, _request, reply) => {
 });
 
 server.setErrorHandler((error, request, response) => {
+	if (error instanceof AppError) {
+		return error.send(response);
+	}
+
 	if (hasZodFastifySchemaValidationErrors(error)) {
 		return response.code(400).send(
 			apiResponse({
@@ -222,6 +227,16 @@ server.setErrorHandler((error, request, response) => {
 			})
 		);
 	}
+
+	return response.status(500).send(
+		apiResponse({
+			status: 500,
+			error: "Internal Server Error",
+			code: "internal_error",
+			message: "Something went wrong.",
+			data: null,
+		})
+	);
 });
 
 //Run server.

@@ -44,6 +44,16 @@ export const errors = defineErrors({
 		message: "User not found",
 		status: 404,
 	},
+	RESOURCE_FORBIDDEN: {
+		code: "forbidden",
+		message: "You are not allowed to perform this action.",
+		status: 403,
+	},
+	AUTH_JWT_INVALID: {
+		code: "auth_jwt_invalid",
+		message: "Authorization token is invalid or expired.",
+		status: 401,
+	},
 });
 
 export type ErrorKey = keyof typeof errors;
