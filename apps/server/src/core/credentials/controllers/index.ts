@@ -12,7 +12,7 @@ export class CredentialsController {
 	/**
 	 * @description Change password for authenticated user
 	 */
-	static async changePasswordAuthenticated({
+	static changePasswordAuthenticated({
 		user,
 		body,
 		response,
@@ -31,7 +31,7 @@ export class CredentialsController {
 	/**
 	 * @description Request a password reset email
 	 */
-	static async requestPasswordReset({
+	static requestPasswordReset({
 		email,
 		response,
 	}: {
@@ -47,7 +47,7 @@ export class CredentialsController {
 	/**
 	 * @description Confirm password reset with token
 	 */
-	static async confirmPasswordReset({
+	static confirmPasswordReset({
 		body,
 		response,
 	}: {
@@ -60,7 +60,7 @@ export class CredentialsController {
 	/**
 	 * @description Validate a password reset token
 	 */
-	static async validatePasswordResetToken({
+	static validatePasswordResetToken({
 		token,
 		response,
 	}: {

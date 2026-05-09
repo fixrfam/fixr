@@ -6,7 +6,7 @@ export class AccountController {
 	/**
 	 * @description Get the authenticated user's account
 	 */
-	static async getAccount({
+	static getAccount({
 		userId,
 		response,
 	}: {
@@ -19,7 +19,7 @@ export class AccountController {
 	/**
 	 * @description Request account deletion
 	 */
-	static async requestAccountDeletion({
+	static requestAccountDeletion({
 		userId,
 		request,
 		response,
@@ -38,7 +38,7 @@ export class AccountController {
 	/**
 	 * @description Confirm account deletion with token
 	 */
-	static async confirmAccountDeletion({
+	static confirmAccountDeletion({
 		token,
 		redirectUrl,
 		response,

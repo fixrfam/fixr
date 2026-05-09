@@ -8,7 +8,7 @@ export class AuthController {
 	/**
 	 * @description Register a new user account
 	 */
-	static async register({
+	static register({
 		body,
 		request,
 		response,
@@ -23,7 +23,7 @@ export class AuthController {
 	/**
 	 * @description Login with email and password
 	 */
-	static async login({
+	static login({
 		body,
 		response,
 	}: {
@@ -36,7 +36,7 @@ export class AuthController {
 	/**
 	 * @description Verify email with confirmation token
 	 */
-	static async verify({
+	static verify({
 		token,
 		redirectUrl,
 		response,
@@ -51,7 +51,7 @@ export class AuthController {
 	/**
 	 * @description Sign out by deleting refresh token
 	 */
-	static async signOut({
+	static signOut({
 		refreshToken,
 		response,
 	}: {
@@ -64,7 +64,7 @@ export class AuthController {
 	/**
 	 * @description Revalidate JWT with refresh token
 	 */
-	static async revalidate({
+	static revalidate({
 		refreshToken,
 		response,
 	}: {
@@ -77,8 +77,7 @@ export class AuthController {
 	/**
 	 * @description Initiate Google OAuth login
 	 */
-	static async googleLogin({
-		request,
+	static googleLogin({
 		response,
 	}: {
 		request: FastifyRequest;
@@ -90,7 +89,7 @@ export class AuthController {
 	/**
 	 * @description Handle Google OAuth callback
 	 */
-	static async googleCallback({
+	static googleCallback({
 		code,
 		response,
 	}: {

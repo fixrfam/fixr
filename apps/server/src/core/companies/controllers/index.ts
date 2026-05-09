@@ -8,7 +8,7 @@ export class CompaniesController {
 	/**
 	 * @description Get the current user's company
 	 */
-	static async getUserCompany({
+	static getUserCompany({
 		userJwt,
 		response,
 	}: {
@@ -21,7 +21,7 @@ export class CompaniesController {
 	/**
 	 * @description Get a company by subdomain
 	 */
-	static async getCompanyBySubdomain({
+	static getCompanyBySubdomain({
 		subdomain,
 		userJwt,
 		response,

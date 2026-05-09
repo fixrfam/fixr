@@ -10,7 +10,7 @@ export class EmployeesController {
 	/**
 	 * @description Get paginated company employees
 	 */
-	static async getCompanyEmployees({
+	static getCompanyEmployees({
 		subdomain,
 		userJwt,
 		page,
@@ -37,7 +37,7 @@ export class EmployeesController {
 	/**
 	 * @description Register a new employee
 	 */
-	static async registerEmployee({
+	static registerEmployee({
 		userJwt,
 		subdomain,
 		data,
