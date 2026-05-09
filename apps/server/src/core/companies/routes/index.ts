@@ -1,10 +1,10 @@
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyBySubdomainSchema } from "@fixr/schemas/companies";
 import type { z } from "zod";
-import { companiesDocs } from "../../../docs/companies/companies.docs";
-import type { FastifyTypedInstance } from "../../../interfaces/fastify";
-import { authenticateEmployee } from "../../../middlewares/authenticate-employee";
-import { withErrorHandler } from "../../../middlewares/with-error-handler";
+import { companiesDocs } from "../../docs/companies/companies.docs";
+import type { FastifyTypedInstance } from "../../interfaces/fastify";
+import { authenticateEmployee } from "../../middlewares/authenticate-employee";
+import { withErrorHandler } from "../../middlewares/with-error-handler";
 import { CompaniesController } from "../controllers";
 
 /** @description Companies routes plugin */

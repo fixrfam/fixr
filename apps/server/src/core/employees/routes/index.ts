@@ -3,10 +3,10 @@ import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { getPaginatedDataSchema } from "@fixr/schemas/utils";
 import type { z } from "zod";
-import { employeesDocs } from "../../../docs/companies/employees/employees.docs";
-import type { FastifyTypedInstance } from "../../../interfaces/fastify";
-import { authenticateEmployee } from "../../../middlewares/authenticate-employee";
-import { withErrorHandler } from "../../../middlewares/with-error-handler";
+import { employeesDocs } from "../../docs/companies/employees/employees.docs";
+import type { FastifyTypedInstance } from "../../interfaces/fastify";
+import { authenticateEmployee } from "../../middlewares/authenticate-employee";
+import { withErrorHandler } from "../../middlewares/with-error-handler";
 import { EmployeesController } from "../controllers";
 
 /** @description Employees routes plugin */

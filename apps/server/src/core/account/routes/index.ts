@@ -2,10 +2,10 @@ import { confirmAccountDeletionSchema } from "@fixr/schemas/account";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { FastifyRequest } from "fastify";
 import type { z } from "zod";
-import { accountDocs } from "../../../docs/account.docs";
-import type { FastifyTypedInstance } from "../../../interfaces/fastify";
-import { authenticate } from "../../../middlewares/authenticate";
-import { withErrorHandler } from "../../../middlewares/with-error-handler";
+import { accountDocs } from "../../docs/account.docs";
+import type { FastifyTypedInstance } from "../../interfaces/fastify";
+import { authenticate } from "../../middlewares/authenticate";
+import { withErrorHandler } from "../../middlewares/with-error-handler";
 import { AccountController } from "../controllers";
 
 /** @description Account routes plugin */

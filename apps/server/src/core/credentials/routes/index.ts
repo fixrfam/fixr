@@ -6,10 +6,10 @@ import {
 } from "@fixr/schemas/credentials";
 import type { FastifyRequest } from "fastify";
 import { z } from "zod";
-import { credentialDocs } from "../../../docs/credentials.docs";
-import type { FastifyTypedInstance } from "../../../interfaces/fastify";
-import { authenticate } from "../../../middlewares/authenticate";
-import { withErrorHandler } from "../../../middlewares/with-error-handler";
+import { credentialDocs } from "../../docs/credentials.docs";
+import type { FastifyTypedInstance } from "../../interfaces/fastify";
+import { authenticate } from "../../middlewares/authenticate";
+import { withErrorHandler } from "../../middlewares/with-error-handler";
 import { CredentialsController } from "../controllers";
 
 /** @description Credentials routes plugin */

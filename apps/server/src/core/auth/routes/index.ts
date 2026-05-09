@@ -6,9 +6,9 @@ import {
 	verifyEmailSchema,
 } from "@fixr/schemas/auth";
 import type { FastifyRequest } from "fastify";
-import { authDocs } from "../../../docs/auth.docs";
-import type { FastifyTypedInstance } from "../../../interfaces/fastify";
-import { withErrorHandler } from "../../../middlewares/with-error-handler";
+import { authDocs } from "../../docs/auth.docs";
+import type { FastifyTypedInstance } from "../../interfaces/fastify";
+import { withErrorHandler } from "../../middlewares/with-error-handler";
 import { AuthController } from "../controllers";
 
 /** @description Auth routes plugin */
