@@ -184,7 +184,6 @@ server.setErrorHandler((error, request, response) => {
 	if (error instanceof AppError) {
 		return error.send(response);
 	}
-
 	if (hasZodFastifySchemaValidationErrors(error)) {
 		return response.code(400).send(
 			apiResponse({

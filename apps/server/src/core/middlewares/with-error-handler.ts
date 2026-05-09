@@ -17,6 +17,10 @@ export function withErrorHandler<
 				return err.send(res);
 			}
 
+			if (res.sent) {
+				return;
+			}
+
 			console.error("Unexpected error:", err);
 
 			return res.status(500).send(
