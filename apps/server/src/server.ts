@@ -25,13 +25,13 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
-import { apiDescription } from "./docs/main";
-import { apiResponse } from "./helpers/response";
-import { accountRoutes } from "./routes/account.routes";
-import { authRoutes } from "./routes/auth.routes";
-import { companiesRoutes } from "./routes/companies/companies.routes";
-import { employeesRoutes } from "./routes/companies/employees/employees.routes";
-import { credentialsRoutes } from "./routes/credentials.routes";
+import { accountRoutes } from "./core/account/routes";
+import { authRoutes } from "./core/auth/routes";
+import { companiesRoutes } from "./core/companies/routes";
+import { credentialsRoutes } from "./core/credentials/routes";
+import { apiDescription } from "./core/docs/main";
+import { employeesRoutes } from "./core/employees/routes";
+import { apiResponse } from "./core/lib/response";
 
 const envToLogger = {
 	development: {
