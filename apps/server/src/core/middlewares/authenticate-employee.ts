@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { AuthRepository } from "../auth/repositories";
+import { AuthRepository } from "../../modules/auth/repositories";
 import { apiResponse, httpStatusCodes } from "../lib/response";
 import { isFastifyError } from "./utils";
 

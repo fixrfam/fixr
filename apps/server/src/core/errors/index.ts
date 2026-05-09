@@ -1,9 +1,9 @@
-import { accountErrors } from "../account/errors";
-import { authErrors } from "../auth/errors";
-import { companiesErrors } from "../companies/errors";
-import { credentialsErrors } from "../credentials/errors";
-import { employeesErrors } from "../employees/errors";
-import { tokensErrors } from "../tokens/errors";
+import { accountErrors } from "../../modules/account/errors";
+import { authErrors } from "../../modules/auth/errors";
+import { companiesErrors } from "../../modules/companies/errors";
+import { credentialsErrors } from "../../modules/credentials/errors";
+import { employeesErrors } from "../../modules/employees/errors";
+import { tokensErrors } from "../../modules/tokens/errors";
 import { defineErrors } from "../utils/errors";
 
 export const errors = defineErrors({

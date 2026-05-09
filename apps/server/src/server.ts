@@ -25,13 +25,13 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
-import { accountRoutes } from "./core/account/routes";
-import { authRoutes } from "./core/auth/routes";
-import { companiesRoutes } from "./core/companies/routes";
-import { credentialsRoutes } from "./core/credentials/routes";
 import { apiDescription } from "./core/docs/main";
-import { employeesRoutes } from "./core/employees/routes";
 import { apiResponse } from "./core/lib/response";
+import { accountRoutes } from "./modules/account/routes";
+import { authRoutes } from "./modules/auth/routes";
+import { companiesRoutes } from "./modules/companies/routes";
+import { credentialsRoutes } from "./modules/credentials/routes";
+import { employeesRoutes } from "./modules/employees/routes";
 
 const envToLogger = {
 	development: {
