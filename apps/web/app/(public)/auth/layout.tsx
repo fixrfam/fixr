@@ -3,7 +3,6 @@ import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { TextAnimate } from "@/components/magicui/text-animate";
 import { Logo } from "@/components/svg/logo";
-import LoginBg from "@/public/login_bg.webp";
 
 export default function AuthLayout({
 	children,
@@ -16,7 +15,7 @@ export default function AuthLayout({
 				<Image
 					alt="Uma pessoa consertando um laptop com uma chave de fenda."
 					className="absolute inset-0 h-full w-full object-cover"
-					src={LoginBg}
+					src={"/login_bg.webp"}
 				/>
 				<div className="absolute z-10 flex size-full flex-col justify-between px-16 py-12 xl:px-20 xl:py-16">
 					<BlurFade direction="up">

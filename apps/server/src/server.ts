@@ -25,14 +25,15 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
-import { apiDescription } from "./docs/main";
-import { apiResponse } from "./helpers/response";
-import { rbacPlugin } from "./middlewares/rbac";
-import { accountRoutes } from "./routes/account.routes";
-import { authRoutes } from "./routes/auth.routes";
-import { companiesRoutes } from "./routes/companies/companies.routes";
-import { employeesRoutes } from "./routes/companies/employees/employees.routes";
-import { credentialsRoutes } from "./routes/credentials.routes";
+import { apiDescription } from "./core/docs/main";
+import { AppError } from "./core/lib/app-error";
+import { apiResponse } from "./core/lib/response";
+import { rbacPlugin } from "./core/middlewares/rbac";
+import { accountRoutes } from "./modules/account/routes";
+import { authRoutes } from "./modules/auth/routes";
+import { companiesRoutes } from "./modules/companies/routes";
+import { credentialsRoutes } from "./modules/credentials/routes";
+import { employeesRoutes } from "./modules/employees/routes";
 
 const envToLogger = {
 	development: {
@@ -180,6 +181,9 @@ server.register(fastifyCors, {
 });
 
 server.setErrorHandler((error, request, response) => {
+	if (error instanceof AppError) {
+		return error.send(response);
+	}
 	if (hasZodFastifySchemaValidationErrors(error)) {
 		return response.code(400).send(
 			apiResponse({
@@ -220,13 +224,13 @@ server.setErrorHandler((error, request, response) => {
 		);
 	}
 
-	response.status(500).send(
+	return response.status(500).send(
 		apiResponse({
 			status: 500,
 			error: "Internal Server Error",
 			code: "internal_error",
-			message: "Something went wrong",
-			data: error,
+			message: "Something went wrong.",
+			data: null,
 		})
 	);
 });

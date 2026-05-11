@@ -2,8 +2,6 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import HomeDark from "@/public/home_dark.webp";
-import HomeLight from "@/public/home_light.webp";
 import Grid from "../../grid";
 
 export const AppPreview = () => {
@@ -18,8 +16,8 @@ export const AppPreview = () => {
 				className="relative z-2 overflow-hidden rounded-xl border border-border shadow-[0_0_1rem_0_#ffffff26] lg:rounded-3xl"
 				id="appimage"
 			>
-				<Image alt="" className="hidden dark:block" src={HomeDark} />
-				<Image alt="" className="block dark:hidden" src={HomeLight} />
+				<Image alt="" className="hidden dark:block" src={"/home_dark.webp"} />
+				<Image alt="" className="block dark:hidden" src={"/home_light.webp"} />
 			</div>
 			<div
 				className="absolute top-[30px] left-1/2 z-1 h-1/4 w-4/5 -translate-x-1/2 rounded-[100%] bg-primary blur-[110px]"
