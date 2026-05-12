@@ -13,5 +13,5 @@ export const createOrderServiceSchema = z.object({
 	images: z
 		.array(z.instanceof(File))
 		.min(3, "Adicione pelo menos três fotos do aparelho")
-		.max(15, "Adicione no máximo cinco fotos do aparelho"),
+		.max(15, "Adicione no máximo quinze fotos do aparelho"),
 });
