@@ -1,18 +1,18 @@
 import { permissions } from "@fixr/permissions";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import { getCompanyBySubdomainSchema } from "@fixr/schemas/companies";
-import type { Context } from "elysia";
+import type { Context, Elysia } from "elysia";
 import type { z } from "zod";
-import { requirePermission } from "@/src/core/middlewares/rbac";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { requirePermission } from "../../../core/middlewares/rbac";
 import { CompaniesController } from "../controllers";
 
 export function companiesRoutes(app: Elysia) {
 	return app
 		.get(
 			"/companies",
-			(ctx: Context) => {
+			(ctx) => {
 				const user = (ctx as Context & { user: z.infer<typeof jwtPayload> })
 					.user;
 				return CompaniesController.getUserCompany({ userJwt: user, ctx });

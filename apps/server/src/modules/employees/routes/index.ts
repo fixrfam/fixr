@@ -3,11 +3,11 @@ import type { jwtPayload } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import { getPaginatedDataSchema } from "@fixr/schemas/utils";
-import type { Context } from "elysia";
+import type { Context, Elysia } from "elysia";
 import type { z } from "zod";
-import { requirePermission } from "@/src/core/middlewares/rbac";
 import { employeesDocs } from "../../../core/docs/companies/employees/employees.docs";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { requirePermission } from "../../../core/middlewares/rbac";
 import { EmployeesController } from "../controllers";
 
 export function employeesRoutes(app: Elysia) {

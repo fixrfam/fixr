@@ -7,8 +7,8 @@
   "private": true,
   "scripts": {
     "test": "dotenv -- vitest",
-    "start": "dotenv -- tsx src/server.ts",
-    "dev": "dotenv -- tsx watch src/server.ts",
+    "start": "bun src/server.ts",
+    "dev": "bun --watch src/server.ts",
     "build": "biome check && dotenv -- tsup src",
     "lint": "biome check",
     "lint:write": "biome check --write",

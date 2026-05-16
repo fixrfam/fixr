@@ -3,9 +3,9 @@ import { confirmAccountDeletionSchema } from "@fixr/schemas/account";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { Context, Elysia } from "elysia";
 import type { z } from "zod";
-import { requirePermission } from "@/src/core/middlewares/rbac";
 import { accountDocs } from "../../../core/docs/account.docs";
 import { authenticate } from "../../../core/middlewares/authenticate";
+import { requirePermission } from "../../../core/middlewares/rbac";
 import { AccountController } from "../controllers";
 
 export function accountRoutes(app: Elysia) {
