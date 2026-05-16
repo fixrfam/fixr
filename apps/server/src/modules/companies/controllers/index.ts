@@ -1,39 +1,32 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
-import type { FastifyReply } from "fastify";
+import type { Context } from "elysia";
 import type { z } from "zod";
 import { CompaniesService } from "../services";
 
-/** @description Companies request handlers */
 export class CompaniesController {
-	/**
-	 * @description Get the current user's company
-	 */
 	static getUserCompany({
 		userJwt,
-		response,
+		ctx,
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
-		return CompaniesService.getUserCompany({ userJwt, response });
+		return CompaniesService.getUserCompany({ userJwt, ctx });
 	}
 
-	/**
-	 * @description Get a company by subdomain
-	 */
 	static getCompanyBySubdomain({
 		subdomain,
 		userJwt,
-		response,
+		ctx,
 	}: {
 		subdomain: string;
 		userJwt: z.infer<typeof jwtPayload>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		return CompaniesService.getCompanyBySubdomain({
 			subdomain,
 			userJwt,
-			response,
+			ctx,
 		});
 	}
 }

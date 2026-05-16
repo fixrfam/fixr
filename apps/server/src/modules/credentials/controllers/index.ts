@@ -3,70 +3,51 @@ import type {
 	changePasswordAuthenticatedSchema,
 	confirmPasswordResetSchema,
 } from "@fixr/schemas/credentials";
-import type { FastifyReply } from "fastify";
+import type { Context } from "elysia";
 import type { z } from "zod";
 import { CredentialsService } from "../services";
 
-/** @description Credentials request handlers */
 export class CredentialsController {
-	/**
-	 * @description Change password for authenticated user
-	 */
 	static changePasswordAuthenticated({
 		user,
 		body,
-		response,
+		ctx,
 	}: {
 		user: z.infer<typeof userJWT>;
 		body: z.infer<typeof changePasswordAuthenticatedSchema>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		return CredentialsService.changePasswordAuthenticated({
 			user,
 			body,
-			response,
+			ctx,
 		});
 	}
 
-	/**
-	 * @description Request a password reset email
-	 */
-	static requestPasswordReset({
-		email,
-		response,
-	}: {
-		email: string;
-		response: FastifyReply;
-	}) {
+	static requestPasswordReset({ email, ctx }: { email: string; ctx: Context }) {
 		return CredentialsService.requestPasswordReset({
 			email,
-			response,
+			ctx,
 		});
 	}
 
-	/**
-	 * @description Confirm password reset with token
-	 */
 	static confirmPasswordReset({
 		body,
-		response,
+		ctx,
 	}: {
 		body: z.infer<typeof confirmPasswordResetSchema>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
-		return CredentialsService.confirmPasswordReset({ body, response });
+		return CredentialsService.confirmPasswordReset({ body, ctx });
 	}
 
-	/**
-	 * @description Validate a password reset token
-	 */
 	static validatePasswordResetToken({
 		token,
-		response,
+		ctx,
 	}: {
 		token: string;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
-		return CredentialsService.validatePasswordResetToken({ token, response });
+		return CredentialsService.validatePasswordResetToken({ token, ctx });
 	}
 }

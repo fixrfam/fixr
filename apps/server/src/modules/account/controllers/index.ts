@@ -1,56 +1,37 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { Context } from "elysia";
 import { AccountService } from "../services";
 
-/** @description Account request handlers */
 export class AccountController {
-	/**
-	 * @description Get the authenticated user's account
-	 */
-	static getAccount({
-		userId,
-		response,
-	}: {
-		userId: string;
-		response: FastifyReply;
-	}) {
-		return AccountService.getAccount({ userId, response });
+	static getAccount({ userId, ctx }: { userId: string; ctx: Context }) {
+		return AccountService.getAccount({ userId, ctx });
 	}
 
-	/**
-	 * @description Request account deletion
-	 */
 	static requestAccountDeletion({
 		userId,
-		request,
-		response,
+		ctx,
 	}: {
 		userId: string;
-		request: FastifyRequest;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		return AccountService.requestAccountDeletion({
 			userId,
-			request,
-			response,
+			ctx,
 		});
 	}
 
-	/**
-	 * @description Confirm account deletion with token
-	 */
 	static confirmAccountDeletion({
 		token,
 		redirectUrl,
-		response,
+		ctx,
 	}: {
 		token: string;
 		redirectUrl?: string;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		return AccountService.confirmAccountDeletion({
 			token,
 			redirectUrl,
-			response,
+			ctx,
 		});
 	}
 }

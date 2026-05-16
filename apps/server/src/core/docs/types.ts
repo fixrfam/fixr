@@ -1,7 +1,16 @@
-import type { FastifySchema } from "fastify";
-import { z } from "zod";
+import { t } from "elysia";
 
-export type RouteDoc = FastifySchema;
+export interface RouteDoc<T = unknown> {
+	detail?: {
+		tags?: string[];
+		summary?: string;
+		description?: string;
+	};
+	schema?: {
+		body?: T;
+		response?: Record<number, unknown>;
+	};
+}
 
 export interface ApiResponseSchema<T = unknown> {
 	status: number;
@@ -11,18 +20,20 @@ export interface ApiResponseSchema<T = unknown> {
 	data: T | null;
 }
 
-export const zodResponseSchema = <T extends z.ZodTypeAny>({
+export const elysiaResponseSchema = <
+	T extends ReturnType<typeof t.Object> | null,
+>({
 	status,
 	error,
-	message,
+	message: _,
 	code,
 	data,
 }: Omit<ApiResponseSchema, "data"> & { data: T | null }) => {
-	return z.object({
-		status: z.literal(status),
-		error: z.literal(error),
-		message: z.literal(message),
-		code: z.literal(code),
-		data: data === null ? z.literal(null) : data,
+	return t.Object({
+		status: t.Literal(status),
+		error: error === null ? t.Null() : t.Literal(error),
+		message: t.String(),
+		code: t.Literal(code),
+		data: data === null ? t.Null() : data,
 	});
 };

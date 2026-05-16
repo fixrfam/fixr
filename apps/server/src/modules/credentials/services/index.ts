@@ -5,7 +5,7 @@ import { emailDisplayName } from "@fixr/mail/services";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { confirmPasswordResetSchema } from "@fixr/schemas/credentials";
 import bcrypt from "bcrypt";
-import type { FastifyReply } from "fastify";
+import type { Context } from "elysia";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { AppError } from "../../../core/lib/app-error";
@@ -16,23 +16,15 @@ import { TokensRepository } from "../../tokens/repositories";
 import { TokensService } from "../../tokens/services";
 import { CredentialsRepository } from "../repositories";
 
-/** @description Credentials business logic */
 export class CredentialsService {
-	/**
-	 * Change password for an authenticated user
-	 *
-	 * @param user - The authenticated user JWT
-	 * @param body - Change password request body
-	 * @param response - Fastify reply
-	 */
 	static async changePasswordAuthenticated({
 		user,
 		body,
-		response,
+		ctx,
 	}: {
 		user: z.infer<typeof userJWT>;
 		body: { old: string; new: string };
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		const userData = await AuthRepository.queryUserById(user.id);
 
@@ -50,36 +42,27 @@ export class CredentialsService {
 
 		await CredentialsRepository.updateUserPassword(user.id, hashedPassword);
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "password_update_success",
-				message: "Password updated successfully!",
-				data: null,
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "password_update_success",
+			message: "Password updated successfully!",
+			data: null,
+		});
 	}
 
-	/**
-	 * Request a password reset for an account.
-	 * Creates a one-time password reset token and sends an email.
-	 *
-	 * @param email - The account email
-	 * @param response - Fastify reply
-	 */
 	static async requestPasswordReset({
 		email,
-		response,
+		ctx,
 	}: {
 		email: string;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		await TokensRepository.deleteUserExpiredTokensByEmail(email);
 		const oneTimeTokens =
 			await TokensRepository.getUserOneTimeTokensWithEmail(email);
 
-		// Use Array.some() for better performance when checking existence
 		if (oneTimeTokens.some((token) => token.tokenType === "password_reset")) {
 			throw new AppError("CREDENTIALS_EXISTING_RESET_REQUEST");
 		}
@@ -110,33 +93,25 @@ export class CredentialsService {
 			},
 		});
 
-		return response.status(201).send(
-			apiResponse({
-				status: 201,
-				error: null,
-				code: "password_reset_request_accepted",
-				message: "Reset request accepted, confirm email.",
-				data: null,
-			})
-		);
+		ctx.set.status = 201;
+		return apiResponse({
+			status: 201,
+			error: null,
+			code: "password_reset_request_accepted",
+			message: "Reset request accepted, confirm email.",
+			data: null,
+		});
 	}
 
-	/**
-	 * Confirm password reset with a one-time password reset token and new password.
-	 *
-	 * @param body - Password reset confirmation body
-	 * @param response - Fastify reply
-	 */
 	static async confirmPasswordReset({
 		body,
-		response,
+		ctx,
 	}: {
 		body: z.infer<typeof confirmPasswordResetSchema>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		const oneTimeToken = await TokensRepository.queryOneTimeToken(body.token);
 
-		//Checks if the token exists, if it's not expired and if it's a password reset token
 		if (!oneTimeToken) {
 			throw new AppError("CREDENTIALS_TOKEN_NOT_FOUND");
 		}
@@ -149,7 +124,6 @@ export class CredentialsService {
 			throw new AppError("CREDENTIALS_INVALID_TOKEN");
 		}
 
-		//If all checks succeed, update the user password and delete the token
 		const hashedPassword = await hashPassword(body.password);
 
 		const updatePass = CredentialsRepository.updateUserPassword(
@@ -160,29 +134,22 @@ export class CredentialsService {
 
 		await Promise.all([updatePass, deleteToken]);
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "password_update_success",
-				message: "Password updated successfully!",
-				data: null,
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "password_update_success",
+			message: "Password updated successfully!",
+			data: null,
+		});
 	}
 
-	/**
-	 * Validate a password reset token.
-	 *
-	 * @param token - The password reset token
-	 * @param response - Fastify reply
-	 */
 	static async validatePasswordResetToken({
 		token,
-		response,
+		ctx,
 	}: {
 		token: string;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		const oneTimeToken = await TokensRepository.queryOneTimeToken(token);
 
@@ -198,16 +165,15 @@ export class CredentialsService {
 			throw new AppError("CREDENTIALS_INVALID_TOKEN");
 		}
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "password_reset_token_valid",
-				message: "The provided token is a valid one.",
-				data: {
-					valid: true,
-				},
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "password_reset_token_valid",
+			message: "The provided token is a valid one.",
+			data: {
+				valid: true,
+			},
+		});
 	}
 }

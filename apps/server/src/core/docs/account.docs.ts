@@ -1,112 +1,117 @@
-import { accountSchema } from "@fixr/schemas/account";
-import type { FastifySchema } from "fastify";
-import { z } from "zod";
-import { zodResponseSchema } from "./types";
+import { t } from "elysia";
+import { elysiaResponseSchema } from "./types";
 
-const getAccountSchema: FastifySchema = {
-	tags: ["Account"],
-	description: "Retrieves user account data",
-	summary: "Get account",
+const errorResponse = t.Object({
+	status: t.Number(),
+	error: t.Union([t.String(), t.Null()]),
+	message: t.String(),
+	code: t.String(),
+	data: t.Union([t.Null(), t.Any()]),
+});
+
+const accountSchema = t.Object({
+	id: t.String(),
+	email: t.String(),
+	avatarUrl: t.Union([t.String(), t.Null()]),
+	displayName: t.Union([t.String(), t.Null()]),
+	cpf: t.String(),
+	phone: t.Union([t.String(), t.Null()]),
+	profileType: t.Union([t.Literal("client"), t.Literal("employee")]),
+	company: t.Optional(
+		t.Object({
+			id: t.String(),
+			name: t.String(),
+			subdomain: t.String(),
+			role: t.Union([
+				t.Literal("guest"),
+				t.Literal("technician"),
+				t.Literal("warehouse"),
+				t.Literal("financial"),
+				t.Literal("manager"),
+				t.Literal("admin"),
+			]),
+		})
+	),
+	createdAt: t.String(),
+});
+
+export const getAccountSchema = {
+	detail: {
+		tags: ["Account"],
+		description: "Retrieves user account data",
+		summary: "Get account",
+	},
 	response: {
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "user_not_found",
-			message: "User not found",
-			data: null,
-		}).describe("Couldn't find user."),
-		200: zodResponseSchema({
+		200: elysiaResponseSchema({
 			status: 200,
 			error: null,
-			code: "get_account_success",
 			message: "Account retrieved successfully.",
+			code: "get_account_success",
 			data: accountSchema,
-		}).describe("Account retrieved successfully."),
+		}),
+		401: errorResponse,
+		403: errorResponse,
+		404: errorResponse,
+		500: errorResponse,
 	},
-	security: [{ JWT: [] }],
 };
 
-const requestDeletionSchema: FastifySchema = {
-	tags: ["Account"],
-	description: `**Request account deletion and sends a confirmation email.**
+export const requestDeletionSchema = {
+	detail: {
+		tags: ["Account"],
+		description: `**Request account deletion and sends a confirmation email.**
     
 When requested, the account is **not** deleted instantly. 
 For confirmation, we generate a \`oneTimeToken\` of type \`account_deletion\`, save it on the database, and send it to the user email as a confirmation link, that will further hit the \`/account/confirm-deletion\` endpoint.
 
 - Requests are valid for 30 minutes.
 - Only one request can be up at a time.`,
-	summary: "Request deletion",
+		summary: "Request deletion",
+	},
 	response: {
-		409: zodResponseSchema({
-			status: 409,
-			error: "Conflict",
-			code: "existing_deletion_request",
-			message:
-				"Deletion request already exists. Finish it or wait until expiration to request a new one.",
-			data: null,
-		}).describe(
-			"Deletion request already exists. Only one can be up at a time."
-		),
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "user_not_found",
-			message: "User not found",
-			data: null,
-		}).describe("Couldn't find user."),
-		201: zodResponseSchema({
+		201: elysiaResponseSchema({
 			status: 201,
 			error: null,
-			code: "deletion_request_accepted",
 			message: "Deletion request accepted, confirm email.",
+			code: "deletion_request_accepted",
 			data: null,
-		}).describe("Request accepted, user needs to confirm the email."),
+		}),
+		401: errorResponse,
+		403: errorResponse,
+		409: errorResponse,
+		500: errorResponse,
 	},
-	security: [{ JWT: [] }],
 };
 
-const confirmDeletionSchema: FastifySchema = {
-	tags: ["Account"],
-	description: `**Confirm deletion of account corresponding to the token.**
+export const confirmDeletionSchema = {
+	detail: {
+		tags: ["Account"],
+		description: `**Confirm deletion of account corresponding to the token.**
         
 When the confirmation email is sent, a link to this API route is sent together with the confirmation token.
 
 Once clicked, the account is deleted along with the single use token, then the user is redirected to the \`redirectUrl\`.
         `,
-	summary: "Confirm deletion",
-	querystring: z.object({
-		token: z.string(),
-		redirectUrl: z.string().optional(),
-	}),
+		summary: "Confirm deletion",
+	},
 	response: {
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "token_not_found",
-			message: "Token not found",
-			data: null,
-		}).describe("Provided token was not found."),
-		410: zodResponseSchema({
-			status: 410,
-			error: "Gone",
-			code: "token_expired",
-			message: "Token expired",
-			data: null,
-		}).describe("The token is expired."),
-		400: zodResponseSchema({
-			status: 400,
-			error: "Bad Request",
-			code: "invalid_token",
-			message: "Invalid token",
-			data: null,
-		}).describe("The token is invalid (mismatching type, for example)."),
-		200: zodResponseSchema({
+		200: elysiaResponseSchema({
 			status: 200,
 			error: null,
-			code: "account_deletion_success",
 			message: "Account deleted sucessfully",
+			code: "account_deletion_success",
 			data: null,
-		}).describe("The account was successfully deleted."),
+		}),
+		302: t.Object({
+			status: t.Literal(302),
+			error: t.Null(),
+			message: t.String(),
+			code: t.String(),
+			data: t.Null(),
+		}),
+		400: errorResponse,
+		404: errorResponse,
+		500: errorResponse,
 	},
 };
 

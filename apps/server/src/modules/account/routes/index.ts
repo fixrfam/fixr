@@ -1,68 +1,57 @@
 import { permissions } from "@fixr/permissions";
 import { confirmAccountDeletionSchema } from "@fixr/schemas/account";
 import type { userJWT } from "@fixr/schemas/auth";
-import type { FastifyRequest } from "fastify";
+import type { Context, Elysia } from "elysia";
 import type { z } from "zod";
 import { requirePermission } from "@/src/core/middlewares/rbac";
 import { accountDocs } from "../../../core/docs/account.docs";
-import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticate } from "../../../core/middlewares/authenticate";
-import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { AccountController } from "../controllers";
 
-/** @description Account routes plugin */
-export function accountRoutes(fastify: FastifyTypedInstance) {
-	fastify.get(
-		"/",
-		{
-			preHandler: [authenticate, requirePermission(permissions.account.read)],
-			schema: accountDocs.getAccountSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-
-			await AccountController.getAccount({ userId: userJwt.id, response });
-		})
-	);
-
-	fastify.post(
-		"/request-deletion",
-		{
-			preHandler: [authenticate, requirePermission(permissions.account.delete)],
-			schema: accountDocs.requestDeletionSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-
-			await AccountController.requestAccountDeletion({
-				userId: userJwt.id,
-				request,
-				response,
-			});
-		})
-	);
-
-	fastify.get(
-		"/confirm-deletion",
-		{ schema: accountDocs.confirmDeletionSchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{
-					Querystring: { token: string; redirectUrl?: string };
-				}>,
-				response
-			) => {
-				const query = await confirmAccountDeletionSchema.parseAsync(
-					request.query
-				);
-				const token = decodeURIComponent(query.token);
-
-				await AccountController.confirmAccountDeletion({
-					token,
-					redirectUrl: query.redirectUrl,
-					response,
-				});
+export function accountRoutes(app: Elysia) {
+	return app
+		.get(
+			"/account",
+			(ctx: Context) => {
+				const user = (ctx as Context & { user: z.infer<typeof userJWT> }).user;
+				return AccountController.getAccount({ userId: user.id, ctx });
+			},
+			{
+				...accountDocs.getAccountSchema,
+				beforeHandle: [
+					authenticate,
+					requirePermission(permissions.account.read),
+				],
 			}
 		)
-	);
+		.post(
+			"/account/request-deletion",
+			(ctx: Context) => {
+				const user = (ctx as Context & { user: z.infer<typeof userJWT> }).user;
+				return AccountController.requestAccountDeletion({
+					userId: user.id,
+					ctx,
+				});
+			},
+			{
+				...accountDocs.requestDeletionSchema,
+				beforeHandle: [
+					authenticate,
+					requirePermission(permissions.account.delete),
+				],
+			}
+		)
+		.get(
+			"/account/confirm-deletion",
+			async (ctx: Context) => {
+				const query = await confirmAccountDeletionSchema.parseAsync(ctx.query);
+				const token = decodeURIComponent(query.token);
+				return AccountController.confirmAccountDeletion({
+					token,
+					redirectUrl: query.redirectUrl,
+					ctx,
+				});
+			},
+			accountDocs.confirmDeletionSchema
+		);
 }

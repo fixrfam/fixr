@@ -1,6 +1,7 @@
+import { env } from "@fixr/env/server";
 import type { jwtPayload } from "@fixr/schemas/auth";
+import jwt from "jsonwebtoken";
 import type { z } from "zod";
-import server from "../../server";
 
 export function signJWT({
 	payload,
@@ -9,14 +10,7 @@ export function signJWT({
 	payload: z.infer<typeof jwtPayload>;
 	expiresIn?: string | number;
 }): string {
-	return server.jwt.sign(payload, { expiresIn: expiresIn ?? "300s" });
-}
-
-export function verifyJWT(token: string) {
-	try {
-		const decoded = server.jwt.verify(token);
-		return { payload: decoded, expired: false };
-	} catch {
-		return { payload: null, expired: true };
-	}
+	return jwt.sign(payload as object, env.JWT_SECRET, {
+		expiresIn: expiresIn ?? "300s",
+	} as jwt.SignOptions);
 }

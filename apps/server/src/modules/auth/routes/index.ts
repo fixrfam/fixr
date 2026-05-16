@@ -1,107 +1,84 @@
 import { cookieKey } from "@fixr/constants/cookies";
 import {
-	createUserSchema,
 	googleCallbackSchema,
 	loginUserSchema,
 	verifyEmailSchema,
 } from "@fixr/schemas/auth";
-import type { FastifyRequest } from "fastify";
+import type { Context, Elysia } from "elysia";
 import { authDocs } from "../../../core/docs/auth.docs";
-import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
-import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
+import { apiResponse } from "../../../core/lib/response";
 import { AuthController } from "../controllers";
 
-/** @description Auth routes plugin */
-export function authRoutes(fastify: FastifyTypedInstance) {
-	fastify.post(
-		"/register",
-		{
-			schema: authDocs.registerSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			await createUserSchema.parseAsync(request.body);
-
-			return response.status(500).send({
-				status: 501,
-				error: "Not implemented",
-				code: "not_implemented",
-				message: "This endpoint is not implemented or disabled.",
-				data: null,
-			});
-		})
-	);
-
-	fastify.post(
-		"/login",
-		{ schema: authDocs.loginSchema },
-		withErrorHandler(async (request, response) => {
-			const body = await loginUserSchema.parseAsync(request.body);
-
-			await AuthController.login({ body, response });
-		})
-	);
-
-	fastify.get(
-		"/verify",
-		{ schema: authDocs.verifySchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{
-					Querystring: { token: string; redirectUrl?: string };
-				}>,
-				response
-			) => {
-				const query = await verifyEmailSchema.parseAsync(request.query);
+export function authRoutes(app: Elysia) {
+	return app
+		.post(
+			"/auth/register",
+			(ctx: Context) => {
+				ctx.set.status = 501;
+				return apiResponse({
+					status: 501,
+					error: "Not implemented",
+					code: "not_implemented",
+					message: "This endpoint is not implemented or disabled.",
+					data: null,
+				});
+			},
+			authDocs.registerSchema
+		)
+		.post(
+			"/auth/login",
+			async (ctx: Context) => {
+				const body = await loginUserSchema.parseAsync(ctx.body);
+				return AuthController.login({ body, ctx });
+			},
+			authDocs.loginConfig
+		)
+		.get(
+			"/auth/verify",
+			async (ctx: Context) => {
+				const query = await verifyEmailSchema.parseAsync(ctx.query);
 				const token = decodeURIComponent(query.token);
-
-				await AuthController.verify({
+				return AuthController.verify({
 					token,
 					redirectUrl: query.redirectUrl,
-					response,
+					ctx,
 				});
-			}
+			},
+			authDocs.verifyConfig
 		)
-	);
-
-	fastify.get(
-		"/signout",
-		{ schema: authDocs.signOutSchema },
-		withErrorHandler(async (request, response) => {
-			const refreshToken = request.cookies[cookieKey("refreshToken")];
-
-			await AuthController.signOut({ refreshToken, response });
-		})
-	);
-
-	fastify.post(
-		"/token",
-		{ schema: authDocs.revalidateSchema },
-		withErrorHandler(async (request, response) => {
-			const refreshToken = request.cookies[cookieKey("refreshToken")];
-
-			await AuthController.revalidate({ refreshToken, response });
-		})
-	);
-
-	fastify.get(
-		"/google",
-		{ schema: authDocs.googleLoginSchema },
-		withErrorHandler(async (request, response) => {
-			await AuthController.googleLogin({ request, response });
-		})
-	);
-
-	fastify.get(
-		"/google/callback",
-		{ schema: authDocs.googleCallbackSchema },
-		withErrorHandler(
-			async (
-				request: FastifyRequest<{ Querystring: { code: string } }>,
-				response
-			) => {
-				const { code } = await googleCallbackSchema.parseAsync(request.query);
-				await AuthController.googleCallback({ response, code });
-			}
+		.get(
+			"/auth/signout",
+			(ctx: Context) => {
+				const cookie = ctx.cookie as Record<string, { value: string }>;
+				const refreshToken = cookie[cookieKey("refreshToken")]?.value;
+				return AuthController.signOut({ refreshToken, ctx });
+			},
+			authDocs.signOutConfig
 		)
-	);
+		.post(
+			"/auth/token",
+			(ctx: Context) => {
+				const cookie = ctx.cookie as Record<string, { value: string }>;
+				const refreshToken = cookie[cookieKey("refreshToken")]?.value;
+				return AuthController.revalidate({ refreshToken, ctx });
+			},
+			authDocs.revalidateConfig
+		)
+		.get(
+			"/auth/google",
+			(ctx: Context) => {
+				return AuthController.googleLogin({ ctx });
+			},
+			authDocs.googleLoginConfig
+		)
+		.get(
+			"/auth/google/callback",
+			async (ctx: Context) => {
+				const { code } = await googleCallbackSchema.parseAsync(
+					ctx.query as { code: string }
+				);
+				return AuthController.googleCallback({ code, ctx });
+			},
+			authDocs.googleCallbackConfig
+		);
 }

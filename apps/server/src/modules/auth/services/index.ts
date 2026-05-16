@@ -1,4 +1,3 @@
-import type { CookieSerializeOptions } from "@fastify/cookie";
 import { APP_NAME } from "@fixr/constants/app";
 import { cookieKey } from "@fixr/constants/cookies";
 import { env } from "@fixr/env/server";
@@ -8,7 +7,7 @@ import {
 } from "@fixr/mail/services";
 import { jwtPayload } from "@fixr/schemas/auth";
 import bcrypt from "bcrypt";
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { Context } from "elysia";
 import { OAuth2Client } from "google-auth-library";
 import { AppError } from "../../../core/lib/app-error";
 import { hashPassword } from "../../../core/lib/hash-password";
@@ -27,34 +26,23 @@ const GOOGLE_CREDS = {
 
 const client = new OAuth2Client(GOOGLE_CREDS);
 
-/** @description Authentication business logic */
 export class AuthService {
-	/**
-	 * Register a new user account.
-	 * Creates the user, generates a confirmation token, and sends a verification email.
-	 *
-	 * @param body - Registration form data
-	 * @param request - Fastify request (used to build verification URL)
-	 * @param response - Fastify reply
-	 */
 	static async register({
 		body,
-		request,
-		response,
+		_request,
+		ctx,
 	}: {
 		body: { email: string; displayName?: string; password: string };
-		request: FastifyRequest;
-		response: FastifyReply;
+		_request: Context;
+		ctx: Context;
 	}) {
 		const email = body.email.toLowerCase();
 		const existingEmail = await AuthRepository.queryUserByEmail(email);
 
-		//First, check if the email is already taken
 		if (existingEmail) {
 			throw new AppError("AUTH_EMAIL_ALREADY_USED");
 		}
 
-		//Then hash the password and insert the user on the database
 		const hashedPassword = await hashPassword(body.password);
 
 		const newUser = await AuthRepository.createUser({
@@ -71,7 +59,8 @@ export class AuthService {
 
 		const redirectUrl = `${env.FRONTEND_URL}/auth/login`;
 
-		const verificationUrl = `${request.protocol}://${request.host}/auth/verify?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+		const reqUrl = new URL(ctx.request.url);
+		const verificationUrl = `${reqUrl.protocol}//${reqUrl.host}/auth/verify?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
 
 		await sendAccountVerificationEmail({
 			to: newUser.email,
@@ -84,33 +73,24 @@ export class AuthService {
 			throw new AppError("AUTH_VERIFICATION_EMAIL_FAILED");
 		});
 
-		return response.status(201).send(
-			apiResponse({
-				status: 201,
-				error: null,
-				code: "user_registered_success",
-				message: "User registered successfully",
-				data: null,
-			})
-		);
+		ctx.set.status = 201;
+		return apiResponse({
+			status: 201,
+			error: null,
+			code: "user_registered_success",
+			message: "User registered successfully",
+			data: null,
+		});
 	}
 
-	/**
-	 * Authenticate a user with email and password.
-	 * Returns JWT token and sets refresh token cookie.
-	 *
-	 * @param body - Login credentials
-	 * @param response - Fastify reply
-	 */
 	static async login({
 		body,
-		response,
+		ctx,
 	}: {
 		body: { email: string; password: string };
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		const email = body.email.toLowerCase();
-		//First check if the user exists
 
 		const user = await AuthRepository.queryUserByEmail(email);
 
@@ -122,7 +102,6 @@ export class AuthService {
 			throw new AppError("AUTH_EMAIL_NOT_VERIFIED");
 		}
 
-		//Then compares the sent password with the hashed password on the database
 		const validPassword = await bcrypt.compare(
 			body.password,
 			user.passwordHash
@@ -134,47 +113,37 @@ export class AuthService {
 
 		const payload = await AuthRepository.queryJWTPayloadByUserId(user.id);
 
-		//If the password is valid, sign the JWT and set the new refresh token
 		const token = signJWT({
 			payload: jwtPayload.parse(payload),
 		});
 
 		const refreshToken = generateRefreshToken();
-		await TokensService.setRefreshToken(response, refreshToken, user.id);
-		TokensService.setJWTCookie(response, token);
+		await TokensService.setRefreshToken(ctx, refreshToken, user.id);
+		TokensService.setJWTCookie(ctx, token);
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "login_success",
-				message: "Logged in successfully",
-				data: {
-					token,
-				},
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "login_success",
+			message: "Logged in successfully",
+			data: {
+				token,
+			},
+		});
 	}
 
-	/**
-	 * Verify a user's email using a one-time confirmation token.
-	 *
-	 * @param token - The confirmation token
-	 * @param redirectUrl - Optional redirect URL after verification
-	 * @param response - Fastify reply
-	 */
 	static async verify({
 		token,
 		redirectUrl,
-		response,
+		ctx,
 	}: {
 		token: string;
 		redirectUrl?: string;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		const oneTimeToken = await TokensRepository.queryOneTimeToken(token);
 
-		//Checks if the token exists, if it's not expired and if it's a confirmation token
 		if (!oneTimeToken) {
 			throw new AppError("AUTH_TOKEN_NOT_FOUND");
 		}
@@ -185,46 +154,39 @@ export class AuthService {
 			throw new AppError("AUTH_INVALID_TOKEN");
 		}
 
-		//If all checks succeed, update the user to be verified and delete the token
 		const verifyUser = AuthRepository.setUserVerified(oneTimeToken.user.id);
 		const deleteToken = TokensRepository.deleteOneTimeToken(oneTimeToken.token);
 		await Promise.all([verifyUser, deleteToken]);
 
 		if (redirectUrl) {
-			return response
-				.setCookie(cookieKey("showVerifiedDialog"), "true", {
-					path: "/",
-					httpOnly: false,
-					sameSite: "none",
-					secure: true,
-				})
-				.status(302)
-				.redirect(decodeURIComponent(redirectUrl));
+			ctx.cookie[cookieKey("showVerifiedDialog")]?.set({
+				value: "true",
+				path: "/",
+				httpOnly: false,
+				sameSite: "none",
+				secure: true,
+			});
+			ctx.set.status = 302;
+			ctx.set.redirect = decodeURIComponent(redirectUrl);
+			return;
 		}
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "email_verify_success",
-				message: "Email verified successfully",
-				data: null,
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "email_verify_success",
+			message: "Email verified successfully",
+			data: null,
+		});
 	}
 
-	/**
-	 * Sign out a user by deleting their refresh token from the database.
-	 *
-	 * @param refreshToken - The refresh token from cookies
-	 * @param response - Fastify reply
-	 */
 	static async signOut({
 		refreshToken,
-		response,
+		ctx,
 	}: {
 		refreshToken: string | undefined;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		if (!refreshToken) {
 			throw new AppError("AUTH_NO_REFRESH_PROVIDED");
@@ -246,38 +208,24 @@ export class AuthService {
 			throw new AppError("AUTH_USER_NOT_FOUND");
 		}
 
-		/**
-		 * If all checks succeed, delete the refreshToken, which will count as a signout.
-		 */
 		await TokensRepository.deleteRefreshToken(tokenData.token);
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "signout_success",
-				message: "User signed out successfully",
-				data: null,
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "signout_success",
+			message: "User signed out successfully",
+			data: null,
+		});
 	}
 
-	/**
-	 * Revalidate a JWT token using a refresh token.
-	 *
-	 * This is used when the JWT expires. The front-end reaches this endpoint
-	 * with the refresh token to get a new JWT. This process makes sure that
-	 * the JWT was not stolen, as the refresh token is stored in a secure-only cookie.
-	 *
-	 * @param refreshToken - The refresh token from cookies
-	 * @param response - Fastify reply
-	 */
 	static async revalidate({
 		refreshToken,
-		response,
+		ctx,
 	}: {
 		refreshToken: string | undefined;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		if (!refreshToken) {
 			throw new AppError("AUTH_NO_REFRESH_PROVIDED");
@@ -299,9 +247,6 @@ export class AuthService {
 			throw new AppError("AUTH_USER_NOT_FOUND");
 		}
 
-		/**
-		 * If all checks succeed, delete the used refreshToken, issue a new JWT with the new payload and issue a new refreshToken
-		 */
 		const deleteRefresh = TokensRepository.deleteRefreshToken(tokenData.token);
 		const queryPayload = AuthRepository.queryJWTPayloadByUserId(user.id);
 
@@ -312,29 +257,22 @@ export class AuthService {
 		});
 
 		const newRefreshToken = generateRefreshToken();
-		await TokensService.setRefreshToken(response, newRefreshToken, user.id);
-		TokensService.setJWTCookie(response, jwt);
+		await TokensService.setRefreshToken(ctx, newRefreshToken, user.id);
+		TokensService.setJWTCookie(ctx, jwt);
 
-		return response.status(200).send(
-			apiResponse({
-				status: 200,
-				error: null,
-				code: "revalidate_success",
-				message: "JWT revalidated successfully",
-				data: {
-					token: jwt,
-				},
-			})
-		);
+		ctx.set.status = 200;
+		return apiResponse({
+			status: 200,
+			error: null,
+			code: "revalidate_success",
+			message: "JWT revalidated successfully",
+			data: {
+				token: jwt,
+			},
+		});
 	}
 
-	/**
-	 * Initiate Google OAuth2 login flow.
-	 * Redirects the user to Google's consent screen.
-	 *
-	 * @param response - Fastify reply
-	 */
-	static googleLogin({ response }: { response: FastifyReply }) {
+	static googleLogin({ ctx }: { ctx: Context }) {
 		const params = {
 			client_id: GOOGLE_CREDS.clientId,
 			redirect_uri: GOOGLE_CREDS.redirectUri,
@@ -345,37 +283,15 @@ export class AuthService {
 		const query = new URLSearchParams(params).toString();
 		const url = `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
 
-		return response.redirect(url);
+		ctx.set.redirect = url;
 	}
 
-	/**
-	 * Handle Google OAuth2 callback after user authorization.
-	 *
-	 * 1. Exchanges the authorization code for tokens.
-	 * 2. Verifies the ID token and extracts user data.
-	 * 3. Validates email exists and is verified.
-	 * 4. Updates user data with latest Google profile info.
-	 * 5. Generates new JWT + refresh token.
-	 * 6. Sets cookies and redirects to dashboard.
-	 *
-	 * On error, redirects to login page with error cookie.
-	 *
-	 * @param code - Authorization code from Google
-	 * @param response - Fastify reply
-	 */
-	static async googleCallback({
-		code,
-		response,
-	}: {
-		code: string;
-		response: FastifyReply;
-	}) {
+	static async googleCallback({ code, ctx }: { code: string; ctx: Context }) {
 		if (!code) {
 			throw new AppError("AUTH_MISSING_CODE");
 		}
 
 		try {
-			// Troca o código de autorização pelos tokens da Google
 			const { tokens } = await client.getToken(code);
 			const idToken = tokens.id_token;
 
@@ -391,49 +307,48 @@ export class AuthService {
 			const payload = ticket.getPayload();
 
 			const authLoginUrl = `${env.FRONTEND_URL}/auth/login`;
-			const errorCookieSettings: CookieSerializeOptions = {
-				path: "/",
-				httpOnly: false,
-				sameSite: "none",
-				secure: true,
-			};
 
 			if (!payload?.email) {
-				return response
-					.setCookie(
-						cookieKey("googleAuthError"),
-						"gacc_missing_email",
-						errorCookieSettings
-					)
-					.status(302)
-					.redirect(authLoginUrl);
+				ctx.cookie[cookieKey("googleAuthError")]?.set({
+					value: "gacc_missing_email",
+					path: "/",
+					httpOnly: false,
+					sameSite: "none",
+					secure: true,
+				});
+				ctx.set.status = 302;
+				ctx.set.redirect = authLoginUrl;
+				return;
 			}
 
 			const user = await AuthRepository.queryUserByEmail(
 				payload.email.toLowerCase()
 			);
 
-			// Apenas usuários já cadastrados conseguem acessar o sistema com o Google
 			if (!user) {
-				return response
-					.setCookie(
-						cookieKey("googleAuthError"),
-						"gacc_user_not_found",
-						errorCookieSettings
-					)
-					.status(302)
-					.redirect(authLoginUrl);
+				ctx.cookie[cookieKey("googleAuthError")]?.set({
+					value: "gacc_user_not_found",
+					path: "/",
+					httpOnly: false,
+					sameSite: "none",
+					secure: true,
+				});
+				ctx.set.status = 302;
+				ctx.set.redirect = authLoginUrl;
+				return;
 			}
 
 			if (!(user.verified && payload.email_verified)) {
-				return response
-					.setCookie(
-						cookieKey("googleAuthError"),
-						"gacc_email_not_verified",
-						errorCookieSettings
-					)
-					.status(302)
-					.redirect(authLoginUrl);
+				ctx.cookie[cookieKey("googleAuthError")]?.set({
+					value: "gacc_email_not_verified",
+					path: "/",
+					httpOnly: false,
+					sameSite: "none",
+					secure: true,
+				});
+				ctx.set.status = 302;
+				ctx.set.redirect = authLoginUrl;
+				return;
 			}
 
 			await AuthRepository.updateUserWithGoogleData({
@@ -445,12 +360,12 @@ export class AuthService {
 			const token = signJWT({ payload: payloadJWT });
 
 			const refreshToken = generateRefreshToken();
-			await TokensService.setRefreshToken(response, refreshToken, user.id);
-			TokensService.setJWTCookie(response, token);
+			await TokensService.setRefreshToken(ctx, refreshToken, user.id);
+			TokensService.setJWTCookie(ctx, token);
 
 			const dashboardUrl = `${env.FRONTEND_URL}/dashboard`;
 
-			return response.redirect(dashboardUrl);
+			ctx.set.redirect = dashboardUrl;
 		} catch (err) {
 			console.error(err);
 			throw new AppError("AUTH_GOOGLE_FAILED");

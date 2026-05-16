@@ -1,15 +1,11 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { getPaginatedDataSchema } from "@fixr/schemas/utils";
-import type { FastifyReply } from "fastify";
+import type { Context } from "elysia";
 import type { z } from "zod";
 import { EmployeesService } from "../services";
 
-/** @description Employees request handlers */
 export class EmployeesController {
-	/**
-	 * @description Get paginated company employees
-	 */
 	static getCompanyEmployees({
 		subdomain,
 		userJwt,
@@ -17,11 +13,11 @@ export class EmployeesController {
 		perPage,
 		query,
 		sort,
-		response,
+		ctx,
 	}: {
 		subdomain: string;
 		userJwt: z.infer<typeof jwtPayload>;
-		response: FastifyReply;
+		ctx: Context;
 	} & z.infer<typeof getPaginatedDataSchema>) {
 		return EmployeesService.getCompanyEmployees({
 			subdomain,
@@ -30,29 +26,26 @@ export class EmployeesController {
 			perPage,
 			query,
 			sort,
-			response,
+			ctx,
 		});
 	}
 
-	/**
-	 * @description Register a new employee
-	 */
 	static registerEmployee({
 		userJwt,
 		subdomain,
 		data,
-		response,
+		ctx,
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
 		data: z.infer<typeof createEmployeeSchema>;
-		response: FastifyReply;
+		ctx: Context;
 	}) {
 		return EmployeesService.registerEmployee({
 			userJwt,
 			subdomain,
 			data,
-			response,
+			ctx,
 		});
 	}
 }

@@ -3,53 +3,47 @@ import {
 	confirmPasswordResetSchema as confirmPasswordResetBody,
 	requestPasswordResetSchema as requestPasswordResetBody,
 } from "@fixr/schemas/credentials";
-import type { FastifySchema } from "fastify";
-import { z } from "zod";
-import { zodResponseSchema } from "./types";
+import { t } from "elysia";
+import { elysiaResponseSchema } from "./types";
 
-const changePasswordAuthenticatedSchema: FastifySchema = {
-	tags: ["Credentials"],
-	description:
-		"User needs to provide the current password for the account and the new one to be set.",
+const errorResponse = t.Object({
+	status: t.Number(),
+	error: t.Union([t.String(), t.Null()]),
+	message: t.String(),
+	code: t.String(),
+	data: t.Union([t.Null(), t.Any()]),
+});
+
+const validData = t.Object({ valid: t.Boolean() });
+
+export const changePasswordAuthenticatedSchema = {
+	detail: {
+		tags: ["Credentials"],
+		description:
+			"User needs to provide the current password for the account and the new one to be set.",
+		summary: "Change password authenticated",
+	},
 	body: changePasswordAuthenticatedBody,
-	summary: "Change password authenticated",
 	response: {
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "user_not_found",
-			message: "User not found",
-			data: null,
-		}).describe("User not found."),
-		401: zodResponseSchema({
-			status: 401,
-			error: "Unauthorized",
-			code: "invalid_password",
-			message: "Invalid password",
-			data: null,
-		}).describe("Invalid old password."),
-		400: zodResponseSchema({
-			status: 400,
-			error: "Bad Request",
-			code: "equal_passwords",
-			message: "Old password and new password are the same",
-			data: null,
-		}).describe("Old and new password are the same."),
-		200: zodResponseSchema({
+		200: elysiaResponseSchema({
 			status: 200,
 			error: null,
-			code: "password_update_success",
 			message: "Password updated successfully!",
+			code: "password_update_success",
 			data: null,
-		}).describe("Account password successfully updated."),
+		}),
+		400: errorResponse,
+		401: errorResponse,
+		409: errorResponse,
+		500: errorResponse,
 	},
-	security: [{ JWT: [] }],
 };
 
-const requestPasswordResetSchema: FastifySchema = {
-	tags: ["Credentials"],
-	summary: "Request password reset",
-	description: `
+export const requestPasswordResetSchema = {
+	detail: {
+		tags: ["Credentials"],
+		summary: "Request password reset",
+		description: `
 **Create a request for password reset (forgot my password) to the specified account**
 
 If the user forget the account password, it can be reseted by hitting this endpoint with the account email.
@@ -66,118 +60,69 @@ For confirmation, we follow the following process:
 - Requests are valid for 30 minutes.
 - Only one request can be up at a time.
     `,
+	},
 	body: requestPasswordResetBody,
 	response: {
-		409: zodResponseSchema({
-			status: 409,
-			error: "Conflict",
-			code: "existing_password_reset_request",
-			message:
-				"Password reset request already exists. Finish it or wait until expiration (30 minutes from request) to issue a new one.",
-			data: null,
-		}).describe(
-			"Password reset request already exists. Only one can be up at a time."
-		),
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "user_not_found",
-			message: "User not found",
-			data: null,
-		}).describe("Couldn't find user."),
-		201: zodResponseSchema({
+		201: elysiaResponseSchema({
 			status: 201,
 			error: null,
-			code: "password_reset_request_accepted",
 			message: "Reset request accepted, confirm email.",
+			code: "password_reset_request_accepted",
 			data: null,
-		}).describe("Request accepted, user needs to confirm the email."),
+		}),
+		400: errorResponse,
+		404: errorResponse,
+		409: errorResponse,
+		500: errorResponse,
 	},
 };
 
-const confirmPasswordResetSchema: FastifySchema = {
-	tags: ["Credentials"],
-	description: `**Confirm the password reset of an account by changing it to a new one**
+export const confirmPasswordResetSchema = {
+	detail: {
+		tags: ["Credentials"],
+		description: `**Confirm the password reset of an account by changing it to a new one**
         
 This endpoint receives the \`password_reset\` \`oneTimeToken\` sent to the user email along with the new password to be used.
         `,
-	summary: "Confirm password reset",
+		summary: "Confirm password reset",
+	},
 	body: confirmPasswordResetBody,
 	response: {
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "token_not_found",
-			message: "Token not found",
-			data: null,
-		}).describe("Provided token was not found."),
-		410: zodResponseSchema({
-			status: 410,
-			error: "Gone",
-			code: "token_expired",
-			message: "Token expired",
-			data: null,
-		}).describe("The token is expired."),
-		400: zodResponseSchema({
-			status: 400,
-			error: "Bad Request",
-			code: "invalid_token",
-			message: "Invalid token",
-			data: null,
-		}).describe("The token is invalid (mismatching type, for example)."),
-		200: zodResponseSchema({
+		200: elysiaResponseSchema({
 			status: 200,
 			error: null,
-			code: "password_update_success",
 			message: "Password updated successfully!",
+			code: "password_update_success",
 			data: null,
-		}).describe("Account password successfully updated."),
+		}),
+		400: errorResponse,
+		404: errorResponse,
+		500: errorResponse,
 	},
 };
 
-export const validatePasswordResetTokenSchema: FastifySchema = {
-	tags: ["Credentials"],
-	description: `**Validates the provided password reset token**
+export const validatePasswordResetTokenSchema = {
+	detail: {
+		tags: ["Credentials"],
+		description: `**Validates the provided password reset token**
 
 This endpoint checks if the password reset \`oneTimeToken\` is valid, ensuring it hasn't expired, been used already, or is invalid due to other reasons. It helps prevent unauthorized or incorrect password reset attempts.
 
 - Is used by the frontend to prevent users to acessing the reset route without a valid token.
         `,
-	summary: "Validate password reset token",
-	querystring: z.object({
-		token: z.string(),
-	}),
+		summary: "Validate password reset token",
+	},
 	response: {
-		404: zodResponseSchema({
-			status: 404,
-			error: "Not Found",
-			code: "token_not_found",
-			message: "Token not found",
-			data: null,
-		}).describe("Provided token was not found."),
-		410: zodResponseSchema({
-			status: 410,
-			error: "Gone",
-			code: "token_expired",
-			message: "Token expired",
-			data: null,
-		}).describe("The token is expired."),
-		400: zodResponseSchema({
-			status: 400,
-			error: "Bad Request",
-			code: "invalid_token",
-			message: "Invalid token",
-			data: null,
-		}).describe("The token is invalid (mismatching type, for example)."),
-		200: zodResponseSchema({
+		200: elysiaResponseSchema({
 			status: 200,
 			error: null,
-			code: "password_reset_token_valid",
 			message: "The provided token is a valid one.",
-			data: z.object({
-				valid: z.literal(true),
-			}),
-		}).describe("The account was successfully deleted."),
+			code: "password_reset_token_valid",
+			data: validData,
+		}),
+		400: errorResponse,
+		404: errorResponse,
+		500: errorResponse,
 	},
 };
 
