@@ -129,13 +129,22 @@ const app = new Elysia()
 		});
 	});
 
-app.listen({
-	port: Number(env.NODE_PORT),
-	hostname: "::",
-});
+const start = async () => {
+	try {
+		await app.listen({
+			port: Number(env.NODE_PORT),
+		});
+		console.log(
+			chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
+		);
+	} catch (err) {
+		console.error(
+			chalk.redBright(`✘ Failed to start server: ${(err as Error).message}`)
+		);
+		process.exit(1);
+	}
+};
 
-console.log(
-	chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
-);
+start();
 
-export default app;
+export type App = typeof app;
