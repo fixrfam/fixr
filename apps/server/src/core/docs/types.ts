@@ -1,17 +1,5 @@
 import { t } from "elysia";
 
-export interface RouteDoc<T = unknown> {
-	detail?: {
-		tags?: string[];
-		summary?: string;
-		description?: string;
-	};
-	schema?: {
-		body?: T;
-		response?: Record<number, unknown>;
-	};
-}
-
 export interface ApiResponseSchema<T = unknown> {
 	status: number;
 	error: string | null;
