@@ -25,7 +25,7 @@ Authentication and user management API featuring email/password auth with JWT to
 - HTTP-only \`refreshToken\` cookies
 - 30-minute expiry for \`oneTimeTokens\`
 
-For authenticating the user, the api can either receive a \`Authorization\` header on the format \`Bearer {token}\` or send it on the "session" cookie (see cookie naming for more info).
+For authenticating the user, the api can either receive a \`Authorization\` header on the format \`Bearer {token}\` or send it on the \`session\` cookie (see cookie naming for more info).
 
 ## Responses
 
@@ -46,7 +46,7 @@ The server sets and removes every cookie needed for authentication and you dont 
 __{cookieName}__{appName}
 \`\`\`
 
-So, for example, the **"session"** cookie on an app called **"Acme"** turns into \`__session__acme\` for avoiding conflicts and ensure consistant naming.
+So, for example, the **\`session\`** cookie on an app called **\`Acme\`** turns into \`__session__acme\` for avoiding conflicts and ensure consistant naming.
 
 - **Note:** This docs refers the the cookies by their **name**, not by their **keys**, so the \`__session__acme\` cookie, for example, will only be referenced as \`session\`
 
@@ -70,7 +70,7 @@ export const paginatedDataSchema = (recordSchema: ZodObject<ZodRawShape>) =>
 export const getPaginatedDataSchema = z.object({
     page: z.number().gte(1),
     query: z.string().optional(),
-    sort: z.enum(["newer", "older"]).optional(),
+    sort: z.enum(['newer', 'older']).optional(),
 });
 \`\`\`
 `;
