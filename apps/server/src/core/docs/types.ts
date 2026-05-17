@@ -9,6 +9,16 @@ export interface ApiResponseSchema<T = unknown> {
 	data: T | null;
 }
 
+/**
+ * Build an Elysia response schema for a known success response.
+ *
+ * @param args - The known response fields (status, error, message, code, data)
+ * @param args.status - The HTTP status code
+ * @param args.error - The error string (null for success)
+ * @param args.message - The developer-friendly message
+ * @param args.code - The machine-readable code
+ * @param args.data - The response data schema, or null
+ */
 export const elysiaResponseSchema = <
 	T extends ReturnType<typeof t.Object> | null,
 >({
@@ -27,6 +37,7 @@ export const elysiaResponseSchema = <
 	});
 };
 
+/** Build a typed Elysia object schema from an error registry key */
 const createErrorSchema = (key: ErrorKey) => {
 	const { status, code, message } = errors[key];
 	return t.Object({
@@ -38,7 +49,23 @@ const createErrorSchema = (key: ErrorKey) => {
 	});
 };
 
+/**
+ * Typed error response schema for a single error key.
+ *
+ * The returned schema uses literal values for `status`, `error`, and `code`
+ * so the OpenAPI docs show exactly what the endpoint returns.
+ *
+ * @param key - Error key from the central error registry
+ */
 export const errorResponse = (key: ErrorKey) => createErrorSchema(key);
 
+/**
+ * Typed error response union for multiple error keys sharing a status code.
+ *
+ * Wraps each error schema in a `t.Union` so the OpenAPI docs show all
+ * possible error variants for the given status code.
+ *
+ * @param keys - One or more error keys from the central error registry
+ */
 export const errorResponses = (...keys: ErrorKey[]) =>
 	t.Union(keys.map(createErrorSchema));

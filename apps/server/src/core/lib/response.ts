@@ -1,5 +1,11 @@
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 
+/**
+ * Build a standardized API response object.
+ *
+ * Every endpoint response follows this shape so the frontend can
+ * handle success and error responses uniformly.
+ */
 export const apiResponse = ({
 	status,
 	error,
