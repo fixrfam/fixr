@@ -20,9 +20,9 @@ export class AppError extends Error {
 	toResponse() {
 		return apiResponse({
 			status: this.status,
-			error: null,
+			error: this.message,
 			code: this.code,
-			message: this.message,
+			message: null,
 			data: this.details ?? null,
 		});
 	}

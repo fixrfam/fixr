@@ -1,13 +1,5 @@
 import { t } from "elysia";
-import { elysiaResponseSchema } from "./types";
-
-const errorResponse = t.Object({
-	status: t.Number(),
-	error: t.Union([t.String(), t.Null()]),
-	message: t.String(),
-	code: t.String(),
-	data: t.Union([t.Null(), t.Any()]),
-});
+import { elysiaResponseSchema, errorResponse } from "./types";
 
 const accountSchema = t.Object({
 	id: t.String(),
@@ -49,10 +41,10 @@ export const getAccountSchema = {
 			code: "get_account_success",
 			data: accountSchema,
 		}),
-		401: errorResponse,
-		403: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponse("RESOURCE_FORBIDDEN"),
+		404: errorResponse("RESOURCE_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -76,10 +68,10 @@ For confirmation, we generate a \`oneTimeToken\` of type \`account_deletion\`, s
 			code: "deletion_request_accepted",
 			data: null,
 		}),
-		401: errorResponse,
-		403: errorResponse,
-		409: errorResponse,
-		500: errorResponse,
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponse("RESOURCE_FORBIDDEN"),
+		409: errorResponse("ACCOUNT_EXISTING_DELETION_REQUEST"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -109,9 +101,9 @@ Once clicked, the account is deleted along with the single use token, then the u
 			code: t.String(),
 			data: t.Null(),
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("ACCOUNT_INVALID_TOKEN"),
+		404: errorResponse("ACCOUNT_TOKEN_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 

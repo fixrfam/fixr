@@ -1,13 +1,9 @@
 import { t } from "elysia";
-import { elysiaResponseSchema } from "../../types";
-
-const errorResponse = t.Object({
-	status: t.Number(),
-	error: t.Union([t.String(), t.Null()]),
-	message: t.String(),
-	code: t.String(),
-	data: t.Union([t.Null(), t.Any()]),
-});
+import {
+	elysiaResponseSchema,
+	errorResponse,
+	errorResponses,
+} from "../../types";
 
 const employeeSchema = t.Object({
 	id: t.String(),
@@ -63,10 +59,10 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
 			code: "get_company_employees_success",
 			data: paginatedEmployeesData,
 		}),
-		401: errorResponse,
-		403: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponses("EMPLOYEE_NOT_ALLOWED", "RESOURCE_FORBIDDEN"),
+		404: errorResponses("EMPLOYEE_COMPANY_NOT_FOUND", "RESOURCE_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -92,11 +88,15 @@ Rules:
 			code: "create_employee_success",
 			data: null,
 		}),
-		400: errorResponse,
-		401: errorResponse,
-		403: errorResponse,
-		409: errorResponse,
-		500: errorResponse,
+		400: errorResponse("BAD_REQUEST"),
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponses(
+			"RESOURCE_FORBIDDEN",
+			"EMPLOYEE_NOT_ALLOWED",
+			"EMPLOYEE_VIOLATES_ROLE_HIERARCHY"
+		),
+		409: errorResponses("EMPLOYEE_EMAIL_ALREADY_USED", "EMPLOYEE_CPF_CONFLICT"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 

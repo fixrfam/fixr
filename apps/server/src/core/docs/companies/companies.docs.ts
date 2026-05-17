@@ -1,13 +1,5 @@
 import { t } from "elysia";
-import { elysiaResponseSchema } from "../types";
-
-const errorResponse = t.Object({
-	status: t.Number(),
-	error: t.Union([t.String(), t.Null()]),
-	message: t.String(),
-	code: t.String(),
-	data: t.Union([t.Null(), t.Any()]),
-});
+import { elysiaResponseSchema, errorResponse, errorResponses } from "../types";
 
 const companySchema = t.Object({
 	id: t.String(),
@@ -32,10 +24,10 @@ export const getUserCompanySchema = {
 			code: "get_company_success",
 			data: companySchema,
 		}),
-		401: errorResponse,
-		403: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponse("RESOURCE_FORBIDDEN"),
+		404: errorResponse("COMPANY_USER_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -54,10 +46,10 @@ export const getCompanyBySubdomainSchema = {
 			code: "get_company_success",
 			data: companySchema,
 		}),
-		401: errorResponse,
-		403: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		401: errorResponse("AUTH_JWT_INVALID"),
+		403: errorResponses("COMPANY_NOT_ALLOWED", "RESOURCE_FORBIDDEN"),
+		404: errorResponse("COMPANY_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 

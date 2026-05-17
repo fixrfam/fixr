@@ -23,6 +23,11 @@ const app = new Elysia()
 	.use(
 		swagger({
 			path: "/docs",
+			scalarConfig: {
+				spec: {
+					url: "/docs/json",
+				},
+			},
 			documentation: {
 				info: {
 					title: `${APP_NAME} API`,

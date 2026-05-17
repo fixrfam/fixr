@@ -1,16 +1,8 @@
 import { createUserSchema, loginUserSchema } from "@fixr/schemas/auth";
 import { t } from "elysia";
-import { elysiaResponseSchema } from "./types";
+import { elysiaResponseSchema, errorResponse, errorResponses } from "./types";
 
 const tokenData = t.Object({ token: t.String() });
-
-const errorResponse = t.Object({
-	status: t.Number(),
-	error: t.Union([t.String(), t.Null()]),
-	message: t.String(),
-	code: t.String(),
-	data: t.Union([t.Null(), t.Any()]),
-});
 
 const loginConfig = {
 	detail: {
@@ -30,9 +22,10 @@ See [cookie naming conventions](/docs/#description/cookies) for more info.`,
 			code: "login_success",
 			data: tokenData,
 		}),
-		401: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		401: errorResponses("AUTH_JWT_INVALID", "AUTH_INVALID_PASSWORD"),
+		403: errorResponse("AUTH_EMAIL_NOT_VERIFIED"),
+		404: errorResponse("AUTH_USER_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -59,10 +52,10 @@ See [cookie naming conventions](/docs/#description/cookies) for more info.
 			code: "revalidate_success",
 			data: tokenData,
 		}),
-		400: errorResponse,
-		401: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("AUTH_NO_REFRESH_PROVIDED"),
+		401: errorResponse("AUTH_INVALID_REFRESH"),
+		404: errorResponse("AUTH_USER_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -92,9 +85,9 @@ Once clicked, the email is confirmed and the single use token is deleted, then t
 			code: t.String(),
 			data: t.Null(),
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("AUTH_INVALID_TOKEN"),
+		404: errorResponse("AUTH_TOKEN_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -122,9 +115,9 @@ for users that are trying to request a new \`JWT\` when their \`refreshToken\` h
 			code: "signout_success",
 			data: null,
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("AUTH_NO_REFRESH_PROVIDED"),
+		404: errorResponse("AUTH_USER_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -175,7 +168,7 @@ In case of errors (missing email, unverified email, etc.), it sets a cookie with
 			code: t.String(),
 			data: t.Null(),
 		}),
-		500: errorResponse,
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -199,9 +192,9 @@ For this, we generate a \`oneTimeToken\`, save it on the database, and send it t
 				code: "user_registered_success",
 				data: null,
 			}),
-			400: errorResponse,
-			409: errorResponse,
-			500: errorResponse,
+			400: errorResponse("BAD_REQUEST"),
+			409: errorResponse("AUTH_EMAIL_ALREADY_USED"),
+			500: errorResponse("INTERNAL_ERROR"),
 		},
 	},
 	loginConfig,

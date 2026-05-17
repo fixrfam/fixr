@@ -4,15 +4,7 @@ import {
 	requestPasswordResetSchema as requestPasswordResetBody,
 } from "@fixr/schemas/credentials";
 import { t } from "elysia";
-import { elysiaResponseSchema } from "./types";
-
-const errorResponse = t.Object({
-	status: t.Number(),
-	error: t.Union([t.String(), t.Null()]),
-	message: t.String(),
-	code: t.String(),
-	data: t.Union([t.Null(), t.Any()]),
-});
+import { elysiaResponseSchema, errorResponse, errorResponses } from "./types";
 
 const validData = t.Object({ valid: t.Boolean() });
 
@@ -32,10 +24,10 @@ export const changePasswordAuthenticatedSchema = {
 			code: "password_update_success",
 			data: null,
 		}),
-		400: errorResponse,
-		401: errorResponse,
-		409: errorResponse,
-		500: errorResponse,
+		400: errorResponse("CREDENTIALS_EQUAL_PASSWORDS"),
+		401: errorResponses("AUTH_JWT_INVALID", "CREDENTIALS_INVALID_PASSWORD"),
+		409: errorResponse("CREDENTIALS_EXISTING_RESET_REQUEST"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -70,10 +62,10 @@ For confirmation, we follow the following process:
 			code: "password_reset_request_accepted",
 			data: null,
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		409: errorResponse,
-		500: errorResponse,
+		400: errorResponse("BAD_REQUEST"),
+		404: errorResponse("CREDENTIALS_USER_NOT_FOUND"),
+		409: errorResponse("CREDENTIALS_EXISTING_RESET_REQUEST"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -95,9 +87,9 @@ This endpoint receives the \`password_reset\` \`oneTimeToken\` sent to the user 
 			code: "password_update_success",
 			data: null,
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("CREDENTIALS_INVALID_TOKEN"),
+		404: errorResponse("CREDENTIALS_TOKEN_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 
@@ -120,9 +112,9 @@ This endpoint checks if the password reset \`oneTimeToken\` is valid, ensuring i
 			code: "password_reset_token_valid",
 			data: validData,
 		}),
-		400: errorResponse,
-		404: errorResponse,
-		500: errorResponse,
+		400: errorResponse("CREDENTIALS_INVALID_TOKEN"),
+		404: errorResponse("CREDENTIALS_TOKEN_NOT_FOUND"),
+		500: errorResponse("INTERNAL_ERROR"),
 	},
 };
 

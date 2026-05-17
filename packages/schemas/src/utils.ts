@@ -3,7 +3,7 @@ import { type ZodObject, type ZodRawShape, z } from "zod";
 export interface ApiResponse<T = unknown> {
 	status: number;
 	error: string | null;
-	message: string;
+	message: string | null;
 	code: string;
 	data: T | null;
 }
@@ -23,6 +23,7 @@ export const apiResponseSchema = z
 			),
 		message: z
 			.string()
+			.nullable()
 			.describe(
 				"A message for the developers to better understand the response."
 			),
