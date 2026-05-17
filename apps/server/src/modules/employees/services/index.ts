@@ -24,7 +24,16 @@ import { AuthRepository } from "../../auth/repositories";
 import { CompaniesRepository } from "../../companies/repositories";
 import { EmployeesRepository } from "../repositories";
 
+/** @description Employees business logic */
 export class EmployeesService {
+	/**
+	 * Get paginated employees for a company
+	 *
+	 * @param subdomain - Company subdomain
+	 * @param userJwt - Authenticated user JWT
+	 * @param page - Page number
+	 * @param ctx - Elysia context
+	 */
 	static async getCompanyEmployees({
 		subdomain,
 		userJwt,
@@ -168,6 +177,14 @@ export class EmployeesService {
 		});
 	}
 
+	/**
+	 * Register a new employee in a company
+	 *
+	 * @param userJwt - Authenticated user JWT
+	 * @param subdomain - Company subdomain
+	 * @param data - Employee registration data
+	 * @param ctx - Elysia context
+	 */
 	static async registerEmployee({
 		userJwt,
 		subdomain,

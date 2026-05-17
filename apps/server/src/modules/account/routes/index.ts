@@ -8,6 +8,7 @@ import { authenticate } from "../../../core/middlewares/authenticate";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { AccountController } from "../controllers";
 
+/** @description Account routes plugin */
 export function accountRoutes(app: Elysia) {
 	return app
 		.get(

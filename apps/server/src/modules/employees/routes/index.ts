@@ -10,6 +10,7 @@ import { authenticateEmployee } from "../../../core/middlewares/authenticate-emp
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { EmployeesController } from "../controllers";
 
+/** @description Employees routes plugin */
 export function employeesRoutes(app: Elysia) {
 	return app
 		.get(

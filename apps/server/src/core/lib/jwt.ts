@@ -3,6 +3,7 @@ import type { jwtPayload } from "@fixr/schemas/auth";
 import jwt from "jsonwebtoken";
 import type { z } from "zod";
 
+/** @description Sign a JWT token with the given payload */
 export function signJWT({
 	payload,
 	expiresIn,

@@ -10,6 +10,7 @@ import { credentialDocs } from "../../../core/docs/credentials.docs";
 import { authenticate } from "../../../core/middlewares/authenticate";
 import { CredentialsController } from "../controllers";
 
+/** @description Credentials routes plugin */
 export function credentialsRoutes(app: Elysia) {
 	return app
 		.put(

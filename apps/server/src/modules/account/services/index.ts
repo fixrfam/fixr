@@ -13,7 +13,14 @@ import { TokensRepository } from "../../tokens/repositories";
 import { TokensService } from "../../tokens/services";
 import { AccountRepository } from "../repositories";
 
+/** @description Account business logic */
 export class AccountService {
+	/**
+	 * Get account details for the authenticated user
+	 *
+	 * @param userId - The authenticated user ID
+	 * @param ctx - Elysia context
+	 */
 	static async getAccount({ userId, ctx }: { userId: string; ctx: Context }) {
 		const account = await AccountRepository.queryAccountById(userId);
 
@@ -27,6 +34,13 @@ export class AccountService {
 		});
 	}
 
+	/**
+	 * Request account deletion.
+	 * Creates a one-time deletion token and sends a confirmation email.
+	 *
+	 * @param userId - The authenticated user ID
+	 * @param ctx - Elysia context
+	 */
 	static async requestAccountDeletion({
 		userId,
 		ctx,
@@ -71,6 +85,13 @@ export class AccountService {
 		});
 	}
 
+	/**
+	 * Confirm account deletion using a one-time deletion token.
+	 *
+	 * @param token - The one-time deletion token
+	 * @param redirectUrl - URL to redirect after success
+	 * @param ctx - Elysia context
+	 */
 	static async confirmAccountDeletion({
 		token,
 		redirectUrl,

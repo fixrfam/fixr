@@ -5,6 +5,7 @@ import type { Context } from "elysia";
 import type { z } from "zod";
 import { apiResponse } from "../lib/response";
 
+/** @description Check if the authenticated user has the required permission */
 export function requirePermission(permission: Permission) {
 	return (ctx: Context) => {
 		const user = (ctx as Context & { user: object }).user as

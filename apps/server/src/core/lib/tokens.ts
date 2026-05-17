@@ -5,6 +5,7 @@ export interface RefreshToken {
 	expires: Date;
 }
 
+/** @description Generate a refresh token with a 7-day expiry */
 export function generateRefreshToken(): RefreshToken {
 	const refreshToken = {
 		token: crypto.randomBytes(64).toString("base64url"),
@@ -14,6 +15,7 @@ export function generateRefreshToken(): RefreshToken {
 	return refreshToken;
 }
 
+/** @description Generate a cryptographically random one-time token */
 export function generateOneTimeToken(): string {
 	return crypto.randomBytes(64).toString("base64url");
 }

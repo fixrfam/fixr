@@ -2,6 +2,7 @@ import type { Context } from "elysia";
 import { AuthRepository } from "../../modules/auth/repositories";
 import { AppError } from "../lib/app-error";
 
+/** @description Verify JWT token and ensure the authenticated user is an employee */
 export const authenticateEmployee = async (ctx: Context) => {
 	const authHeader = ctx.request.headers.get("authorization");
 	const ctxJwt = ctx as Context & {

@@ -5,7 +5,9 @@ import type { Context } from "elysia";
 import type { z } from "zod";
 import { EmployeesService } from "../services";
 
+/** @description Employees request handlers */
 export class EmployeesController {
+	/** @description Get paginated company employees */
 	static getCompanyEmployees({
 		subdomain,
 		userJwt,
@@ -30,6 +32,7 @@ export class EmployeesController {
 		});
 	}
 
+	/** @description Register a new employee */
 	static registerEmployee({
 		userJwt,
 		subdomain,

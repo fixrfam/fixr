@@ -3,7 +3,9 @@ import type { Context } from "elysia";
 import type { z } from "zod";
 import { AuthService } from "../services";
 
+/** @description Auth request handlers */
 export class AuthController {
+	/** @description Register a new user account */
 	static register({
 		body,
 		_request,
@@ -16,6 +18,7 @@ export class AuthController {
 		return AuthService.register({ body, _request: ctx, ctx });
 	}
 
+	/** @description Login with email and password */
 	static login({
 		body,
 		ctx,
@@ -26,6 +29,7 @@ export class AuthController {
 		return AuthService.login({ body, ctx });
 	}
 
+	/** @description Verify email with confirmation token */
 	static verify({
 		token,
 		redirectUrl,
@@ -38,6 +42,7 @@ export class AuthController {
 		return AuthService.verify({ token, redirectUrl, ctx });
 	}
 
+	/** @description Sign out by deleting refresh token */
 	static signOut({
 		refreshToken,
 		ctx,
@@ -48,6 +53,7 @@ export class AuthController {
 		return AuthService.signOut({ refreshToken, ctx });
 	}
 
+	/** @description Revalidate JWT with refresh token */
 	static revalidate({
 		refreshToken,
 		ctx,
@@ -58,10 +64,12 @@ export class AuthController {
 		return AuthService.revalidate({ refreshToken, ctx });
 	}
 
+	/** @description Initiate Google OAuth login */
 	static googleLogin({ ctx }: { ctx: Context }) {
 		return AuthService.googleLogin({ ctx });
 	}
 
+	/** @description Handle Google OAuth callback */
 	static googleCallback({ code, ctx }: { code: string; ctx: Context }) {
 		return AuthService.googleCallback({ code, ctx });
 	}

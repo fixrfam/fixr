@@ -2,6 +2,7 @@ import type { Context } from "elysia";
 import { AuthRepository } from "../../modules/auth/repositories";
 import { AppError } from "../lib/app-error";
 
+/** @description Verify JWT token from Authorization header or session cookie */
 export const authenticate = async (ctx: Context) => {
 	const authHeader = ctx.request.headers.get("authorization");
 	const ctxJwt = ctx as Context & {

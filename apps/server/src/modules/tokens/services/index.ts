@@ -4,7 +4,15 @@ import type { Context } from "elysia";
 import { generateOneTimeToken } from "../../../core/lib/tokens";
 import { TokensRepository } from "../repositories";
 
+/** @description Token business logic layer for managing refresh tokens and one-time tokens */
 export class TokensService {
+	/**
+	 * Set a refresh token cookie and persist it to the database.
+	 *
+	 * @param ctx - Elysia context
+	 * @param token - The refresh token data
+	 * @param userId - The user ID
+	 */
 	static async setRefreshToken(
 		ctx: Context,
 		token: { token: string; expires: Date },
@@ -35,6 +43,12 @@ export class TokensService {
 		});
 	}
 
+	/**
+	 * Set the JWT session cookie
+	 *
+	 * @param ctx - Elysia context
+	 * @param token - The JWT token
+	 */
 	static setJWTCookie(ctx: Context, token: string) {
 		const cookieOptions = {
 			path: "/",
@@ -51,6 +65,13 @@ export class TokensService {
 		});
 	}
 
+	/**
+	 * Create a one-time token for email verification, password reset, or account deletion.
+	 *
+	 * @param userId - The user ID
+	 * @param email - The user email
+	 * @param tokenType - The type of one-time token
+	 */
 	static async createOneTimeToken({
 		userId,
 		email,

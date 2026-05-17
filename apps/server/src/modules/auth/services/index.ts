@@ -26,7 +26,16 @@ const GOOGLE_CREDS = {
 
 const client = new OAuth2Client(GOOGLE_CREDS);
 
+/** @description Authentication business logic */
 export class AuthService {
+	/**
+	 * Register a new user account.
+	 * Creates the user, generates a confirmation token, and sends a verification email.
+	 *
+	 * @param body - Registration form data
+	 * @param _request - Elysia context (used to build verification URL)
+	 * @param ctx - Elysia context
+	 */
 	static async register({
 		body,
 		_request,
@@ -83,6 +92,13 @@ export class AuthService {
 		});
 	}
 
+	/**
+	 * Authenticate a user with email and password.
+	 * Returns JWT token and sets refresh token cookie.
+	 *
+	 * @param body - Login credentials
+	 * @param ctx - Elysia context
+	 */
 	static async login({
 		body,
 		ctx,
@@ -133,6 +149,13 @@ export class AuthService {
 		});
 	}
 
+	/**
+	 * Verify a user's email using a one-time confirmation token.
+	 *
+	 * @param token - The confirmation token
+	 * @param redirectUrl - Optional redirect URL after verification
+	 * @param ctx - Elysia context
+	 */
 	static async verify({
 		token,
 		redirectUrl,
@@ -181,6 +204,12 @@ export class AuthService {
 		});
 	}
 
+	/**
+	 * Sign out a user by deleting their refresh token from the database.
+	 *
+	 * @param refreshToken - The refresh token from cookies
+	 * @param ctx - Elysia context
+	 */
 	static async signOut({
 		refreshToken,
 		ctx,
@@ -220,6 +249,16 @@ export class AuthService {
 		});
 	}
 
+	/**
+	 * Revalidate a JWT token using a refresh token.
+	 *
+	 * This is used when the JWT expires. The front-end reaches this endpoint
+	 * with the refresh token to get a new JWT. This process makes sure that
+	 * the JWT was not stolen, as the refresh token is stored in a secure-only cookie.
+	 *
+	 * @param refreshToken - The refresh token from cookies
+	 * @param ctx - Elysia context
+	 */
 	static async revalidate({
 		refreshToken,
 		ctx,
@@ -272,6 +311,12 @@ export class AuthService {
 		});
 	}
 
+	/**
+	 * Initiate Google OAuth2 login flow.
+	 * Redirects the user to Google's consent screen.
+	 *
+	 * @param ctx - Elysia context
+	 */
 	static googleLogin({ ctx }: { ctx: Context }) {
 		const params = {
 			client_id: GOOGLE_CREDS.clientId,
@@ -286,6 +331,16 @@ export class AuthService {
 		ctx.set.redirect = url;
 	}
 
+	/**
+	 * Handle Google OAuth2 callback after user authorization.
+	 *
+	 * Exchanges the authorization code for tokens, verifies the ID token,
+	 * syncs Google profile data, and issues a new JWT + refresh token.
+	 * On error, redirects to login page with error cookie.
+	 *
+	 * @param code - Authorization code from Google
+	 * @param ctx - Elysia context
+	 */
 	static async googleCallback({ code, ctx }: { code: string; ctx: Context }) {
 		if (!code) {
 			throw new AppError("AUTH_MISSING_CODE");

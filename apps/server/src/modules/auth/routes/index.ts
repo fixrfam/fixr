@@ -9,6 +9,7 @@ import { authDocs } from "../../../core/docs/auth.docs";
 import { apiResponse } from "../../../core/lib/response";
 import { AuthController } from "../controllers";
 
+/** @description Auth routes plugin */
 export function authRoutes(app: Elysia) {
 	return app
 		.post(

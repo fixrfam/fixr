@@ -16,7 +16,15 @@ import { TokensRepository } from "../../tokens/repositories";
 import { TokensService } from "../../tokens/services";
 import { CredentialsRepository } from "../repositories";
 
+/** @description Credentials business logic */
 export class CredentialsService {
+	/**
+	 * Change password for an authenticated user
+	 *
+	 * @param user - The authenticated user JWT
+	 * @param body - Change password request body
+	 * @param ctx - Elysia context
+	 */
 	static async changePasswordAuthenticated({
 		user,
 		body,
@@ -52,6 +60,13 @@ export class CredentialsService {
 		});
 	}
 
+	/**
+	 * Request a password reset for an account.
+	 * Creates a one-time password reset token and sends an email.
+	 *
+	 * @param email - The account email
+	 * @param ctx - Elysia context
+	 */
 	static async requestPasswordReset({
 		email,
 		ctx,
@@ -103,6 +118,12 @@ export class CredentialsService {
 		});
 	}
 
+	/**
+	 * Confirm password reset with a one-time password reset token
+	 *
+	 * @param body - Confirm password reset request body
+	 * @param ctx - Elysia context
+	 */
 	static async confirmPasswordReset({
 		body,
 		ctx,
@@ -144,6 +165,12 @@ export class CredentialsService {
 		});
 	}
 
+	/**
+	 * Validate a password reset token
+	 *
+	 * @param token - The password reset token
+	 * @param ctx - Elysia context
+	 */
 	static async validatePasswordResetToken({
 		token,
 		ctx,

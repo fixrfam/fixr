@@ -6,7 +6,14 @@ import { AppError } from "../../../core/lib/app-error";
 import { apiResponse } from "../../../core/lib/response";
 import { CompaniesRepository } from "../repositories";
 
+/** @description Companies business logic */
 export class CompaniesService {
+	/**
+	 * Get the company associated with the authenticated user
+	 *
+	 * @param userJwt - The authenticated user's JWT payload
+	 * @param ctx - Elysia context
+	 */
 	static async getUserCompany({
 		userJwt,
 		ctx,
@@ -32,6 +39,13 @@ export class CompaniesService {
 		});
 	}
 
+	/**
+	 * Get a company by its subdomain
+	 *
+	 * @param subdomain - The company subdomain
+	 * @param userJwt - The authenticated user's JWT payload
+	 * @param ctx - Elysia context
+	 */
 	static async getCompanyBySubdomain({
 		subdomain,
 		userJwt,
