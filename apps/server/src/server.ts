@@ -224,13 +224,23 @@ server.setErrorHandler((error, request, response) => {
 		);
 	}
 
+	request.log.error(error, "Unhandled error reached global error handler");
+
 	return response.status(500).send(
 		apiResponse({
 			status: 500,
 			error: "Internal Server Error",
 			code: "internal_error",
-			message: "Something went wrong.",
-			data: null,
+			message: error instanceof Error ? error.message : "Something went wrong.",
+			data: {
+				...(error instanceof Error ? { message: error.message } : {}),
+				...(error instanceof Error && error.stack
+					? { stack: error.stack.split("\n").slice(0, 4).join("\n") }
+					: {}),
+				...(error && typeof error === "object"
+					? { details: String(error) }
+					: {}),
+			},
 		})
 	);
 });
