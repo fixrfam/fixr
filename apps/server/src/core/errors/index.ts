@@ -54,6 +54,11 @@ export const errors = defineErrors({
 		message: "Authorization token is invalid or expired.",
 		status: 401,
 	},
+	TURNSTILE_VALIDATION_FAILED: {
+		code: "turnstile_validation_failed",
+		message: "Security check failed. Please try again.",
+		status: 403,
+	},
 });
 
 export type ErrorKey = keyof typeof errors;

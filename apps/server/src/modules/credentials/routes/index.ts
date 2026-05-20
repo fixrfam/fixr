@@ -9,6 +9,7 @@ import { z } from "zod";
 import { credentialDocs } from "../../../core/docs/credentials.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticate } from "../../../core/middlewares/authenticate";
+import { requireTurnstile } from "../../../core/middlewares/turnstile";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { CredentialsController } from "../controllers";
 
@@ -34,7 +35,10 @@ export function credentialsRoutes(fastify: FastifyTypedInstance) {
 
 	fastify.post(
 		"/password/reset",
-		{ schema: credentialDocs.requestPasswordResetSchema },
+		{
+			schema: credentialDocs.requestPasswordResetSchema,
+			preHandler: [requireTurnstile()],
+		},
 		withErrorHandler(async (request, response) => {
 			const body = requestPasswordResetSchema.parse(request.body);
 			await CredentialsController.requestPasswordReset({
@@ -46,7 +50,10 @@ export function credentialsRoutes(fastify: FastifyTypedInstance) {
 
 	fastify.put(
 		"/password/reset",
-		{ schema: credentialDocs.confirmPasswordResetSchema },
+		{
+			schema: credentialDocs.confirmPasswordResetSchema,
+			preHandler: [requireTurnstile()],
+		},
 		withErrorHandler(async (request, response) => {
 			const body = confirmPasswordResetSchema.parse(request.body);
 			await CredentialsController.confirmPasswordReset({ body, response });

@@ -16,8 +16,20 @@ export const AppPreview = () => {
 				className="relative z-2 overflow-hidden rounded-xl border border-border shadow-[0_0_1rem_0_#ffffff26] lg:rounded-3xl"
 				id="appimage"
 			>
-				<Image alt="" className="hidden dark:block" src={"/home_dark.webp"} />
-				<Image alt="" className="block dark:hidden" src={"/home_light.webp"} />
+				<Image
+					alt=""
+					className="hidden dark:block"
+					height={988}
+					src={"/home_dark.webp"}
+					width={1612}
+				/>
+				<Image
+					alt=""
+					className="block dark:hidden"
+					height={988}
+					src={"/home_light.webp"}
+					width={1612}
+				/>
 			</div>
 			<div
 				className="absolute top-[30px] left-1/2 z-1 h-1/4 w-4/5 -translate-x-1/2 rounded-[100%] bg-primary blur-[110px]"

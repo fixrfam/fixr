@@ -8,9 +8,11 @@ export const changePasswordAuthenticatedSchema = z.object({
 
 export const requestPasswordResetSchema = z.object({
 	email: z.string().email(),
+	cfTurnstileToken: z.string().optional(),
 });
 
 export const confirmPasswordResetSchema = z.object({
 	token: z.string(),
 	password: passwordSchema,
+	cfTurnstileToken: z.string().optional(),
 });

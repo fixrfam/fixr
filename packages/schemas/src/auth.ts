@@ -26,6 +26,7 @@ export const createUserSchema = z.object({
 		.string({ error: "Email is required." })
 		.email({ message: "Invalid email address" }),
 	password: passwordSchema,
+	cfTurnstileToken: z.string().optional(),
 	displayName: z
 		.string()
 		.transform((value) => (value.trim() === "" ? undefined : value)) // Handle empty strings
@@ -44,6 +45,7 @@ z.lazy;
 export const loginUserSchema = z.object({
 	email: z.string().email({ message: "Email inválido" }),
 	password: z.string(),
+	cfTurnstileToken: z.string().optional(),
 });
 
 export const jwtPayload = z
