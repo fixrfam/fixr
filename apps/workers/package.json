@@ -7,9 +7,9 @@
   "private": true,
   "scripts": {
     "test": "dotenv -- vitest",
-    "start": "dotenv -- tsx src/index.ts",
+    "start": "dotenv -- node dist/index.js",
     "dev": "dotenv -- tsx watch src/index.ts",
-    "build": "biome check && dotenv -- tsup src",
+    "build": "dotenv -- tsup src",
     "lint": "biome check",
     "lint:write": "biome check --write",
     "check-types": "tsc --noEmit"

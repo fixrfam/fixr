@@ -8,7 +8,9 @@
     "build:packages": "dotenv -- bun run --elide-lines 0 --filter './packages/*' build",
     "build:apps": "dotenv -- bun run --elide-lines 0 --filter './apps/*' build",
     "build:server": "dotenv -- bun run --elide-lines 0 --filter server build",
+    "build:server:ci": "dotenv -- bun run --filter server build",
     "build:workers": "dotenv -- bun run --elide-lines 0 --filter workers build",
+    "build:workers:ci": "dotenv -- bun run --filter workers build",
     "build:web": "dotenv -- bun run --elide-lines 0 --filter web build",
     "build:admin": "dotenv -- bun run --elide-lines 0 --filter admin build",
     "lint": "dotenv -- bun run --elide-lines 0 --filter '*' lint",
@@ -27,6 +29,7 @@
     "destroy": "bun run --elide-lines 0 --filter @fixr/infra destroy",
     "destroy:ci": "bun run --filter @fixr/infra destroy",
     "check-types": "bun run --elide-lines 0 --filter '*' check-types",
+    "check-types:ci": "bun run --filter '*' check-types",
     "prepare": "husky"
   },
   "workspaces": {
