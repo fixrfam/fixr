@@ -10,6 +10,7 @@ import Link from "next/link";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { Turnstile } from "@/components/auth/turnstile";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -29,6 +30,11 @@ export function ForgotPasswordForm({
 	onSuccess: Dispatch<SetStateAction<boolean>>;
 }) {
 	const [loading, setLoading] = useState(false);
+	const [turnstile, setTurnstile] = useState<{
+		token: string | null;
+		loading: boolean;
+		error: boolean;
+	}>({ token: null, loading: true, error: false });
 
 	const form = useForm<z.infer<typeof requestPasswordResetSchema>>({
 		resolver: zodResolver(requestPasswordResetSchema),
@@ -45,7 +51,7 @@ export function ForgotPasswordForm({
 		try {
 			const res = await axios.post<ApiResponse>(
 				api("/credentials/password/reset"),
-				values,
+				{ ...values, cfTurnstileToken: turnstile.token },
 				{
 					withCredentials: true,
 				}
@@ -109,12 +115,27 @@ export function ForgotPasswordForm({
 							</FormItem>
 						)}
 					/>
+					<Turnstile
+						onError={() =>
+							setTurnstile({ token: null, loading: false, error: true })
+						}
+						onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
+						onToken={(token) =>
+							setTurnstile({ token, loading: false, error: false })
+						}
+					/>
+					{turnstile.error && (
+						<p className="text-destructive text-xs">
+							Falha na verificação de segurança. Recarregue a página e tente
+							novamente.
+						</p>
+					)}
 					<Button
 						className="w-full"
-						disabled={loading || !formState.isValid}
+						disabled={loading || !formState.isValid || turnstile.loading}
 						type="submit"
 					>
-						{loading ? (
+						{loading || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
 							"Redefinir senha"

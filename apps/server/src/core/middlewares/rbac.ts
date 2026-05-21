@@ -11,7 +11,10 @@ declare module "fastify" {
 	}
 }
 
-const abilities = new WeakMap<FastifyRequest, ReturnType<typeof createAbility>>();
+const abilities = new WeakMap<
+	FastifyRequest,
+	ReturnType<typeof createAbility>
+>();
 
 export function setupRBAC(fastify: FastifyInstance) {
 	fastify.decorateRequest("ability", {
@@ -35,7 +38,7 @@ export function requirePermission(permission: Permission) {
 	return (
 		request: FastifyRequest,
 		_reply: FastifyReply,
-		done: (err?: Error) => void,
+		done: (err?: Error) => void
 	): void => {
 		if (request.ability.cannot(permission)) {
 			done(new AppError("MISSING_PERMISSIONS"));

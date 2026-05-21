@@ -8,6 +8,7 @@ import {
 import type { FastifyRequest } from "fastify";
 import { authDocs } from "../../../core/docs/auth.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { requireTurnstile } from "../../../core/middlewares/turnstile";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { AuthController } from "../controllers";
 
@@ -17,6 +18,7 @@ export function authRoutes(fastify: FastifyTypedInstance) {
 		"/register",
 		{
 			schema: authDocs.registerSchema,
+			preHandler: [requireTurnstile()],
 		},
 		withErrorHandler(async (request, response) => {
 			await createUserSchema.parseAsync(request.body);
@@ -33,7 +35,7 @@ export function authRoutes(fastify: FastifyTypedInstance) {
 
 	fastify.post(
 		"/login",
-		{ schema: authDocs.loginSchema },
+		{ schema: authDocs.loginSchema, preHandler: [requireTurnstile()] },
 		withErrorHandler(async (request, response) => {
 			const body = await loginUserSchema.parseAsync(request.body);
 

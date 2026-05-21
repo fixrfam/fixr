@@ -31,6 +31,10 @@ export const env = createEnv({
 			.default("development")
 			.describe("Node environment"),
 		FRONTEND_URL: z.url().describe("Frontend application URL"),
+		TURNSTILE_SECRET_KEY: z
+			.string()
+			.min(1)
+			.describe("Cloudflare Turnstile secret key"),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

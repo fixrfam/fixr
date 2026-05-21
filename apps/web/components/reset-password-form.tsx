@@ -10,6 +10,7 @@ import { Loader2, Lock } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Turnstile } from "@/components/auth/turnstile";
 import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -32,6 +33,11 @@ export function ResetPasswordForm({
 	token: string;
 }) {
 	const [loading, setLoading] = useState(false);
+	const [turnstile, setTurnstile] = useState<{
+		token: string | null;
+		loading: boolean;
+		error: boolean;
+	}>({ token: null, loading: true, error: false });
 
 	const confirmPasswordResetSchema = baseConfirmPasswordResetSchema
 		.extend({
@@ -77,7 +83,7 @@ export function ResetPasswordForm({
 		try {
 			const res = await axios.put<ApiResponse>(
 				api("/credentials/password/reset"),
-				{ token, password: values.password },
+				{ token, password: values.password, cfTurnstileToken: turnstile.token },
 				{
 					withCredentials: true,
 				}
@@ -163,12 +169,27 @@ export function ResetPasswordForm({
 							</FormItem>
 						)}
 					/>
+					<Turnstile
+						onError={() =>
+							setTurnstile({ token: null, loading: false, error: true })
+						}
+						onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
+						onToken={(token) =>
+							setTurnstile({ token, loading: false, error: false })
+						}
+					/>
+					{turnstile.error && (
+						<p className="text-destructive text-xs">
+							Falha na verificação de segurança. Recarregue a página e tente
+							novamente.
+						</p>
+					)}
 					<Button
 						className="w-full"
-						disabled={loading || !formState.isValid}
+						disabled={loading || !formState.isValid || turnstile.loading}
 						type="submit"
 					>
-						{loading ? (
+						{loading || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
 							"Alterar senha"

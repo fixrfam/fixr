@@ -64,3 +64,5 @@ export async function tryCatch<T, E = Error>(
 		return { data: null, error: error as E };
 	}
 }
+
+export type Nullable<T> = T | null;

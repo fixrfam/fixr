@@ -58,6 +58,8 @@ export const web = await Nextjs("web", {
 		NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL as string,
 		NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL as string,
 		NEXT_PUBLIC_LINKTREE_URL: process.env.NEXT_PUBLIC_LINKTREE_URL as string,
+		NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env
+			.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string,
 	},
 });
 
