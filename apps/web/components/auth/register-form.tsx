@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/lib/auth/axios";
 import { fallbackMessages, messages } from "@/lib/messages";
-import { api, cn } from "@/lib/utils";
+import { api, cn, type Nullable } from "@/lib/utils";
 import {
 	Form,
 	FormControl,
@@ -24,6 +24,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "../ui/form";
+import { Turnstile } from "./turnstile";
 
 export function RegisterForm({
 	onSuccess,
@@ -31,6 +32,11 @@ export function RegisterForm({
 	onSuccess: Dispatch<SetStateAction<boolean>>;
 }) {
 	const [loading, setLoading] = useState(false);
+	const [turnstile, setTurnstile] = useState<{
+		token: Nullable<string>;
+		loading: boolean;
+		error: boolean;
+	}>({ token: null, loading: true, error: false });
 
 	const createUserSchema = baseCreateUserSchema
 		.extend({
@@ -73,7 +79,10 @@ export function RegisterForm({
 	async function onSubmit(values: z.infer<typeof createUserSchema>) {
 		setLoading(true);
 		try {
-			const res = await axios.post<ApiResponse>(api("/auth/register"), values);
+			const res = await axios.post<ApiResponse>(api("/auth/register"), {
+				...values,
+				cfTurnstileToken: turnstile.token,
+			});
 			const message = messages[res.data.code] ?? fallbackMessages.success;
 
 			if (res.status === 201) {
@@ -179,12 +188,31 @@ export function RegisterForm({
 						)}
 					/>
 				</div>
+				<Turnstile
+					onError={() =>
+						setTurnstile({ token: null, loading: false, error: true })
+					}
+					onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
+					onToken={(token) =>
+						setTurnstile({ token, loading: false, error: false })
+					}
+				/>
+				{turnstile.error && (
+					<p className="text-destructive text-xs">
+						Falha na verificação de segurança. Recarregue a página e tente
+						novamente.
+					</p>
+				)}
 				<Button
 					className="w-full"
-					disabled={loading || !formState.isValid}
+					disabled={loading || !formState.isValid || turnstile.loading}
 					type="submit"
 				>
-					{loading ? <Loader2 className="size-4 animate-spin" /> : "Cadastrar"}
+					{loading || turnstile.loading ? (
+						<Loader2 className="size-4 animate-spin" />
+					) : (
+						"Cadastrar"
+					)}
 				</Button>
 				<div className="text-center text-sm">
 					Já tem uma conta?{" "}

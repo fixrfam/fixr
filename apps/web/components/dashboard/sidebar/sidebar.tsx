@@ -1,5 +1,6 @@
 "use client";
 
+import { createAbility } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { PanelLeft, Search } from "lucide-react";
 import type { z } from "zod";
@@ -14,10 +15,40 @@ import { cn } from "@/lib/utils";
 import { AccountPopover } from "../account-popover";
 import { SidebarButton } from "./sidebar-button";
 import { sidebarSections } from "./sidebar-routes";
+import type { MenuItem, SidebarItem } from "./types";
 
 export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 	const { isOpen, close } = useSidebarStore();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+	const ability = createAbility(session.company?.role ?? "guest");
+
+	function filterItem(item: SidebarItem): SidebarItem | null {
+		if (item.type === "route") {
+			if (item.permission && ability.cannot(item.permission)) {
+				return null;
+			}
+			return item;
+		}
+
+		const filteredItems = item.items
+			.map(filterItem)
+			.filter((i): i is SidebarItem => i !== null);
+		if (filteredItems.length === 0) {
+			return null;
+		}
+
+		return { ...item, items: filteredItems } as MenuItem;
+	}
+
+	const filteredSections = sidebarSections
+		.map((section) => ({
+			...section,
+			items: section.items
+				.map(filterItem)
+				.filter((i): i is SidebarItem => i !== null),
+		}))
+		.filter((section) => section.items.length > 0);
 
 	return (
 		<>
@@ -91,7 +122,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 						WebkitMaskComposite: "destination-in",
 					}}
 				>
-					{sidebarSections.map((section) => (
+					{filteredSections.map((section) => (
 						<div className="space-y-1" key={section.title}>
 							<p className="px-5 font-semibold text-muted-foreground text-xs uppercase tracking-tight">
 								{section.title}

@@ -16,7 +16,7 @@ import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fallbackMessages, messages } from "@/lib/messages";
-import { api, cn, parseJwt } from "@/lib/utils";
+import { api, cn, type Nullable, parseJwt } from "@/lib/utils";
 import CookieAlert from "../cookie-alert";
 import { Google } from "../svg/google";
 import { Logo } from "../svg/logo";
@@ -29,10 +29,16 @@ import {
 	FormLabel,
 	FormMessage,
 } from "../ui/form";
+import { Turnstile } from "./turnstile";
 
 export function LoginForm({ errors }: { errors?: { google?: string } }) {
 	const [loading, setLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
+	const [turnstile, setTurnstile] = useState<{
+		token: Nullable<string>;
+		loading: boolean;
+		error: boolean;
+	}>({ token: null, loading: true, error: false });
 
 	const form = useForm<z.infer<typeof loginUserSchema>>({
 		resolver: zodResolver(loginUserSchema),
@@ -52,7 +58,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 		try {
 			const res = await axios.post<ApiResponse<{ token: string }>>(
 				api("/auth/login"),
-				values,
+				{ ...values, cfTurnstileToken: turnstile.token },
 				{
 					withCredentials: true,
 				}
@@ -147,12 +153,31 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 							</FormItem>
 						)}
 					/>
+					<Turnstile
+						onError={() =>
+							setTurnstile({ token: null, loading: false, error: true })
+						}
+						onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
+						onToken={(token) =>
+							setTurnstile({ token, loading: false, error: false })
+						}
+					/>
+					{turnstile.error && (
+						<p className="text-destructive text-xs">
+							Falha na verificação de segurança. Recarregue a página e tente
+							novamente.
+						</p>
+					)}
 					<Button
 						className="w-full"
-						disabled={loading || !formState.isValid}
+						disabled={loading || !formState.isValid || turnstile.loading}
 						type="submit"
 					>
-						{loading ? <Loader2 className="size-4 animate-spin" /> : "Entrar"}
+						{loading || turnstile.loading ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							"Entrar"
+						)}
 					</Button>
 					<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
 						<span className="relative z-10 bg-background px-2 text-muted-foreground">

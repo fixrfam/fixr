@@ -1,6 +1,13 @@
 import { cookieKey } from "@fixr/constants/cookies";
 import { env } from "@fixr/env/web";
+import { createAbility } from "@fixr/permissions";
 import { type NextRequest, NextResponse } from "next/server";
+import {
+	getRequiredPermission,
+	getRequiredRoles,
+	isPublicRoute,
+	routeRules,
+} from "./lib/rbac";
 import { parseJwt } from "./lib/utils";
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <TODO: Refactor this later to split it into smaller functions>
@@ -100,9 +107,59 @@ export async function middleware(request: NextRequest) {
 				new URL(redirectPath, env.NEXT_PUBLIC_APP_URL)
 			);
 		}
+
+		/**
+		 * Role-Based Access Control (RBAC) enforcement.
+		 *
+		 * Resolves the user's role from the JWT payload and evaluates
+		 * both role and permission requirements defined in the route rules.
+		 * If the user lacks the necessary role or permission, they are
+		 * redirected to the home dashboard.
+		 */
+		const pathname = request.nextUrl.pathname;
+		const userRole = payload?.company?.role ?? "guest";
+
+		/**
+		 * Public routes (e.g., login, support) are accessible without
+		 * authorization checks. Only protected routes with defined
+		 * permissions or roles proceed to RBAC evaluation.
+		 */
+		if (!isPublicRoute(pathname, routeRules)) {
+			const requiredPerm = getRequiredPermission(pathname, routeRules);
+			const requiredRoles = getRequiredRoles(pathname, routeRules);
+
+			const ability = createAbility(userRole);
+
+			/**
+			 * Role-based gate: if the route specifies required roles,
+			 * verify the user's role is included. Redirects to home
+			 * when the user lacks an appropriate role.
+			 */
+			if (requiredRoles && requiredRoles.length > 0) {
+				const hasRequiredRole = requiredRoles.includes(userRole);
+				if (!hasRequiredRole) {
+					return redirectToHome(userTenant);
+				}
+			}
+
+			/**
+			 * Permission-based gate: if the route requires a specific
+			 * permission, verify the user's ability grants it.
+			 * Redirects to home when the user lacks the required permission.
+			 */
+			if (requiredPerm && ability.cannot(requiredPerm as never)) {
+				return redirectToHome(userTenant);
+			}
+		}
 	}
 
 	return NextResponse.next();
+
+	function redirectToHome(tenant: string) {
+		return NextResponse.redirect(
+			new URL(`/dashboard/${tenant}/home`, env.NEXT_PUBLIC_APP_URL)
+		);
+	}
 }
 
 async function revalidate(request: NextRequest, isProtectedRoute: boolean) {

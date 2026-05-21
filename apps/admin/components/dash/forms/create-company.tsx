@@ -43,6 +43,7 @@ export function CreateCompany() {
 			subdomain: "",
 			owner_email: "",
 			owner_password: "",
+			owner_cpf: "",
 		},
 		mode: "all",
 	});

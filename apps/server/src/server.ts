@@ -25,13 +25,15 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
-import { apiDescription } from "./docs/main";
-import { apiResponse } from "./helpers/response";
-import { accountRoutes } from "./routes/account.routes";
-import { authRoutes } from "./routes/auth.routes";
-import { companiesRoutes } from "./routes/companies/companies.routes";
-import { employeesRoutes } from "./routes/companies/employees/employees.routes";
-import { credentialsRoutes } from "./routes/credentials.routes";
+import { apiDescription } from "./core/docs/main";
+import { AppError } from "./core/lib/app-error";
+import { apiResponse } from "./core/lib/response";
+import { setupRBAC } from "./core/middlewares/rbac";
+import { accountRoutes } from "./modules/account/routes";
+import { authRoutes } from "./modules/auth/routes";
+import { companiesRoutes } from "./modules/companies/routes";
+import { credentialsRoutes } from "./modules/credentials/routes";
+import { employeesRoutes } from "./modules/employees/routes";
 
 const envToLogger = {
 	development: {
@@ -140,6 +142,8 @@ server.register(fastifyCookie, {
 	secret: env.COOKIE_ENCRYPTION_SECRET,
 });
 
+setupRBAC(server);
+
 server.register(fastifyStatic, {
 	root: join(cwd(), "public"),
 	prefix: "/public/",
@@ -176,25 +180,10 @@ server.register(fastifyCors, {
 	credentials: true,
 });
 
-//Map the zod errors to standard response
-server.setErrorHandler((error, _request, reply) => {
-	if (error instanceof ZodError) {
-		reply.status(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "bad_request",
-				message: "Type validation failed",
-				data: error.issues,
-			})
-		);
-		return;
-	}
-
-	reply.send(error);
-});
-
 server.setErrorHandler((error, request, response) => {
+	if (error instanceof AppError) {
+		return error.send(response);
+	}
 	if (hasZodFastifySchemaValidationErrors(error)) {
 		return response.code(400).send(
 			apiResponse({
@@ -222,6 +211,38 @@ server.setErrorHandler((error, request, response) => {
 			})
 		);
 	}
+
+	if (error instanceof ZodError) {
+		return response.status(400).send(
+			apiResponse({
+				status: 400,
+				error: "Bad Request",
+				code: "bad_request",
+				message: "Type validation failed",
+				data: error.issues,
+			})
+		);
+	}
+
+	request.log.error(error, "Unhandled error reached global error handler");
+
+	return response.status(500).send(
+		apiResponse({
+			status: 500,
+			error: "Internal Server Error",
+			code: "internal_error",
+			message: error instanceof Error ? error.message : "Something went wrong.",
+			data: {
+				...(error instanceof Error ? { message: error.message } : {}),
+				...(error instanceof Error && error.stack
+					? { stack: error.stack.split("\n").slice(0, 4).join("\n") }
+					: {}),
+				...(error && typeof error === "object"
+					? { details: String(error) }
+					: {}),
+			},
+		})
+	);
 });
 
 //Run server.
