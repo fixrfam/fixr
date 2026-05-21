@@ -17,7 +17,9 @@ export default function DowntimePage() {
 				<Image
 					alt="Fixr Banner"
 					className="w-full rounded-lg border border-border"
+					height={630}
 					src={"/og_image.jpg"}
+					width={1200}
 				/>
 
 				<p className="text-muted-foreground">
