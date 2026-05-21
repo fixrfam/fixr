@@ -49,6 +49,11 @@ export const errors = defineErrors({
 		message: "You are not allowed to perform this action.",
 		status: 403,
 	},
+	MISSING_PERMISSIONS: {
+		code: "missing_required_permissions",
+		message: "You dont have the required permissions to perform this action",
+		status: 403,
+	},
 	AUTH_JWT_INVALID: {
 		code: "auth_jwt_invalid",
 		message: "Authorization token is invalid or expired.",

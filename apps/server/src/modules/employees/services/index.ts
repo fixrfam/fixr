@@ -55,7 +55,7 @@ export class EmployeesService {
 		}
 
 		if (userJwt.company.subdomain !== subdomain) {
-			throw new AppError("EMPLOYEE_NOT_ALLOWED");
+			throw new AppError("EMPLOYEE_COMPANY_NOT_ALLOWED");
 		}
 
 		const company =

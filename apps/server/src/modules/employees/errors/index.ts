@@ -21,6 +21,11 @@ export const employeesErrors = defineErrors({
 		message: "You are not allowed to perform this action.",
 		status: 403,
 	},
+	EMPLOYEE_COMPANY_NOT_ALLOWED: {
+		code: "not_allowed",
+		message: "You are not allowed to access this company.",
+		status: 403,
+	},
 	EMPLOYEE_VIOLATES_ROLE_HIERARCHY: {
 		code: "violates_role_hierarchy",
 		message: "Managers may only create subordinate accounts.",

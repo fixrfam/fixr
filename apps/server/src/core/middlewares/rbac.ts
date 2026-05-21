@@ -1,9 +1,9 @@
 import { createAbility } from "@fixr/permissions";
 import type { Permission } from "@fixr/permissions/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
-import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
-import { apiResponse } from "../lib/response";
+import { AppError } from "../lib/app-error";
 
 declare module "fastify" {
 	interface FastifyRequest {
@@ -11,9 +11,20 @@ declare module "fastify" {
 	}
 }
 
-// biome-ignore lint/suspicious/useAwait: <We need to make this plugin async so it doesnt block IO, despite having no await expression>
-export const rbacPlugin: FastifyPluginAsync = async (fastify) => {
-	fastify.decorateRequest("ability", { getter: () => createAbility("guest") });
+const abilities = new WeakMap<
+	FastifyRequest,
+	ReturnType<typeof createAbility>
+>();
+
+export function setupRBAC(fastify: FastifyInstance) {
+	fastify.decorateRequest("ability", {
+		getter() {
+			return abilities.get(this) ?? createAbility("guest");
+		},
+		setter(val) {
+			abilities.set(this, val);
+		},
+	});
 
 	fastify.addHook("onRequest", (request, _reply, done) => {
 		const user = request.user as z.infer<typeof userJWT> | undefined;
@@ -21,21 +32,18 @@ export const rbacPlugin: FastifyPluginAsync = async (fastify) => {
 		request.ability = createAbility(role);
 		done();
 	});
-};
+}
 
 export function requirePermission(permission: Permission) {
-	return (request: FastifyRequest, reply: FastifyReply): void => {
+	return (
+		request: FastifyRequest,
+		_reply: FastifyReply,
+		done: (err?: Error) => void
+	): void => {
 		if (request.ability.cannot(permission)) {
-			reply.status(403).send(
-				apiResponse({
-					status: 403,
-					error: "Forbidden",
-					code: "missing_required_permissions",
-					message:
-						"You dont have the required permissions to perform this action",
-					data: null,
-				})
-			);
+			done(new AppError("MISSING_PERMISSIONS"));
+			return;
 		}
+		done();
 	};
 }

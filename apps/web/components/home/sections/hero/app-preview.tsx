@@ -19,16 +19,16 @@ export const AppPreview = () => {
 				<Image
 					alt=""
 					className="hidden dark:block"
-					height={988}
+					height={987}
 					src={"/home_dark.webp"}
-					width={1612}
+					width={1610}
 				/>
 				<Image
 					alt=""
 					className="block dark:hidden"
-					height={988}
+					height={987}
 					src={"/home_light.webp"}
-					width={1612}
+					width={1610}
 				/>
 			</div>
 			<div

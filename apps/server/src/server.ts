@@ -28,7 +28,7 @@ import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
-import { rbacPlugin } from "./core/middlewares/rbac";
+import { setupRBAC } from "./core/middlewares/rbac";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { companiesRoutes } from "./modules/companies/routes";
@@ -142,7 +142,7 @@ server.register(fastifyCookie, {
 	secret: env.COOKIE_ENCRYPTION_SECRET,
 });
 
-server.register(rbacPlugin);
+setupRBAC(server);
 
 server.register(fastifyStatic, {
 	root: join(cwd(), "public"),
@@ -224,13 +224,23 @@ server.setErrorHandler((error, request, response) => {
 		);
 	}
 
+	request.log.error(error, "Unhandled error reached global error handler");
+
 	return response.status(500).send(
 		apiResponse({
 			status: 500,
 			error: "Internal Server Error",
 			code: "internal_error",
-			message: "Something went wrong.",
-			data: null,
+			message: error instanceof Error ? error.message : "Something went wrong.",
+			data: {
+				...(error instanceof Error ? { message: error.message } : {}),
+				...(error instanceof Error && error.stack
+					? { stack: error.stack.split("\n").slice(0, 4).join("\n") }
+					: {}),
+				...(error && typeof error === "object"
+					? { details: String(error) }
+					: {}),
+			},
 		})
 	);
 });
