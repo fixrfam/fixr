@@ -4,7 +4,7 @@ import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { emailDisplayName } from "@fixr/mail/services";
 import type { userJWT } from "@fixr/schemas/auth";
 import type { confirmPasswordResetSchema } from "@fixr/schemas/credentials";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
