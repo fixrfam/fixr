@@ -74,6 +74,15 @@ export const admin = await Nextjs("admin", {
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env
 			.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY as string,
 		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL as string,
+
+		MYSQL_ROOT_PASSWORD: process.env.MYSQL_ROOT_PASSWORD as string,
+		MYSQL_DATABASE: process.env.MYSQL_DATABASE as string,
+		MYSQL_USER: process.env.MYSQL_USER as string,
+		MYSQL_PASSWORD: process.env.MYSQL_PASSWORD as string,
+
+		DB_URL: process.env.DB_URL as string,
+
+		REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
 	},
 });
 
