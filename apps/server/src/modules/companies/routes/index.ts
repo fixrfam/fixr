@@ -1,6 +1,9 @@
 import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
-import { getCompanyBySubdomainSchema } from "@fixr/schemas/companies";
+import {
+	createCompanySchema,
+	getCompanyBySubdomainSchema,
+} from "@fixr/schemas/companies";
 import type { z } from "zod";
 import { requirePermission } from "@/src/core/middlewares/rbac";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
@@ -45,6 +48,21 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 			await CompaniesController.getCompanyBySubdomain({
 				subdomain: params.subdomain,
 				userJwt,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/",
+		{
+			schema: companiesDocs.createCompanySchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const body = await createCompanySchema.parseAsync(request.body);
+
+			await CompaniesController.createCompany({
+				body,
 				response,
 			});
 		})

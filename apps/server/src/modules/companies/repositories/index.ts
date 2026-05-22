@@ -1,7 +1,15 @@
 import { db, eq } from "@fixr/db/connection";
-import { companies, companySelectSchema } from "@fixr/db/schema";
+import {
+	companies,
+	companySelectSchema,
+	employees,
+	users,
+} from "@fixr/db/schema";
+import type { createCompanySchema } from "@fixr/schemas/companies";
+import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { CACHE_TTL, companyCacheKey } from "../../../core/lib/cache";
+import { hashPassword } from "../../../core/lib/hash-password";
 
 /** @description Companies data access layer */
 export class CompaniesRepository {
@@ -53,5 +61,61 @@ export class CompaniesRepository {
 		await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL);
 
 		return companySelectSchema.parse(company);
+	}
+
+	/** @description Check if an employee with the given CPF exists */
+	static async queryEmployeeByCpf(cpf: string) {
+		const [data] = await db
+			.select()
+			.from(employees)
+			.where(eq(employees.cpf, cpf));
+		return data;
+	}
+
+	/** @description Check if a company with the given CNPJ exists */
+	static async queryCompanyByCnpj(cnpj: string) {
+		const [data] = await db
+			.select()
+			.from(companies)
+			.where(eq(companies.cnpj, cnpj));
+		return data;
+	}
+
+	/** @description Check if a user with the given email exists */
+	static async queryUserByEmail(email: string) {
+		const [data] = await db.select().from(users).where(eq(users.email, email));
+		return data;
+	}
+
+	/**
+	 * @description Create a company, user, and employee (admin) in sequence
+	 */
+	static async createOrgWithAdmin(data: z.infer<typeof createCompanySchema>) {
+		const [orgId] = await db
+			.insert(companies)
+			.values({
+				name: data.name,
+				cnpj: data.cnpj,
+				address: data.address || null,
+				subdomain: data.subdomain,
+			})
+			.$returningId();
+
+		const [adminId] = await db
+			.insert(users)
+			.values({
+				email: data.owner_email,
+				passwordHash: await hashPassword(data.owner_password),
+				verified: true,
+			})
+			.$returningId();
+
+		await db.insert(employees).values({
+			name: "Admin",
+			cpf: data.owner_cpf,
+			role: "admin" as const,
+			userId: adminId?.id as string,
+			companyId: orgId?.id as string,
+		});
 	}
 }

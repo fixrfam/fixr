@@ -1,6 +1,6 @@
 "use client";
 
-import { cnpj, cpf, unmask } from "@fixr/constants/masks";
+import { cnpj, cpf } from "@fixr/constants/masks";
 import { defaultMessages, messages } from "@fixr/constants/messages";
 import { createCompanySchema } from "@fixr/schemas/companies";
 import type { ApiResponse } from "@fixr/schemas/utils";
@@ -54,14 +54,12 @@ export function CreateCompany() {
 		const formatted: z.infer<typeof createCompanySchema> = {
 			...values,
 			subdomain: values.subdomain.toLowerCase(),
-			cnpj: unmask.cnpj(values.cnpj),
-			owner_cpf: unmask.cpf(values.owner_cpf),
 		};
 
 		try {
 			const { data: response, error } = await tryCatch<
 				AxiosResponse<ApiResponse>
-			>(axios.post("/api/companies", formatted));
+			>(axios.post(`${process.env.NEXT_PUBLIC_API_URL}/companies`, formatted));
 
 			if (error && error instanceof AxiosError) {
 				const message =

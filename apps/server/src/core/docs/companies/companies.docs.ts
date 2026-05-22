@@ -1,5 +1,8 @@
 import { companySelectSchema } from "@fixr/db/schema";
-import { getCompanyBySubdomainSchema as getCompanyBySubdomainParamsSchema } from "@fixr/schemas/companies";
+import {
+	createCompanySchema,
+	getCompanyBySubdomainSchema as getCompanyBySubdomainParamsSchema,
+} from "@fixr/schemas/companies";
 import type { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../types";
 
@@ -58,7 +61,32 @@ const getCompanyBySubdomainSchema: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const createCompanySchemaDoc: FastifySchema = {
+	tags: ["Companies"],
+	summary: "Create a new company",
+	description:
+		"Creates a new company with an admin user and sends an invite email.",
+	body: createCompanySchema,
+	response: {
+		201: zodResponseSchema({
+			status: 201,
+			error: null,
+			code: "company_create_success",
+			message: "Company created successfully.",
+			data: null,
+		}).describe("Company created successfully."),
+		409: zodResponseSchema({
+			status: 409,
+			error: "Conflict",
+			code: "cpf_conflict",
+			message: "CPF is already registered.",
+			data: null,
+		}).describe("Conflict with existing data."),
+	},
+};
+
 export const companiesDocs = {
 	getUserCompanySchema,
 	getCompanyByIdSchema: getCompanyBySubdomainSchema,
+	createCompanySchema: createCompanySchemaDoc,
 };
