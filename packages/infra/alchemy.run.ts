@@ -83,6 +83,7 @@ export const admin = await Nextjs("admin", {
 		DB_URL: process.env.DB_URL as string,
 
 		REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
+		RESEND_KEY: process.env.RESEND_KEY as string,
 	},
 });
 
