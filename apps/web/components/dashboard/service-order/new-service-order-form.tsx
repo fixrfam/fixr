@@ -1,8 +1,10 @@
 "use client";
 
+import { cpf, unmask } from "@fixr/constants/masks";
 import { getDevices } from "@fixr/mock";
 import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMaskito } from "@maskito/react";
 import { useQuery } from "@tanstack/react-query";
 import { ImagePlus, Trash2, UserPlus } from "lucide-react";
 import { type ComponentPropsWithoutRef, useMemo, useState } from "react";
@@ -75,12 +77,19 @@ export function NewServiceOrderForm({
 		mode: "all",
 	});
 
+	const cpfMask = useMaskito({ options: { mask: cpf } });
+
 	const handleCustomerCreated = (cpf: string) => {
 		form.setValue("customerCPF", cpf);
 	};
 
 	const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
-		console.log("Ordem de serviço a ser criada:", values);
+		const formattedValues = {
+			...values,
+			customerCPF: unmask.cpf(values.customerCPF),
+		};
+
+		console.log("Ordem de serviço a ser criada:", formattedValues);
 	};
 
 	const [selectedMarca, setSelectedMarca] = useState("");
@@ -169,27 +178,10 @@ export function NewServiceOrderForm({
 										<Input
 											placeholder="123.456.789-00"
 											{...field}
-											onBlur={async (e) => {
-												field.onBlur();
-
-												const cpf = e.target.value.replace(/\D/g, "");
-												if (!cpf) {
-													return;
-												}
-												const res = await fetch(
-													`/api/customers/exists?cpf=${cpf}`
-												);
-												const data = await res.json();
-
-												if (data.exists) {
-													form.setError("customerCPF", {
-														type: "manual",
-														message: "Este CPF já está cadastrado.",
-													});
-												} else {
-													form.clearErrors("customerCPF");
-												}
-											}}
+											onInput={(e) =>
+												form.setValue("customerCPF", e.currentTarget.value)
+											}
+											ref={cpfMask}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -226,7 +218,13 @@ export function NewServiceOrderForm({
 						<FormItem className="flex-grow">
 							<FormLabel>Defeito relatado pelo cliente</FormLabel>
 							<FormControl>
-								<Textarea placeholder="Descreva o defeito" {...field} />
+								<Textarea
+									autoCapitalize="off"
+									autoCorrect="off"
+									placeholder="Descreva o defeito relatado pelo cliente"
+									spellCheck={false}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -349,7 +347,10 @@ export function NewServiceOrderForm({
 							<FormLabel>Observações</FormLabel>
 							<FormControl>
 								<Textarea
+									autoCapitalize="off"
+									autoCorrect="off"
 									placeholder="Adicione observações sobre a ordem de serviço"
+									spellCheck={false}
 									{...field}
 								/>
 							</FormControl>
