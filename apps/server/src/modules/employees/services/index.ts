@@ -61,6 +61,10 @@ export class EmployeesService {
 		const company =
 			await CompaniesRepository.queryCompanyBySubdomain(subdomain);
 
+		if (!company) {
+			throw new AppError("COMPANY_NOT_FOUND");
+		}
+
 		const PER_PAGE = perPage ?? 10;
 
 		//If there is no sort arg, fallback to newer records.
@@ -253,6 +257,10 @@ export class EmployeesService {
 
 		if (existingCpf) {
 			throw new AppError("EMPLOYEE_CPF_CONFLICT");
+		}
+
+		if (!company) {
+			throw new AppError("COMPANY_NOT_FOUND");
 		}
 
 		const employeePassword = data.password ?? generateRandomPassword();

@@ -31,6 +31,11 @@ export const env = createEnv({
 			.default("development")
 			.describe("Node environment"),
 		FRONTEND_URL: z.url().describe("Frontend application URL"),
+		ADMIN_URL: z.url().describe("Admin panel URL for CORS"),
+		CLERK_SECRET_KEY: z
+			.string()
+			.min(1)
+			.describe("Clerk secret key for admin JWT verification"),
 		TURNSTILE_SECRET_KEY: z
 			.string()
 			.min(1)

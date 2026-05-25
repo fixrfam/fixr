@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { cnpj, cpf } from "@fixr/constants/masks";
 import { defaultMessages, messages } from "@fixr/constants/messages";
 import { createCompanySchema } from "@fixr/schemas/companies";
@@ -33,6 +34,7 @@ import { generateRandomPassword, tryCatch } from "@/lib/utils";
 
 export function CreateCompany() {
 	const [loading, setLoading] = useState(false);
+	const { getToken } = useAuth();
 
 	const form = useForm<z.infer<typeof createCompanySchema>>({
 		resolver: zodResolver(createCompanySchema),
@@ -56,10 +58,18 @@ export function CreateCompany() {
 			subdomain: values.subdomain.toLowerCase(),
 		};
 
+		const token = await getToken();
+
 		try {
 			const { data: response, error } = await tryCatch<
 				AxiosResponse<ApiResponse>
-			>(axios.post(`${process.env.NEXT_PUBLIC_API_URL}/companies`, formatted));
+			>(
+				axios.post(`${process.env.NEXT_PUBLIC_API_URL}/companies`, formatted, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				})
+			);
 
 			if (error && error instanceof AxiosError) {
 				const message =

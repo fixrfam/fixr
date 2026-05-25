@@ -24,7 +24,11 @@ export class CompaniesRepository {
 		const cached = await redis.get(cacheKey);
 
 		if (cached) {
-			return companySelectSchema.parse(JSON.parse(cached));
+			const parsed = JSON.parse(cached);
+			if (!parsed) {
+				return undefined;
+			}
+			return companySelectSchema.parse(parsed);
 		}
 
 		const [company] = await db
@@ -32,6 +36,11 @@ export class CompaniesRepository {
 			.from(companies)
 			.where(eq(companies.id, id))
 			.limit(1);
+
+		if (!company) {
+			await redis.set(cacheKey, JSON.stringify(null), "EX", CACHE_TTL);
+			return undefined;
+		}
 
 		await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL);
 
@@ -49,7 +58,11 @@ export class CompaniesRepository {
 		const cached = await redis.get(cacheKey);
 
 		if (cached) {
-			return companySelectSchema.parse(JSON.parse(cached));
+			const parsed = JSON.parse(cached);
+			if (!parsed) {
+				return undefined;
+			}
+			return companySelectSchema.parse(parsed);
 		}
 
 		const [company] = await db
@@ -57,6 +70,11 @@ export class CompaniesRepository {
 			.from(companies)
 			.where(eq(companies.subdomain, subdomain))
 			.limit(1);
+
+		if (!company) {
+			await redis.set(cacheKey, JSON.stringify(null), "EX", CACHE_TTL);
+			return undefined;
+		}
 
 		await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL);
 

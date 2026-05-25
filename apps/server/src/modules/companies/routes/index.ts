@@ -5,10 +5,11 @@ import {
 	getCompanyBySubdomainSchema,
 } from "@fixr/schemas/companies";
 import type { z } from "zod";
-import { requirePermission } from "@/src/core/middlewares/rbac";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { authenticateAdmin } from "../../../core/middlewares/authenticate-admin";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { CompaniesController } from "../controllers";
 
@@ -56,9 +57,19 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
 		"/",
 		{
+			preHandler: [authenticateAdmin],
 			schema: companiesDocs.createCompanySchema,
 		},
 		withErrorHandler(async (request, response) => {
+			request.log.info(
+				{
+					body: request.body,
+					bodyType: typeof request.body,
+					bodyJson: JSON.stringify(request.body),
+				},
+				"create-company body"
+			);
+
 			const body = await createCompanySchema.parseAsync(request.body);
 
 			await CompaniesController.createCompany({

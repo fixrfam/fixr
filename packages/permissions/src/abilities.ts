@@ -55,6 +55,7 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	admin: [
 		...baseEmployee,
+		permissions.companies.create,
 		permissions.companies.update,
 		permissions.employees.read,
 		permissions.employees.create,

@@ -65,7 +65,7 @@ const createCompanySchemaDoc: FastifySchema = {
 	tags: ["Companies"],
 	summary: "Create a new company",
 	description:
-		"Creates a new company with an admin user and sends an invite email.",
+		"Creates a new company with an admin user and sends an invite email. Restricted to admin users authenticated via Clerk on the private admin panel.",
 	body: createCompanySchema,
 	response: {
 		201: zodResponseSchema({
@@ -75,6 +75,20 @@ const createCompanySchemaDoc: FastifySchema = {
 			message: "Company created successfully.",
 			data: null,
 		}).describe("Company created successfully."),
+		401: zodResponseSchema({
+			status: 401,
+			error: "Unauthorized",
+			code: "auth_jwt_invalid",
+			message: "Authorization token is invalid or expired.",
+			data: null,
+		}).describe("Invalid or expired Clerk session token."),
+		403: zodResponseSchema({
+			status: 403,
+			error: "Forbidden",
+			code: "missing_required_permissions",
+			message: "You dont have the required permissions to perform this action",
+			data: null,
+		}).describe("User is not a platform admin."),
 		409: zodResponseSchema({
 			status: 409,
 			error: "Conflict",
@@ -83,6 +97,7 @@ const createCompanySchemaDoc: FastifySchema = {
 			data: null,
 		}).describe("Conflict with existing data."),
 	},
+	security: [{ JWT: [] }],
 };
 
 export const companiesDocs = {
