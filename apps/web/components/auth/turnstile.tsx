@@ -13,7 +13,12 @@ interface TurnstileProps {
 	onInteractive?: () => void;
 }
 
-export function Turnstile({ onToken, onError, onLoad, onInteractive }: TurnstileProps) {
+export function Turnstile({
+	onToken,
+	onError,
+	onLoad,
+	onInteractive,
+}: TurnstileProps) {
 	const [mounted, setMounted] = useState(false);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,12 +43,18 @@ export function Turnstile({ onToken, onError, onLoad, onInteractive }: Turnstile
 
 	return (
 		<TurnstileWidget
+			onBeforeInteractive={() => {
+				onInteractive?.();
+			}}
 			onError={() => {
 				onToken(null);
 				onError?.();
 			}}
 			onExpire={() => {
 				onToken(null);
+			}}
+			onSuccess={(token) => {
+				onToken(token);
 			}}
 			onTimeout={() => {
 				onToken(null);
@@ -54,12 +65,6 @@ export function Turnstile({ onToken, onError, onLoad, onInteractive }: Turnstile
 					clearTimeout(timeoutRef.current);
 				}
 				onLoad?.();
-			}}
-			onBeforeInteractive={() => {
-				onInteractive?.();
-			}}
-			onSuccess={(token) => {
-				onToken(token);
 			}}
 			options={{
 				theme: "light",

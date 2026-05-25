@@ -1,13 +1,12 @@
 import { cookieKey } from "@fixr/constants/cookies";
-import { env } from "@fixr/env/web";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
 	const cookieStore = await cookies();
 
 	cookieStore.delete(cookieKey("session"));
 	cookieStore.delete(cookieKey("refreshToken"));
 
-	return NextResponse.redirect(new URL("/auth/login", env.NEXT_PUBLIC_APP_URL));
+	return NextResponse.redirect(new URL("/auth/login", request.url));
 }
