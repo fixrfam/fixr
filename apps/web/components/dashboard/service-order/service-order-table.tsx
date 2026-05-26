@@ -20,6 +20,7 @@ interface Props {
 }
 
 const STATUS_STYLE_MAP_TABLE = {
+	registered: "bg-sky-400 text-sky-900",
 	parts_pending: "bg-green-400 text-green-900",
 	analysis: "bg-green-400 text-green-900",
 	finished: "bg-blue-400 text-blue-900",
@@ -28,7 +29,6 @@ const STATUS_STYLE_MAP_TABLE = {
 	approval_pending: "bg-green-400 text-green-900",
 	in_progress: "bg-blue-400 text-blue-900",
 	ready_for_pickup: "bg-green-400 text-green-900",
-	contacted: "bg-gray-400 text-gray-900",
 } as const;
 
 function getStatusClassTable(statusId: string) {

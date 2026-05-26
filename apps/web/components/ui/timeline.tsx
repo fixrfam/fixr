@@ -283,7 +283,7 @@ const timelineItemVariants = cva("relative flex", {
     {
       orientation: "vertical",
       variant: "default",
-      class: "gap-3 pb-8 last:pb-0",
+      class: "gap-3 last:pb-0",
     },
     {
       orientation: "horizontal",
