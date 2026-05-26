@@ -19,7 +19,7 @@ import {
 	Plus,
 	User,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
 import { type ComponentPropsWithoutRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -46,21 +46,13 @@ import { axios } from "@/lib/auth/axios";
 import { api, tryCatch } from "@/lib/utils";
 import { generateRandomPassword } from "@/lib/utils/generate-random-password";
 
-declare module "next-auth" {
-	interface Session {
-		company?: {
-			subdomain: string;
-		};
-	}
-}
-
 export function NewEmployeeForm({
 	onSuccess,
 }: ComponentPropsWithoutRef<"form"> & {
 	onSuccess?: () => void;
 }) {
 	const [loading, setLoading] = useState(false);
-	const { data: session } = useSession();
+	const { subdomain } = useParams<{ subdomain: string }>();
 
 	const form = useForm<z.infer<typeof createEmployeeSchema>>({
 		resolver: zodResolver(createEmployeeSchema),
@@ -79,15 +71,6 @@ export function NewEmployeeForm({
 	async function onSubmit(values: z.infer<typeof createEmployeeSchema>) {
 		setLoading(true);
 
-		if (!session?.company?.subdomain) {
-			toast.error({
-				text: "Erro",
-				description: "Sessão inválida. Por favor, faça login novamente.",
-			});
-			setLoading(false);
-			return;
-		}
-
 		const formatted: z.infer<typeof createEmployeeSchema> = {
 			...values,
 			cpf: unmask.cpf(values.cpf),
@@ -96,12 +79,7 @@ export function NewEmployeeForm({
 		try {
 			const { data: response, error } = await tryCatch<
 				AxiosResponse<ApiResponse>
-			>(
-				axios.post(
-					api(`/companies/${session.company.subdomain}/employees`),
-					formatted
-				)
-			);
+			>(axios.post(api(`/companies/${subdomain}/employees`), formatted));
 
 			if (error && error instanceof AxiosError) {
 				const message =
