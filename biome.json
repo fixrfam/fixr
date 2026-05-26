@@ -68,7 +68,8 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useBlockStatements": "off"
       },
       "performance": {
         "noBarrelFile": "off",

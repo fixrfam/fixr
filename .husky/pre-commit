@@ -72,7 +72,7 @@ fi
 
 # Run type checking
 echo "🔍 Running type checks..."
-bun run check-types
+bun run --filter '*' check-types
 TYPE_CHECK_EXIT_CODE=$?
 
 if [ $TYPE_CHECK_EXIT_CODE -ne 0 ]; then

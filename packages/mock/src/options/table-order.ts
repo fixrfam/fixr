@@ -1,3 +1,14 @@
+export type ServiceOrderStatus =
+	| "registered"
+	| "parts_pending"
+	| "analysis"
+	| "finished"
+	| "canceled"
+	| "quote_pending"
+	| "approval_pending"
+	| "in_progress"
+	| "ready_for_pickup";
+
 export interface ServiceOrderRow {
 	id: string;
 	orderNumber: string;
@@ -10,16 +21,7 @@ export interface ServiceOrderRow {
 	model: string;
 	technician: string;
 	status: {
-		id:
-			| "parts_pending"
-			| "analysis"
-			| "finished"
-			| "canceled"
-			| "quote_pending"
-			| "approval_pending"
-			| "in_progress"
-			| "ready_for_pickup"
-			| "contacted";
+		id: ServiceOrderStatus;
 		label: string;
 	};
 	client: {
@@ -36,7 +38,7 @@ export interface ServiceOrderRow {
 	parts?: string[];
 	history: {
 		id: string;
-		status: string;
+		status: ServiceOrderStatus;
 		label: string;
 		dateTime: string;
 		comment: string;
@@ -73,6 +75,13 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		notes: "Troca do conector de carga iniciada",
 		parts: ["Tela", "Bateria", "Conector de carga"],
 		history: [
+			{
+				id: "h0",
+				status: "registered",
+				label: "Registrada",
+				dateTime: "03/05/2026 14:30",
+				comment: "Ordem de serviço registrada pelo técnico.",
+			},
 			{
 				id: "h1",
 				status: "analysis",
@@ -112,12 +121,12 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://via.placeholder.com/150?text=Imagem+1",
+				url: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho com a tela trincada.",
 			},
 			{
 				id: "img2",
-				url: "https://via.placeholder.com/150?text=Imagem+2",
+				url: "https://images.unsplash.com/photo-1510557880182-3b931ea6e2b1?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho sem resposta ao toque.",
 			},
 		],
@@ -146,23 +155,37 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		notes: "Diagnóstico concluído, aguardando chegada de bateria nova.",
 		history: [
 			{
+				id: "h0",
+				status: "registered",
+				label: "Registrada",
+				dateTime: "04/05/2026 09:00",
+				comment: "Ordem de serviço registrada pelo técnico.",
+			},
+			{
+				id: "h0b",
+				status: "analysis",
+				label: "Em análise",
+				dateTime: "04/05/2026 14:00",
+				comment: "Diagnóstico concluído, necessário troca de bateria.",
+			},
+			{
 				id: "h1",
 				status: "parts_pending",
 				label: "Pendente de peças",
 				dateTime: "06/05/2026 10:20",
-				comment: "Diagnóstico concluído, aguardando chegada de bateria nova.",
+				comment: "Aguardando chegada de bateria nova.",
 			},
 		],
 		parts: ["Bateria"],
 		images: [
 			{
 				id: "img1",
-				url: "https://via.placeholder.com/150?text=Imagem+1",
+				url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho com a tela trincada.",
 			},
 			{
 				id: "img2",
-				url: "https://via.placeholder.com/150?text=Imagem+2",
+				url: "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho sem resposta ao toque.",
 			},
 		],
@@ -190,6 +213,13 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		},
 		notes: "Reparo concluído, aguardando retirada pelo cliente.",
 		history: [
+			{
+				id: "h0",
+				status: "registered",
+				label: "Registrada",
+				dateTime: "01/05/2026 08:30",
+				comment: "Ordem de serviço registrada pelo técnico.",
+			},
 			{
 				id: "h1",
 				status: "analysis",
@@ -223,12 +253,12 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://via.placeholder.com/150?text=Imagem+1",
+				url: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho com a tela trincada.",
 			},
 			{
 				id: "img2",
-				url: "https://via.placeholder.com/150?text=Imagem+2",
+				url: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do aparelho sem resposta ao toque.",
 			},
 		],
@@ -258,6 +288,13 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		notes: "Cliente optou por cancelar a ordem de serviço.",
 		history: [
 			{
+				id: "h0",
+				status: "registered",
+				label: "Registrada",
+				dateTime: "05/05/2026 10:00",
+				comment: "Ordem de serviço registrada pelo técnico.",
+			},
+			{
 				id: "h1",
 				status: "analysis",
 				label: "Em análise",
@@ -282,7 +319,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://via.placeholder.com/150?text=Imagem+1",
+				url: "https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=600&q=80",
 				description: "Foto do notebook sem resposta ao ligar.",
 			},
 		],
