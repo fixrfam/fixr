@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { passwordSchema } from "./auth";
-import { documentSchema } from "./documention-validation";
+import { documentSchema } from "./documents";
 import { employeeRoles } from "./roles";
 
 export const createEmployeeSchema = z.object({

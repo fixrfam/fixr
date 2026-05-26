@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { documentSchema } from "./documention-validation";
+import { documentSchema } from "./documents";
 import { employeeRoles } from "./roles";
 
 export const accountSchema = z

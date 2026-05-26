@@ -20,7 +20,7 @@ export default function NewEmployeePage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="space-y-2">
-				<BackButton variant={"link"} />
+				<BackButton className="-translate-x-3" variant={"link"} />
 				<Heading
 					description={"Adicione um ou mais os funcionários na sua empresa."}
 					Icon={UserRoundPlus}

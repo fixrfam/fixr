@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { documentSchema } from "./documention-validation";
+import { documentSchema } from "./documents";
 
 export const createClientSchema = z.object({
 	name: z.string().min(1, "O nome é obrigatório"),

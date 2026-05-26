@@ -1,6 +1,6 @@
 import { formattedIMEI } from "@fixr/schemas/common";
 import { z } from "zod";
-import { documentSchema } from "./documention-validation";
+import { documentSchema } from "./documents";
 
 export const createOrderServiceSchema = z.object({
 	customerCPF: documentSchema("cpf").min(1, "O CPF é obrigatório"),

@@ -166,13 +166,13 @@ export function NewServiceOrderForm({
 				onSubmit={form.handleSubmit(onSubmit)}
 				{...props}
 			>
-				<div className="flex flex-grow items-end gap-4">
-					<div className="flex flex-grow flex-col gap-4">
+				<div className="flex grow gap-4">
+					<div className="flex grow flex-col gap-4">
 						<FormField
 							control={form.control}
 							name="customerCPF"
 							render={({ field }) => (
-								<FormItem className="flex-grow">
+								<FormItem className="grow">
 									<FormLabel>CPF do cliente</FormLabel>
 									<FormControl>
 										<Input
@@ -191,7 +191,7 @@ export function NewServiceOrderForm({
 					</div>
 
 					<Sheet>
-						<SheetTrigger asChild>
+						<SheetTrigger asChild className="mt-5.5">
 							<Button className="shrink-0" type="button">
 								Cadastrar novo <UserPlus className="size-4" />
 							</Button>

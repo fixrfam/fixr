@@ -20,6 +20,14 @@ function isRepeatedDigits(value: string) {
 	return REPEATED_DIGITS_REGEX.test(value);
 }
 
+/**
+ * Validates a Brazilian CPF (Cadastro de Pessoas Físicas) document number.
+ *
+ * The algorithm veriies the two check digits:
+ * 1st check digit: multiply digits 1-9 by weights 10 -> 2, sum them, multiply by 10, take %11
+ * 2nd check digit: multiply digits 1-10 by weights 11 -> 2, sum them, multiply by 10, take %11
+ * If the remainder is 10, the check digit is 0.
+ */
 export function isValidCPF(cpf: string) {
 	const value = onlyDigits(cpf);
 
@@ -45,6 +53,14 @@ export function isValidCPF(cpf: string) {
 	return digit1 === Number(value[9]) && digit2 === Number(value[10]);
 }
 
+/**
+ * Validates a Brazilian CNPJ (Cadastro Nacional da Pessoa Jurídica) document number.
+ *
+ * The algorithm verifies the two check digits using fixed weight arrays:
+ * 1st check digit: multiply digits 1-12 by weights [5,4,3,2,9,8,7,6,5,4,3,2], sum, take %11
+ * 2nd check digit: multiply digits 1-13 by weights [6,5,4,3,2,9,8,7,6,5,4,3,2], sum, take %11
+ * If remainder < 2, check digit is 0; otherwise it's 11 - remainder.
+ */
 export function isValidCNPJ(cnpj: string) {
 	const value = onlyDigits(cnpj);
 
