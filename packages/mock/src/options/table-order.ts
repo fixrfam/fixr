@@ -121,12 +121,12 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80",
+				url: "https://i.redd.it/broken-screen-and-back-iphone-13-pro-how-much-is-it-worth-v0-snmnyouzrwwe1.jpg?width=3024&format=pjpg&auto=webp&s=cc71f74906440b64bc06ca3cc69d80df06bcdf7a",
 				description: "Foto do aparelho com a tela trincada.",
 			},
 			{
 				id: "img2",
-				url: "https://images.unsplash.com/photo-1510557880182-3b931ea6e2b1?auto=format&fit=crop&w=600&q=80",
+				url: "https://preview.redd.it/can-someone-help-how-to-fix-a-broken-white-screen-iphone-13-v0-tokryq9qydme1.jpeg?width=1080&crop=smart&auto=webp&s=b95b6119f107fe887ada88ebe0846326000c4ed0",
 				description: "Foto do aparelho sem resposta ao toque.",
 			},
 		],
@@ -180,13 +180,8 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80",
-				description: "Foto do aparelho com a tela trincada.",
-			},
-			{
-				id: "img2",
-				url: "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=600&q=80",
-				description: "Foto do aparelho sem resposta ao toque.",
+				url: "https://eu.community.samsung.com/t5/image/serverpage/image-id/2620867iFECC0D4F8CEA7AEA?v=v2",
+				description: "Bateria do celular inchando",
 			},
 		],
 	},
@@ -253,13 +248,8 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=600&q=80",
-				description: "Foto do aparelho com a tela trincada.",
-			},
-			{
-				id: "img2",
-				url: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=600&q=80",
-				description: "Foto do aparelho sem resposta ao toque.",
+				url: "https://i.redd.it/9h3ki7g7fbe61.jpg",
+				description: "Foto do aparelho com agua no interior.",
 			},
 		],
 	},
@@ -319,8 +309,8 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 		images: [
 			{
 				id: "img1",
-				url: "https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=600&q=80",
-				description: "Foto do notebook sem resposta ao ligar.",
+				url: "https://newyorkcomputerhelp.com/wp-content/uploads/2020/11/blue-screen-pc-windows-issue-1024x1024.jpg",
+				description: "Foto do notebook dando tela azul ao ligar.",
 			},
 		],
 	},

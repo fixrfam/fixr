@@ -44,8 +44,8 @@ function ServiceOrderKeyValueItem({
 	}
 
 	return (
-		<div className={cn("flex items-start gap-4", className)}>
-			<dt className="w-28 shrink-0 text-muted-foreground sm:w-32">{label}</dt>
+		<div className={cn("flex items-start justify-between gap-4", className)}>
+			<dt className="shrink-0 text-muted-foreground">{label}</dt>
 			<dd
 				className={cn(
 					"wrap-break-words min-w-0 flex-1 font-medium",

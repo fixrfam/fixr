@@ -16,7 +16,7 @@ import {
 	ServiceOrderKeyValueList,
 } from "@/components/dashboard/service-order/widgets/service-order-key-value";
 import { ServiceOrderPartsList } from "@/components/dashboard/service-order/widgets/service-order-parts-list";
-import { ServiceOrderStatusBadge } from "@/components/ui/service-order-status-badge";
+import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import type { CardId } from "./utils/constants";
 
 type CardsMap = Record<CardId, React.ReactNode>;
@@ -32,7 +32,6 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem label="Numero" value={order.orderNumber} />
 					<ServiceOrderKeyValueItem
-						align="left"
 						label="Status"
 						value={
 							<ServiceOrderStatusBadge
