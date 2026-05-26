@@ -9,7 +9,11 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+import {
+	arrayMove,
+	SortableContext,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { ServiceOrderRow } from "@fixr/mock";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -178,7 +182,10 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 					direction="horizontal"
 				>
 					<ResizablePanel defaultSize={55} minSize={40}>
-						<SortableContext items={layout.left}>
+						<SortableContext
+							items={layout.left}
+							strategy={verticalListSortingStrategy}
+						>
 							<DroppableColumn id="left">
 								{layout.left.map((cardId, index) => (
 									<div className="space-y-6" key={cardId}>
@@ -196,7 +203,10 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 					</ResizablePanel>
 					<ResizableHandle withHandle />
 					<ResizablePanel defaultSize={45} minSize={35}>
-						<SortableContext items={layout.right}>
+						<SortableContext
+							items={layout.right}
+							strategy={verticalListSortingStrategy}
+						>
 							<DroppableColumn id="right">
 								{layout.right.map((cardId, index) => (
 									<div className="space-y-6" key={cardId}>

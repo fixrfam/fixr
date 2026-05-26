@@ -114,7 +114,7 @@ export function ServiceOrderLifecycle({
 				 * custom properties set on `<Timeline>`.
 				 */
 				const connectorSpacingClass =
-					"rounded-full ![top:var(--timeline-connector-gap)] ![height:calc(100%-var(--timeline-connector-gap)-var(--timeline-connector-gap))] ![left:calc(var(--timeline-dot-size)/2-1px)] ![width:2px]";
+					"rounded-full !translate-y-[calc(var(--timeline-connector-gap)*4)] ![height:calc(100%-var(--timeline-connector-gap)*5)] ![left:calc(var(--timeline-dot-size)/2-1px)] ![width:2px]";
 
 				return (
 					<TimelineItem key={phase.id}>
@@ -141,11 +141,11 @@ export function ServiceOrderLifecycle({
 						)}
 
 						<TimelineContent>
-							<TimelineHeader>
+							<TimelineHeader className="gap-0.5">
 								<div className="flex items-center justify-between gap-4">
 									<TimelineTitle>{phase.title}</TimelineTitle>
 									<span
-										className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-medium text-xs ${getStatusBadgeClass(
+										className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${getStatusBadgeClass(
 											{
 												isCanceled,
 												isCompleted,

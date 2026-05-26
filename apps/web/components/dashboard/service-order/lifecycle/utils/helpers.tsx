@@ -58,15 +58,15 @@ export function getStatusBadgeClass({
 	isActive: boolean;
 }) {
 	if (isCanceled) {
-		return "bg-rose-500/15 text-rose-600 border-rose-500/30";
+		return "bg-rose-500/20 text-rose-700 dark:text-rose-300";
 	}
 	if (isCompleted) {
-		return "bg-green-500/15 text-green-600 border-green-500/30";
+		return "bg-green-500/20 text-green-700 dark:text-green-300";
 	}
 	if (isActive) {
-		return "bg-primary/15 text-primary border-primary/30";
+		return "bg-primary/20 text-primary-600 dark:text-primary-300";
 	}
-	return "bg-primary/10 text-primary/60 border-primary/20";
+	return "bg-primary/20 text-primary/60";
 }
 
 /** Returns the Tailwind class for the timeline connector line based on phase state. */
@@ -83,7 +83,7 @@ export function getConnectorClass({
 		return `bg-green-500 ${connectorSpacingClass}`;
 	}
 	if (isActive) {
-		return `[background:linear-gradient(to_bottom,hsl(var(--primary))_50%,hsl(var(--primary)/0.45)_50%)] ${connectorSpacingClass}`;
+		return `bg-[linear-gradient(to_bottom,var(--primary)_50%,color-mix(in_oklab,var(--primary)_15%,transparent)_50%)] ${connectorSpacingClass}`;
 	}
 	return `bg-primary/45 ${connectorSpacingClass}`;
 }
@@ -101,13 +101,13 @@ export function getDotIcon({
 	Icon: ComponentType<{ className?: string }>;
 }) {
 	if (isCanceled) {
-		return <X className="size-5 text-white" />;
+		return <X className="size-6 text-red-100" />;
 	}
 	if (isCompleted) {
-		return <Check className="size-5 text-white" />;
+		return <Check className="size-6 text-green-100" />;
 	}
 	if (isActive) {
-		return <Icon className="size-5 text-white" />;
+		return <Icon className="size-5 fill-primary-100 text-primary-100" />;
 	}
 	return null;
 }
