@@ -12,7 +12,7 @@ export type ServiceOrderStatus =
 export interface ServiceOrderRow {
 	id: string;
 	orderNumber: string;
-	line:
+	category:
 		| "Telefonia"
 		| "Notebook e Informática"
 		| "Televisores e video"
@@ -54,7 +54,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	{
 		id: "1",
 		orderNumber: "58241",
-		line: "Telefonia",
+		category: "Telefonia",
 		mark: "Apple",
 		model: "iPhone 13",
 		technician: "João Silva",
@@ -134,7 +134,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	{
 		id: "2",
 		orderNumber: "60918",
-		line: "Telefonia",
+		category: "Telefonia",
 		mark: "Samsung",
 		model: "Galaxy S21",
 		technician: "Ana Costa",
@@ -188,7 +188,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	{
 		id: "3",
 		orderNumber: "73506",
-		line: "Telefonia",
+		category: "Telefonia",
 		mark: "Motorola",
 		model: "Moto G Power",
 		technician: "Ricardo Alves",
@@ -256,7 +256,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	{
 		id: "4",
 		orderNumber: "81473",
-		line: "Notebook e Informática",
+		category: "Notebook e Informática",
 		mark: "Dell",
 		model: "XPS 13",
 		technician: "Mariana Souza",

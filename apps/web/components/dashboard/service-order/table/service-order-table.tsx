@@ -52,7 +52,7 @@ export function ServiceOrdersTable({ subdomain }: Props) {
 				row.client.cpf,
 				row.mark,
 				row.model,
-				row.line,
+				row.category,
 				row.technician,
 				row.status.label,
 				row.orderDetails?.imei,

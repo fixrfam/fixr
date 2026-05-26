@@ -63,8 +63,8 @@ export function DeviceCell({
 	);
 }
 
-export function LineCell({ line }: { line: string }) {
-	return <span className="text-sm">{line}</span>;
+export function CategoryCell({ category }: { category: string }) {
+	return <span className="text-sm">{category}</span>;
 }
 
 export function TechnicianCell({ name }: { name: string }) {

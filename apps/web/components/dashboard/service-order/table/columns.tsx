@@ -8,17 +8,21 @@ import { useMemo } from "react";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import {
 	ActionsCell,
+	CategoryCell,
 	ClientCell,
 	DeviceCell,
 	IssueCell,
-	LineCell,
 	OrderNumberCell,
 	PartsCell,
 	StatusCell,
 	TechnicianCell,
 	UpdatedAtCell,
 } from "./cells";
-import { LINE_OPTIONS, STATUS_OPTIONS, TECH_OPTIONS } from "./filter-options";
+import {
+	CATEGORY_OPTIONS,
+	STATUS_OPTIONS,
+	TECH_OPTIONS,
+} from "./filter-options";
 
 const columnHelper = createColumnHelper<ServiceOrderRow>();
 
@@ -74,17 +78,17 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				),
 				meta: { label: "Aparelho" },
 			}),
-			columnHelper.accessor("line", {
+			columnHelper.accessor("category", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Linha" />
+					<DataTableColumnHeader column={column} label="Categoria" />
 				),
-				cell: ({ getValue }) => <LineCell line={getValue()} />,
+				cell: ({ getValue }) => <CategoryCell category={getValue()} />,
 				enableColumnFilter: true,
 				filterFn: multiSelectFilter,
 				meta: {
-					label: "Linha",
+					label: "Categoria",
 					variant: "multiSelect",
-					options: LINE_OPTIONS,
+					options: CATEGORY_OPTIONS,
 				},
 			}),
 			columnHelper.accessor("technician", {

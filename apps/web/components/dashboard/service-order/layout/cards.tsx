@@ -42,7 +42,7 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 							</ServiceOrderStatusBadge>
 						}
 					/>
-					<ServiceOrderKeyValueItem label="Linha" value={order.line} />
+					<ServiceOrderKeyValueItem label="Categoria" value={order.category} />
 					<ServiceOrderKeyValueItem label="Marca" value={order.mark} />
 					<ServiceOrderKeyValueItem label="Modelo" value={order.model} />
 				</ServiceOrderKeyValueList>

@@ -14,9 +14,9 @@ export const STATUS_OPTIONS: FilterOption[] = Array.from(
 	).values()
 );
 
-export const LINE_OPTIONS: FilterOption[] = Array.from(
-	new Set(mockServiceOrders.map((s) => s.line))
-).map((line) => ({ label: line, value: line }));
+export const CATEGORY_OPTIONS: FilterOption[] = Array.from(
+	new Set(mockServiceOrders.map((s) => s.category))
+).map((category) => ({ label: category, value: category }));
 
 export const TECH_OPTIONS: FilterOption[] = Array.from(
 	new Set(mockServiceOrders.map((s) => s.technician))
