@@ -131,7 +131,7 @@ export function DataTableDateFilter<TData>({
       const hasSelectedDates = selectedDates.from || selectedDates.to;
       const dateText = hasSelectedDates
         ? formatDateRange(selectedDates)
-        : "Select date range";
+        : "Selecione um intervalo de datas";
 
       return (
         <span className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function DataTableDateFilter<TData>({
     const hasSelectedDate = selectedDates.length > 0;
     const dateText = hasSelectedDate
       ? formatDate(selectedDates[0])
-      : "Select date";
+      : "Selecione uma data";
 
     return (
       <span className="flex items-center gap-2">

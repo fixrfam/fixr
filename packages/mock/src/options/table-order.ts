@@ -53,7 +53,7 @@ export interface ServiceOrderRow {
 export const mockServiceOrders: ServiceOrderRow[] = [
 	{
 		id: "1",
-		orderNumber: "1001",
+		orderNumber: "58241",
 		line: "Telefonia",
 		mark: "Apple",
 		model: "iPhone 13",
@@ -133,7 +133,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	},
 	{
 		id: "2",
-		orderNumber: "1002",
+		orderNumber: "60918",
 		line: "Telefonia",
 		mark: "Samsung",
 		model: "Galaxy S21",
@@ -187,7 +187,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	},
 	{
 		id: "3",
-		orderNumber: "1003",
+		orderNumber: "73506",
 		line: "Telefonia",
 		mark: "Motorola",
 		model: "Moto G Power",
@@ -255,7 +255,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 	},
 	{
 		id: "4",
-		orderNumber: "1004",
+		orderNumber: "81473",
 		line: "Notebook e Informática",
 		mark: "Dell",
 		model: "XPS 13",

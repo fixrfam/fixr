@@ -1,4 +1,8 @@
-import { flexRender, type Table as TanstackTable } from "@tanstack/react-table";
+import {
+  flexRender,
+  type Row,
+  type Table as TanstackTable,
+} from "@tanstack/react-table";
 import type * as React from "react";
 
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
@@ -16,6 +20,7 @@ import { cn } from "@/lib/utils";
 interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   table: TanstackTable<TData>;
   actionBar?: React.ReactNode;
+  onRowClick?: (row: Row<TData>) => void;
 }
 
 export function DataTable<TData>({
@@ -23,6 +28,7 @@ export function DataTable<TData>({
   actionBar,
   children,
   className,
+  onRowClick,
   ...props
 }: DataTableProps<TData>) {
   return (
@@ -61,10 +67,13 @@ export function DataTable<TData>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => onRowClick?.(row)}
+                  className={cn( "group", onRowClick && "cursor-pointer")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      className={cn("group-hover:bg-primary/5!")}
                       style={{
                         ...getColumnPinningStyles({ column: cell.column }),
                       }}
@@ -83,7 +92,7 @@ export function DataTable<TData>({
                   colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Sem resultados.
                 </TableCell>
               </TableRow>
             )}

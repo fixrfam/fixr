@@ -62,7 +62,7 @@ export function DataTableColumnHeader<TData, TValue>({
               onClick={() => column.toggleSorting(false)}
             >
               <ChevronUp />
-              Asc
+              Crescente
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               className="relative pr-8 pl-2 [&>span:first-child]:right-2 [&>span:first-child]:left-auto [&_svg]:text-muted-foreground"
@@ -70,7 +70,7 @@ export function DataTableColumnHeader<TData, TValue>({
               onClick={() => column.toggleSorting(true)}
             >
               <ChevronDown />
-              Desc
+              Decrescente
             </DropdownMenuCheckboxItem>
             {column.getIsSorted() && (
               <DropdownMenuItem
@@ -78,7 +78,7 @@ export function DataTableColumnHeader<TData, TValue>({
                 onClick={() => column.clearSorting()}
               >
                 <X />
-                Reset
+                Redefinir
               </DropdownMenuItem>
             )}
           </>
@@ -90,7 +90,7 @@ export function DataTableColumnHeader<TData, TValue>({
             onClick={() => column.toggleVisibility(false)}
           >
             <EyeOff />
-            Hide
+            Esconder
           </DropdownMenuCheckboxItem>
         )}
       </DropdownMenuContent>

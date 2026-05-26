@@ -37,7 +37,7 @@ export function DataTablePagination<TData>({
     >
       <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
         <div className="flex items-center space-x-2">
-          <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
+          <p className="whitespace-nowrap font-medium text-sm">Linhas por página</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -57,12 +57,12 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="flex items-center justify-center font-medium text-sm">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          Página {table.getState().pagination.pageIndex + 1} de{" "}
           {table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">
           <Button
-            aria-label="Go to first page"
+            aria-label="Ir para primeira página"
             variant="outline"
             size="icon"
             className="hidden size-8 lg:flex"
@@ -72,7 +72,7 @@ export function DataTablePagination<TData>({
             <ChevronsLeft />
           </Button>
           <Button
-            aria-label="Go to previous page"
+            aria-label="Ir para página anterior"
             variant="outline"
             size="icon"
             className="size-8"
@@ -82,7 +82,7 @@ export function DataTablePagination<TData>({
             <ChevronLeft />
           </Button>
           <Button
-            aria-label="Go to next page"
+            aria-label="Ir para próxima página"
             variant="outline"
             size="icon"
             className="size-8"
@@ -92,7 +92,7 @@ export function DataTablePagination<TData>({
             <ChevronRight />
           </Button>
           <Button
-            aria-label="Go to last page"
+            aria-label="Ir para última página"
             variant="outline"
             size="icon"
             className="hidden size-8 lg:flex"

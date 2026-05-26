@@ -45,6 +45,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   const [open, setOpen] = React.useState(false);
 
   const columnFilterValue = column?.getFilterValue();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedValues = new Set(
     Array.isArray(columnFilterValue) ? columnFilterValue : [],
   );
@@ -89,7 +90,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           {selectedValues?.size > 0 ? (
             <div
               role="button"
-              aria-label={`Clear ${title} filter`}
+              aria-label={`Limpar filtro ${title}`}
               tabIndex={0}
               className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onReset}
@@ -143,7 +144,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           <CommandInput placeholder={title} />
           <CommandList className="max-h-full">
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-[300px] scroll-py-1 overflow-y-auto overflow-x-hidden">
+            <CommandGroup className="max-h-75 scroll-py-1 overflow-y-auto overflow-x-hidden">
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
 
@@ -154,13 +155,13 @@ export function DataTableFacetedFilter<TData, TValue>({
                   >
                     <div
                       className={cn(
-                        "flex size-4 items-center justify-center rounded-sm border border-primary",
+                        "flex size-4 items-center justify-center rounded-[5px] border border-primary",
                         isSelected
                           ? "bg-primary"
                           : "opacity-50 [&_svg]:invisible",
                       )}
                     >
-                      <Check />
+                      <Check className={"text-white size-3"} />
                     </div>
                     {option.icon && <option.icon />}
                     <span className="truncate">{option.label}</span>
@@ -181,7 +182,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     onSelect={() => onReset()}
                     className="justify-center text-center"
                   >
-                    Clear filters
+                    Limpar filtros
                   </CommandItem>
                 </CommandGroup>
               </>
