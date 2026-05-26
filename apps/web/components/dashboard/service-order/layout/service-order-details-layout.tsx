@@ -178,7 +178,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			<div className="hidden gap-6 lg:block">
 				<ResizablePanelGroup
 					autoSaveId={storageKey}
-					className="min-w-[72rem] gap-6"
+					className="min-w-6xl gap-6"
 					direction="horizontal"
 				>
 					<ResizablePanel defaultSize={55} minSize={40}>
@@ -233,7 +233,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 						<DragOverlay adjustScale={false}>
 							{activeId ? (
 								<div
-									className="z-[1000] inline-block"
+									className="z-1000 inline-block"
 									style={dragWidth ? { width: `${dragWidth}px` } : undefined}
 								>
 									{cards[activeId]}

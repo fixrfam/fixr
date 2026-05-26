@@ -55,7 +55,7 @@ export function DataTableToolbar<TData>({
 						variant="outline"
 					>
 						<X />
-						Reset
+						Redefinir
 					</Button>
 				)}
 			</div>
@@ -94,7 +94,7 @@ function DataTableToolbarFilter<TData>({
 					return (
 						<div className="relative">
 							<Input
-								className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
+								className={cn("h-8 w-30", columnMeta.unit && "pr-8")}
 								inputMode="numeric"
 								onChange={(event) => column.setFilterValue(event.target.value)}
 								placeholder={columnMeta.placeholder ?? columnMeta.label}
