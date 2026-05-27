@@ -9,7 +9,7 @@
     "test": "dotenv -- vitest",
     "start": "dotenv -- node dist/index.js",
     "dev": "dotenv -- tsx watch src/index.ts",
-    "build": "dotenv -- tsup src",
+    "build": "dotenv -- tsup",
     "lint": "biome check",
     "lint:write": "biome check --write",
     "check-types": "tsc --noEmit"
