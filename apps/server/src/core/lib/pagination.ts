@@ -66,22 +66,42 @@ export async function getPaginatedRecords<T = unknown>({
 
 	const query = baseQuery.orderBy(order).limit(take).offset(skip);
 
-	// Cast the result to the expected type inferred from the select parameter (or table columns)
 	return (await query) as unknown[];
 }
 
-/**
- * Counts the total number of records matching the given condition.
- */
 export async function getPaginatedCount({
 	table,
 	where,
+	joins,
 }: {
 	table: unknown;
 	where?: SQL;
+	joins?: Join[];
 }) {
 	const tableRef = table as MySqlTable;
 	const query = db.select({ count: count() }).from(tableRef).$dynamic();
+
+	if (joins) {
+		for (const join of joins) {
+			const joinTable = join.table as MySqlTable;
+			switch (join.type) {
+				case "inner":
+					query.innerJoin(joinTable, join.on);
+					break;
+				case "left":
+					query.leftJoin(joinTable, join.on);
+					break;
+				case "right":
+					query.rightJoin(joinTable, join.on);
+					break;
+				case "full":
+					query.fullJoin(joinTable, join.on);
+					break;
+				default:
+					break;
+			}
+		}
+	}
 
 	if (where) {
 		query.where(where);

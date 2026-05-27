@@ -53,6 +53,10 @@
     "./service-orders": {
       "types": "./src/service-orders.ts",
       "default": "./src/service-orders.ts"
+    },
+    "./uploads": {
+      "types": "./src/uploads.ts",
+      "default": "./src/uploads.ts"
     }
   },
   "devDependencies": {

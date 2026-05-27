@@ -3,7 +3,9 @@ import { authErrors } from "../../modules/auth/errors";
 import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
 import { employeesErrors } from "../../modules/employees/errors";
+import { serviceOrdersErrors } from "../../modules/service-orders/errors";
 import { tokensErrors } from "../../modules/tokens/errors";
+import { uploadsErrors } from "../../modules/uploads/errors";
 import { defineErrors } from "../utils/errors";
 
 export const errors = defineErrors({
@@ -12,7 +14,9 @@ export const errors = defineErrors({
 	...credentialsErrors,
 	...companiesErrors,
 	...employeesErrors,
+	...serviceOrdersErrors,
 	...tokensErrors,
+	...uploadsErrors,
 
 	INTERNAL_ERROR: {
 		code: "internal_error",

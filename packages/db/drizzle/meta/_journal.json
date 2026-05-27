@@ -43,6 +43,13 @@
       "when": 1760755210443,
       "tag": "0005_faulty_mandarin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1766188800000,
+      "tag": "0006_service_orders",
+      "breakpoints": true
     }
   ]
 }
