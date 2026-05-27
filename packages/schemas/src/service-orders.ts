@@ -1,8 +1,9 @@
-import { cpf, formattedIMEI } from "@fixr/schemas/common";
+import { formattedIMEI } from "@fixr/schemas/common";
 import { z } from "zod";
+import { documentSchema } from "./documents";
 
 export const createOrderServiceSchema = z.object({
-	customerCPF: cpf.min(1, "O CPF é obrigatório"),
+	customerCPF: documentSchema("cpf").min(1, "O CPF é obrigatório"),
 	deviceIMEI: formattedIMEI.optional(),
 	description: z.string().min(1, "A descrição do problema é obrigatória"),
 	notes: z.string().optional(),
@@ -13,5 +14,5 @@ export const createOrderServiceSchema = z.object({
 	images: z
 		.array(z.instanceof(File))
 		.min(3, "Adicione pelo menos três fotos do aparelho")
-		.max(15, "Adicione no máximo cinco fotos do aparelho"),
+		.max(15, "Adicione no máximo quinze fotos do aparelho"),
 });

@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { passwordSchema } from "./auth";
-import { cnpj, cpf } from "./common";
+import { documentSchema } from "./documents";
 
 export const createCompanySchema = z.object({
 	name: z
 		.string()
 		.min(3, { message: "Name must be at least 3 characters long." })
 		.max(100, { message: "Name must be at most 100 characters long." }),
-	cnpj,
+	cnpj: documentSchema("cnpj"),
 	address: z
 		.string()
 		.min(3, { message: "Address must be at least 3 characters long." })
@@ -22,7 +22,7 @@ export const createCompanySchema = z.object({
 			message:
 				"Subdomain can only contain lowercase letters (a-z), numbers (0-9), and hyphens (-), but cannot start or end with a hyphen",
 		}),
-	owner_cpf: cpf,
+	owner_cpf: documentSchema("cpf"),
 	owner_email: z.string().email({ message: "Invalid email address." }),
 	owner_password: passwordSchema,
 });

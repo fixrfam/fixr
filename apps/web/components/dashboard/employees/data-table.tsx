@@ -28,7 +28,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { DashLink } from "../dash-link";
+import { DashLink } from "../service-order/dash-link";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];

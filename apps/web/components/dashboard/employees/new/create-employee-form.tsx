@@ -1,9 +1,7 @@
 "use client";
-
 import { cpf, unmask } from "@fixr/constants/masks";
 import { defaultMessages, messages } from "@fixr/constants/messages";
 import { roleLabels } from "@fixr/constants/roles";
-import type { userJWT } from "@fixr/schemas/auth";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +19,8 @@ import {
 	Plus,
 	User,
 } from "lucide-react";
-import { useState } from "react";
+import { useParams } from "next/navigation";
+import { type ComponentPropsWithoutRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -47,14 +46,13 @@ import { axios } from "@/lib/auth/axios";
 import { api, tryCatch } from "@/lib/utils";
 import { generateRandomPassword } from "@/lib/utils/generate-random-password";
 
-export function CreateEmployeeForm({
-	session,
+export function NewEmployeeForm({
 	onSuccess,
-}: {
-	session: z.infer<typeof userJWT>;
-	onSuccess: () => void;
+}: ComponentPropsWithoutRef<"form"> & {
+	onSuccess?: () => void;
 }) {
 	const [loading, setLoading] = useState(false);
+	const { subdomain } = useParams<{ subdomain: string }>();
 
 	const form = useForm<z.infer<typeof createEmployeeSchema>>({
 		resolver: zodResolver(createEmployeeSchema),
@@ -81,12 +79,7 @@ export function CreateEmployeeForm({
 		try {
 			const { data: response, error } = await tryCatch<
 				AxiosResponse<ApiResponse>
-			>(
-				axios.post(
-					api(`/companies/${session.company?.subdomain}/employees`),
-					formatted
-				)
-			);
+			>(axios.post(api(`/companies/${subdomain}/employees`), formatted));
 
 			if (error && error instanceof AxiosError) {
 				const message =
@@ -107,7 +100,7 @@ export function CreateEmployeeForm({
 				description: message.description,
 			});
 
-			onSuccess();
+			onSuccess?.();
 			queryClient.invalidateQueries({ queryKey: ["employeesData"] });
 		} finally {
 			setLoading(false);

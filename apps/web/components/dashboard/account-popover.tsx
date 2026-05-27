@@ -8,7 +8,7 @@ import { Avatar, type AvatarProps } from "../account/profile-avatar";
 import { SignOutButton } from "../auth/signout-button";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { DashLink } from "./dash-link";
+import { DashLink } from "./service-order/dash-link";
 
 export function AccountPopover({
 	session,

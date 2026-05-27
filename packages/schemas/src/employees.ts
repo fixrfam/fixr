@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { passwordSchema } from "./auth";
-import { cpf } from "./common";
+import { documentSchema } from "./documents";
 import { employeeRoles } from "./roles";
 
 export const createEmployeeSchema = z.object({
@@ -8,7 +8,7 @@ export const createEmployeeSchema = z.object({
 		.string({ error: "Preencha este campo" })
 		.min(3, { message: "O nome deve ter no mínimo 3 caracteres." })
 		.max(100, { message: "Ops! Nome muito grande..." }),
-	cpf,
+	cpf: documentSchema("cpf"),
 	phone: z
 		.string()
 		.length(11, { message: "Telefone incompleto." })

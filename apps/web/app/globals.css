@@ -181,3 +181,16 @@
 	border-radius: 10px;
 	background-color: var(--border);
 }
+
+@keyframes working {
+	0%,
+	100% {
+		box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 18%, transparent);
+		transform: scale(1);
+	}
+
+	50% {
+		box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 28%, transparent);
+		transform: scale(1.04);
+	}
+}

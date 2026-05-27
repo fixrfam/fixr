@@ -26,6 +26,10 @@
       "types": "./src/credentials.ts",
       "default": "./src/credentials.ts"
     },
+    "./documents": {
+      "types": "./src/documents.ts",
+      "default": "./src/documents.ts"
+    },
     "./utils": {
       "types": "./src/utils.ts",
       "default": "./src/utils.ts"

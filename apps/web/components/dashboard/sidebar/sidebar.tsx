@@ -54,7 +54,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 		<>
 			<aside
 				className={cn(
-					"fixed top-2.5 left-2.5 z-99 flex h-[calc(100dvh-(2*0.625rem))] w-[286px] select-none flex-col justify-between rounded-md border border-border bg-background transition-transform",
+					"fixed top-2.5 left-2.5 z-50 flex h-[calc(100dvh-(2*0.625rem))] w-71.5 select-none flex-col justify-between rounded-md border border-border bg-background transition-transform",
 					"lg:translate-x-0", // Always visible on desktop
 					"-translate-x-[calc(100%+0.625rem)] data-[state=open]:translate-x-0" // Slide in on mobile
 				)}
@@ -96,13 +96,13 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 							</div>
 							<div className="inline-flex items-center gap-1.5">
 								<Badge
-									className="grid min-w-5 place-items-center rounded-[4px] bg-background px-0.5 text-muted-foreground"
+									className="grid min-w-5 place-items-center rounded-lg bg-background px-0.5 text-muted-foreground"
 									variant={"outline"}
 								>
 									⌘
 								</Badge>
 								<Badge
-									className="grid min-w-5 place-items-center rounded-[4px] bg-background px-0.5 text-muted-foreground"
+									className="grid min-w-5 place-items-center rounded-lg bg-background px-0.5 text-muted-foreground"
 									variant={"outline"}
 								>
 									K
