@@ -1,5 +1,90 @@
 import { formattedIMEI } from "@fixr/schemas/common";
 import { z } from "zod";
+import { getPaginatedDataSchema } from "./utils";
+
+export const serviceOrderStatuses = z.enum([
+	"pending",
+	"diagnosing",
+	"waiting_approval",
+	"approved",
+	"fixing",
+	"ready",
+	"delivered",
+]);
+
+export const createServiceOrderPhotoSchema = z.object({
+	uploadId: z
+		.string({ error: "ID do upload é obrigatório." })
+		.min(1, { message: "ID do upload é obrigatório." }),
+	description: z
+		.string()
+		.max(255, { message: "Descrição excede 255 caracteres." })
+		.optional()
+		.nullable(),
+});
+
+export const createServiceOrderMockSchema = z.object({
+	clientId: z.string().cuid2({ message: "Cliente inválido." }),
+	deviceBrandId: z
+		.string()
+		.cuid2({ message: "Marca do dispositivo inválida." }),
+	deviceCategoryId: z
+		.string()
+		.cuid2({ message: "Categoria do dispositivo inválida." }),
+	deviceModel: z
+		.string({ error: "Modelo do dispositivo é obrigatório." })
+		.min(1, { message: "Modelo do dispositivo é obrigatório." })
+		.max(100, { message: "Modelo do dispositivo excede 100 caracteres." }),
+	imei: z
+		.string()
+		.max(50, { message: "IMEI excede 50 caracteres." })
+		.optional()
+		.nullable(),
+	reportedDefect: z
+		.string({ error: "Defeito relatado é obrigatório." })
+		.min(1, { message: "Defeito relatado é obrigatório." })
+		.max(65_535, { message: "Defeito relatado excede o limite permitido." }),
+	observations: z
+		.string()
+		.max(65_535, { message: "Observações excedem o limite permitido." })
+		.optional()
+		.nullable(),
+	photos: z
+		.array(createServiceOrderPhotoSchema)
+		.max(20, { message: "Máximo de 20 fotos por ordem de serviço." })
+		.default([]),
+});
+
+/** @deprecated Use createServiceOrderSchema */
+export const createOrderServiceMockSchema = createServiceOrderMockSchema;
+
+export const getServiceOrdersQuerySchema = getPaginatedDataSchema
+	.extend({
+		deviceCategoryId: z
+			.string()
+			.cuid2({ message: "Categoria do dispositivo inválida." })
+			.optional(),
+		employeeId: z
+			.string()
+			.cuid2({ message: "Responsável inválido." })
+			.optional(),
+		status: serviceOrderStatuses.optional(),
+		dateFrom: z.coerce.date({ message: "Data inicial inválida." }).optional(),
+		dateTo: z.coerce.date({ message: "Data final inválida." }).optional(),
+	})
+	.refine(
+		(data) => {
+			if (data.dateFrom && data.dateTo) {
+				return data.dateFrom <= data.dateTo;
+			}
+			return true;
+		},
+		{
+			message: "A data inicial deve ser anterior ou igual à data final.",
+			path: ["dateTo"],
+		}
+	);
+
 import { documentSchema } from "./documents";
 
 export const createOrderServiceSchema = z.object({

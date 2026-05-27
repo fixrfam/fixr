@@ -11,7 +11,7 @@ import { z } from "zod";
 import { zodResponseSchema } from "../../types";
 
 const getCompanyEmployeesSchema: FastifySchema = {
-	tags: ["Companies/Employees"],
+	tags: ["Employees"],
 	summary: "Get employees",
 	description: `
 **Retrieves specified company employees**
@@ -65,7 +65,7 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
 };
 
 const registerEmployeeSchema: FastifySchema = {
-	tags: ["Companies/Employees"],
+	tags: ["Employees"],
 	summary: "Register employee",
 	description: `
 **Register an employee on the system**

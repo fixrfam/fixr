@@ -13,30 +13,30 @@ export const AppPreview = () => {
 			whileInView={{ y: 0, opacity: 1 }}
 		>
 			<div
-				className="relative z-2 overflow-hidden rounded-xl border border-border shadow-[0_0_1rem_0_#ffffff26] lg:rounded-3xl"
+				className="relative z-2! overflow-hidden rounded-xl border border-border shadow-[0_0_1rem_0_#ffffff26] lg:rounded-3xl"
 				id="appimage"
 			>
 				<Image
 					alt=""
 					className="hidden dark:block"
-					height={987}
+					height={990}
 					src={"/home_dark.webp"}
-					width={1610}
+					width={1590}
 				/>
 				<Image
 					alt=""
 					className="block dark:hidden"
-					height={987}
+					height={990}
 					src={"/home_light.webp"}
-					width={1610}
+					width={1590}
 				/>
 			</div>
 			<div
-				className="absolute top-[30px] left-1/2 z-1 h-1/4 w-4/5 -translate-x-1/2 rounded-[100%] bg-primary blur-[110px]"
+				className="absolute top-7.5 left-1/2 z-1 h-1/4 w-4/5 -translate-x-1/2 rounded-[100%] bg-primary blur-[110px]"
 				id="blueglow"
 			/>
 			<div
-				className="absolute top-[30px] left-1/2 z-1 h-1/4 w-full -translate-x-1/2 -translate-y-full"
+				className="absolute top-7.5 left-1/2 z-1 h-1/4 w-full -translate-x-1/2 -translate-y-full"
 				id="grid"
 				style={{
 					maskImage:
