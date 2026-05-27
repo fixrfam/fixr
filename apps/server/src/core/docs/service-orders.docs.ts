@@ -1,6 +1,5 @@
-import { zodResponseSchema } from "@/src/core/docs/types";
 import {
-	serviceOrderPhotoSelectSchema,
+	serviceOrderImageSelectSchema,
 	serviceOrderSelectSchema,
 } from "@fixr/db/schema";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
@@ -12,9 +11,10 @@ import {
 import { paginatedDataSchema } from "@fixr/schemas/utils";
 import type { FastifySchema } from "fastify";
 import { z } from "zod";
+import { zodResponseSchema } from "./types";
 
 const createServiceOrderResponseDataSchema = serviceOrderSelectSchema.extend({
-	photos: z.array(serviceOrderPhotoSelectSchema),
+	photos: z.array(serviceOrderImageSelectSchema),
 });
 
 const serviceOrderListRecordSchema = z.object({
@@ -31,14 +31,14 @@ const serviceOrderListRecordSchema = z.object({
 		id: z.string(),
 		name: z.string(),
 	}),
-	deviceBrand: z.object({
+	deviceMaker: z.object({
 		id: z.string(),
 		name: z.string(),
 	}),
 });
 
 const getCompanyServiceOrdersSchema: FastifySchema = {
-	tags: ["Companies/Service Orders"],
+	tags: ["Service Orders"],
 	summary: "List service orders",
 	description: `
 **Retrieves company service orders (paginated)**
@@ -87,7 +87,7 @@ Optional filters (query string):
 };
 
 const createServiceOrderSchemaDoc: FastifySchema = {
-	tags: ["Companies/Service Orders"],
+	tags: ["Service Orders"],
 	summary: "Create service order",
 	description: `
 **Creates a new service order for the authenticated company**
@@ -113,8 +113,7 @@ Rules:
 			status: 400,
 			error: "Bad Request",
 			code: "invalid_photo_url",
-			message:
-				"Photo URL must come from a pre-signed upload for this company.",
+			message: "Photo URL must come from a pre-signed upload for this company.",
 			data: null,
 		}).describe("Photo URL was not issued by this company's upload flow."),
 		403: z

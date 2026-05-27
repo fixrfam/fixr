@@ -1,13 +1,13 @@
-import { randomUUID } from "node:crypto";
 import { S3Client } from "@aws-sdk/client-s3";
 import { env } from "@fixr/env/server";
+import {
+	buildObjectPublicUrl as _buildObjectPublicUrl,
+	isAllowedCompanyPhotoUrl as _isAllowedCompanyPhotoUrl,
+} from "../core/lib/r2";
 
-const PATH_SEPARATOR_REGEX = /[/\\]/;
-const UNSAFE_FILENAME_CHARS_REGEX = /[^\w.-]+/g;
-const DUPLICATE_DASHES_REGEX = /-+/g;
-const TRIM_DASHES_REGEX = /^-|-$/g;
+export { buildUploadObjectKey, sanitizeUploadFileName } from "../core/lib/r2";
 
-export function parseR2BucketUrl(bucketUrl: string) {
+function parseR2BucketUrl(bucketUrl: string) {
 	const parsed = new URL(bucketUrl);
 	const pathSegments = parsed.pathname.split("/").filter(Boolean);
 
@@ -39,34 +39,9 @@ export const r2Client = new S3Client({
 });
 
 export function buildObjectPublicUrl(key: string) {
-	return `${r2PublicBaseUrl}/${key}`;
-}
-
-export function sanitizeUploadFileName(fileName: string) {
-	const baseName = fileName.split(PATH_SEPARATOR_REGEX).pop() ?? fileName;
-	const sanitized = baseName
-		.normalize("NFKD")
-		.replace(UNSAFE_FILENAME_CHARS_REGEX, "-")
-		.replace(DUPLICATE_DASHES_REGEX, "-")
-		.replace(TRIM_DASHES_REGEX, "");
-
-	return sanitized.length > 0 ? sanitized.slice(0, 200) : "upload";
+	return _buildObjectPublicUrl(r2PublicBaseUrl, key);
 }
 
 export function isAllowedCompanyPhotoUrl(url: string, companyId: string) {
-	const prefix = `${r2PublicBaseUrl}/companies/${companyId}/service-orders/`;
-	return url.startsWith(prefix);
-}
-
-export function buildUploadObjectKey({
-	companyId,
-	fileName,
-}: {
-	companyId: string;
-	fileName: string;
-}) {
-	const safeName = sanitizeUploadFileName(fileName);
-	const uniquePrefix = `${Date.now()}-${randomUUID().slice(0, 8)}`;
-
-	return `companies/${companyId}/service-orders/${uniquePrefix}-${safeName}`;
+	return _isAllowedCompanyPhotoUrl(r2PublicBaseUrl, url, companyId);
 }

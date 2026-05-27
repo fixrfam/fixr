@@ -28,14 +28,13 @@ import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
-import { setupRBAC } from "./core/middlewares/rbac";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
-import { serviceOrdersRoutes } from "./routes/companies/service-orders/service-orders.routes";
-import { uploadsRoutes } from "./routes/uploads/uploads.routes";
 import { employeesRoutes } from "./modules/employees/routes";
+import { serviceOrdersRoutes } from "./modules/service-orders/routes";
+import { uploadsRoutes } from "./modules/uploads/routes";
 
 const envToLogger = {
 	development: {
@@ -145,15 +144,15 @@ async function registerPlugins() {
 					description: "Company management.",
 				},
 				{
-					name: "Companies/Employees",
+					name: "Employees",
 					description: "Manage company employees.",
 				},
 				{
-					name: "Companies/Service Orders",
+					name: "Service Orders",
 					description: "Manage company service orders.",
 				},
 				{
-					name: "Companies/Uploads",
+					name: "Uploads",
 					description: "Pre-signed uploads to Cloudflare R2.",
 				},
 			],
@@ -224,10 +223,8 @@ async function registerPlugins() {
 	});
 
 	// OpenAPI spec consumed by Scalar (and external tools).
-	server.get(
-		"/openapi.json",
-		{ schema: { hide: true } },
-		async () => server.swagger()
+	server.get("/openapi.json", { schema: { hide: true } }, async () =>
+		server.swagger()
 	);
 
 	// Scalar UI — register after all routes so the spec is complete.
@@ -262,12 +259,12 @@ registerPlugins()
 		});
 
 		console.log(
-			chalk.greenBright(
-				`✔ Server running at http://localhost:${env.NODE_PORT}`
-			)
+			chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
 		);
 		console.log(
-			chalk.greenBright(`✔ API docs (Scalar): http://localhost:${env.NODE_PORT}/docs`)
+			chalk.greenBright(
+				`✔ API docs (Scalar): http://localhost:${env.NODE_PORT}/docs`
+			)
 		);
 		console.log(
 			chalk.greenBright(

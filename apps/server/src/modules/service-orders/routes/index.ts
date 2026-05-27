@@ -5,19 +5,18 @@ import {
 	getServiceOrdersQuerySchema,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
-import { createServiceOrderHandler } from "@/src/controllers/service-orders/create-service-order-handler";
-import { getCompanyServiceOrdersHandler } from "@/src/controllers/service-orders/get-company-service-orders-handler";
-import { serviceOrdersDocs } from "@/src/docs/companies/service-orders/service-orders.docs";
-import { FastifyTypedInstance } from "@/src/core/interfaces/fastify";
-import { withErrorHandler } from "@/src/core/middlewares/with-error-handler";
-import { authenticateEmployee } from "@/src/core/middlewares/authenticate-employee";
+import { serviceOrdersDocs } from "../../../core/docs/service-orders.docs";
+import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
+import { ServiceOrdersController } from "../controllers";
 
-
+/** @description Service orders routes plugin */
 export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [authenticateEmployee],
 			schema: serviceOrdersDocs.getCompanyServiceOrdersSchema,
 		},
 		withErrorHandler(async (request, response) => {
@@ -25,7 +24,7 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 			const query = getServiceOrdersQuerySchema.parse(request.query);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await getCompanyServiceOrdersHandler({
+			await ServiceOrdersController.getCompanyServiceOrders({
 				userJwt,
 				subdomain,
 				response,
@@ -37,7 +36,7 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
 		"/",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [authenticateEmployee],
 			schema: serviceOrdersDocs.createServiceOrderSchema,
 		},
 		withErrorHandler(async (request, response) => {
@@ -45,7 +44,7 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 			const body = await createServiceOrderMockSchema.parseAsync(request.body);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await createServiceOrderHandler({
+			await ServiceOrdersController.createServiceOrder({
 				userJwt,
 				data: body,
 				subdomain,

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { employees } from "./employees";
 import { serviceOrders } from "./service-orders";
 
-export const serviceOrderPhotos = mysqlTable("service_order_photos", {
+export const serviceOrderImages = mysqlTable("service_order_images", {
 	id: varchar("id", { length: 25 })
 		.$defaultFn(() => createId())
 		.primaryKey(),
@@ -15,7 +15,7 @@ export const serviceOrderPhotos = mysqlTable("service_order_photos", {
 	employeeId: varchar("employee_id", { length: 25 })
 		.references(() => employees.id, { onDelete: "restrict" })
 		.notNull(),
-	photoUrl: varchar("photo_url", { length: 255 }).notNull(),
+	imageUrl: varchar("image_url", { length: 255 }).notNull(),
 	fileName: varchar("file_name", { length: 255 }).notNull(),
 	sizeInBytes: int("size_in_bytes").notNull(),
 	contentType: varchar("content_type", { length: 50 }).notNull(),
@@ -23,9 +23,14 @@ export const serviceOrderPhotos = mysqlTable("service_order_photos", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const serviceOrderPhotoSelectSchema = createSelectSchema(
-	serviceOrderPhotos,
+export const serviceOrderImageSelectSchema = createSelectSchema(
+	serviceOrderImages,
 	{
 		createdAt: z.coerce.date(),
 	}
 );
+
+/** @deprecated Renamed to {@link serviceOrderImages} */
+export const serviceOrderPhotos = serviceOrderImages;
+/** @deprecated Renamed to {@link serviceOrderImageSelectSchema} */
+export const serviceOrderPhotoSelectSchema = serviceOrderImageSelectSchema;

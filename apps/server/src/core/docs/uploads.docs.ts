@@ -1,10 +1,9 @@
-import { zodResponseSchema } from "@/src/core/docs/types";
 import {
 	createUploadPresignSchema,
 	uploadPresignResponseSchema,
 } from "@fixr/schemas/uploads";
 import type { FastifySchema } from "fastify";
-
+import { zodResponseSchema } from "./types";
 
 const createUploadPresignSchemaDoc: FastifySchema = {
 	tags: ["Uploads"],

@@ -1,24 +1,25 @@
 import type { userJWT } from "@fixr/schemas/auth";
 import { createUploadPresignSchema } from "@fixr/schemas/uploads";
 import type { z } from "zod";
-import { createUploadPresignHandler } from "@/src/controllers/uploads/create-upload-presign-handler";
-import { uploadsDocs } from "@/src/docs/uploads/uploads.docs";
-import { FastifyTypedInstance } from "@/src/core/interfaces/fastify";
-import { authenticateEmployee } from "@/src/core/middlewares/authenticate-employee";
-import { withErrorHandler } from "@/src/core/middlewares/with-error-handler";
+import { uploadsDocs } from "../../../core/docs/uploads.docs";
+import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
+import { UploadsController } from "../controllers";
 
+/** @description Uploads routes plugin */
 export function uploadsRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
 		"/presign",
 		{
-			preHandler: authenticateEmployee,
+			preHandler: [authenticateEmployee],
 			schema: uploadsDocs.createUploadPresignSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const body = await createUploadPresignSchema.parseAsync(request.body);
 
-			await createUploadPresignHandler({
+			await UploadsController.createPresignedUpload({
 				userJwt,
 				data: body,
 				response,
