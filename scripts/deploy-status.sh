@@ -6,8 +6,18 @@ ACTION="${1:?Missing action}"
 ENVIRONMENT="${2:?Missing environment}"
 DESCRIPTION="${3:-}"
 
-REPO="$(git remote get-url origin | sed 's/.*github.com[:\/]//;s/\.git$//')"
-SHA="$(git rev-parse HEAD)"
+REPO="${GIT_REPO:-$(git remote get-url origin 2>/dev/null | sed 's/.*github.com[:\/]//;s/\.git$//')}"
+REF="${GIT_REF:-${COOLIFY_BRANCH:-$(git rev-parse HEAD 2>/dev/null || true)}}"
+
+if [ -z "$REPO" ]; then
+  >&2 echo "Cannot determine repository. Set GIT_REPO env var."
+  exit 1
+fi
+if [ -z "$REF" ]; then
+  >&2 echo "Cannot determine git ref. Set GIT_REF env var."
+  exit 1
+fi
+
 ID_FILE="/tmp/deploy-status-${ENVIRONMENT}.id"
 
 mark_status() {
@@ -41,7 +51,7 @@ case "$ACTION" in
       -H "Authorization: Bearer $GITHUB_TOKEN" \
       -H "Accept: application/vnd.github+json" \
       "https://api.github.com/repos/$REPO/deployments" \
-      -d "{\"ref\":\"$SHA\",\"environment\":\"$ENVIRONMENT\",\"auto_merge\":false,\"required_contexts\":[],\"description\":\"${DESCRIPTION:-Deploying...}\"}" \
+      -d "{\"ref\":\"$REF\",\"environment\":\"$ENVIRONMENT\",\"auto_merge\":false,\"required_contexts\":[],\"description\":\"${DESCRIPTION:-Deploying...}\"}" \
       | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))")
 
     if [ -z "$ID" ]; then
