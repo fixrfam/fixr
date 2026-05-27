@@ -3,7 +3,7 @@
 import { useParams, usePathname } from "next/navigation";
 import { Logo } from "@/components/svg/logo";
 import { getDashboardRouteName } from "@/lib/utils/get-dashboard-route-name";
-import { DashLink } from "../dash-link";
+import { DashLink } from "../service-order/dash-link";
 import { FloatingToggle } from "./floating-toggle";
 
 export function Header() {

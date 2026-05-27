@@ -6,7 +6,7 @@ import { NewServiceOrderForm } from "@/components/dashboard/service-order/new-se
 export default function NewServiceOrderPage() {
 	return (
 		<div className="space-y-6">
-			<BackButton className="-translate-x-2" />
+			<BackButton className="-translate-x-3" />
 			<Heading
 				description="Preencha os campos abaixo para criar uma nova ordem de serviço."
 				Icon={ClipboardPlus}
