@@ -33,6 +33,8 @@ import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
+import { serviceOrdersRoutes } from "./routes/companies/service-orders/service-orders.routes";
+import { uploadsRoutes } from "./routes/uploads/uploads.routes";
 import { employeesRoutes } from "./modules/employees/routes";
 
 const envToLogger = {
@@ -62,124 +64,22 @@ const server = fastify({
 server.setValidatorCompiler(validatorCompiler);
 server.setSerializerCompiler(serializerCompiler);
 
-//Set Swagger as the openapi docs generator
-server.register(fastifySwagger, {
-	openapi: {
-		info: {
-			title: `${APP_NAME} API`,
-			version: "1.0.0",
-			summary: `${APP_NAME} API`,
-			description: apiDescription,
-		},
-		tags: [
-			{
-				name: "Auth",
-				description:
-					"Routes used for authentication (register, login and confirmations)",
-			},
-			{
-				name: "Account",
-				description: "Edit account data or delete it through these routes.",
-			},
-			{
-				name: "Credentials",
-				description: "Change account credentials (password) in different ways.",
-			},
-			{
-				name: "Companies",
-				description: "Company management.",
-			},
-			{
-				name: "Employees",
-				description: "Manage company employees.",
-			},
-		],
-		security: [],
-		components: {
-			securitySchemes: {
-				JWT: {
-					type: "http",
-					scheme: "bearer",
-					bearerFormat: "Bearer",
-				},
-			},
-		},
-	},
-	transform: jsonSchemaTransform,
-	transformObject: jsonSchemaTransformObject,
-});
+//Map the zod errors to standard response
+server.setErrorHandler((error, _request, reply) => {
+	if (error instanceof ZodError) {
+		reply.status(400).send(
+			apiResponse({
+				status: 400,
+				error: "Bad Request",
+				code: "bad_request",
+				message: "Type validation failed",
+				data: error.issues,
+			})
+		);
+		return;
+	}
 
-//Set Scalar as the frontend for the docs
-server.register(scalarUi, {
-	routePrefix: "/docs",
-	configuration: {
-		url: "/reference/json",
-		metaData: {
-			title: `Docs - ${APP_NAME} API`,
-		},
-		favicon: "/public/favicon.ico",
-		theme: "none",
-	},
-});
-
-//Also register Swagger for the classic API reference
-server.register(fastifySwaggerUi, {
-	routePrefix: "/reference",
-});
-
-//Register routes and plugins.
-server.register(fastifyJwt, {
-	secret: env.JWT_SECRET,
-	cookie: {
-		cookieName: cookieKey("session"),
-		signed: false,
-	},
-});
-
-server.register(fastifyCookie, {
-	secret: env.COOKIE_ENCRYPTION_SECRET,
-});
-
-setupRBAC(server);
-
-server.register(fastifyStatic, {
-	root: join(cwd(), "public"),
-	prefix: "/public/",
-});
-
-server.register(fastifyCors, {
-	origin: [
-		env.FRONTEND_URL,
-		env.ADMIN_URL,
-		`http://localhost:${env.NODE_PORT}`,
-	],
-	credentials: true,
-});
-
-server.register(authRoutes, {
-	prefix: "/auth",
-});
-
-server.register(accountRoutes, {
-	prefix: "/account",
-});
-
-server.register(credentialsRoutes, {
-	prefix: "/credentials",
-});
-
-server.register(companiesRoutes, {
-	prefix: "/companies",
-});
-
-server.register(employeesRoutes, {
-	prefix: "/companies/:subdomain/employees",
-});
-
-server.get("/", (_, reply) => {
-	reply
-		.status(200)
-		.send("Hello from Fixr API! Reach the documentation at /docs");
+	reply.send(error);
 });
 
 server.setErrorHandler((error, request, response) => {
@@ -213,50 +113,171 @@ server.setErrorHandler((error, request, response) => {
 			})
 		);
 	}
-
-	if (error instanceof ZodError) {
-		return response.status(400).send(
-			apiResponse({
-				status: 400,
-				error: "Bad Request",
-				code: "bad_request",
-				message: "Type validation failed",
-				data: error.issues,
-			})
-		);
-	}
-
-	request.log.error(error, "Unhandled error reached global error handler");
-
-	return response.status(500).send(
-		apiResponse({
-			status: 500,
-			error: "Internal Server Error",
-			code: "internal_error",
-			message: error instanceof Error ? error.message : "Something went wrong.",
-			data: {
-				...(error instanceof Error ? { message: error.message } : {}),
-				...(error instanceof Error && error.stack
-					? { stack: error.stack.split("\n").slice(0, 4).join("\n") }
-					: {}),
-				...(error && typeof error === "object"
-					? { details: String(error) }
-					: {}),
-			},
-		})
-	);
 });
 
-//Run server.
-server
-	.listen({
-		port: Number(env.NODE_PORT),
-		host: "::",
-	})
-	.then(() => {
+async function registerPlugins() {
+	// @fastify/swagger must be registered before routes (route discovery).
+	await server.register(fastifySwagger, {
+		openapi: {
+			info: {
+				title: `${APP_NAME} API`,
+				version: "1.0.0",
+				summary: `${APP_NAME} API`,
+				description: apiDescription,
+			},
+			tags: [
+				{
+					name: "Auth",
+					description:
+						"Routes used for authentication (register, login and confirmations)",
+				},
+				{
+					name: "Account",
+					description: "Edit account data or delete it through these routes.",
+				},
+				{
+					name: "Credentials",
+					description:
+						"Change account credentials (password) in different ways.",
+				},
+				{
+					name: "Companies",
+					description: "Company management.",
+				},
+				{
+					name: "Companies/Employees",
+					description: "Manage company employees.",
+				},
+				{
+					name: "Companies/Service Orders",
+					description: "Manage company service orders.",
+				},
+				{
+					name: "Companies/Uploads",
+					description: "Pre-signed uploads to Cloudflare R2.",
+				},
+			],
+			security: [],
+			components: {
+				securitySchemes: {
+					JWT: {
+						type: "http",
+						scheme: "bearer",
+						bearerFormat: "Bearer",
+					},
+				},
+			},
+		},
+		transform: jsonSchemaTransform,
+		transformObject: jsonSchemaTransformObject,
+	});
+
+	await server.register(fastifyJwt, {
+		secret: env.JWT_SECRET,
+		cookie: {
+			cookieName: cookieKey("session"),
+			signed: false,
+		},
+	});
+
+	await server.register(fastifyCookie, {
+		secret: env.COOKIE_ENCRYPTION_SECRET,
+	});
+
+	await server.register(fastifyStatic, {
+		root: join(cwd(), "public"),
+		prefix: "/public/",
+	});
+
+	await server.register(authRoutes, {
+		prefix: "/auth",
+	});
+
+	await server.register(accountRoutes, {
+		prefix: "/account",
+	});
+
+	await server.register(credentialsRoutes, {
+		prefix: "/credentials",
+	});
+
+	await server.register(companiesRoutes, {
+		prefix: "/companies",
+	});
+
+	await server.register(employeesRoutes, {
+		prefix: "/companies/:subdomain/employees",
+	});
+
+	await server.register(serviceOrdersRoutes, {
+		prefix: "/companies/:subdomain/service-orders",
+	});
+
+	await server.register(uploadsRoutes, {
+		prefix: "/uploads",
+	});
+
+	server.get("/", (_, reply) => {
+		reply
+			.status(200)
+			.send("Hello from Fixr API! Reach the documentation at /docs");
+	});
+
+	// OpenAPI spec consumed by Scalar (and external tools).
+	server.get(
+		"/openapi.json",
+		{ schema: { hide: true } },
+		async () => server.swagger()
+	);
+
+	// Scalar UI — register after all routes so the spec is complete.
+	await server.register(scalarUi, {
+		routePrefix: "/docs",
+		configuration: {
+			url: "/openapi.json",
+			metaData: {
+				title: `Docs - ${APP_NAME} API`,
+			},
+			favicon: "/public/favicon.ico",
+			theme: "none",
+		},
+	});
+
+	// Classic Swagger UI (alternative to Scalar).
+	await server.register(fastifySwaggerUi, {
+		routePrefix: "/reference",
+	});
+
+	await server.register(fastifyCors, {
+		origin: [env.FRONTEND_URL, `http://localhost:${env.NODE_PORT}`],
+		credentials: true,
+	});
+}
+
+registerPlugins()
+	.then(async () => {
+		await server.listen({
+			port: Number(env.NODE_PORT),
+			host: "0.0.0.0",
+		});
+
 		console.log(
-			chalk.greenBright(`✔ Server running at http://localhost:${env.NODE_PORT}`)
+			chalk.greenBright(
+				`✔ Server running at http://localhost:${env.NODE_PORT}`
+			)
 		);
+		console.log(
+			chalk.greenBright(`✔ API docs (Scalar): http://localhost:${env.NODE_PORT}/docs`)
+		);
+		console.log(
+			chalk.greenBright(
+				`✔ API docs (Swagger): http://localhost:${env.NODE_PORT}/reference`
+			)
+		);
+	})
+	.catch((error) => {
+		console.error(error);
+		process.exit(1);
 	});
 
 export default server;
