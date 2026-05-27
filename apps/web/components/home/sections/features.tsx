@@ -11,7 +11,7 @@ export default function Features({ className }: { className?: string }) {
 			)}
 			id="features"
 		>
-			<LampContainer className="absolute z-[-1] hidden -translate-y-[42.5%] lg:flex" />
+			<LampContainer className="absolute z-[-1]! hidden -translate-y-[42.5%] lg:flex" />
 
 			<div className="rounded-full border border-primary bg-background px-3 py-2 font-light text-primary text-xs shadow-[0_4px_30_-8px_var(--primary-500)] md:px-4 md:py-2 md:text-sm">
 				<Feather className="mr-2 inline-block h-4 w-4" />

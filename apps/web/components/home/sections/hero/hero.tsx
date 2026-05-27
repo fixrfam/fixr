@@ -8,7 +8,7 @@ import { AppPreview } from "./app-preview";
 
 export default function Hero() {
 	return (
-		<section className="z-2 flex w-full max-w-7xl flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10">
+		<section className="relative z-10 flex w-full max-w-7xl flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10">
 			<div className="z-3 flex w-full flex-col items-start gap-4">
 				<BlurFade delay={0.3} direction="up" inView>
 					<div className="rounded-full border border-primary bg-primary/15 px-3 py-2 font-light text-primary text-xs shadow-[0_4px_30_-8px_var(--primary-500)] md:px-4 md:py-2 md:text-sm">

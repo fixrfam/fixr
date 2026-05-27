@@ -90,7 +90,7 @@ server.register(fastifySwagger, {
 				description: "Company management.",
 			},
 			{
-				name: "Companies/Employees",
+				name: "Employees",
 				description: "Manage company employees.",
 			},
 		],
