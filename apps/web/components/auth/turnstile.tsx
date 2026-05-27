@@ -35,7 +35,7 @@ export function Turnstile({
 				clearTimeout(timeoutRef.current);
 			}
 		};
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [onError, onToken]);
 
 	if (!mounted) {
 		return null;
