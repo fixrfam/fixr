@@ -54,7 +54,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 		<>
 			<aside
 				className={cn(
-					"fixed top-2.5 left-2.5 z-50 flex h-[calc(100dvh-(2*0.625rem))] w-71.5 select-none flex-col justify-between rounded-md border border-border bg-background transition-transform",
+					"fixed top-2.5 left-2.5 z-50 flex h-[calc(100dvh-1.25rem)] w-71.5 select-none flex-col justify-between rounded-md border border-border bg-background transition-transform",
 					"lg:translate-x-0", // Always visible on desktop
 					"-translate-x-[calc(100%+0.625rem)] data-[state=open]:translate-x-0" // Slide in on mobile
 				)}
@@ -149,7 +149,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 			</aside>
 			<button
 				className={cn(
-					"fixed z-98 h-dvh w-full bg-background/5 backdrop-blur-xs transition-all",
+					"fixed z-49 h-dvh w-full bg-background/5 backdrop-blur-xs transition-all",
 					isDesktop && "hidden",
 					isDesktop || isOpen
 						? "pointer-events-auto opacity-100"
