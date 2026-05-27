@@ -43,27 +43,6 @@
       "when": 1760755210443,
       "tag": "0005_faulty_mandarin",
       "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1779887155497,
-      "tag": "0006_curved_doctor_octopus",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1779888252559,
-      "tag": "0007_powerful_mulholland_black",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1779888404608,
-      "tag": "0008_dear_karnak",
-      "breakpoints": true
     }
   ]
 }

@@ -10,9 +10,9 @@ import {
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { categories } from "./categories";
 import { companies } from "./companies";
-import { makers } from "./makers";
+import { modelCategories } from "./model-categories";
+import { modelMakers } from "./model-makers";
 
 export const models = mysqlTable(
 	"models",
@@ -22,7 +22,7 @@ export const models = mysqlTable(
 			.primaryKey(),
 		makerId: varchar("maker_id", { length: 25 })
 			.notNull()
-			.references(() => makers.id),
+			.references(() => modelMakers.id),
 		name: varchar("name", { length: 255 }).notNull(),
 		slug: varchar("slug", { length: 100 }).notNull(),
 		url: varchar("url", { length: 255 }).notNull(),
@@ -30,7 +30,7 @@ export const models = mysqlTable(
 		imageLocalPath: varchar("image_local_path", { length: 255 }),
 
 		categoryId: varchar("category_id", { length: 25 }).references(
-			() => categories.id
+			() => modelCategories.id
 		),
 
 		announced: text("announced"),

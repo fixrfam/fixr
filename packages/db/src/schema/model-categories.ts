@@ -7,11 +7,9 @@ export const modelCategories = mysqlTable("model_categories", {
 		.$defaultFn(() => createId())
 		.primaryKey(),
 	name: varchar("name", { length: 100 }).notNull(),
+	slug: varchar("slug", { length: 100 }).unique().notNull(),
 });
 
 export const modelCategorySelectSchema = createSelectSchema(modelCategories);
-
-/** @deprecated Renamed to {@link modelCategories} */
-export const deviceCategories = modelCategories;
-/** @deprecated Renamed to {@link modelCategorySelectSchema} */
-export const deviceCategorySelectSchema = modelCategorySelectSchema;
+export type CategoryInsert = typeof modelCategories.$inferInsert;
+export type CategorySelect = typeof modelCategories.$inferSelect;
