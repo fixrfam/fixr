@@ -1,18 +1,45 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { GripVerticalIcon } from "lucide-react";
 import {
+	Group as ResizablePanelGroupPrimitive,
 	Panel as ResizablePanelPrimitive,
-	PanelGroup as ResizablePanelGroupPrimitive,
-	PanelResizeHandle as ResizableHandlePrimitive,
+	Separator as ResizableHandlePrimitive,
 } from "react-resizable-panels";
 
 import { cn } from "@/lib/utils";
 
 function ResizablePanelGroup({
 	className,
+	autoSave,
 	...props
-}: React.ComponentProps<typeof ResizablePanelGroupPrimitive>) {
+}: React.ComponentProps<typeof ResizablePanelGroupPrimitive> & {
+	autoSave?: string;
+}) {
+	const [savedLayout, setSavedLayout] = useState<Record<string, number> | undefined>(
+		() => {
+			if (!autoSave) return undefined;
+			try {
+				const stored = localStorage.getItem(autoSave);
+				return stored ? JSON.parse(stored) : undefined;
+			} catch {
+				return undefined;
+			}
+		}
+	);
+
+	const handleLayoutChanged = useCallback(
+		(layout: Record<string, number>) => {
+			if (autoSave) {
+				localStorage.setItem(autoSave, JSON.stringify(layout));
+			}
+			setSavedLayout(layout);
+			props.onLayoutChanged?.(layout);
+		},
+		[autoSave, props.onLayoutChanged]
+	);
+
 	return (
 		<ResizablePanelGroupPrimitive
 			className={cn(
@@ -21,6 +48,8 @@ function ResizablePanelGroup({
 			)}
 			data-slot="resizable-panel-group"
 			{...props}
+			defaultLayout={savedLayout}
+			onLayoutChanged={handleLayoutChanged}
 		/>
 	);
 }

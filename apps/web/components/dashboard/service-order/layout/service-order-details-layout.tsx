@@ -176,12 +176,8 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			sensors={sensors}
 		>
 			<div className="hidden gap-6 lg:block">
-				<ResizablePanelGroup
-					autoSaveId={storageKey}
-					className="min-w-6xl gap-6"
-					direction="horizontal"
-				>
-					<ResizablePanel defaultSize={55} minSize={40}>
+				<ResizablePanelGroup autoSave={storageKey} className="min-w-6xl gap-6">
+					<ResizablePanel defaultSize="55%" minSize="40%">
 						<SortableContext
 							items={layout.left}
 							strategy={verticalListSortingStrategy}
@@ -202,7 +198,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 						</SortableContext>
 					</ResizablePanel>
 					<ResizableHandle withHandle />
-					<ResizablePanel defaultSize={45} minSize={35}>
+					<ResizablePanel defaultSize="45%" minSize="35%">
 						<SortableContext
 							items={layout.right}
 							strategy={verticalListSortingStrategy}
