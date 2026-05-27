@@ -20,6 +20,7 @@
     "db:studio": "bun run --elide-lines 0 --filter @fixr/db db:studio",
     "db:generate": "bun run --elide-lines 0 --filter @fixr/db db:generate",
     "db:migrate": "bun run --elide-lines 0 --filter @fixr/db db:migrate",
+    "db:seed": "bun run --elide-lines 0 --filter @fixr/db db:seed",
     "db:start": "bun run --elide-lines 0 --filter @fixr/db db:start",
     "db:watch": "bun run --elide-lines 0 --filter @fixr/db db:watch",
     "db:stop": "bun run --elide-lines 0 --filter @fixr/db db:stop",
