@@ -4,6 +4,7 @@ import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { employees } from "./employees";
 import { serviceOrders } from "./service-orders";
+import { uploads } from "./uploads";
 
 export const serviceOrderImages = mysqlTable("service_order_images", {
 	id: varchar("id", { length: 25 })
@@ -14,6 +15,9 @@ export const serviceOrderImages = mysqlTable("service_order_images", {
 		.notNull(),
 	employeeId: varchar("employee_id", { length: 25 })
 		.references(() => employees.id, { onDelete: "restrict" })
+		.notNull(),
+	uploadId: varchar("upload_id", { length: 25 })
+		.references(() => uploads.id, { onDelete: "restrict" })
 		.notNull(),
 	imageUrl: varchar("image_url", { length: 255 }).notNull(),
 	fileName: varchar("file_name", { length: 255 }).notNull(),

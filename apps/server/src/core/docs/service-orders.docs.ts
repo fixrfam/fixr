@@ -112,10 +112,11 @@ Rules:
 		400: zodResponseSchema({
 			status: 400,
 			error: "Bad Request",
-			code: "invalid_photo_url",
-			message: "Photo URL must come from a pre-signed upload for this company.",
+			code: "upload_not_found",
+			message:
+				"One or more uploads were not found or do not belong to this company.",
 			data: null,
-		}).describe("Photo URL was not issued by this company's upload flow."),
+		}).describe("Upload was not found or does not belong to this company."),
 		403: z
 			.union([
 				zodResponseSchema({

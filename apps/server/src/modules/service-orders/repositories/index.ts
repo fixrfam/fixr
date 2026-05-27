@@ -1,4 +1,14 @@
-import { and, db, eq, gte, like, lte, or, type SQL } from "@fixr/db/connection";
+import {
+	and,
+	db,
+	eq,
+	gte,
+	inArray,
+	like,
+	lte,
+	or,
+	type SQL,
+} from "@fixr/db/connection";
 import {
 	clients,
 	employees,
@@ -6,6 +16,7 @@ import {
 	modelMakers,
 	serviceOrderImages,
 	serviceOrders,
+	uploads,
 } from "@fixr/db/schema";
 import type {
 	createServiceOrderMockSchema,
@@ -62,7 +73,6 @@ export const serviceOrdersListJoins = [
 	},
 ];
 
-/** @description Service orders data access layer */
 export class ServiceOrdersRepository {
 	static async queryEmployeeByUserId(userId: string) {
 		const [employee] = await db
@@ -170,17 +180,34 @@ export class ServiceOrdersRepository {
 				.$returningId();
 
 			if (data.photos.length > 0) {
+				const uploadIds = data.photos.map((p) => p.uploadId);
+				const uploadRecords = await tx
+					.select()
+					.from(uploads)
+					.where(inArray(uploads.id, uploadIds));
+
+				const uploadMap = new Map(uploadRecords.map((u) => [u.id, u]));
+
 				await tx.insert(serviceOrderImages).values(
-					data.photos.map((photo) => ({
-						serviceOrderId: serviceOrderId.id,
-						employeeId,
-						imageUrl: photo.url,
-						fileName: photo.fileName,
-						sizeInBytes: photo.size,
-						contentType: photo.contentType,
-						description: photo.description ?? null,
-					}))
+					data.photos.map((photo) => {
+						const upload = uploadMap.get(photo.uploadId)!;
+						return {
+							serviceOrderId: serviceOrderId.id,
+							employeeId,
+							uploadId: photo.uploadId,
+							imageUrl: upload.url,
+							fileName: upload.fileName,
+							sizeInBytes: upload.sizeInBytes,
+							contentType: upload.contentType,
+							description: photo.description ?? null,
+						};
+					})
 				);
+
+				await tx
+					.update(uploads)
+					.set({ status: "completed" })
+					.where(inArray(uploads.id, uploadIds));
 			}
 
 			const [serviceOrder] = await tx

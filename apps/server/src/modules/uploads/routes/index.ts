@@ -9,10 +9,9 @@ import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { UploadsController } from "../controllers";
 
-/** @description Uploads routes plugin */
 export function uploadsRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
-		"/presign",
+		"/service-orders/presign",
 		{
 			preHandler: [
 				authenticateEmployee,

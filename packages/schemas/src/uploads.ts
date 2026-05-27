@@ -11,7 +11,7 @@ export const createUploadPresignSchema = z.object({
 		.string({ error: "Tipo de conteúdo é obrigatório." })
 		.min(1, { message: "Tipo de conteúdo é obrigatório." })
 		.max(255, { message: "Tipo de conteúdo excede 255 caracteres." })
-		.regex(/^[^\/]+\/[^\/]+$/, {
+		.regex(/^[^/]+\/[^/]+$/, {
 			message: "Tipo de conteúdo deve ser um MIME válido.",
 		}),
 	size: z
@@ -24,6 +24,7 @@ export const createUploadPresignSchema = z.object({
 });
 
 export const uploadPresignResponseSchema = z.object({
+	id: z.string(),
 	uploadUrl: z.string().url(),
 	key: z.string(),
 	url: z.string().url(),

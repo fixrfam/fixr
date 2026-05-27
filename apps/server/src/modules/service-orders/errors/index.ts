@@ -31,9 +31,10 @@ export const serviceOrdersErrors = defineErrors({
 		message: "Device category not found.",
 		status: 404,
 	},
-	SERVICE_ORDER_INVALID_PHOTO_URL: {
-		code: "invalid_photo_url",
-		message: "Photo URL must come from a pre-signed upload for this company.",
+	SERVICE_ORDER_UPLOAD_NOT_FOUND: {
+		code: "upload_not_found",
+		message:
+			"One or more uploads were not found or do not belong to this company.",
 		status: 400,
 	},
 	SERVICE_ORDER_PAGE_OUT_OF_BOUNDS: {

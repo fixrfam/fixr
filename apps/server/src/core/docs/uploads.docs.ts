@@ -7,13 +7,13 @@ import { zodResponseSchema } from "./types";
 
 const createUploadPresignSchemaDoc: FastifySchema = {
 	tags: ["Uploads"],
-	summary: "Generate pre-signed upload URL",
+	summary: "Generate pre-signed upload URL for service order images",
 	description: `
-**Generates a pre-signed URL for direct upload to Backblaze/Cloudflare R2**
+**Generates a pre-signed URL for direct upload to Cloudflare R2**
 
-This endpoint is generic and supports any file type. Use the returned URL to upload the file, then store the returned \`url\` for later download, preview or editing.
+Creates a pending upload record and returns a time-limited pre-signed PUT URL. Use the returned URL to upload the file, then pass the \`id\` when creating the service order.
 
-The request accepts file metadata (\`fileName\`, \`contentType\`, \`size\`) and returns the upload URL, object key, public URL and expiration time.
+The request accepts file metadata (\`fileName\`, \`contentType\`, \`size\`) and returns the upload ID, upload URL, object key, public URL and expiration time.
 `,
 	body: createUploadPresignSchema,
 	response: {

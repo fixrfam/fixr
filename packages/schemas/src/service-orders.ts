@@ -13,22 +13,9 @@ export const serviceOrderStatuses = z.enum([
 ]);
 
 export const createServiceOrderPhotoSchema = z.object({
-	url: z
-		.string({ error: "URL da foto é obrigatória." })
-		.url({ message: "URL da foto inválida." })
-		.max(255, { message: "URL da foto excede 255 caracteres." }),
-	fileName: z
-		.string({ error: "Nome do arquivo é obrigatório." })
-		.min(1, { message: "Nome do arquivo é obrigatório." })
-		.max(255, { message: "Nome do arquivo excede 255 caracteres." }),
-	size: z
-		.number({ error: "Tamanho do arquivo é obrigatório." })
-		.int({ message: "Tamanho do arquivo deve ser um número inteiro." })
-		.positive({ message: "Tamanho do arquivo deve ser maior que zero." }),
-	contentType: z
-		.string({ error: "Tipo de conteúdo é obrigatório." })
-		.min(1, { message: "Tipo de conteúdo é obrigatório." })
-		.max(50, { message: "Tipo de conteúdo excede 50 caracteres." }),
+	uploadId: z
+		.string({ error: "ID do upload é obrigatório." })
+		.min(1, { message: "ID do upload é obrigatório." }),
 	description: z
 		.string()
 		.max(255, { message: "Descrição excede 255 caracteres." })
@@ -97,6 +84,7 @@ export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 			path: ["dateTo"],
 		}
 	);
+
 import { documentSchema } from "./documents";
 
 export const createOrderServiceSchema = z.object({

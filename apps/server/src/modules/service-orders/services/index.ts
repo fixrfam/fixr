@@ -1,5 +1,5 @@
-import { asc, desc } from "@fixr/db/connection";
-import { serviceOrders as serviceOrdersTable } from "@fixr/db/schema";
+import { asc, db, desc, inArray } from "@fixr/db/connection";
+import { serviceOrders as serviceOrdersTable, uploads } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	createServiceOrderMockSchema,
@@ -7,7 +7,6 @@ import type {
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
-import { isAllowedCompanyPhotoUrl } from "../../../config/r2";
 import { AppError } from "../../../core/lib/app-error";
 import {
 	getPaginatedCount,
@@ -20,7 +19,6 @@ import {
 	serviceOrdersListSelect,
 } from "../repositories";
 
-/** @description Service orders business logic */
 export class ServiceOrdersService {
 	static async getCompanyServiceOrders({
 		userJwt,
@@ -178,12 +176,21 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_DEVICE_CATEGORY_NOT_FOUND");
 		}
 
-		const invalidPhoto = data.photos.find(
-			(photo) => !isAllowedCompanyPhotoUrl(photo.url, companyId)
-		);
+		if (data.photos.length > 0) {
+			const uploadIds = data.photos.map((p) => p.uploadId);
+			const foundUploads = await db
+				.select()
+				.from(uploads)
+				.where(inArray(uploads.id, uploadIds));
 
-		if (invalidPhoto) {
-			throw new AppError("SERVICE_ORDER_INVALID_PHOTO_URL");
+			const foundMap = new Map(foundUploads.map((u) => [u.id, u]));
+
+			for (const uploadId of uploadIds) {
+				const upload = foundMap.get(uploadId);
+				if (!upload || upload.companyId !== companyId) {
+					throw new AppError("SERVICE_ORDER_UPLOAD_NOT_FOUND");
+				}
+			}
 		}
 
 		const { serviceOrder, photos } =
