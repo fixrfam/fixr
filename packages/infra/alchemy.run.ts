@@ -69,8 +69,6 @@ export const admin = await Nextjs("admin", {
 	domains: parseDomains("ADMIN_PUBLIC_DOMAINS"),
 	bindings: {
 		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY as string,
-		REDIS_URL: process.env.REDIS_URL as string,
-		FRONTEND_URL: process.env.FRONTEND_URL as string,
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env
 			.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY as string,
 		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL as string,

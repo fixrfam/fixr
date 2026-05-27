@@ -36,7 +36,8 @@ export function RegisterForm({
 		token: Nullable<string>;
 		loading: boolean;
 		error: boolean;
-	}>({ token: null, loading: true, error: false });
+		interactive: boolean;
+	}>({ token: null, loading: true, error: false, interactive: false });
 
 	const createUserSchema = baseCreateUserSchema
 		.extend({
@@ -190,17 +191,35 @@ export function RegisterForm({
 				</div>
 				<Turnstile
 					onError={() =>
-						setTurnstile({ token: null, loading: false, error: true })
+						setTurnstile({
+							token: null,
+							loading: false,
+							error: true,
+							interactive: false,
+						})
+					}
+					onInteractive={() =>
+						setTurnstile((prev) => ({ ...prev, interactive: true }))
 					}
 					onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
 					onToken={(token) =>
-						setTurnstile({ token, loading: false, error: false })
+						setTurnstile({
+							token,
+							loading: false,
+							error: false,
+							interactive: false,
+						})
 					}
 				/>
 				{turnstile.error && (
 					<p className="text-destructive text-xs">
 						Falha na verificação de segurança. Recarregue a página e tente
 						novamente.
+					</p>
+				)}
+				{turnstile.interactive && (
+					<p className="text-muted-foreground text-xs">
+						Verificação de segurança necessária. Complete o desafio CAPTCHA
 					</p>
 				)}
 				<Button

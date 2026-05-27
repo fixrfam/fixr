@@ -7,6 +7,7 @@ export const permissions = {
 	companies: {
 		read: "companies:read",
 		update: "companies:update",
+		create: "companies:create",
 	},
 	logs: {
 		read: "logs:read",

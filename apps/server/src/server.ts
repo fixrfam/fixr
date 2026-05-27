@@ -15,15 +15,15 @@ import scalarUi from "@scalar/fastify-api-reference";
 import chalk from "chalk";
 import { fastify } from "fastify";
 import {
-	createJsonSchemaTransformObject,
 	hasZodFastifySchemaValidationErrors,
 	isResponseSerializationError,
 	jsonSchemaTransform,
+	jsonSchemaTransformObject,
 	serializerCompiler,
 	validatorCompiler,
 	type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
@@ -48,6 +48,10 @@ const envToLogger = {
 	production: true,
 	test: false,
 };
+
+z.globalRegistry.add(apiResponseSchema, { id: "Response" });
+z.globalRegistry.add(accountSchema, { id: "User" });
+z.globalRegistry.add(companySelectSchema, { id: "Company" });
 
 //Set Zod as the default request/response data serializer
 const server = fastify({
@@ -102,13 +106,7 @@ server.register(fastifySwagger, {
 		},
 	},
 	transform: jsonSchemaTransform,
-	transformObject: createJsonSchemaTransformObject({
-		schemas: {
-			Response: apiResponseSchema,
-			User: accountSchema,
-			Company: companySelectSchema,
-		},
-	}),
+	transformObject: jsonSchemaTransformObject,
 });
 
 //Set Scalar as the frontend for the docs
@@ -149,6 +147,15 @@ server.register(fastifyStatic, {
 	prefix: "/public/",
 });
 
+server.register(fastifyCors, {
+	origin: [
+		env.FRONTEND_URL,
+		env.ADMIN_URL,
+		`http://localhost:${env.NODE_PORT}`,
+	],
+	credentials: true,
+});
+
 server.register(authRoutes, {
 	prefix: "/auth",
 });
@@ -173,11 +180,6 @@ server.get("/", (_, reply) => {
 	reply
 		.status(200)
 		.send("Hello from Fixr API! Reach the documentation at /docs");
-});
-
-server.register(fastifyCors, {
-	origin: [env.FRONTEND_URL, `http://localhost:${env.NODE_PORT}`],
-	credentials: true,
 });
 
 server.setErrorHandler((error, request, response) => {

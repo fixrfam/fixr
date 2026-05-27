@@ -7,7 +7,7 @@ import {
 	sendAccountVerificationEmail,
 } from "@fixr/mail/services";
 import { jwtPayload } from "@fixr/schemas/auth";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { OAuth2Client } from "google-auth-library";
 import { AppError } from "../../../core/lib/app-error";

@@ -1,4 +1,5 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
+import type { createCompanySchema } from "@fixr/schemas/companies";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { CompaniesService } from "../services";
@@ -35,5 +36,18 @@ export class CompaniesController {
 			userJwt,
 			response,
 		});
+	}
+
+	/**
+	 * @description Create a new company
+	 */
+	static createCompany({
+		body,
+		response,
+	}: {
+		body: z.infer<typeof createCompanySchema>;
+		response: FastifyReply;
+	}) {
+		return CompaniesService.createCompany({ body, response });
 	}
 }
