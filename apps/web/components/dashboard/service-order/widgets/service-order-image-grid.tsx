@@ -32,7 +32,11 @@ function ServiceOrderImageGrid({
 						type="button"
 					>
 						{/** biome-ignore lint/correctness/useImageSize: <No need for that> */}
-
+						<img
+							alt={image.description}
+							className="h-32 w-full object-cover"
+							src={image.url}
+						/>
 						<p className="p-2 text-center text-muted-foreground text-xs">
 							{image.description}
 						</p>
