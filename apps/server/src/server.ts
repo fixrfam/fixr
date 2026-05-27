@@ -216,7 +216,7 @@ async function registerPlugins() {
 		prefix: "/uploads",
 	});
 
-	server.get("/", (_, reply) => {
+	server.get("/", { schema: { hide: true } }, (_, reply) => {
 		reply
 			.status(200)
 			.send("Hello from Fixr API! Reach the documentation at /docs");

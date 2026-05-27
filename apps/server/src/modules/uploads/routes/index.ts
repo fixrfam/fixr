@@ -1,9 +1,11 @@
+import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { createUploadPresignSchema } from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import { uploadsDocs } from "../../../core/docs/uploads.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { UploadsController } from "../controllers";
 
@@ -12,7 +14,10 @@ export function uploadsRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
 		"/presign",
 		{
-			preHandler: [authenticateEmployee],
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.serviceOrders.update),
+			],
 			schema: uploadsDocs.createUploadPresignSchema,
 		},
 		withErrorHandler(async (request, response) => {
