@@ -14,6 +14,8 @@ import {
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
 import {
+	type ModelFlatRecord,
+	type ModelListRecord,
 	ModelsRepository,
 	modelListJoins,
 	modelMinimalListSelect,
@@ -139,38 +141,33 @@ export class ModelsService {
 		const next_page =
 			PER_PAGE * (page - 1) + records.length < totalRecords ? page + 1 : null;
 
-		const modelIds = (records as Record<string, unknown>[]).map(
-			(r) => r.id as string
-		);
+		const modelIds = (records as ModelFlatRecord[]).map((r) => r.id);
 		const primaryImageMap = await ModelsRepository.queryPrimaryImages(modelIds);
 
-		const recordsWithImages = await Promise.all(
-			(records as Record<string, unknown>[]).map(async (r) => {
-				const record = { ...r };
-				record.maker = {
-					id: record.makerId,
-					name: record.makerName,
-					slug: record.makerSlug,
-				};
-				record.category = record.categoryId
+		const recordsWithImages: ModelListRecord[] = await Promise.all(
+			(records as ModelFlatRecord[]).map(async (r) => ({
+				id: r.id,
+				name: r.name,
+				slug: r.slug,
+				status: r.status ?? "Available",
+				price: r.price,
+				released: r.released,
+				maker: {
+					id: r.makerId,
+					name: r.makerName,
+					slug: r.makerSlug,
+				},
+				category: r.categoryId
 					? {
-							id: record.categoryId,
-							name: record.categoryName,
-							slug: record.categorySlug,
+							id: r.categoryId,
+							name: r.categoryName!,
+							slug: r.categorySlug!,
 						}
-					: null;
-				record.makerId = undefined;
-				record.makerName = undefined;
-				record.makerSlug = undefined;
-				record.categoryId = undefined;
-				record.categoryName = undefined;
-				record.categorySlug = undefined;
-				const r2Key = primaryImageMap.get(record.id as string);
-				record.imageUrl =
-					await ModelsRepository.generateImagePresignedUrl(r2Key);
-				record.status = record.status ?? "Available";
-				return record as Record<string, unknown>;
-			})
+					: null,
+				imageUrl: await ModelsRepository.generateImagePresignedUrl(
+					primaryImageMap.get(r.id) ?? null
+				),
+			}))
 		);
 
 		return response.status(200).send(
@@ -234,9 +231,7 @@ export class ModelsService {
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
 			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
-			ModelsRepository.attachPresignedUrlsToImages(
-				images as Record<string, unknown>[]
-			),
+			ModelsRepository.attachPresignedUrlsToImages(images),
 		]);
 
 		return response.status(200).send(
@@ -246,7 +241,7 @@ export class ModelsService {
 				code: "get_model_success",
 				message: "Model retrieved successfully.",
 				data: {
-					...(model as Record<string, unknown>),
+					...model,
 					status: model.status ?? "Available",
 					imageUrl,
 					images: imagesWithPresignedUrls,
@@ -379,9 +374,7 @@ export class ModelsService {
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
 			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
-			ModelsRepository.attachPresignedUrlsToImages(
-				images as Record<string, unknown>[]
-			),
+			ModelsRepository.attachPresignedUrlsToImages(images),
 		]);
 
 		return response.status(200).send(
@@ -495,9 +488,7 @@ export class ModelsService {
 		});
 
 		const [imageWithPresignedUrl] =
-			await ModelsRepository.attachPresignedUrlsToImages([
-				image as Record<string, unknown>,
-			]);
+			await ModelsRepository.attachPresignedUrlsToImages([image!]);
 
 		return response.status(201).send(
 			apiResponse({

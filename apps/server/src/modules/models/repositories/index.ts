@@ -11,6 +11,7 @@ import {
 	sql,
 } from "@fixr/db/connection";
 import {
+	type ModelImageSelect,
 	modelCategories,
 	modelImages,
 	modelMakers,
@@ -54,6 +55,33 @@ export const modelListJoins = [
 		on: eq(modelCategories.id, models.categoryId),
 	},
 ];
+
+export interface ModelFlatRecord {
+	id: string;
+	name: string;
+	slug: string;
+	status: string | null;
+	price: string | null;
+	released: string | null;
+	makerId: string;
+	makerName: string;
+	makerSlug: string;
+	categoryId: string | null;
+	categoryName: string | null;
+	categorySlug: string | null;
+}
+
+export interface ModelListRecord {
+	id: string;
+	name: string;
+	slug: string;
+	status: string;
+	price: string | null;
+	released: string | null;
+	maker: { id: string; name: string; slug: string };
+	category: { id: string; name: string; slug: string } | null;
+	imageUrl: string | null;
+}
 
 /** @description Data access layer for device models */
 export class ModelsRepository {
@@ -254,9 +282,9 @@ export class ModelsRepository {
 	 * @param r2Key - The R2 object key
 	 * @returns Presigned URL or null
 	 */
-	static async generateImagePresignedUrl(r2Key: string | null | undefined) {
+	static async generateImagePresignedUrl(r2Key: string | null) {
 		if (!r2Key) return null;
-		return (await generatePresignedGetUrl(r2Key)) ?? null;
+		return await generatePresignedGetUrl(r2Key);
 	}
 
 	/**
@@ -266,8 +294,8 @@ export class ModelsRepository {
 	 * @returns Images with presignedUrl attached
 	 */
 	static async attachPresignedUrlsToImages(
-		images: Record<string, unknown>[]
-	): Promise<Record<string, unknown>[]> {
+		images: ModelImageSelect[]
+	): Promise<(ModelImageSelect & { presignedUrl: string })[]> {
 		return await Promise.all(
 			images.map(async (img) => {
 				const r2Key = img.r2Key as string;
