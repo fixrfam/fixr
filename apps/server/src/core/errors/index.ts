@@ -1,8 +1,11 @@
 import { accountErrors } from "../../modules/account/errors";
 import { authErrors } from "../../modules/auth/errors";
+import { categoriesErrors } from "../../modules/categories/errors";
 import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
 import { employeesErrors } from "../../modules/employees/errors";
+import { makersErrors } from "../../modules/makers/errors";
+import { modelsErrors } from "../../modules/models/errors";
 import { serviceOrdersErrors } from "../../modules/service-orders/errors";
 import { tokensErrors } from "../../modules/tokens/errors";
 import { uploadsErrors } from "../../modules/uploads/errors";
@@ -14,6 +17,9 @@ export const errors = defineErrors({
 	...credentialsErrors,
 	...companiesErrors,
 	...employeesErrors,
+	...categoriesErrors,
+	...makersErrors,
+	...modelsErrors,
 	...serviceOrdersErrors,
 	...tokensErrors,
 	...uploadsErrors,

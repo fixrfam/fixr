@@ -1,11 +1,16 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@fixr/env/server";
 import {
 	buildObjectPublicUrl as _buildObjectPublicUrl,
 	isAllowedCompanyPhotoUrl as _isAllowedCompanyPhotoUrl,
 } from "../core/lib/r2";
 
-export { buildUploadObjectKey, sanitizeUploadFileName } from "../core/lib/r2";
+export {
+	buildModelObjectKey,
+	buildUploadObjectKey,
+	sanitizeUploadFileName,
+} from "../core/lib/r2";
 
 function parseR2BucketUrl(bucketUrl: string) {
 	const parsed = new URL(bucketUrl);
@@ -44,4 +49,18 @@ export function buildObjectPublicUrl(key: string) {
 
 export function isAllowedCompanyPhotoUrl(url: string, companyId: string) {
 	return _isAllowedCompanyPhotoUrl(r2PublicBaseUrl, url, companyId);
+}
+
+/**
+ * Generate a presigned GET URL for reading an object from R2
+ *
+ * @param key - The R2 object key
+ * @returns A presigned URL valid for 24 hours
+ */
+export async function generatePresignedGetUrl(key: string): Promise<string> {
+	const command = new GetObjectCommand({
+		Bucket: r2Bucket,
+		Key: key,
+	});
+	return await getSignedUrl(r2Client, command, { expiresIn: 86_400 });
 }

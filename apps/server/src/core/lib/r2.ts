@@ -56,3 +56,19 @@ export function buildUploadObjectKey({
 
 	return `companies/${companyId}/service-orders/${uniquePrefix}-${safeName}`;
 }
+
+/**
+ * Build an R2 object key for a model image
+ */
+export function buildModelObjectKey({
+	companyId,
+	fileName,
+}: {
+	companyId: string;
+	fileName: string;
+}): string {
+	const safeName = sanitizeUploadFileName(fileName);
+	const uniquePrefix = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+	return `companies/${companyId}/models/${uniquePrefix}-${safeName}`;
+}

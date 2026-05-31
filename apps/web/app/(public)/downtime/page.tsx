@@ -28,8 +28,8 @@ export default function DowntimePage() {
 						projeto interdisciplinar desenvolvido na FAM (Faculdade das
 						Américas)
 					</span>
-					. Sua infraestrutura envolve diversos serviços — como o servidor da
-					API, banco de dados e sistema de cache — todos hospedados em uma{" "}
+					. Sua infraestrutura envolve diversos serviços: como o servidor da
+					API, banco de dados e sistema de cache: todos hospedados em uma{" "}
 					<span className="font-medium text-foreground">VPS privada</span>.
 				</p>
 

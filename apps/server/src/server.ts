@@ -30,9 +30,12 @@ import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
+import { categoriesRoutes } from "./modules/categories/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
 import { employeesRoutes } from "./modules/employees/routes";
+import { makersRoutes } from "./modules/makers/routes";
+import { modelsRoutes } from "./modules/models/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
 import { uploadsRoutes } from "./modules/uploads/routes";
 
@@ -155,6 +158,11 @@ async function registerPlugins() {
 					name: "Uploads",
 					description: "Pre-signed uploads to Cloudflare R2.",
 				},
+				{
+					name: "Devices",
+					description:
+						"Device catalog management: categories, makers, and models.",
+				},
 			],
 			security: [],
 			components: {
@@ -212,6 +220,18 @@ async function registerPlugins() {
 		prefix: "/companies/:subdomain/service-orders",
 	});
 
+	await server.register(categoriesRoutes, {
+		prefix: "/companies/:subdomain/categories",
+	});
+
+	await server.register(makersRoutes, {
+		prefix: "/companies/:subdomain/makers",
+	});
+
+	await server.register(modelsRoutes, {
+		prefix: "/companies/:subdomain/models",
+	});
+
 	await server.register(uploadsRoutes, {
 		prefix: "/uploads",
 	});
@@ -227,7 +247,7 @@ async function registerPlugins() {
 		server.swagger()
 	);
 
-	// Scalar UI — register after all routes so the spec is complete.
+	// Scalar UI: register after all routes so the spec is complete.
 	await server.register(scalarUi, {
 		routePrefix: "/docs",
 		configuration: {
