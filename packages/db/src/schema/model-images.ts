@@ -17,7 +17,6 @@ export const modelImages = mysqlTable("model_images", {
 	modelId: varchar("model_id", { length: 25 })
 		.notNull()
 		.references(() => models.id),
-	originalUrl: varchar("original_url", { length: 255 }),
 	r2Key: varchar("r2_key", { length: 255 }),
 	isPrimary: boolean("is_primary").notNull().default(false),
 	variant: varchar("variant", { length: 50 }),

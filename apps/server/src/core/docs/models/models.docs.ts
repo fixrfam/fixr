@@ -15,8 +15,6 @@ const modelListRecordSchema = z.object({
 	name: z.string(),
 	slug: z.string(),
 	imageUrl: z.string().nullable(),
-	imageLocalPath: z.string().nullable(),
-	presignedImageUrl: z.string().nullable(),
 	status: z.string().nullable(),
 	price: z.string().nullable(),
 	released: z.string().nullable(),
@@ -37,7 +35,6 @@ const modelListRecordSchema = z.object({
 const modelImageRecordSchema = z.object({
 	id: z.string(),
 	modelId: z.string(),
-	originalUrl: z.string().nullable(),
 	r2Key: z.string().nullable(),
 	presignedUrl: z.string().nullable(),
 	isPrimary: z.boolean(),
@@ -53,8 +50,6 @@ const modelDetailRecordSchema = z.object({
 	slug: z.string(),
 	url: z.string(),
 	imageUrl: z.string().nullable(),
-	imageLocalPath: z.string().nullable(),
-	presignedImageUrl: z.string().nullable(),
 	categoryId: z.string().nullable(),
 	announced: z.string().nullable(),
 	status: z.string().nullable(),
@@ -245,7 +240,7 @@ const patchModelSchema: FastifySchema = {
 	description: `
 **Partially updates a device model record.**
 
-All fields are optional — only provided fields will be updated.
+All fields are optional: only provided fields will be updated.
 Returns the full model detail with presigned image URLs.
 `,
 	params: z.object({ subdomain: z.string(), modelId: z.string() }),

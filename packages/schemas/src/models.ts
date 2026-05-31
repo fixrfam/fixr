@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getPaginatedDataSchema } from "./utils";
 
-/** @description Query schema for listing categories — optional name filter */
+/** @description Query schema for listing categories: optional name filter */
 export const getModelCategoriesQuerySchema = z.object({
 	query: z.string().optional(),
 });
@@ -11,7 +11,7 @@ export const getModelCategoryParamsSchema = z.object({
 	slug: z.string().min(1),
 });
 
-/** @description Query schema for listing makers — pagination, sorting, and optional name filter */
+/** @description Query schema for listing makers: pagination, sorting, and optional name filter */
 export const getModelMakersQuerySchema = getPaginatedDataSchema.extend({
 	sort: z.enum(["newer", "older", "name", "most_devices"]).optional(),
 });
@@ -29,7 +29,7 @@ export const modelStatuses = z.enum([
 	"Rumored",
 ]);
 
-/** @description Query schema for listing models — pagination, fulltext search, filters, and sorting */
+/** @description Query schema for listing models: pagination, fulltext search, filters, and sorting */
 export const getModelsQuerySchema = getPaginatedDataSchema.extend({
 	makerId: z.string().cuid2().optional(),
 	categoryId: z.string().cuid2().optional(),
@@ -108,7 +108,6 @@ export const modelImageParamsSchema = z.object({
 /** @description Body schema for assigning an uploaded image to a model */
 export const createModelImageBodySchema = z.object({
 	r2Key: z.string().min(1),
-	originalUrl: z.string().url().optional(),
 	isPrimary: z.boolean().optional(),
 	variant: z.string().optional(),
 	position: z.number().int().optional(),

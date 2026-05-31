@@ -2,7 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 
-/** @description Device makers (brands) table — stores manufacturer/brand info */
+/** @description Device makers (brands) table: stores manufacturer/brand info */
 export const modelMakers = mysqlTable("model_makers", {
 	id: varchar("id", { length: 25 })
 		.$defaultFn(() => createId())

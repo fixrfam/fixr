@@ -139,10 +139,38 @@ export class ModelsService {
 		const next_page =
 			PER_PAGE * (page - 1) + records.length < totalRecords ? page + 1 : null;
 
+		const modelIds = (records as Record<string, unknown>[]).map(
+			(r) => r.id as string
+		);
+		const primaryImageMap = await ModelsRepository.queryPrimaryImages(modelIds);
+
 		const recordsWithImages = await Promise.all(
-			(records as Record<string, unknown>[]).map((r) =>
-				ModelsRepository.attachPresignedImageUrls(r)
-			)
+			(records as Record<string, unknown>[]).map(async (r) => {
+				const record = { ...r };
+				record.maker = {
+					id: record.makerId,
+					name: record.makerName,
+					slug: record.makerSlug,
+				};
+				record.category = record.categoryId
+					? {
+							id: record.categoryId,
+							name: record.categoryName,
+							slug: record.categorySlug,
+						}
+					: null;
+				record.makerId = undefined;
+				record.makerName = undefined;
+				record.makerSlug = undefined;
+				record.categoryId = undefined;
+				record.categoryName = undefined;
+				record.categorySlug = undefined;
+				const r2Key = primaryImageMap.get(record.id as string);
+				record.imageUrl =
+					await ModelsRepository.generateImagePresignedUrl(r2Key);
+				record.status = record.status ?? "Available";
+				return record as Record<string, unknown>;
+			})
 		);
 
 		return response.status(200).send(
@@ -203,10 +231,9 @@ export class ModelsService {
 
 		const images = await ModelsRepository.queryModelImages(model.id as string);
 
-		const [modelWithPresignedUrl, imagesWithPresignedUrls] = await Promise.all([
-			ModelsRepository.attachPresignedImageUrls(
-				model as Record<string, unknown>
-			),
+		const primaryImage = images.find((img) => img.isPrimary);
+		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
+			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
 			ModelsRepository.attachPresignedUrlsToImages(
 				images as Record<string, unknown>[]
 			),
@@ -218,7 +245,12 @@ export class ModelsService {
 				error: null,
 				code: "get_model_success",
 				message: "Model retrieved successfully.",
-				data: { ...modelWithPresignedUrl, images: imagesWithPresignedUrls },
+				data: {
+					...(model as Record<string, unknown>),
+					status: model.status ?? "Available",
+					imageUrl,
+					images: imagesWithPresignedUrls,
+				},
 			})
 		);
 	}
@@ -344,10 +376,9 @@ export class ModelsService {
 
 		const images = await ModelsRepository.queryModelImages(model.id as string);
 
-		const [modelWithPresignedUrl, imagesWithPresignedUrls] = await Promise.all([
-			ModelsRepository.attachPresignedImageUrls(
-				(updated ?? model) as Record<string, unknown>
-			),
+		const primaryImage = images.find((img) => img.isPrimary);
+		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
+			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
 			ModelsRepository.attachPresignedUrlsToImages(
 				images as Record<string, unknown>[]
 			),
@@ -359,7 +390,12 @@ export class ModelsService {
 				error: null,
 				code: "patch_model_success",
 				message: "Model updated successfully.",
-				data: { ...modelWithPresignedUrl, images: imagesWithPresignedUrls },
+				data: {
+					...(updated ?? model),
+					status: (updated ?? model).status ?? "Available",
+					imageUrl,
+					images: imagesWithPresignedUrls,
+				},
 			})
 		);
 	}
@@ -453,7 +489,6 @@ export class ModelsService {
 			id: imageId,
 			modelId: model.id as string,
 			r2Key: data.r2Key,
-			originalUrl: data.originalUrl ?? null,
 			isPrimary: data.isPrimary ?? false,
 			variant: data.variant ?? null,
 			position: data.position ?? 0,

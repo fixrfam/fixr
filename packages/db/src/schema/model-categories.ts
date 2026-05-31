@@ -1,16 +1,14 @@
 import { createId } from "@paralleldrive/cuid2";
-import { mysqlTable, text, varchar } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 
-/** @description Device categories table — groups models by type (e.g. smartphone, tablet) */
+/** @description Device categories table: groups models by type (e.g. smartphone, tablet) */
 export const modelCategories = mysqlTable("model_categories", {
 	id: varchar("id", { length: 25 })
 		.$defaultFn(() => createId())
 		.primaryKey(),
 	name: varchar("name", { length: 100 }).notNull(),
 	slug: varchar("slug", { length: 100 }).notNull(),
-	url: varchar("url", { length: 255 }).notNull(),
-	imageUrl: text("image_url"),
 });
 
 /** @description Zod schema for selecting a category record */

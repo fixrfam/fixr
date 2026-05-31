@@ -26,8 +26,6 @@ export const models = mysqlTable(
 		name: varchar("name", { length: 255 }).notNull(),
 		slug: varchar("slug", { length: 100 }).notNull(),
 		url: varchar("url", { length: 255 }).notNull(),
-		imageUrl: varchar("image_url", { length: 255 }),
-		imageLocalPath: varchar("image_local_path", { length: 255 }),
 
 		categoryId: varchar("category_id", { length: 25 }).references(
 			() => modelCategories.id

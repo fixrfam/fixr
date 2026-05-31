@@ -1,5 +1,15 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { and, asc, db, desc, eq, or, type SQL, sql } from "@fixr/db/connection";
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	inArray,
+	or,
+	type SQL,
+	sql,
+} from "@fixr/db/connection";
 import {
 	modelCategories,
 	modelImages,
@@ -20,17 +30,15 @@ export const modelMinimalListSelect = {
 	id: models.id,
 	name: models.name,
 	slug: models.slug,
-	imageUrl: models.imageUrl,
-	imageLocalPath: models.imageLocalPath,
 	status: models.status,
 	price: models.price,
 	released: models.released,
-	maker: { id: modelMakers.id, name: modelMakers.name, slug: modelMakers.slug },
-	category: {
-		id: modelCategories.id,
-		name: modelCategories.name,
-		slug: modelCategories.slug,
-	},
+	makerId: modelMakers.id,
+	makerName: modelMakers.name,
+	makerSlug: modelMakers.slug,
+	categoryId: modelCategories.id,
+	categoryName: modelCategories.name,
+	categorySlug: modelCategories.slug,
 };
 
 /** @description Join definitions for models list queries */
@@ -134,8 +142,6 @@ export class ModelsRepository {
 				name: models.name,
 				slug: models.slug,
 				url: models.url,
-				imageUrl: models.imageUrl,
-				imageLocalPath: models.imageLocalPath,
 				categoryId: models.categoryId,
 				announced: models.announced,
 				status: models.status,
@@ -216,17 +222,41 @@ export class ModelsRepository {
 	}
 
 	/**
-	 * Attach a presigned GET URL to a model record
+	 * Batch fetch primary model images for a set of model IDs
 	 *
-	 * @param model - The model record
-	 * @returns The model record with presignedImageUrl
+	 * @param modelIds - Array of model IDs
+	 * @returns Map of modelId -> r2Key
 	 */
-	static async attachPresignedImageUrls(
-		model: Record<string, unknown>
-	): Promise<Record<string, unknown>> {
-		const localPath = model.imageLocalPath as string;
-		const presignedUrl = await generatePresignedGetUrl(localPath);
-		return { ...model, presignedImageUrl: presignedUrl ?? model.imageUrl };
+	static async queryPrimaryImages(
+		modelIds: string[]
+	): Promise<Map<string, string>> {
+		if (modelIds.length === 0) return new Map();
+		const rows = await db
+			.select({
+				modelId: modelImages.modelId,
+				r2Key: modelImages.r2Key,
+			})
+			.from(modelImages)
+			.where(
+				and(
+					inArray(modelImages.modelId, modelIds),
+					eq(modelImages.isPrimary, true)
+				)
+			);
+		return new Map(
+			rows.filter((r) => !!r.r2Key).map((r) => [r.modelId, r.r2Key!])
+		);
+	}
+
+	/**
+	 * Generate a presigned GET URL for an R2 key
+	 *
+	 * @param r2Key - The R2 object key
+	 * @returns Presigned URL or null
+	 */
+	static async generateImagePresignedUrl(r2Key: string | null | undefined) {
+		if (!r2Key) return null;
+		return (await generatePresignedGetUrl(r2Key)) ?? null;
 	}
 
 	/**
@@ -242,7 +272,7 @@ export class ModelsRepository {
 			images.map(async (img) => {
 				const r2Key = img.r2Key as string;
 				const presignedUrl = await generatePresignedGetUrl(r2Key);
-				return { ...img, presignedUrl: presignedUrl ?? img.originalUrl };
+				return { ...img, presignedUrl };
 			})
 		);
 	}
@@ -325,28 +355,12 @@ export class ModelsRepository {
 	 * @returns Array of R2 keys
 	 */
 	static async queryR2KeysByModel(modelId: string) {
-		const [modelResult, imageKeys] = await Promise.all([
-			db
-				.select({ key: models.imageLocalPath })
-				.from(models)
-				.where(eq(models.id, modelId))
-				.limit(1),
-			db
-				.select({ key: modelImages.r2Key })
-				.from(modelImages)
-				.where(eq(modelImages.modelId, modelId)),
-		]);
+		const imageKeys = await db
+			.select({ key: modelImages.r2Key })
+			.from(modelImages)
+			.where(eq(modelImages.modelId, modelId));
 
-		const keys: string[] = [];
-		if (modelResult[0]?.key) {
-			keys.push(modelResult[0].key);
-		}
-		for (const img of imageKeys) {
-			if (img.key) {
-				keys.push(img.key);
-			}
-		}
-		return keys;
+		return imageKeys.map((img) => img.key).filter((k): k is string => !!k);
 	}
 
 	/**
