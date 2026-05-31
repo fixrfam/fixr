@@ -1,3 +1,4 @@
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { and, asc, db, desc, eq, or, type SQL, sql } from "@fixr/db/connection";
 import {
 	modelCategories,
@@ -5,7 +6,11 @@ import {
 	modelMakers,
 	models,
 } from "@fixr/db/schema";
-import { generatePresignedGetUrl } from "../../../config/r2";
+import {
+	generatePresignedGetUrl,
+	r2Bucket,
+	r2Client,
+} from "../../../config/r2";
 
 const FTS_OPERATOR_REGEX = /[+\-*~()<>@]/;
 const WHITESPACE_REGEX = /\s+/;
@@ -240,5 +245,146 @@ export class ModelsRepository {
 				return { ...img, presignedUrl: presignedUrl ?? img.originalUrl };
 			})
 		);
+	}
+
+	/**
+	 * Check if a slug already exists for a given company
+	 *
+	 * @param slug - The slug to check
+	 * @param companyId - Company ID for scoping
+	 * @returns The matching model or undefined
+	 */
+	static async queryBySlugAndCompany(slug: string, companyId: string) {
+		const [model] = await db
+			.select({ id: models.id })
+			.from(models)
+			.where(
+				and(
+					eq(models.slug, slug),
+					or(eq(models.companyId, companyId), sql`${models.companyId} IS NULL`)
+				)
+			)
+			.limit(1);
+		return model;
+	}
+
+	/**
+	 * Check if a maker exists by ID
+	 *
+	 * @param makerId - The maker ID
+	 * @returns The maker or undefined
+	 */
+	static async queryMakerById(makerId: string) {
+		const [maker] = await db
+			.select({ id: modelMakers.id })
+			.from(modelMakers)
+			.where(eq(modelMakers.id, makerId))
+			.limit(1);
+		return maker;
+	}
+
+	/**
+	 * Insert a new model record
+	 *
+	 * @param data - The model data to insert
+	 */
+	static async insertModel(data: typeof models.$inferInsert) {
+		await db.insert(models).values(data);
+	}
+
+	/**
+	 * Insert a model image record
+	 *
+	 * @param data - The model image data
+	 * @returns The created model image
+	 */
+	static async insertModelImage(data: typeof modelImages.$inferInsert) {
+		const id = data.id as string;
+		await db.insert(modelImages).values(data);
+		const [created] = await db
+			.select()
+			.from(modelImages)
+			.where(eq(modelImages.id, id))
+			.limit(1);
+		return created;
+	}
+
+	/**
+	 * Delete a single model image record
+	 *
+	 * @param imageId - The image ID
+	 */
+	static async deleteModelImageRecord(imageId: string) {
+		await db.delete(modelImages).where(eq(modelImages.id, imageId));
+	}
+
+	/**
+	 * Get all R2 keys associated with a model (model images + the model's own imageLocalPath)
+	 *
+	 * @param modelId - The model ID
+	 * @returns Array of R2 keys
+	 */
+	static async queryR2KeysByModel(modelId: string) {
+		const [modelResult, imageKeys] = await Promise.all([
+			db
+				.select({ key: models.imageLocalPath })
+				.from(models)
+				.where(eq(models.id, modelId))
+				.limit(1),
+			db
+				.select({ key: modelImages.r2Key })
+				.from(modelImages)
+				.where(eq(modelImages.modelId, modelId)),
+		]);
+
+		const keys: string[] = [];
+		if (modelResult[0]?.key) {
+			keys.push(modelResult[0].key);
+		}
+		for (const img of imageKeys) {
+			if (img.key) {
+				keys.push(img.key);
+			}
+		}
+		return keys;
+	}
+
+	/**
+	 * Delete an R2 object by key
+	 *
+	 * @param key - The R2 object key
+	 */
+	static async deleteR2Object(key: string) {
+		await r2Client.send(
+			new DeleteObjectCommand({
+				Bucket: r2Bucket,
+				Key: key,
+			})
+		);
+	}
+
+	/**
+	 * Update a model record (partial)
+	 *
+	 * @param id - The model ID
+	 * @param data - The fields to update
+	 */
+	static async updateModel(
+		id: string,
+		data: Partial<typeof models.$inferInsert>
+	) {
+		await db.update(models).set(data).where(eq(models.id, id));
+	}
+
+	/**
+	 * Delete a model record and its associated images
+	 *
+	 * @param id - The model ID
+	 */
+	static async deleteModel(id: string) {
+		const keys = await ModelsRepository.queryR2KeysByModel(id);
+		await Promise.all(keys.map((k) => ModelsRepository.deleteR2Object(k)));
+		await db.delete(modelImages).where(eq(modelImages.modelId, id));
+		await db.delete(models).where(eq(models.id, id));
 	}
 }

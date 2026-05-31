@@ -48,4 +48,46 @@ export class UploadsService {
 			})
 		);
 	}
+
+	static async createModelImagePresign({
+		userJwt,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		data: { fileName: string; contentType: string; size: number };
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("UPLOAD_COMPANY_NOT_FOUND");
+		}
+
+		const [employee] = await db
+			.select()
+			.from(employees)
+			.where(eq(employees.userId, userJwt.id))
+			.limit(1);
+
+		if (!employee || employee.companyId !== userJwt.company.id) {
+			throw new AppError("UPLOAD_COMPANY_NOT_FOUND");
+		}
+
+		const presign = await UploadsRepository.createModelPresignedUpload({
+			companyId: userJwt.company.id,
+			employeeId: employee.id,
+			fileName: data.fileName,
+			contentType: data.contentType,
+			size: data.size,
+		});
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "create_model_image_presign_success",
+				message: "Upload URL generated successfully.",
+				data: presign,
+			})
+		);
+	}
 }

@@ -1,6 +1,9 @@
 import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
-import { createUploadPresignSchema } from "@fixr/schemas/uploads";
+import {
+	createModelImageUploadPresignSchema,
+	createUploadPresignSchema,
+} from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import { uploadsDocs } from "../../../core/docs/uploads.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
@@ -24,6 +27,27 @@ export function uploadsRoutes(fastify: FastifyTypedInstance) {
 			const body = await createUploadPresignSchema.parseAsync(request.body);
 
 			await UploadsController.createPresignedUpload({
+				userJwt,
+				data: body,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/models/presign",
+		{
+			preHandler: [
+				authenticateEmployee,
+				requirePermission(permissions.devices.update),
+			],
+			schema: uploadsDocs.createModelImagePresignSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const body = createModelImageUploadPresignSchema.parse(request.body);
+
+			await UploadsController.createModelImagePresign({
 				userJwt,
 				data: body,
 				response,

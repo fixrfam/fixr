@@ -54,10 +54,13 @@ export function isAllowedCompanyPhotoUrl(url: string, companyId: string) {
 /**
  * Generate a presigned GET URL for reading an object from R2
  *
- * @param key - The R2 object key
- * @returns A presigned URL valid for 24 hours
+ * @param key - The R2 object key (nullable)
+ * @returns A presigned URL valid for 24 hours, or null if key is empty
  */
-export async function generatePresignedGetUrl(key: string): Promise<string> {
+export async function generatePresignedGetUrl(
+	key: string | null | undefined
+): Promise<string | null> {
+	if (!key) return null;
 	const command = new GetObjectCommand({
 		Bucket: r2Bucket,
 		Key: key,

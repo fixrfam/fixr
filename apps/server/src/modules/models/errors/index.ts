@@ -22,4 +22,19 @@ export const modelsErrors = defineErrors({
 		message: "You are not authorized to access this company.",
 		status: 403,
 	},
+	MODEL_SLUG_CONFLICT: {
+		code: "model_slug_conflict",
+		message: "A model with this slug already exists.",
+		status: 409,
+	},
+	MODEL_MAKER_NOT_FOUND: {
+		code: "maker_not_found",
+		message: "The specified maker does not exist.",
+		status: 404,
+	},
+	MODEL_IMAGE_NOT_FOUND: {
+		code: "model_image_not_found",
+		message: "Model image not found.",
+		status: 404,
+	},
 });

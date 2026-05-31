@@ -1,5 +1,12 @@
+import { slugify } from "@fixr/constants/slug";
 import { models } from "@fixr/db/schema";
+import type {
+	createModelBodySchema,
+	createModelImageBodySchema,
+} from "@fixr/schemas/models";
+import { createId } from "@paralleldrive/cuid2";
 import type { FastifyReply } from "fastify";
+import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
 import {
 	getPaginatedCount,
@@ -14,6 +21,22 @@ import {
 
 /** @description Business logic for device models */
 export class ModelsService {
+	private static buildCreateModelValues(
+		data: z.infer<typeof createModelBodySchema>,
+		modelId: string,
+		companyId: string,
+		slug: string
+	): typeof models.$inferInsert {
+		return {
+			id: modelId,
+			slug,
+			url: `/models/${slug}`,
+			companyId,
+			...Object.fromEntries(
+				Object.entries(data).filter(([_, v]) => v !== undefined)
+			),
+		} as typeof models.$inferInsert;
+	}
 	/**
 	 * List models with pagination, fulltext search, and filters
 	 *
@@ -196,6 +219,317 @@ export class ModelsService {
 				code: "get_model_success",
 				message: "Model retrieved successfully.",
 				data: { ...modelWithPresignedUrl, images: imagesWithPresignedUrls },
+			})
+		);
+	}
+
+	/**
+	 * Create a new model
+	 *
+	 * @param userJwt - Authenticated user JWT payload
+	 * @param subdomain - Company subdomain
+	 * @param data - The model data
+	 * @param response - Fastify reply
+	 */
+	static async createModel({
+		userJwt,
+		subdomain,
+		data,
+		response,
+	}: {
+		userJwt: { id: string; company?: { id: string; subdomain: string } };
+		subdomain: string;
+		data: z.infer<typeof createModelBodySchema>;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("MODEL_COMPANY_NOT_FOUND");
+		}
+
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		const maker = await ModelsRepository.queryMakerById(data.makerId);
+
+		if (!maker) {
+			throw new AppError("MODEL_MAKER_NOT_FOUND");
+		}
+
+		const slug = slugify(data.name);
+
+		const existing = await ModelsRepository.queryBySlugAndCompany(
+			slug,
+			userJwt.company.id
+		);
+
+		if (existing) {
+			throw new AppError("MODEL_SLUG_CONFLICT");
+		}
+
+		const modelId = createId();
+		const companyId = userJwt.company.id;
+
+		const values = ModelsService.buildCreateModelValues(
+			data,
+			modelId,
+			companyId,
+			slug
+		);
+		await ModelsRepository.insertModel(values);
+
+		return response.status(201).send(
+			apiResponse({
+				status: 201,
+				error: null,
+				code: "create_model_success",
+				message: "Model created successfully.",
+				data: { id: modelId, name: data.name, slug },
+			})
+		);
+	}
+
+	/**
+	 * Partially update a model
+	 *
+	 * @param userJwt - Authenticated user JWT payload
+	 * @param subdomain - Company subdomain
+	 * @param modelId - The model ID
+	 * @param data - The fields to update
+	 * @param response - Fastify reply
+	 */
+	static async patchModel({
+		userJwt,
+		subdomain,
+		modelId,
+		data,
+		response,
+	}: {
+		userJwt: { id: string; company?: { id: string; subdomain: string } };
+		subdomain: string;
+		modelId: string;
+		data: Record<string, unknown>;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("MODEL_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		const model = await ModelsRepository.queryModelBySlug(
+			modelId,
+			userJwt.company.id
+		);
+
+		if (!model) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		const updateData: Record<string, unknown> = {};
+
+		for (const [key, value] of Object.entries(data)) {
+			updateData[key] = value ?? null;
+		}
+
+		if (Object.keys(updateData).length > 0) {
+			await ModelsRepository.updateModel(modelId, updateData);
+		}
+
+		const updated = await ModelsRepository.queryModelBySlug(
+			model.id as string,
+			userJwt.company.id
+		);
+
+		const images = await ModelsRepository.queryModelImages(model.id as string);
+
+		const [modelWithPresignedUrl, imagesWithPresignedUrls] = await Promise.all([
+			ModelsRepository.attachPresignedImageUrls(
+				(updated ?? model) as Record<string, unknown>
+			),
+			ModelsRepository.attachPresignedUrlsToImages(
+				images as Record<string, unknown>[]
+			),
+		]);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "patch_model_success",
+				message: "Model updated successfully.",
+				data: { ...modelWithPresignedUrl, images: imagesWithPresignedUrls },
+			})
+		);
+	}
+
+	/**
+	 * Delete a model
+	 *
+	 * @param userJwt - Authenticated user JWT payload
+	 * @param subdomain - Company subdomain
+	 * @param modelId - The model ID
+	 * @param response - Fastify reply
+	 */
+	static async deleteModel({
+		userJwt,
+		subdomain,
+		modelId,
+		response,
+	}: {
+		userJwt: { id: string; company?: { id: string; subdomain: string } };
+		subdomain: string;
+		modelId: string;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("MODEL_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		const model = await ModelsRepository.queryModelBySlug(
+			modelId,
+			userJwt.company.id
+		);
+		if (!model) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		await ModelsRepository.deleteModel(model.id as string);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "delete_model_success",
+				message: "Model deleted successfully.",
+				data: null,
+			})
+		);
+	}
+
+	/**
+	 * Assign an uploaded image to a model
+	 *
+	 * @param userJwt - Authenticated user JWT payload
+	 * @param subdomain - Company subdomain
+	 * @param modelId - The model ID
+	 * @param data - The image data
+	 * @param response - Fastify reply
+	 */
+	static async createModelImage({
+		userJwt,
+		subdomain,
+		modelId,
+		data,
+		response,
+	}: {
+		userJwt: { id: string; company?: { id: string; subdomain: string } };
+		subdomain: string;
+		modelId: string;
+		data: z.infer<typeof createModelImageBodySchema>;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("MODEL_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		const model = await ModelsRepository.queryModelBySlug(
+			modelId,
+			userJwt.company.id
+		);
+		if (!model) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		const imageId = createId();
+		const image = await ModelsRepository.insertModelImage({
+			id: imageId,
+			modelId: model.id as string,
+			r2Key: data.r2Key,
+			originalUrl: data.originalUrl ?? null,
+			isPrimary: data.isPrimary ?? false,
+			variant: data.variant ?? null,
+			position: data.position ?? 0,
+		});
+
+		const [imageWithPresignedUrl] =
+			await ModelsRepository.attachPresignedUrlsToImages([
+				image as Record<string, unknown>,
+			]);
+
+		return response.status(201).send(
+			apiResponse({
+				status: 201,
+				error: null,
+				code: "create_model_image_success",
+				message: "Model image created successfully.",
+				data: imageWithPresignedUrl,
+			})
+		);
+	}
+
+	/**
+	 * Delete a model image
+	 *
+	 * @param userJwt - Authenticated user JWT payload
+	 * @param subdomain - Company subdomain
+	 * @param modelId - The model ID
+	 * @param imageId - The image ID
+	 * @param response - Fastify reply
+	 */
+	static async deleteModelImage({
+		userJwt,
+		subdomain,
+		modelId,
+		imageId,
+		response,
+	}: {
+		userJwt: { id: string; company?: { id: string; subdomain: string } };
+		subdomain: string;
+		modelId: string;
+		imageId: string;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company) {
+			throw new AppError("MODEL_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		const model = await ModelsRepository.queryModelBySlug(
+			modelId,
+			userJwt.company.id
+		);
+		if (!model) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		const images = await ModelsRepository.queryModelImages(model.id as string);
+		const image = images.find((img) => img.id === imageId);
+		if (!image) {
+			throw new AppError("MODEL_IMAGE_NOT_FOUND");
+		}
+
+		if (image.r2Key) {
+			await ModelsRepository.deleteR2Object(image.r2Key);
+		}
+		await ModelsRepository.deleteModelImageRecord(imageId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "delete_model_image_success",
+				message: "Model image deleted successfully.",
+				data: null,
 			})
 		);
 	}
