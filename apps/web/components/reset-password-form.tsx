@@ -205,7 +205,12 @@ export function ResetPasswordForm({
 					)}
 					<Button
 						className="w-full"
-						disabled={loading || !formState.isValid || turnstile.loading}
+						disabled={
+							loading ||
+							!formState.isValid ||
+							turnstile.loading ||
+							!turnstile.token
+						}
 						type="submit"
 					>
 						{loading || turnstile.loading ? (
