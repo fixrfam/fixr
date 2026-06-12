@@ -7,9 +7,8 @@ import {
 } from "@fixr/db/schema";
 import type { createCompanySchema } from "@fixr/schemas/companies";
 import type { z } from "zod";
-import { redis } from "../../../config/redis";
-import { CACHE_TTL, companyCacheKey } from "../../../core/lib/cache";
 import { hashPassword } from "../../../core/lib/hash-password";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 /** @description Companies data access layer */
 export class CompaniesRepository {
@@ -19,18 +18,8 @@ export class CompaniesRepository {
 	 * @param id - The company ID
 	 * @returns The parsed company data
 	 */
+	@Cached({ ttl: 3600, key: "company" })
 	static async queryCompanyById(id: string) {
-		const cacheKey = companyCacheKey(id);
-		const cached = await redis.get(cacheKey);
-
-		if (cached) {
-			const parsed = JSON.parse(cached);
-			if (!parsed) {
-				return undefined;
-			}
-			return companySelectSchema.parse(parsed);
-		}
-
 		const [company] = await db
 			.select()
 			.from(companies)
@@ -38,11 +27,8 @@ export class CompaniesRepository {
 			.limit(1);
 
 		if (!company) {
-			await redis.set(cacheKey, JSON.stringify(null), "EX", CACHE_TTL);
 			return undefined;
 		}
-
-		await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL);
 
 		return companySelectSchema.parse(company);
 	}
@@ -53,18 +39,8 @@ export class CompaniesRepository {
 	 * @param subdomain - The company subdomain
 	 * @returns The parsed company data
 	 */
+	@Cached({ ttl: 3600, key: "company:subdomain" })
 	static async queryCompanyBySubdomain(subdomain: string) {
-		const cacheKey = companyCacheKey(subdomain);
-		const cached = await redis.get(cacheKey);
-
-		if (cached) {
-			const parsed = JSON.parse(cached);
-			if (!parsed) {
-				return undefined;
-			}
-			return companySelectSchema.parse(parsed);
-		}
-
 		const [company] = await db
 			.select()
 			.from(companies)
@@ -72,11 +48,8 @@ export class CompaniesRepository {
 			.limit(1);
 
 		if (!company) {
-			await redis.set(cacheKey, JSON.stringify(null), "EX", CACHE_TTL);
 			return undefined;
 		}
-
-		await redis.set(cacheKey, JSON.stringify(company), "EX", CACHE_TTL);
 
 		return companySelectSchema.parse(company);
 	}
@@ -108,6 +81,7 @@ export class CompaniesRepository {
 	/**
 	 * @description Create a company, user, and employee (admin) in sequence
 	 */
+	@InvalidateCache({ patterns: ["company:*"] })
 	static async createOrgWithAdmin(data: z.infer<typeof createCompanySchema>) {
 		const [orgId] = await db
 			.insert(companies)
