@@ -22,6 +22,7 @@ import {
 	r2Bucket,
 	r2Client,
 } from "../../../config/r2";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 const FTS_OPERATOR_REGEX = /[+\-*~()<>@]/;
 const WHITESPACE_REGEX = /\s+/;
@@ -155,6 +156,7 @@ export class ModelsRepository {
 	 * @param companyId - Optional company ID for scoping
 	 * @returns The model record with relations or null
 	 */
+	@Cached({ ttl: 3600, key: "models:slug" })
 	static async queryModelBySlug(slug: string, companyId?: string) {
 		const conditions: SQL[] = [eq(models.slug, slug)];
 		if (companyId) {
@@ -241,6 +243,7 @@ export class ModelsRepository {
 	 * @param modelId - The model ID
 	 * @returns Array of model images
 	 */
+	@Cached({ ttl: 3600, key: "models:images" })
 	static async queryModelImages(modelId: string) {
 		return await db
 			.select()
@@ -312,6 +315,7 @@ export class ModelsRepository {
 	 * @param id - The model ID
 	 * @returns The model record with relations or null
 	 */
+	@Cached({ ttl: 3600, key: "models:detail" })
 	static async queryModelById(id: string) {
 		const [model] = await db
 			.select({
@@ -425,6 +429,7 @@ export class ModelsRepository {
 	 *
 	 * @param data - The model data to insert
 	 */
+	@InvalidateCache({ patterns: ["models:*"] })
 	static async insertModel(data: typeof models.$inferInsert) {
 		await db.insert(models).values(data);
 	}
@@ -435,6 +440,7 @@ export class ModelsRepository {
 	 * @param data - The model image data
 	 * @returns The created model image
 	 */
+	@InvalidateCache({ patterns: ["models:*"] })
 	static async insertModelImage(data: typeof modelImages.$inferInsert) {
 		const id = data.id as string;
 		await db.insert(modelImages).values(data);
@@ -451,6 +457,7 @@ export class ModelsRepository {
 	 *
 	 * @param imageId - The image ID
 	 */
+	@InvalidateCache({ patterns: ["models:*"] })
 	static async deleteModelImageRecord(imageId: string) {
 		await db.delete(modelImages).where(eq(modelImages.id, imageId));
 	}
@@ -490,6 +497,7 @@ export class ModelsRepository {
 	 * @param id - The model ID
 	 * @param data - The fields to update
 	 */
+	@InvalidateCache({ patterns: ["models:*"] })
 	static async updateModel(
 		id: string,
 		data: Partial<typeof models.$inferInsert>
@@ -502,6 +510,7 @@ export class ModelsRepository {
 	 *
 	 * @param id - The model ID
 	 */
+	@InvalidateCache({ patterns: ["models:*"] })
 	static async deleteModel(id: string) {
 		const keys = await ModelsRepository.queryR2KeysByModel(id);
 		await Promise.all(keys.map((k) => ModelsRepository.deleteR2Object(k)));
