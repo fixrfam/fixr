@@ -295,14 +295,93 @@ export class ModelsRepository {
 	 */
 	static async attachPresignedUrlsToImages(
 		images: ModelImageSelect[]
-	): Promise<(ModelImageSelect & { presignedUrl: string })[]> {
+	): Promise<(ModelImageSelect & { presignedUrl: string | null })[]> {
 		return await Promise.all(
 			images.map(async (img) => {
-				const r2Key = img.r2Key as string;
-				const presignedUrl = await generatePresignedGetUrl(r2Key);
+				const presignedUrl = img.r2Key
+					? await generatePresignedGetUrl(img.r2Key)
+					: null;
 				return { ...img, presignedUrl };
 			})
 		);
+	}
+
+	/**
+	 * Find a model by its ID with full maker and category relations
+	 *
+	 * @param id - The model ID
+	 * @returns The model record with relations or null
+	 */
+	static async queryModelById(id: string) {
+		const [model] = await db
+			.select({
+				id: models.id,
+				makerId: models.makerId,
+				name: models.name,
+				slug: models.slug,
+				url: models.url,
+				categoryId: models.categoryId,
+				announced: models.announced,
+				status: models.status,
+				dimensions: models.dimensions,
+				weight: models.weight,
+				build: models.build,
+				sim: models.sim,
+				displayType: models.displayType,
+				displaySize: models.displaySize,
+				displayResolution: models.displayResolution,
+				displayProtection: models.displayProtection,
+				os: models.os,
+				chipset: models.chipset,
+				cpu: models.cpu,
+				gpu: models.gpu,
+				cardSlot: models.cardSlot,
+				internalMemory: models.internalMemory,
+				mainCamera: models.mainCamera,
+				mainCameraFeatures: models.mainCameraFeatures,
+				mainCameraVideo: models.mainCameraVideo,
+				selfieCamera: models.selfieCamera,
+				selfieFeatures: models.selfieFeatures,
+				selfieVideo: models.selfieVideo,
+				battery: models.battery,
+				batteryCharging: models.batteryCharging,
+				networkTech: models.networkTech,
+				sensors: models.sensors,
+				colors: models.colors,
+				colorsHex: models.colorsHex,
+				modelsText: models.modelsText,
+				price: models.price,
+				dimensionsWidth: models.dimensionsWidth,
+				dimensionsHeight: models.dimensionsHeight,
+				dimensionsThickness: models.dimensionsThickness,
+				weightGrams: models.weightGrams,
+				displaySizeInches: models.displaySizeInches,
+				displaySizeRatio: models.displaySizeRatio,
+				displayResWidth: models.displayResWidth,
+				displayResHeight: models.displayResHeight,
+				displayResPpi: models.displayResPpi,
+				released: models.released,
+				meta: models.meta,
+				companyId: models.companyId,
+				createdAt: models.createdAt,
+				maker: {
+					id: modelMakers.id,
+					name: modelMakers.name,
+					slug: modelMakers.slug,
+					url: modelMakers.url,
+				},
+				category: {
+					id: modelCategories.id,
+					name: modelCategories.name,
+					slug: modelCategories.slug,
+				},
+			})
+			.from(models)
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId))
+			.where(eq(models.id, id))
+			.limit(1);
+		return model ?? null;
 	}
 
 	/**

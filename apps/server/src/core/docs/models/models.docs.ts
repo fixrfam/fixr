@@ -312,7 +312,7 @@ const createModelImageSchema: FastifySchema = {
 	description: `
 **Creates a model image record, linking an uploaded file to a device model.**
 
-Provide the \`r2Key\` (and optional \`originalUrl\`) returned from the presign upload endpoint. Returns the created model image with a presigned URL.
+Provide the \`r2Key\` returned from the presign upload endpoint. Returns the created model image with a presigned URL.
 `,
 	params: z.object({ subdomain: z.string(), modelId: z.string() }),
 	body: createModelImageBodySchema,

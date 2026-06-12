@@ -37,4 +37,9 @@ export const modelsErrors = defineErrors({
 		message: "Model image not found.",
 		status: 404,
 	},
+	MODEL_IMAGE_KEY_MISMATCH: {
+		code: "model_image_key_mismatch",
+		message: "The provided image key does not belong to your company.",
+		status: 403,
+	},
 });

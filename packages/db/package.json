@@ -8,7 +8,6 @@
     "db:generate": "bunx --bun drizzle-kit generate",
     "db:studio": "bunx --bun drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts",
-    "db:seed": "bun src/seed.ts",
     "db:start": "docker compose up -d",
     "db:watch": "docker compose up",
     "db:stop": "docker compose stop",

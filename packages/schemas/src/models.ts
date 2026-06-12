@@ -48,7 +48,6 @@ export const createModelBodySchema = z.object({
 	makerId: z.string().min(1),
 	categoryId: z.string().optional(),
 	status: modelStatuses.optional(),
-	imageLocalPath: z.string().optional(),
 	announced: z.string().optional(),
 	dimensions: z.string().optional(),
 	weight: z.string().optional(),

@@ -226,7 +226,7 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_FOUND");
 		}
 
-		const images = await ModelsRepository.queryModelImages(model.id as string);
+		const images = await ModelsRepository.queryModelImages(model.id);
 
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
@@ -345,10 +345,7 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelBySlug(
-			modelId,
-			userJwt.company.id
-		);
+		const model = await ModelsRepository.queryModelById(modelId);
 
 		if (!model) {
 			throw new AppError("MODEL_NOT_FOUND");
@@ -364,12 +361,9 @@ export class ModelsService {
 			await ModelsRepository.updateModel(modelId, updateData);
 		}
 
-		const updated = await ModelsRepository.queryModelBySlug(
-			model.id as string,
-			userJwt.company.id
-		);
+		const updated = await ModelsRepository.queryModelById(modelId);
 
-		const images = await ModelsRepository.queryModelImages(model.id as string);
+		const images = await ModelsRepository.queryModelImages(model.id);
 
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
@@ -419,15 +413,12 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelBySlug(
-			modelId,
-			userJwt.company.id
-		);
+		const model = await ModelsRepository.queryModelById(modelId);
 		if (!model) {
 			throw new AppError("MODEL_NOT_FOUND");
 		}
 
-		await ModelsRepository.deleteModel(model.id as string);
+		await ModelsRepository.deleteModel(model.id);
 
 		return response.status(200).send(
 			apiResponse({
@@ -469,18 +460,20 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelBySlug(
-			modelId,
-			userJwt.company.id
-		);
+		const model = await ModelsRepository.queryModelById(modelId);
 		if (!model) {
 			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		const expectedPrefix = `companies/${userJwt.company.id}/models/`;
+		if (!data.r2Key.startsWith(expectedPrefix)) {
+			throw new AppError("MODEL_IMAGE_KEY_MISMATCH");
 		}
 
 		const imageId = createId();
 		const image = await ModelsRepository.insertModelImage({
 			id: imageId,
-			modelId: model.id as string,
+			modelId: model.id,
 			r2Key: data.r2Key,
 			isPrimary: data.isPrimary ?? false,
 			variant: data.variant ?? null,
@@ -530,15 +523,12 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelBySlug(
-			modelId,
-			userJwt.company.id
-		);
+		const model = await ModelsRepository.queryModelById(modelId);
 		if (!model) {
 			throw new AppError("MODEL_NOT_FOUND");
 		}
 
-		const images = await ModelsRepository.queryModelImages(model.id as string);
+		const images = await ModelsRepository.queryModelImages(model.id);
 		const image = images.find((img) => img.id === imageId);
 		if (!image) {
 			throw new AppError("MODEL_IMAGE_NOT_FOUND");
