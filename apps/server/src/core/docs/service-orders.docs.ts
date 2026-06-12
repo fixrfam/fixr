@@ -44,12 +44,12 @@ const getCompanyServiceOrdersSchema: FastifySchema = {
 **Retrieves company service orders (paginated)**
 
 Optional filters (query string):
-- \`deviceCategoryId\` — device category (cuid2)
-- \`employeeId\` — responsible employee (cuid2)
-- \`status\` — one of: ${serviceOrderStatuses.options.join(", ")}
-- \`dateFrom\` / \`dateTo\` — filter by \`created_at\` (inclusive; ISO date or datetime)
-- \`query\` — search in device model, reported defect, or client name
-- \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`) — pagination (see API pagination docs)
+- \`deviceCategoryId\`: device category (cuid2)
+- \`employeeId\`: responsible employee (cuid2)
+- \`status\`: one of: ${serviceOrderStatuses.options.join(", ")}
+- \`dateFrom\` / \`dateTo\`: filter by \`created_at\` (inclusive; ISO date or datetime)
+- \`query\`: search in device model, reported defect, or client name
+- \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`): pagination (see API pagination docs)
 `,
 	params: getCompanyNestedDataSchema,
 	querystring: getServiceOrdersQuerySchema,

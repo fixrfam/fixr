@@ -28,6 +28,7 @@ export const httpStatusCodes: Record<number, string> = {
 	405: "Method Not Allowed",
 	409: "Conflict",
 	410: "Gone",
+	416: "Range Not Satisfiable",
 	418: "I'm a teapot",
 	429: "Too Many Requests",
 	500: "Internal Server Error",

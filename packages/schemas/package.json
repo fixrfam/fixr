@@ -57,6 +57,10 @@
     "./uploads": {
       "types": "./src/uploads.ts",
       "default": "./src/uploads.ts"
+    },
+    "./models": {
+      "types": "./src/models.ts",
+      "default": "./src/models.ts"
     }
   },
   "devDependencies": {

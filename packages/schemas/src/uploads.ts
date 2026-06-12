@@ -30,3 +30,13 @@ export const uploadPresignResponseSchema = z.object({
 	url: z.string().url(),
 	expiresIn: z.number().int().positive(),
 });
+
+export const createModelImageUploadPresignSchema = z.object({
+	fileName: z.string().min(1).max(255),
+	contentType: z
+		.string()
+		.min(1)
+		.max(255)
+		.regex(/^[^/]+\/[^/]+$/),
+	size: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
+});

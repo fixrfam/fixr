@@ -5,6 +5,7 @@ import { uploads } from "@fixr/db/schema";
 import type { createUploadPresignSchema } from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import {
+	buildModelObjectKey,
 	buildObjectPublicUrl,
 	buildUploadObjectKey,
 	r2Bucket,
@@ -46,6 +47,56 @@ export class UploadsRepository {
 				fileName: data.fileName,
 				contentType: data.contentType,
 				sizeInBytes: data.size,
+				status: "pending",
+			})
+			.$returningId();
+
+		return {
+			id: record.id,
+			uploadUrl,
+			key,
+			url,
+			expiresIn: r2PresignExpiresIn,
+		};
+	}
+
+	static async createModelPresignedUpload({
+		companyId,
+		employeeId,
+		fileName,
+		contentType,
+		size,
+	}: {
+		companyId: string;
+		employeeId: string;
+		fileName: string;
+		contentType: string;
+		size: number;
+	}) {
+		const key = buildModelObjectKey({ companyId, fileName });
+		const url = buildObjectPublicUrl(key);
+
+		const command = new PutObjectCommand({
+			Bucket: r2Bucket,
+			Key: key,
+			ContentType: contentType,
+			ContentLength: size,
+		});
+
+		const uploadUrl = await getSignedUrl(r2Client, command, {
+			expiresIn: r2PresignExpiresIn,
+		});
+
+		const [record] = await db
+			.insert(uploads)
+			.values({
+				companyId,
+				employeeId,
+				key,
+				url,
+				fileName,
+				contentType,
+				sizeInBytes: size,
 				status: "pending",
 			})
 			.$returningId();
