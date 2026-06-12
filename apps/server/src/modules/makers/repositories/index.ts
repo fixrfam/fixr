@@ -1,5 +1,6 @@
 import { and, asc, db, desc, eq, like, type SQL } from "@fixr/db/connection";
 import { modelMakers } from "@fixr/db/schema";
+import { Cached } from "../../../shared/infra/cache";
 
 /** @description Column selection for paginated makers list */
 export const makersListSelect = {
@@ -51,6 +52,7 @@ export class MakersRepository {
 	 * @param slug - The maker slug
 	 * @returns The maker record or null
 	 */
+	@Cached({ ttl: 3600, key: "makers:slug" })
 	static async queryMakerBySlug(slug: string) {
 		const [maker] = await db
 			.select()

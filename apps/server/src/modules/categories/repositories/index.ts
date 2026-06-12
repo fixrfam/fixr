@@ -1,5 +1,6 @@
 import { asc, db, eq, like } from "@fixr/db/connection";
 import { modelCategories } from "@fixr/db/schema";
+import { Cached } from "../../../shared/infra/cache";
 
 /** @description Data access layer for device categories */
 export class CategoriesRepository {
@@ -8,6 +9,7 @@ export class CategoriesRepository {
 	 *
 	 * @param query - Optional name filter
 	 */
+	@Cached({ ttl: 3600, key: "categories:all" })
 	static async queryAllCategories(query?: string) {
 		const base = db.select().from(modelCategories).$dynamic();
 		if (query) {
@@ -22,6 +24,7 @@ export class CategoriesRepository {
 	 * @param slug - The category slug
 	 * @returns The category record or null
 	 */
+	@Cached({ ttl: 3600, key: "categories:slug" })
 	static async queryCategoryBySlug(slug: string) {
 		const [category] = await db
 			.select()

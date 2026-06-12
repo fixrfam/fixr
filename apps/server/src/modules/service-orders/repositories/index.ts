@@ -23,6 +23,7 @@ import type {
 	getServiceOrdersQuerySchema,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 function endOfDay(date: Date) {
 	const end = new Date(date);
@@ -74,6 +75,7 @@ export const serviceOrdersListJoins = [
 ];
 
 export class ServiceOrdersRepository {
+	@Cached({ ttl: 3600, key: "service-orders:employee" })
 	static async queryEmployeeByUserId(userId: string) {
 		const [employee] = await db
 			.select()
@@ -83,6 +85,7 @@ export class ServiceOrdersRepository {
 		return employee ?? null;
 	}
 
+	@Cached({ ttl: 3600, key: "service-orders:client" })
 	static async queryClientById(clientId: string) {
 		const [client] = await db
 			.select()
@@ -92,6 +95,7 @@ export class ServiceOrdersRepository {
 		return client ?? null;
 	}
 
+	@Cached({ ttl: 3600, key: "service-orders:device-maker" })
 	static async queryDeviceMakerById(deviceMakerId: string) {
 		const [maker] = await db
 			.select()
@@ -101,6 +105,7 @@ export class ServiceOrdersRepository {
 		return maker ?? null;
 	}
 
+	@Cached({ ttl: 3600, key: "service-orders:device-category" })
 	static async queryDeviceCategoryById(deviceCategoryId: string) {
 		const [category] = await db
 			.select()
@@ -154,6 +159,7 @@ export class ServiceOrdersRepository {
 		return and(...conditions);
 	}
 
+	@InvalidateCache({ patterns: ["service-orders:*"] })
 	static async createWithPhotos({
 		companyId,
 		employeeId,
