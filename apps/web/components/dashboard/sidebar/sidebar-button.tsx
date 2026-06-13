@@ -37,7 +37,7 @@ export function SidebarButton({
 			<Link href={path} id={id} onClick={() => close()} prefetch>
 				<div
 					className={cn(
-						"relative inline-flex w-full items-center gap-2 rounded-sm py-1.5 pr-2 font-medium text-secondary-foreground text-sm",
+						"relative inline-flex w-full items-center gap-2 rounded-sm py-1.5 pr-2 font-medium text-2xs text-secondary-foreground",
 						active
 							? "bg-primary/10 text-primary"
 							: "text-muted-foreground hover:bg-muted/50 hover:text-secondary-foreground"
@@ -63,12 +63,12 @@ export function SidebarButton({
 	return (
 		<Collapsible>
 			<CollapsibleTrigger asChild>
-				<div className="group flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-secondary-foreground text-sm hover:bg-muted/50">
+				<div className="group flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-2xs text-secondary-foreground hover:bg-muted/50">
 					<div className="inline-flex items-center gap-2">
-						<Icon className="size-4" />
+						<Icon className="size-3.5" />
 						{label}
 					</div>
-					<icons.ChevronDown className="size-4 text-muted-foreground transition-all group-data-[state=open]:rotate-180" />
+					<icons.ChevronDown className="size-3.5 text-muted-foreground transition-all group-data-[state=open]:rotate-180" />
 				</div>
 			</CollapsibleTrigger>
 			<CollapsibleContent className="relative">

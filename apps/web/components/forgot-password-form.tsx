@@ -93,7 +93,7 @@ export function ForgotPasswordForm({
 					<h1 className="whitespace-nowrap font-bold text-2xl tracking-tight">
 						Esqueceu sua senha?
 					</h1>
-					<p className="text-balance text-muted-foreground text-sm">
+					<p className="text-balance text-2xs text-muted-foreground">
 						Digite seu e-mail abaixo, redefinimos para você!
 					</p>
 				</div>
@@ -166,7 +166,7 @@ export function ForgotPasswordForm({
 						)}
 					</Button>
 				</div>
-				<div className="text-center text-sm">
+				<div className="text-center text-2xs">
 					<Link className="underline underline-offset-4" href="/auth/login">
 						Voltar
 					</Link>

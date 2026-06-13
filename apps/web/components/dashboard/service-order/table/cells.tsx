@@ -64,7 +64,7 @@ export function DeviceCell({
 }
 
 export function CategoryCell({ category }: { category: string }) {
-	return <span className="text-sm">{category}</span>;
+	return <span className="text-2xs">{category}</span>;
 }
 
 export function TechnicianCell({ name }: { name: string }) {
@@ -98,7 +98,7 @@ export function IssueCell({
 	const desc = description ?? "Sem descrição registrada.";
 	return (
 		<div className="flex flex-col">
-			<span className="max-w-55 truncate text-sm">{desc}</span>
+			<span className="max-w-55 truncate text-2xs">{desc}</span>
 			{notes && (
 				<span className="max-w-55 truncate text-muted-foreground text-xs">
 					{notes}

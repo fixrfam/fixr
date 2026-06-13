@@ -116,7 +116,7 @@ export function RegisterForm({
 			>
 				<div className="flex flex-col items-center gap-2 text-center">
 					<h1 className="font-bold text-2xl tracking-tight">Crie uma conta</h1>
-					<p className="text-balance text-muted-foreground text-sm">
+					<p className="text-balance text-2xs text-muted-foreground">
 						Preencha o formulário abaixo para começar
 					</p>
 				</div>
@@ -238,7 +238,7 @@ export function RegisterForm({
 						"Cadastrar"
 					)}
 				</Button>
-				<div className="text-center text-sm">
+				<div className="text-center text-2xs">
 					Já tem uma conta?{" "}
 					<Link className="underline underline-offset-4" href="/auth/login">
 						Faça login

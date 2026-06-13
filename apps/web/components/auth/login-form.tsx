@@ -105,7 +105,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 					<h1 className="font-bold text-2xl tracking-tight">
 						Bem vindo ao Fixr!
 					</h1>
-					<p className="text-balance text-muted-foreground text-sm">
+					<p className="text-balance text-2xs text-muted-foreground">
 						Insira suas credenciais e entre na sua conta
 					</p>
 				</div>
@@ -136,7 +136,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 								<div className="flex items-center">
 									<FormLabel>Senha *</FormLabel>
 									<Link
-										className="ml-auto text-sm underline-offset-4 hover:underline"
+										className="ml-auto text-2xs underline-offset-4 hover:underline"
 										href="/auth/forgot-password"
 									>
 										Esqueceu sua senha?
@@ -203,7 +203,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 							"Entrar"
 						)}
 					</Button>
-					<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
+					<div className="relative text-center text-2xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
 						<span className="relative z-10 bg-background px-2 text-muted-foreground">
 							Ou continue com
 						</span>
@@ -237,7 +237,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						</CookieAlert>
 					)}
 				</div>
-				<div className="text-center text-sm opacity-30">
+				<div className="text-center text-2xs opacity-30">
 					Projeto universitário sem fins lucrativos.
 				</div>
 			</form>

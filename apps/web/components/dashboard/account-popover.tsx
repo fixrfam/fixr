@@ -42,7 +42,7 @@ export function AccountPopover({
 					/>
 					{showData && (
 						<div className="flex min-w-0 flex-col">
-							<p className="overflow-hidden truncate whitespace-nowrap font-medium text-sm">
+							<p className="overflow-hidden truncate whitespace-nowrap font-medium text-2xs">
 								{displayName}
 							</p>
 							<p className="overflow-hidden truncate whitespace-nowrap text-muted-foreground text-xs">

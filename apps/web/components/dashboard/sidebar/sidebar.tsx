@@ -76,7 +76,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 								variant="square"
 							/>
 							<div>
-								<p className="font-medium text-sm tracking-tight">
+								<p className="font-medium text-2xs tracking-tight">
 									{session.company?.name}
 								</p>
 								<p className="text-muted-foreground text-xs tracking-tight">
@@ -87,11 +87,11 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 					</div>
 					<div className="w-full px-5">
 						<Button
-							className="h-8.5 w-full justify-between bg-muted/50 px-3 text-[0.8rem] text-muted-foreground hover:bg-muted"
+							className="h-8.5 w-full justify-between bg-muted/50 px-3 text-2xs text-muted-foreground hover:bg-muted"
 							variant={"outline"}
 						>
 							<div className="inline-flex items-center gap-1.5">
-								<Search className={"size-4"} />
+								<Search className={"size-3.5"} />
 								Acesso rápido
 							</div>
 							<div className="inline-flex items-center gap-1.5">

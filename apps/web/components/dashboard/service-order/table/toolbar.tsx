@@ -33,13 +33,13 @@ export function TableToolbar({
 				</div>
 			</div>
 			<div className="flex justify-start">
-				<Button asChild className="h-9.5 shrink-0">
+				<Button asChild className="shrink-0">
 					<DashLink
 						href={"/service-orders/new"}
 						prefetch
 						subdomain={params.subdomain}
 					>
-						Nova ordem de serviço <Plus className="size-4" />
+						Nova ordem de serviço <Plus className="size-3.5" />
 					</DashLink>
 				</Button>
 			</div>

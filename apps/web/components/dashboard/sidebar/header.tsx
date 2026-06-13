@@ -15,7 +15,7 @@ export function Header() {
 			<DashLink href="/home" subdomain={params.subdomain}>
 				<Logo className="size-6 text-secondary-foreground" />
 			</DashLink>
-			<p className="text-sm">{getDashboardRouteName(pathname)}</p>
+			<p className="text-2xs">{getDashboardRouteName(pathname)}</p>
 			<FloatingToggle className="relative z-999" />
 		</header>
 	);

@@ -182,7 +182,7 @@ export function ServiceOrderLifecycle({
 													<span className="block text-muted-foreground text-xs">
 														{entry.dateTime}
 													</span>
-													<p className="text-foreground text-sm">
+													<p className="text-2xs text-foreground">
 														{entry.comment}
 													</p>
 												</div>
