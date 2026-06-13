@@ -34,6 +34,7 @@ import { categoriesRoutes } from "./modules/categories/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
 import { employeesRoutes } from "./modules/employees/routes";
+import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
@@ -163,6 +164,11 @@ async function registerPlugins() {
 					description:
 						"Device catalog management: categories, makers, and models.",
 				},
+				{
+					name: "Health",
+					description:
+						"System health check endpoint for monitoring and orchestration probes.",
+				},
 			],
 			security: [],
 			components: {
@@ -195,6 +201,8 @@ async function registerPlugins() {
 		root: join(cwd(), "public"),
 		prefix: "/public/",
 	});
+
+	await server.register(healthRoutes);
 
 	await server.register(authRoutes, {
 		prefix: "/auth",
