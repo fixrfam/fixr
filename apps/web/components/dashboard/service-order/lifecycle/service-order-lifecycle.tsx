@@ -52,6 +52,7 @@ export function ServiceOrderLifecycle({
 			status: getPhaseStatus(0, activeIndex),
 			statuses: ["registered", "analysis"] as ServiceOrderStatusId[],
 			icon: ClipboardList,
+			fillableIcon: false,
 		},
 		{
 			id: "pending",
@@ -64,6 +65,7 @@ export function ServiceOrderLifecycle({
 				"parts_pending",
 			] as ServiceOrderStatusId[],
 			icon: Clock,
+			fillableIcon: false,
 		},
 		{
 			id: "progress",
@@ -84,8 +86,9 @@ export function ServiceOrderLifecycle({
 				"canceled",
 			] as ServiceOrderStatusId[],
 			icon: Check,
+			fillableIcon: false,
 		},
-	] as const;
+	];
 
 	return (
 		<Timeline
@@ -126,6 +129,7 @@ export function ServiceOrderLifecycle({
 								isCompleted,
 								isActive,
 								Icon: phase.icon,
+								fillableIcon: phase.fillableIcon,
 							})}
 						</TimelineDot>
 

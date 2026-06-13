@@ -37,8 +37,10 @@ export function SidebarButton({
 			<Link href={path} id={id} onClick={() => close()} prefetch>
 				<div
 					className={cn(
-						"relative inline-flex w-full items-center gap-2 rounded-sm py-1.5 pr-2 text-secondary-foreground text-sm",
-						active ? "bg-primary/10 text-primary" : "hover:bg-muted/50"
+						"relative inline-flex w-full items-center gap-2 rounded-sm py-1.5 pr-2 font-medium text-secondary-foreground text-sm",
+						active
+							? "bg-primary/10 text-primary"
+							: "text-muted-foreground hover:bg-muted/50 hover:text-secondary-foreground"
 					)}
 					style={{
 						paddingLeft: nestingLevel
@@ -49,7 +51,7 @@ export function SidebarButton({
 					{active && nestingLevel ? (
 						<div className="absolute left-[calc(1rem-0.5px)] h-1/2 w-px bg-primary" />
 					) : null}
-					<Icon className="size-4" />
+					<Icon className="size-3.5" />
 					{label}
 				</div>
 			</Link>

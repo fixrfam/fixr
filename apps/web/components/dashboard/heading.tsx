@@ -18,7 +18,9 @@ export function Heading({
 				</div>
 			)}
 			<div>
-				<h1 className="font-heading font-semibold text-3xl">{title}</h1>
+				<h1 className="t font-heading font-semibold text-2xl lg:text-3xl">
+					{title}
+				</h1>
 				<p className="text-muted-foreground text-sm">{description}</p>
 			</div>
 		</div>

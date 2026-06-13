@@ -12,7 +12,7 @@ function ServiceOrderPartsList({ parts }: { parts?: string[] }) {
 		<div className="grid gap-2">
 			{parts.map((part) => (
 				<div
-					className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-sm"
+					className="flex items-center justify-between rounded-md border bg-card px-3 py-2 text-sm"
 					key={part}
 				>
 					<span className="wrap-break-words font-medium">{part}</span>

@@ -15,7 +15,7 @@ export function ServiceOrderDetailsCard({
 	children,
 }: ServiceOrderDetailsCardProps) {
 	return (
-		<div className="rounded-lg border bg-card">
+		<div className="rounded-lg border bg-background">
 			<div className="flex gap-3 border-b px-4 py-3">
 				<Icon className="mt-1 size-4 text-muted-foreground" />
 				<div>

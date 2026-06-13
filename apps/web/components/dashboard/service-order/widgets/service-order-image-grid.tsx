@@ -26,7 +26,7 @@ function ServiceOrderImageGrid({
 			<div className="grid grid-cols-2 gap-3">
 				{images.map((image) => (
 					<button
-						className="cursor-pointer overflow-hidden rounded-lg border bg-background transition-colors hover:border-primary/50"
+						className="cursor-pointer overflow-hidden rounded-lg border bg-card transition-colors hover:border-primary/50"
 						key={image.id}
 						onClick={() => setSelected(image)}
 						type="button"
