@@ -56,7 +56,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 				className={cn(
 					"fixed z-50 flex h-full w-71.5 select-none flex-col justify-between rounded-md bg-background transition-transform max-md:top-2.5 max-md:left-2.5 max-md:h-[calc(100dvh-1.25rem)]",
 					"lg:translate-x-0", // Always visible on desktop
-					"-translate-x-[calc(100%+0.625rem)] data-[state=open]:translate-x-0 max-md:border max-md:border-border" // Slide in on mobile
+					"-translate-x-[calc(100%+0.625rem)] data-[state=open]:translate-x-0 max-lg:border max-lg:border-border" // Slide in on mobile
 				)}
 				data-state={isOpen ? "open" : "closed"}
 			>

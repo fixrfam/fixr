@@ -30,7 +30,8 @@ const cal = localFont({
 
 export default async function RootLayout({
 	children,
-}: Readonly<{ children: React.ReactNode }>) {
+	modal,
+}: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
 	const cookieStore = await cookies();
 	const session = getSession(cookieStore);
 
@@ -59,6 +60,7 @@ export default async function RootLayout({
 									{children}
 								</main>
 							</div>
+							{modal}
 						</SessionProvider>
 						<ThemedToaster />
 					</QueryClientWrapper>
