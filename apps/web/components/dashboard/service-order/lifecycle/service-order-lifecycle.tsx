@@ -93,7 +93,7 @@ export function ServiceOrderLifecycle({
 	return (
 		<Timeline
 			activeIndex={activeIndex}
-			className="[--timeline-connector-gap:0.75rem] [--timeline-dot-size:2.5rem]"
+			className="[--timeline-connector-gap:0.675rem] [--timeline-dot-size:2.25rem]"
 		>
 			{phases.map((phase, idx) => {
 				const isCompleted = phase.status === "done";
@@ -147,7 +147,9 @@ export function ServiceOrderLifecycle({
 						<TimelineContent>
 							<TimelineHeader className="gap-0.5">
 								<div className="flex items-center justify-between gap-4">
-									<TimelineTitle>{phase.title}</TimelineTitle>
+									<TimelineTitle className="text-sm">
+										{phase.title}
+									</TimelineTitle>
 									<span
 										className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${getStatusBadgeClass(
 											{
@@ -164,7 +166,7 @@ export function ServiceOrderLifecycle({
 										})}
 									</span>
 								</div>
-								<TimelineDescription className="text-muted-foreground">
+								<TimelineDescription className="text-2xs text-muted-foreground">
 									{phase.description}
 								</TimelineDescription>
 							</TimelineHeader>

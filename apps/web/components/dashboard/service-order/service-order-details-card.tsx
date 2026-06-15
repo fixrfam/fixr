@@ -19,9 +19,9 @@ export function ServiceOrderDetailsCard({
 			<div className="flex gap-3 border-b px-4 py-3">
 				<Icon className="mt-1 size-4 text-muted-foreground" />
 				<div>
-					<h2 className="font-medium">{title}</h2>
+					<h2 className="font-medium text-2xs">{title}</h2>
 					{description && (
-						<p className="text-muted-foreground text-xs">{description}</p>
+						<p className="text-2xs text-muted-foreground">{description}</p>
 					)}
 				</div>
 			</div>
