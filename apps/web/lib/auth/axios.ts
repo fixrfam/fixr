@@ -57,7 +57,7 @@ axiosClient.interceptors.request.use(
 		const jwt = cookies[cookieKey("session")];
 		const payload = parseJwt(jwt as string);
 
-		if (!jwt || (payload && payload.exp * 1000 < Date.now())) {
+		if (!(jwt && payload) || payload.exp * 1000 < Date.now()) {
 			try {
 				const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/auth/token`, {
 					method: "POST",
@@ -67,8 +67,10 @@ axiosClient.interceptors.request.use(
 					credentials: "include",
 					body: JSON.stringify({}),
 				});
-				const setCookie = res.headers.get("Set-Cookie");
-				config.headers.set("Set-Cookie", setCookie);
+				const setCookies = res.headers.getSetCookie();
+				for (const cookie of setCookies) {
+					config.headers.append("Set-Cookie", cookie);
+				}
 			} catch (error) {
 				return Promise.reject(error);
 			}
@@ -104,9 +106,11 @@ axios.interceptors.response.use(
 						body: JSON.stringify({}),
 					});
 					isRefreshing = false;
-					const setCookie = refresh.headers.get("Set-Cookie");
+					const setCookies = refresh.headers.getSetCookie();
 					processQueue(null);
-					originalRequest?.headers.set("Set-Cookie", setCookie);
+					for (const cookie of setCookies) {
+						originalRequest?.headers.append("Set-Cookie", cookie);
+					}
 					return axiosClient.request(
 						originalRequest as InternalAxiosRequestConfig
 					);

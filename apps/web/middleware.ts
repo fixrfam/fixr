@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
 	const payload = parseJwt(token);
 
 	//Revalidate the user JWT if its not present (cookie vanished) or expired
-	if (!token || (payload && payload.exp * 1000 < Date.now())) {
+	if (!(token && payload) || payload.exp * 1000 < Date.now()) {
 		try {
 			const response = await revalidate(request, isProtectedRoute);
 			return response;
@@ -176,12 +176,12 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 	);
 
 	if (revalidateResponse.ok) {
-		const setCookie = revalidateResponse.headers.get("Set-Cookie");
-
-		if (setCookie) {
-			// Force a redirect to the same page to trigger a new request
-			const res = NextResponse.redirect(request.nextUrl);
-			res.headers.set("Set-Cookie", setCookie);
+		const setCookies = revalidateResponse.headers.getSetCookie();
+		if (setCookies.length > 0) {
+			const res = NextResponse.next();
+			for (const cookie of setCookies) {
+				res.headers.append("Set-Cookie", cookie);
+			}
 			return res;
 		}
 	}
