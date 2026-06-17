@@ -11,12 +11,12 @@ export function Header() {
 	const params = useParams<{ subdomain: string }>();
 
 	return (
-		<header className="absolute z-97 flex h-16 w-full items-center justify-between border-border/30 border-b bg-background/90 px-4 backdrop-blur-xs lg:hidden">
+		<header className="absolute z-40 flex h-16 w-full items-center justify-between border-border/30 border-b bg-card/90 px-4 backdrop-blur-xs lg:hidden">
 			<DashLink href="/home" subdomain={params.subdomain}>
-				<Logo className="size-8" />
+				<Logo className="size-6 text-secondary-foreground" />
 			</DashLink>
-			<p className="text-sm">{getDashboardRouteName(pathname)}</p>
-			<FloatingToggle className="relative z-101" />
+			<p className="text-2xs">{getDashboardRouteName(pathname)}</p>
+			<FloatingToggle className="relative z-999" />
 		</header>
 	);
 }

@@ -125,7 +125,7 @@ export function ResetPasswordForm({
 					<h1 className="whitespace-nowrap font-bold text-2xl tracking-tight">
 						Alterar sua senha
 					</h1>
-					<p className="text-balance text-muted-foreground text-sm">
+					<p className="text-balance text-2xs text-muted-foreground">
 						Crie uma nova senha segura e preencha abaixo.
 					</p>
 				</div>
@@ -162,7 +162,7 @@ export function ResetPasswordForm({
 										{...field}
 									/>
 								</FormControl>
-								<FormDescription>
+								<FormDescription className="text-2xs">
 									A confirmação ajuda a garantir que não haja erros de
 									digitação, mantendo sua conta segura.
 								</FormDescription>

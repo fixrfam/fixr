@@ -14,6 +14,7 @@
         "dotenv": "^17.2.4",
         "dotenv-cli": "^8.0.0",
         "fastify-type-provider-zod": "6.1.0",
+        "vaul": "^1.1.2",
         "vitest": "catalog:",
       },
       "devDependencies": {
@@ -27,7 +28,7 @@
         "tsx": "^4.21.0",
         "typescript": "5.5.4",
         "ultracite": "7.0.12",
-        "web": "workspace:*",
+        "web": "^0.0.2",
       },
     },
     "apps/admin": {

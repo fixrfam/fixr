@@ -110,7 +110,7 @@ export function DataTable<TData, TValue>({
 					</DashLink>
 				</div>
 			</div>
-			<div className="rounded-md border">
+			<div className="rounded-md border bg-background">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (

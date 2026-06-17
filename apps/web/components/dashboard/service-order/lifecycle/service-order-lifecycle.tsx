@@ -52,6 +52,7 @@ export function ServiceOrderLifecycle({
 			status: getPhaseStatus(0, activeIndex),
 			statuses: ["registered", "analysis"] as ServiceOrderStatusId[],
 			icon: ClipboardList,
+			fillableIcon: false,
 		},
 		{
 			id: "pending",
@@ -64,6 +65,7 @@ export function ServiceOrderLifecycle({
 				"parts_pending",
 			] as ServiceOrderStatusId[],
 			icon: Clock,
+			fillableIcon: false,
 		},
 		{
 			id: "progress",
@@ -84,13 +86,14 @@ export function ServiceOrderLifecycle({
 				"canceled",
 			] as ServiceOrderStatusId[],
 			icon: Check,
+			fillableIcon: false,
 		},
-	] as const;
+	];
 
 	return (
 		<Timeline
 			activeIndex={activeIndex}
-			className="[--timeline-connector-gap:0.75rem] [--timeline-dot-size:2.5rem]"
+			className="[--timeline-connector-gap:0.675rem] [--timeline-dot-size:2.25rem]"
 		>
 			{phases.map((phase, idx) => {
 				const isCompleted = phase.status === "done";
@@ -126,6 +129,7 @@ export function ServiceOrderLifecycle({
 								isCompleted,
 								isActive,
 								Icon: phase.icon,
+								fillableIcon: phase.fillableIcon,
 							})}
 						</TimelineDot>
 
@@ -143,7 +147,9 @@ export function ServiceOrderLifecycle({
 						<TimelineContent>
 							<TimelineHeader className="gap-0.5">
 								<div className="flex items-center justify-between gap-4">
-									<TimelineTitle>{phase.title}</TimelineTitle>
+									<TimelineTitle className="text-sm">
+										{phase.title}
+									</TimelineTitle>
 									<span
 										className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${getStatusBadgeClass(
 											{
@@ -160,7 +166,7 @@ export function ServiceOrderLifecycle({
 										})}
 									</span>
 								</div>
-								<TimelineDescription className="text-muted-foreground">
+								<TimelineDescription className="text-2xs text-muted-foreground">
 									{phase.description}
 								</TimelineDescription>
 							</TimelineHeader>
@@ -178,7 +184,7 @@ export function ServiceOrderLifecycle({
 													<span className="block text-muted-foreground text-xs">
 														{entry.dateTime}
 													</span>
-													<p className="text-foreground text-sm">
+													<p className="text-2xs text-foreground">
 														{entry.comment}
 													</p>
 												</div>
