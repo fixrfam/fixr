@@ -47,7 +47,7 @@ export default async function RootLayout({
 					enableSystem
 				>
 					<QueryClientWrapper>
-						<SessionProvider>
+						<SessionProvider session={session}>
 							<Sidebar session={session} />
 							<Header />
 							<div className="lg:py-2">

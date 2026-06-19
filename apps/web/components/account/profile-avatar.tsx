@@ -1,13 +1,26 @@
 /* eslint-disable @next/next/no-img-element */
 
 import BoringAvatar from "boring-avatars";
+import { Camera, X } from "lucide-react";
 import { forwardRef, type HTMLAttributes } from "react";
 import { cn, type RequireAtLeastOne } from "@/lib/utils";
 
+/**
+ * Props for the reusable Avatar component.
+ *
+ * @param src - URL to the avatar image (or null/undefined to show fallback).
+ * @param fallbackHash - String hash used to generate the Boring Avatar fallback.
+ * @param variant - Shape variant: "rounded" (circle, default) or "square".
+ * @param fallbackType - Boring Avatar style variant (default: "beam").
+ * @param onEdit - When set, renders a camera overlay button on hover.
+ * @param onDelete - When set, renders a trash overlay button on hover.
+ */
 export type AvatarProps = HTMLAttributes<HTMLDivElement> &
 	RequireAtLeastOne<{ src?: string | null; fallbackHash?: string }> & {
 		variant?: "rounded" | "square";
 		fallbackType?: "beam" | "marble" | "pixel" | "sunset" | "ring" | "bauhaus";
+		onEdit?: () => void;
+		onDelete?: () => void;
 	};
 
 const avatarColors = [
@@ -22,6 +35,10 @@ const avatarColors = [
 	"#11225a",
 ];
 
+/**
+ * Renders a user avatar with a Boring Avatar fallback and optional
+ * ghost-style action buttons (edit camera, delete trash) on hover.
+ */
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	(
@@ -31,6 +48,8 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 			className,
 			variant = "rounded",
 			fallbackType = "beam" as const,
+			onEdit,
+			onDelete,
 			...props
 		},
 		ref
@@ -40,7 +59,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 		return (
 			<div
 				className={cn(
-					"flex aspect-square items-center justify-center overflow-clip border border-border",
+					"group relative flex aspect-square items-center justify-center overflow-clip border border-border",
 					round[variant],
 					className
 				)}
@@ -58,12 +77,36 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 				)}
 				{src && (
 					<img
-						alt="Foto do usuário"
+						aria-label="Foto do usuário"
 						className="aspect-square size-full object-cover"
 						height={256}
 						src={src}
 						width={256}
 					/>
+				)}
+				{(onEdit || onDelete) && (
+					<span className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+						{onEdit && (
+							<button
+								className="inline-flex items-center justify-center rounded-md p-1.5 text-white transition-colors hover:bg-white/20"
+								onClick={onEdit}
+								type="button"
+							>
+								<Camera className="size-6" />
+								<span className="sr-only">Alterar foto do perfil</span>
+							</button>
+						)}
+						{onDelete && (
+							<button
+								className="inline-flex items-center justify-center rounded-md p-1.5 text-white transition-colors hover:bg-white/20"
+								onClick={onDelete}
+								type="button"
+							>
+								<X className="size-6" />
+								<span className="sr-only">Remover foto do perfil</span>
+							</button>
+						)}
+					</span>
 				)}
 			</div>
 		);

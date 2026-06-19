@@ -1,0 +1,1 @@
+export { AvatarUploadDialog } from "./dialog";
