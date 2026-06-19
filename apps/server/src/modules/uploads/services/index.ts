@@ -1,14 +1,65 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { db, eq } from "@fixr/db/connection";
 import { employees } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createUploadPresignSchema } from "@fixr/schemas/uploads";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import {
+	buildAvatarObjectKey,
+	buildObjectPublicUrl,
+	r2Bucket,
+	r2Client,
+	r2PresignExpiresIn,
+} from "../../../config/r2";
 import { AppError } from "../../../core/lib/app-error";
 import { apiResponse } from "../../../core/lib/response";
 import { UploadsRepository } from "../repositories";
 
 export class UploadsService {
+	static async createAvatarPresign({
+		userJwt,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		data: { fileName: string; contentType: string; size: number };
+		response: FastifyReply;
+	}) {
+		const key = buildAvatarObjectKey({
+			userId: userJwt.id,
+			fileName: data.fileName,
+		});
+		const url = `${buildObjectPublicUrl(key)}?v=${Date.now()}`;
+
+		const command = new PutObjectCommand({
+			Bucket: r2Bucket,
+			Key: key,
+			ContentType: data.contentType,
+			ContentLength: data.size,
+		});
+
+		const uploadUrl = await getSignedUrl(r2Client, command, {
+			expiresIn: r2PresignExpiresIn,
+		});
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "create_avatar_presign_success",
+				message: "Avatar upload URL generated successfully.",
+				data: {
+					uploadUrl,
+					url,
+					key,
+					expiresIn: r2PresignExpiresIn,
+				},
+			})
+		);
+	}
+
 	static async createPresignedUpload({
 		userJwt,
 		data,

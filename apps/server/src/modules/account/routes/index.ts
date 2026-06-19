@@ -9,6 +9,7 @@ import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticate } from "../../../core/middlewares/authenticate";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { AccountController } from "../controllers";
+import { updateAvatarSchema } from "../schemas";
 
 /** @description Account routes plugin */
 export function accountRoutes(fastify: FastifyTypedInstance) {
@@ -22,6 +23,40 @@ export function accountRoutes(fastify: FastifyTypedInstance) {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 
 			await AccountController.getAccount({ userId: userJwt.id, response });
+		})
+	);
+
+	fastify.put(
+		"/avatar",
+		{
+			preHandler: [authenticate, requirePermission(permissions.account.update)],
+			schema: accountDocs.updateAvatarSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const body = updateAvatarSchema.parse(request.body);
+
+			await AccountController.updateAvatar({
+				userId: userJwt.id,
+				avatarUrl: body.url,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/avatar",
+		{
+			preHandler: [authenticate, requirePermission(permissions.account.update)],
+			schema: accountDocs.removeAvatarSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+
+			await AccountController.removeAvatar({
+				userId: userJwt.id,
+				response,
+			});
 		})
 	);
 

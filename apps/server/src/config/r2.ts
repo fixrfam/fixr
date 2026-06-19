@@ -7,6 +7,7 @@ import {
 } from "../core/lib/r2";
 
 export {
+	buildAvatarObjectKey,
 	buildModelObjectKey,
 	buildUploadObjectKey,
 	sanitizeUploadFileName,

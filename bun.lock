@@ -28,7 +28,7 @@
         "tsx": "^4.21.0",
         "typescript": "5.5.4",
         "ultracite": "7.0.12",
-        "web": "^0.0.2",
+        "web": "workspace:*",
       },
     },
     "apps/admin": {

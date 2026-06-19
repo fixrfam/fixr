@@ -31,6 +31,18 @@ export const uploadPresignResponseSchema = z.object({
 	expiresIn: z.number().int().positive(),
 });
 
+export const MAX_AVATAR_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+
+export const createAvatarUploadPresignSchema = z.object({
+	fileName: z.string().min(1).max(255),
+	contentType: z
+		.string()
+		.min(1)
+		.max(255)
+		.regex(/^[^/]+\/[^/]+$/),
+	size: z.number().int().positive().max(MAX_AVATAR_UPLOAD_SIZE_BYTES),
+});
+
 export const createModelImageUploadPresignSchema = z.object({
 	fileName: z.string().min(1).max(255),
 	contentType: z

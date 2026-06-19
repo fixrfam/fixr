@@ -17,6 +17,34 @@ export class AccountController {
 	}
 
 	/**
+	 * @description Update the authenticated user's avatar URL
+	 */
+	static updateAvatar({
+		userId,
+		avatarUrl,
+		response,
+	}: {
+		userId: string;
+		avatarUrl: string;
+		response: FastifyReply;
+	}) {
+		return AccountService.updateAvatar({ userId, avatarUrl, response });
+	}
+
+	/**
+	 * @description Remove the authenticated user's avatar
+	 */
+	static removeAvatar({
+		userId,
+		response,
+	}: {
+		userId: string;
+		response: FastifyReply;
+	}) {
+		return AccountService.removeAvatar({ userId, response });
+	}
+
+	/**
 	 * @description Request account deletion
 	 */
 	static requestAccountDeletion({
