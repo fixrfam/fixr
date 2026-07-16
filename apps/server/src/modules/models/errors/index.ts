@@ -42,4 +42,9 @@ export const modelsErrors = defineErrors({
 		message: "The provided image key does not belong to your company.",
 		status: 403,
 	},
+	MODEL_IMAGE_UPLOAD_NOT_FOUND: {
+		code: "model_image_upload_not_found",
+		message: "The provided upload record was not found.",
+		status: 404,
+	},
 });

@@ -9,6 +9,7 @@ import {
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { models } from "./models";
+import { uploads } from "./uploads";
 
 export const modelImages = mysqlTable("model_images", {
 	id: varchar("id", { length: 25 })
@@ -17,7 +18,9 @@ export const modelImages = mysqlTable("model_images", {
 	modelId: varchar("model_id", { length: 25 })
 		.notNull()
 		.references(() => models.id),
-	r2Key: varchar("r2_key", { length: 255 }),
+	uploadId: varchar("upload_id", { length: 25 })
+		.notNull()
+		.references(() => uploads.id, { onDelete: "restrict" }),
 	isPrimary: boolean("is_primary").notNull().default(false),
 	variant: varchar("variant", { length: 50 }),
 	position: int("position").notNull().default(0),

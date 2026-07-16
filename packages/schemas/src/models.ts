@@ -106,7 +106,7 @@ export const modelImageParamsSchema = z.object({
 
 /** @description Body schema for assigning an uploaded image to a model */
 export const createModelImageBodySchema = z.object({
-	r2Key: z.string().min(1),
+	uploadId: z.string().min(1),
 	isPrimary: z.boolean().optional(),
 	variant: z.string().optional(),
 	position: z.number().int().optional(),

@@ -16,6 +16,7 @@ import {
 	modelImages,
 	modelMakers,
 	models,
+	uploads,
 } from "@fixr/db/schema";
 import {
 	generatePresignedGetUrl,
@@ -241,13 +242,23 @@ export class ModelsRepository {
 	 * Query all images for a model, ordered by position
 	 *
 	 * @param modelId - The model ID
-	 * @returns Array of model images
+	 * @returns Array of model images with upload key
 	 */
 	@Cached({ ttl: 3600, key: "models:images" })
 	static async queryModelImages(modelId: string) {
 		return await db
-			.select()
+			.select({
+				id: modelImages.id,
+				modelId: modelImages.modelId,
+				uploadId: modelImages.uploadId,
+				isPrimary: modelImages.isPrimary,
+				variant: modelImages.variant,
+				position: modelImages.position,
+				createdAt: modelImages.createdAt,
+				key: uploads.key,
+			})
 			.from(modelImages)
+			.innerJoin(uploads, eq(modelImages.uploadId, uploads.id))
 			.where(eq(modelImages.modelId, modelId))
 			.orderBy(asc(modelImages.position));
 	}
@@ -256,7 +267,7 @@ export class ModelsRepository {
 	 * Batch fetch primary model images for a set of model IDs
 	 *
 	 * @param modelIds - Array of model IDs
-	 * @returns Map of modelId -> r2Key
+	 * @returns Map of modelId -> key (for generating presigned URLs)
 	 */
 	static async queryPrimaryImages(
 		modelIds: string[]
@@ -265,29 +276,28 @@ export class ModelsRepository {
 		const rows = await db
 			.select({
 				modelId: modelImages.modelId,
-				r2Key: modelImages.r2Key,
+				key: uploads.key,
 			})
 			.from(modelImages)
+			.innerJoin(uploads, eq(modelImages.uploadId, uploads.id))
 			.where(
 				and(
 					inArray(modelImages.modelId, modelIds),
 					eq(modelImages.isPrimary, true)
 				)
 			);
-		return new Map(
-			rows.filter((r) => !!r.r2Key).map((r) => [r.modelId, r.r2Key!])
-		);
+		return new Map(rows.filter((r) => !!r.key).map((r) => [r.modelId, r.key!]));
 	}
 
 	/**
 	 * Generate a presigned GET URL for an R2 key
 	 *
-	 * @param r2Key - The R2 object key
+	 * @param key - The R2 object key
 	 * @returns Presigned URL or null
 	 */
-	static async generateImagePresignedUrl(r2Key: string | null) {
-		if (!r2Key) return null;
-		return await generatePresignedGetUrl(r2Key);
+	static async generateImagePresignedUrl(key: string | null) {
+		if (!key) return null;
+		return await generatePresignedGetUrl(key);
 	}
 
 	/**
@@ -297,12 +307,12 @@ export class ModelsRepository {
 	 * @returns Images with presignedUrl attached
 	 */
 	static async attachPresignedUrlsToImages(
-		images: ModelImageSelect[]
+		images: (ModelImageSelect & { key: string | null })[]
 	): Promise<(ModelImageSelect & { presignedUrl: string | null })[]> {
 		return await Promise.all(
 			images.map(async (img) => {
-				const presignedUrl = img.r2Key
-					? await generatePresignedGetUrl(img.r2Key)
+				const presignedUrl = img.key
+					? await generatePresignedGetUrl(img.key)
 					: null;
 				return { ...img, presignedUrl };
 			})
@@ -463,18 +473,19 @@ export class ModelsRepository {
 	}
 
 	/**
-	 * Get all R2 keys associated with a model (model images + the model's own imageLocalPath)
+	 * Get all R2 keys associated with a model
 	 *
 	 * @param modelId - The model ID
 	 * @returns Array of R2 keys
 	 */
-	static async queryR2KeysByModel(modelId: string) {
-		const imageKeys = await db
-			.select({ key: modelImages.r2Key })
+	static async queryUploadKeysByModel(modelId: string) {
+		const rows = await db
+			.select({ key: uploads.key })
 			.from(modelImages)
+			.innerJoin(uploads, eq(modelImages.uploadId, uploads.id))
 			.where(eq(modelImages.modelId, modelId));
 
-		return imageKeys.map((img) => img.key).filter((k): k is string => !!k);
+		return rows.map((r) => r.key).filter((k): k is string => !!k);
 	}
 
 	/**
@@ -512,7 +523,7 @@ export class ModelsRepository {
 	 */
 	@InvalidateCache({ patterns: ["models:*"] })
 	static async deleteModel(id: string) {
-		const keys = await ModelsRepository.queryR2KeysByModel(id);
+		const keys = await ModelsRepository.queryUploadKeysByModel(id);
 		await Promise.all(keys.map((k) => ModelsRepository.deleteR2Object(k)));
 		await db.delete(modelImages).where(eq(modelImages.modelId, id));
 		await db.delete(models).where(eq(models.id, id));

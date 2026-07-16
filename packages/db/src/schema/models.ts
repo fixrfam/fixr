@@ -1,7 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
 	float,
-	index,
 	int,
 	mysqlTable,
 	text,
@@ -85,16 +84,6 @@ export const models = mysqlTable(
 			table.slug,
 			table.companyId
 		),
-		modelsFulltextIdx: index("models_fulltext_idx")
-			.on(
-				table.name,
-				table.modelsText,
-				table.chipset,
-				table.cpu,
-				table.internalMemory,
-				table.os
-			)
-			.using("fulltext" as "btree"),
 	})
 );
 

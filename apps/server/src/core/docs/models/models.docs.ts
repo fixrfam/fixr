@@ -35,7 +35,7 @@ const modelListRecordSchema = z.object({
 const modelImageRecordSchema = z.object({
 	id: z.string(),
 	modelId: z.string(),
-	r2Key: z.string().nullable(),
+	uploadId: z.string(),
 	presignedUrl: z.string().nullable(),
 	isPrimary: z.boolean(),
 	variant: z.string().nullable(),
@@ -312,7 +312,7 @@ const createModelImageSchema: FastifySchema = {
 	description: `
 **Creates a model image record, linking an uploaded file to a device model.**
 
-Provide the \`r2Key\` returned from the presign upload endpoint. Returns the created model image with a presigned URL.
+Provide the \`uploadId\` returned from the presign upload endpoint. Returns the created model image with a presigned URL.
 `,
 	params: z.object({ subdomain: z.string(), modelId: z.string() }),
 	body: createModelImageBodySchema,

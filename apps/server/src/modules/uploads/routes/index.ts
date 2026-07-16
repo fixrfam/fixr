@@ -1,9 +1,8 @@
 import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import {
-	createAvatarUploadPresignSchema,
-	createModelImageUploadPresignSchema,
 	createUploadPresignSchema,
+	presignParamsSchema,
 } from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import { uploadsDocs } from "../../../core/docs/uploads.docs";
@@ -16,62 +15,37 @@ import { UploadsController } from "../controllers";
 
 export function uploadsRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
-		"/avatar/presign",
+		"/:purpose/presign",
 		{
-			preHandler: [authenticate],
-			schema: uploadsDocs.createAvatarPresignSchema,
+			preHandler: async (request, reply) => {
+				const { purpose } = presignParamsSchema.parse(request.params);
+				if (purpose === "avatar") {
+					await authenticate(request, reply);
+					return;
+				}
+				await authenticateEmployee(request, reply);
+				const permission =
+					purpose === "service-orders"
+						? permissions.serviceOrders.update
+						: permissions.devices.update;
+				await new Promise<void>((resolve, reject) => {
+					requirePermission(permission)(request, reply, (err) => {
+						if (err) reject(err);
+						else resolve();
+					});
+				});
+			},
+			schema: uploadsDocs.createPresignSchema,
 		},
 		withErrorHandler(async (request, response) => {
+			const { purpose } = presignParamsSchema.parse(request.params);
+			const body = createUploadPresignSchema.parse(request.body);
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = await createAvatarUploadPresignSchema.parseAsync(
-				request.body
-			);
-
-			await UploadsController.createAvatarPresign({
-				userJwt,
-				data: body,
-				response,
-			});
-		})
-	);
-
-	fastify.post(
-		"/service-orders/presign",
-		{
-			preHandler: [
-				authenticateEmployee,
-				requirePermission(permissions.serviceOrders.update),
-			],
-			schema: uploadsDocs.createUploadPresignSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = await createUploadPresignSchema.parseAsync(request.body);
-
 			await UploadsController.createPresignedUpload({
-				userJwt,
+				purpose,
 				data: body,
-				response,
-			});
-		})
-	);
-
-	fastify.post(
-		"/models/presign",
-		{
-			preHandler: [
-				authenticateEmployee,
-				requirePermission(permissions.devices.update),
-			],
-			schema: uploadsDocs.createModelImagePresignSchema,
-		},
-		withErrorHandler(async (request, response) => {
-			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = createModelImageUploadPresignSchema.parse(request.body);
-
-			await UploadsController.createModelImagePresign({
-				userJwt,
-				data: body,
+				userId: userJwt.id,
+				companyId: userJwt.company?.id,
 				response,
 			});
 		})

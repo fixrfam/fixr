@@ -1,5 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
-import { int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { employees } from "./employees";
@@ -19,10 +19,6 @@ export const serviceOrderImages = mysqlTable("service_order_images", {
 	uploadId: varchar("upload_id", { length: 25 })
 		.references(() => uploads.id, { onDelete: "restrict" })
 		.notNull(),
-	imageUrl: varchar("image_url", { length: 255 }).notNull(),
-	fileName: varchar("file_name", { length: 255 }).notNull(),
-	sizeInBytes: int("size_in_bytes").notNull(),
-	contentType: varchar("content_type", { length: 50 }).notNull(),
 	description: varchar("description", { length: 255 }),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });

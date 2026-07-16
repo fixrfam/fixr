@@ -30,7 +30,7 @@
     "@biomejs/biome": "catalog:",
     "@types/eslint": "^8.56.5",
     "@types/bun": "catalog:",
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.31.0",
     "typescript": "catalog:"
   },
   "dependencies": {

@@ -1,5 +1,6 @@
 import { slugify } from "@fixr/constants/slug";
-import { models } from "@fixr/db/schema";
+import { and, db, eq } from "@fixr/db/connection";
+import { modelImages, models, uploads } from "@fixr/db/schema";
 import type {
 	createModelBodySchema,
 	createModelImageBodySchema,
@@ -230,7 +231,7 @@ export class ModelsService {
 
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
-			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
+			ModelsRepository.generateImagePresignedUrl(primaryImage?.key ?? null),
 			ModelsRepository.attachPresignedUrlsToImages(images),
 		]);
 
@@ -367,7 +368,7 @@ export class ModelsService {
 
 		const primaryImage = images.find((img) => img.isPrimary);
 		const [imageUrl, imagesWithPresignedUrls] = await Promise.all([
-			ModelsRepository.generateImagePresignedUrl(primaryImage?.r2Key ?? null),
+			ModelsRepository.generateImagePresignedUrl(primaryImage?.key ?? null),
 			ModelsRepository.attachPresignedUrlsToImages(images),
 		]);
 
@@ -465,23 +466,53 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_FOUND");
 		}
 
-		const expectedPrefix = `companies/${userJwt.company.id}/models/`;
-		if (!data.r2Key.startsWith(expectedPrefix)) {
+		const [uploadRecord] = await db
+			.select({ companyId: uploads.companyId })
+			.from(uploads)
+			.where(
+				and(eq(uploads.id, data.uploadId), eq(uploads.purpose, "model_image"))
+			)
+			.limit(1);
+
+		if (!uploadRecord) {
+			throw new AppError("MODEL_IMAGE_UPLOAD_NOT_FOUND");
+		}
+
+		if (
+			uploadRecord.companyId &&
+			uploadRecord.companyId !== userJwt.company.id
+		) {
 			throw new AppError("MODEL_IMAGE_KEY_MISMATCH");
 		}
 
 		const imageId = createId();
-		const image = await ModelsRepository.insertModelImage({
+		await ModelsRepository.insertModelImage({
 			id: imageId,
 			modelId: model.id,
-			r2Key: data.r2Key,
+			uploadId: data.uploadId,
 			isPrimary: data.isPrimary ?? false,
 			variant: data.variant ?? null,
 			position: data.position ?? 0,
 		});
 
+		const [imageRecord] = await db
+			.select({
+				id: modelImages.id,
+				modelId: modelImages.modelId,
+				uploadId: modelImages.uploadId,
+				isPrimary: modelImages.isPrimary,
+				variant: modelImages.variant,
+				position: modelImages.position,
+				createdAt: modelImages.createdAt,
+				key: uploads.key,
+			})
+			.from(modelImages)
+			.innerJoin(uploads, eq(modelImages.uploadId, uploads.id))
+			.where(eq(modelImages.id, imageId))
+			.limit(1);
+
 		const [imageWithPresignedUrl] =
-			await ModelsRepository.attachPresignedUrlsToImages([image!]);
+			await ModelsRepository.attachPresignedUrlsToImages([imageRecord!]);
 
 		return response.status(201).send(
 			apiResponse({
@@ -534,8 +565,8 @@ export class ModelsService {
 			throw new AppError("MODEL_IMAGE_NOT_FOUND");
 		}
 
-		if (image.r2Key) {
-			await ModelsRepository.deleteR2Object(image.r2Key);
+		if (image.key) {
+			await ModelsRepository.deleteR2Object(image.key);
 		}
 		await ModelsRepository.deleteModelImageRecord(imageId);
 

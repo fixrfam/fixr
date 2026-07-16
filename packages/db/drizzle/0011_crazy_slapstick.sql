@@ -1,1 +1,0 @@
-ALTER TABLE `model_images` DROP COLUMN `original_url`;
