@@ -29,6 +29,7 @@ import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
 import { accountRoutes } from "./modules/account/routes";
+import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
 import { companiesRoutes } from "./modules/companies/routes";
@@ -165,6 +166,11 @@ async function registerPlugins() {
 						"Device catalog management: categories, makers, and models.",
 				},
 				{
+					name: "API Keys",
+					description:
+						"Integration keys for programmatic access, scoped to a company.",
+				},
+				{
 					name: "Health",
 					description:
 						"System health check endpoint for monitoring and orchestration probes.",
@@ -238,6 +244,10 @@ async function registerPlugins() {
 
 	await server.register(modelsRoutes, {
 		prefix: "/companies/:subdomain/models",
+	});
+
+	await server.register(apiKeysRoutes, {
+		prefix: "/companies/:subdomain/api-keys",
 	});
 
 	await server.register(uploadsRoutes, {

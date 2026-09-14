@@ -40,6 +40,9 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	manager: [
 		...baseEmployee,
+		permissions.apiKeys.read,
+		permissions.apiKeys.create,
+		permissions.apiKeys.revoke,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.create,
 		permissions.serviceOrders.update,
@@ -62,6 +65,9 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	admin: [
 		...baseEmployee,
+		permissions.apiKeys.read,
+		permissions.apiKeys.create,
+		permissions.apiKeys.revoke,
 		permissions.companies.create,
 		permissions.companies.update,
 		permissions.employees.read,

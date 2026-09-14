@@ -1,4 +1,5 @@
 import { accountErrors } from "../../modules/account/errors";
+import { apiKeysErrors } from "../../modules/api-keys/errors";
 import { authErrors } from "../../modules/auth/errors";
 import { categoriesErrors } from "../../modules/categories/errors";
 import { companiesErrors } from "../../modules/companies/errors";
@@ -14,6 +15,7 @@ import { defineErrors } from "../utils/errors";
 export const errors = defineErrors({
 	...authErrors,
 	...accountErrors,
+	...apiKeysErrors,
 	...credentialsErrors,
 	...companiesErrors,
 	...employeesErrors,
