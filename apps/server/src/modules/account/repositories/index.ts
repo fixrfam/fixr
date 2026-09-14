@@ -1,16 +1,7 @@
 import { db, eq, sql } from "@fixr/db/connection";
 import { clients, companies, employees, users } from "@fixr/db/schema";
 import { accountSchema } from "@fixr/schemas/account";
-<<<<<<< HEAD
-import { Cached } from "../../../shared/infra/cache";
-=======
-import { redis } from "../../../config/redis";
-import {
-	accountCacheKey,
-	CACHE_TTL,
-	jwtPayloadCacheKey,
-} from "../../../core/lib/cache";
->>>>>>> 990eba6 (Feat(Server): Add avatar upload presign, update, and remove endpoints)
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 /** @description Account data access layer */
 export class AccountRepository {
@@ -62,11 +53,8 @@ export class AccountRepository {
 	 * @param userId - The user ID
 	 * @param avatarUrl - The new avatar URL
 	 */
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
 	static async updateAvatarUrl(userId: string, avatarUrl: string | null) {
 		await db.update(users).set({ avatarUrl }).where(eq(users.id, userId));
-
-		const cacheKey = accountCacheKey(userId);
-		const jwtCacheKey = jwtPayloadCacheKey(userId);
-		await Promise.all([redis.del(cacheKey), redis.del(jwtCacheKey)]);
 	}
 }
