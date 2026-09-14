@@ -44,6 +44,11 @@ export const errors = defineErrors({
 		message: "Response doesn't match the schema",
 		status: 500,
 	},
+	RATE_LIMIT_EXCEEDED: {
+		code: "rate_limit_exceeded",
+		message: "Rate limit exceeded. Please slow down.",
+		status: 429,
+	},
 	NOT_IMPLEMENTED: {
 		code: "not_implemented",
 		message: "This endpoint is not implemented or disabled.",
