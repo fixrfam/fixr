@@ -57,7 +57,7 @@ export function CreateApiKeyDialog() {
 							<DialogDescription className="text-muted-foreground text-sm">
 								{created
 									? `Guarde o segredo de "${created.name}" em local seguro.`
-									: "Acesso programático à API do Fixr, com as permissões do seu cargo."}
+									: "A chave é sua e carrega exatamente as permissões do seu cargo."}
 							</DialogDescription>
 						</div>
 					</div>

@@ -25,13 +25,16 @@ const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 /** @description API keys business logic */
 export class ApiKeysService {
 	/**
-	 * Resolve the company the caller is acting on, rejecting cross-company access.
+	 * Resolve the employee behind the request, rejecting cross-company access.
+	 *
+	 * Keys are user-scoped, so every operation needs the employee record and not
+	 * just the company: the employee is what a key belongs to.
 	 *
 	 * @param userJwt - Authenticated user JWT
 	 * @param subdomain - Company subdomain from the route
-	 * @returns The company record
+	 * @returns The company and the employee acting on it
 	 */
-	private static async resolveCompany({
+	private static async resolveActor({
 		userJwt,
 		subdomain,
 	}: {
@@ -53,14 +56,24 @@ export class ApiKeysService {
 			throw new AppError("COMPANY_NOT_FOUND");
 		}
 
-		return company;
+		const employee = await EmployeesRepository.getEmployeeByUserAndCompany({
+			userId: userJwt.id,
+			companyId: company.id,
+		});
+
+		if (!employee) {
+			throw new AppError("API_KEY_COMPANY_NOT_FOUND");
+		}
+
+		return { company, employee };
 	}
 
 	/**
-	 * Get paginated API keys for a company.
+	 * Get the caller's own paginated API keys.
 	 *
-	 * Secrets are never stored and `keyHash` is excluded from the projection,
-	 * so there is nothing sensitive to leak here.
+	 * Scoped to the employee, not the company: one employee never sees another's
+	 * keys. Secrets are never stored and `keyHash` is excluded from the
+	 * projection, so there is nothing sensitive to leak here either.
 	 *
 	 * @param subdomain - Company subdomain
 	 * @param userJwt - Authenticated user JWT
@@ -70,7 +83,7 @@ export class ApiKeysService {
 	 * @param sort - Sort direction
 	 * @param response - Fastify reply
 	 */
-	static async getCompanyApiKeys({
+	static async getOwnApiKeys({
 		subdomain,
 		userJwt,
 		page,
@@ -83,7 +96,10 @@ export class ApiKeysService {
 		userJwt: z.infer<typeof jwtPayload>;
 		response: FastifyReply;
 	} & z.infer<typeof getPaginatedDataSchema>) {
-		const company = await ApiKeysService.resolveCompany({ userJwt, subdomain });
+		const { employee } = await ApiKeysService.resolveActor({
+			userJwt,
+			subdomain,
+		});
 
 		const PER_PAGE = perPage ?? 10;
 
@@ -94,7 +110,7 @@ export class ApiKeysService {
 				: asc(apiKeysTable.createdAt);
 
 		const filter = and(
-			eq(apiKeysTable.companyId, company.id),
+			eq(apiKeysTable.employeeId, employee.id),
 			like(apiKeysTable.name, `%${query ?? ""}%`) //like "%%" to fetch all if there is no query
 		);
 
@@ -144,8 +160,8 @@ export class ApiKeysService {
 				apiResponse({
 					status: 200,
 					error: null,
-					message: "Company API keys successfully retrieved.",
-					code: "get_company_api_keys_success",
+					message: "API keys successfully retrieved.",
+					code: "get_api_keys_success",
 					data: paginatedData({
 						records: [],
 						pagination: {
@@ -173,8 +189,8 @@ export class ApiKeysService {
 			apiResponse({
 				status: 200,
 				error: null,
-				message: "Company API keys successfully retrieved.",
-				code: "get_company_api_keys_success",
+				message: "API keys successfully retrieved.",
+				code: "get_api_keys_success",
 				data: paginatedData({
 					records,
 					pagination: {
@@ -211,7 +227,10 @@ export class ApiKeysService {
 		data: z.infer<typeof createApiKeySchema>;
 		response: FastifyReply;
 	}) {
-		const company = await ApiKeysService.resolveCompany({ userJwt, subdomain });
+		const { company, employee } = await ApiKeysService.resolveActor({
+			userJwt,
+			subdomain,
+		});
 
 		const maxExpiration = new Date(
 			Date.now() + API_KEY_MAX_TTL_DAYS * MILLISECONDS_PER_DAY
@@ -236,23 +255,13 @@ export class ApiKeysService {
 			throw new AppError("API_KEY_INVALID_SCOPES", { invalidScopes });
 		}
 
-		const [existingName, employee] = await Promise.all([
-			ApiKeysRepository.getActiveByNameAndCompany({
-				name: data.name,
-				companyId: company.id,
-			}),
-			EmployeesRepository.getEmployeeByUserAndCompany({
-				userId: userJwt.id,
-				companyId: company.id,
-			}),
-		]);
+		const existingName = await ApiKeysRepository.getActiveByNameAndEmployee({
+			name: data.name,
+			employeeId: employee.id,
+		});
 
 		if (existingName) {
 			throw new AppError("API_KEY_NAME_CONFLICT");
-		}
-
-		if (!employee) {
-			throw new AppError("API_KEY_COMPANY_NOT_FOUND");
 		}
 
 		const { prefix, keyHash, token } = generateApiKey();
@@ -288,9 +297,12 @@ export class ApiKeysService {
 	}
 
 	/**
-	 * Revoke an API key.
+	 * Revoke one of the caller's own API keys.
 	 *
-	 * Revocation is a soft delete: the row is kept so the audit trail survives.
+	 * A key that belongs to another employee resolves to "not found" rather than
+	 * "forbidden", so the endpoint cannot be used to probe for other people's
+	 * key IDs. Revocation is a soft delete: the row is kept so the audit trail
+	 * survives.
 	 *
 	 * @param userJwt - Authenticated user JWT
 	 * @param subdomain - Company subdomain
@@ -308,11 +320,14 @@ export class ApiKeysService {
 		apiKeyId: string;
 		response: FastifyReply;
 	}) {
-		const company = await ApiKeysService.resolveCompany({ userJwt, subdomain });
+		const { employee } = await ApiKeysService.resolveActor({
+			userJwt,
+			subdomain,
+		});
 
-		const apiKey = await ApiKeysRepository.getByIdAndCompany({
+		const apiKey = await ApiKeysRepository.getByIdAndEmployee({
 			apiKeyId,
-			companyId: company.id,
+			employeeId: employee.id,
 		});
 
 		if (!apiKey) {

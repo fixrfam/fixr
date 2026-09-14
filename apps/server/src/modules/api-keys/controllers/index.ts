@@ -8,9 +8,9 @@ import { ApiKeysService } from "../services";
 /** @description API keys request handlers */
 export class ApiKeysController {
 	/**
-	 * @description Get paginated company API keys
+	 * @description Get the caller's own paginated API keys
 	 */
-	static getCompanyApiKeys({
+	static getOwnApiKeys({
 		subdomain,
 		userJwt,
 		page,
@@ -23,7 +23,7 @@ export class ApiKeysController {
 		userJwt: z.infer<typeof jwtPayload>;
 		response: FastifyReply;
 	} & z.infer<typeof getPaginatedDataSchema>) {
-		return ApiKeysService.getCompanyApiKeys({
+		return ApiKeysService.getOwnApiKeys({
 			subdomain,
 			userJwt,
 			page,

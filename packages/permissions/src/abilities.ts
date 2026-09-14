@@ -12,6 +12,11 @@ const baseEmployee: Permission[] = [
 	permissions.settings.update,
 	permissions.settings.security,
 	permissions.customers.read,
+	// API keys are self-service: every employee manages their own, and a key
+	// never carries more than the role of the employee who created it.
+	permissions.apiKeys.read,
+	permissions.apiKeys.create,
+	permissions.apiKeys.revoke,
 ];
 
 const roleAbilities: Record<EmployeeRole, Permission[]> = {
@@ -40,9 +45,6 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	manager: [
 		...baseEmployee,
-		permissions.apiKeys.read,
-		permissions.apiKeys.create,
-		permissions.apiKeys.revoke,
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.create,
 		permissions.serviceOrders.update,
@@ -65,9 +67,6 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 	],
 	admin: [
 		...baseEmployee,
-		permissions.apiKeys.read,
-		permissions.apiKeys.create,
-		permissions.apiKeys.revoke,
 		permissions.companies.create,
 		permissions.companies.update,
 		permissions.employees.read,

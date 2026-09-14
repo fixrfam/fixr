@@ -89,7 +89,7 @@ export function buildColumns({
 				if (scopes.length === 0) {
 					return (
 						<span className="text-muted-foreground text-sm">
-							Herda o cargo do criador
+							Herda seu cargo
 						</span>
 					);
 				}

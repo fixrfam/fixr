@@ -54,41 +54,47 @@ export class ApiKeysRepository {
 	}
 
 	/**
-	 * Get a single key scoped to a company.
+	 * Get a single key belonging to an employee.
+	 *
+	 * Keys are user-scoped, so ownership — not just company membership — is what
+	 * grants access to one.
 	 *
 	 * @param apiKeyId - The key ID
-	 * @param companyId - The company the key must belong to
+	 * @param employeeId - The employee the key must belong to
 	 * @returns The key or undefined
 	 */
-	static async getByIdAndCompany({
+	static async getByIdAndEmployee({
 		apiKeyId,
-		companyId,
+		employeeId,
 	}: {
 		apiKeyId: string;
-		companyId: string;
+		employeeId: string;
 	}) {
 		const [data] = await db
 			.select()
 			.from(apiKeys)
-			.where(and(eq(apiKeys.id, apiKeyId), eq(apiKeys.companyId, companyId)))
+			.where(and(eq(apiKeys.id, apiKeyId), eq(apiKeys.employeeId, employeeId)))
 			.limit(1);
 
 		return data;
 	}
 
 	/**
-	 * Find an active (non-revoked) key by name within a company.
+	 * Find an active (non-revoked) key by name among an employee's own keys.
+	 *
+	 * Names only need to be unique per employee: two people may each have a key
+	 * called "ERP" without colliding.
 	 *
 	 * @param name - The key name
-	 * @param companyId - The company ID
+	 * @param employeeId - The owning employee ID
 	 * @returns The key or undefined
 	 */
-	static async getActiveByNameAndCompany({
+	static async getActiveByNameAndEmployee({
 		name,
-		companyId,
+		employeeId,
 	}: {
 		name: string;
-		companyId: string;
+		employeeId: string;
 	}) {
 		const [data] = await db
 			.select({ id: apiKeys.id })
@@ -96,7 +102,7 @@ export class ApiKeysRepository {
 			.where(
 				and(
 					eq(apiKeys.name, name),
-					eq(apiKeys.companyId, companyId),
+					eq(apiKeys.employeeId, employeeId),
 					isNull(apiKeys.revokedAt)
 				)
 			)

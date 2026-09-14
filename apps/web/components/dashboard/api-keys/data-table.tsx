@@ -58,7 +58,7 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}
-						placeholder="Procurar chaves..."
+						placeholder="Procurar nas suas chaves..."
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 					/>
 				</div>
@@ -102,7 +102,7 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 									className="h-18 text-center"
 									colSpan={columns.length}
 								>
-									Nenhuma chave criada ainda
+									Você ainda não criou nenhuma chave
 								</TableCell>
 							</TableRow>
 						)}

@@ -33,7 +33,7 @@ export function apiKeysRoutes(fastify: FastifyTypedInstance) {
 			);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ApiKeysController.getCompanyApiKeys({
+			await ApiKeysController.getOwnApiKeys({
 				subdomain,
 				userJwt,
 				response,

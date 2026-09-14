@@ -14,7 +14,7 @@ export const messages: Record<string, Message> = {
 	},
 	api_key_name_conflict: {
 		title: "Nome já utilizado",
-		description: "Já existe uma chave ativa com este nome.",
+		description: "Você já tem uma chave ativa com este nome.",
 	},
 	api_key_invalid_scopes: {
 		title: "Permissões inválidas",
@@ -22,7 +22,7 @@ export const messages: Record<string, Message> = {
 	},
 	api_key_not_found: {
 		title: "Chave não encontrada",
-		description: "Esta chave não existe ou pertence a outra empresa.",
+		description: "Esta chave não existe ou não pertence a você.",
 	},
 	api_key_already_revoked: {
 		title: "Chave já revogada",

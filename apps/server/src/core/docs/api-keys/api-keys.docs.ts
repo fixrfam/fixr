@@ -14,24 +14,27 @@ import { zodResponseSchema } from "../types";
 
 const listApiKeysSchema: FastifySchema = {
 	tags: ["API Keys"],
-	summary: "List company API keys",
+	summary: "List your API keys",
 	description: `
-**Retrieves the API keys of a company, paginated.**
+**Retrieves the caller's own API keys, paginated.**
+
+Keys are user-scoped: this never returns another employee's keys, not even for
+an admin.
 
 Only the public \`prefix\` is returned: the secret is never stored in a
 recoverable form and cannot be retrieved after creation.
 
-Requires the \`apiKeys:read\` permission.
+Requires the \`apiKeys:read\` permission, which every employee holds.
 `,
 	querystring: getPaginatedDataSchema,
 	response: {
 		200: zodResponseSchema({
 			status: 200,
 			error: null,
-			message: "Company API keys successfully retrieved.",
-			code: "get_company_api_keys_success",
+			message: "API keys successfully retrieved.",
+			code: "get_api_keys_success",
 			data: paginatedDataSchema(z.object({ ...apiKeyPublicSchema.shape })),
-		}).describe("Company API keys successfully retrieved."),
+		}).describe("API keys successfully retrieved."),
 		403: zodResponseSchema({
 			status: 403,
 			error: "Forbidden",
@@ -49,6 +52,10 @@ const createApiKeyRouteSchema: FastifySchema = {
 	description: `
 **Creates a key for programmatic access to the API.**
 
+The key belongs to the employee who created it and carries that employee's
+permissions. The role is resolved on every request, so demoting or removing an
+employee immediately narrows every key they issued.
+
 The plaintext secret is returned **exactly once**, in this response. Store it
 immediately: only its HMAC is persisted, so it can never be shown again.
 
@@ -56,7 +63,7 @@ Scopes may only *narrow* the creator's role. Requesting a permission the creator
 does not hold is rejected with \`api_key_invalid_scopes\`. An empty scope list
 means the key inherits the creator's role as-is.
 
-Requires the \`apiKeys:create\` permission.
+Requires the \`apiKeys:create\` permission, which every employee holds.
 `,
 	body: createApiKeySchema,
 	response: {
@@ -79,7 +86,7 @@ Requires the \`apiKeys:create\` permission.
 			status: 409,
 			error: "Conflict",
 			code: "api_key_name_conflict",
-			message: "An active API key with this name already exists.",
+			message: "You already have an active API key with this name.",
 			data: null,
 		}).describe("An active key already uses this name."),
 	},
@@ -88,13 +95,17 @@ Requires the \`apiKeys:create\` permission.
 
 const revokeApiKeySchema: FastifySchema = {
 	tags: ["API Keys"],
-	summary: "Revoke an API key",
+	summary: "Revoke one of your API keys",
 	description: `
 **Revokes a key, immediately rejecting any request that presents it.**
 
+Only the caller's own keys can be revoked. A key belonging to someone else
+answers \`404\`, so the endpoint cannot be used to probe for other people's key
+IDs.
+
 Revocation is a soft delete: the row is kept so the audit trail survives.
 
-Requires the \`apiKeys:revoke\` permission.
+Requires the \`apiKeys:revoke\` permission, which every employee holds.
 `,
 	params: apiKeyIdParamsSchema,
 	response: {
@@ -111,7 +122,7 @@ Requires the \`apiKeys:revoke\` permission.
 			code: "api_key_not_found",
 			message: "API key not found.",
 			data: null,
-		}).describe("API key not found in this company."),
+		}).describe("API key not found, or it belongs to another employee."),
 		409: zodResponseSchema({
 			status: 409,
 			error: "Conflict",

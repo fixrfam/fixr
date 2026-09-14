@@ -23,7 +23,7 @@ export const apiKeysErrors = defineErrors({
 	},
 	API_KEY_NAME_CONFLICT: {
 		code: "api_key_name_conflict",
-		message: "An active API key with this name already exists.",
+		message: "You already have an active API key with this name.",
 		status: 409,
 	},
 	API_KEY_INVALID_SCOPES: {

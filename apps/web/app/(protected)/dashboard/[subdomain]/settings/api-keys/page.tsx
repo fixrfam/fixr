@@ -28,7 +28,7 @@ export default function ApiKeysPage() {
 		<div className="flex flex-col gap-2">
 			<Heading
 				description={
-					"Chaves para acesso programático à API do Fixr. O segredo é exibido apenas na criação."
+					"Suas chaves para acesso programático à API do Fixr. Cada chave carrega as permissões do seu cargo, e o segredo é exibido apenas na criação."
 				}
 				Icon={KeyRound}
 				title={"Chaves de API"}
