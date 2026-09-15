@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { useSession } from "@/lib/hooks/use-session";
 import { type ApiKeyRow, buildColumns } from "./columns";
-import { CreateApiKeyDialog } from "./create-api-key-dialog";
+import { CreateApiKeySheet } from "./create-api-key-sheet";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 
 export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
@@ -62,7 +62,7 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 					/>
 				</div>
-				{ability.can(permissions.apiKeys.create) && <CreateApiKeyDialog />}
+				{ability.can(permissions.apiKeys.create) && <CreateApiKeySheet />}
 			</div>
 			<div className="rounded-md border bg-background">
 				<Table>

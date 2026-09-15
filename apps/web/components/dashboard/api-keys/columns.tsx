@@ -19,25 +19,40 @@ export const dataSchema = apiKeyPublicSchema;
 
 export type ApiKeyRow = z.infer<typeof dataSchema>;
 
-/** A key is usable only while it is neither revoked nor past its expiration. */
+/**
+ * A key is usable only while it is neither revoked nor past its expiration.
+ *
+ * Status is a quiet piece of information next to the key name, so none of the
+ * variants use the primary colour. Revoked is the deliberate action and keeps a
+ * hint of destructive; expired just happened on its own and stays muted.
+ */
 export function getKeyStatus(key: ApiKeyRow): {
 	label: string;
 	variant: "default" | "secondary" | "destructive" | "outline";
+	className?: string;
 } {
 	if (key.revokedAt) {
-		return { label: "Revogada", variant: "destructive" };
+		return {
+			label: "Revogada",
+			variant: "outline",
+			className: "border-destructive/40 text-destructive",
+		};
 	}
 
 	if (key.expiresAt && new Date(key.expiresAt) <= new Date()) {
-		return { label: "Expirada", variant: "outline" };
+		return {
+			label: "Expirada",
+			variant: "outline",
+			className: "text-muted-foreground",
+		};
 	}
 
-	return { label: "Ativa", variant: "default" };
+	return { label: "Ativa", variant: "secondary" };
 }
 
 function formatDate(value: Date | string | null) {
 	if (!value) {
-		return "—";
+		return "-";
 	}
 
 	return new Intl.DateTimeFormat("pt-BR", {
@@ -77,7 +92,11 @@ export function buildColumns({
 			header: "Status",
 			cell: ({ row }) => {
 				const status = getKeyStatus(row.original);
-				return <Badge variant={status.variant}>{status.label}</Badge>;
+				return (
+					<Badge className={status.className} variant={status.variant}>
+						{status.label}
+					</Badge>
+				);
 			},
 		},
 		{
@@ -148,7 +167,7 @@ export function buildColumns({
 								disabled={isRevoked || !canRevoke}
 								onSelect={() => onRevoke(row.original)}
 							>
-								<Ban /> Revogar
+								<Ban className="text-destructive" /> Revogar
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

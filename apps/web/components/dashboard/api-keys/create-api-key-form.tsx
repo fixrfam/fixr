@@ -144,7 +144,7 @@ export function CreateApiKeyForm({
 
 	return (
 		<Form {...form}>
-			<form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+			<form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
 				<FormField
 					control={form.control}
 					name="name"
@@ -210,7 +210,7 @@ export function CreateApiKeyForm({
 					<CollapsibleContent className="space-y-4 border-border border-t p-3">
 						<p className="text-muted-foreground text-xs">
 							Sem nenhuma selecionada, a chave usa exatamente as permissões do
-							seu cargo. Selecionar restringe — uma chave nunca pode ter mais
+							seu cargo. Selecionar restringe: uma chave nunca pode ter mais
 							acesso do que você.
 						</p>
 						{availableScopes.map((group) => (

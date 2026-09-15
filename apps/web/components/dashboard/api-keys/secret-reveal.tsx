@@ -36,7 +36,7 @@ export function SecretReveal({
 
 	return (
 		<div className="space-y-5">
-			<Alert variant="destructive">
+			<Alert variant="warning">
 				<TriangleAlert />
 				<AlertTitle>
 					Copie agora, este segredo não será exibido de novo
