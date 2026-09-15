@@ -23,7 +23,7 @@ export const createApiKeySchema = z.object({
 });
 
 export const apiKeyIdParamsSchema = z.object({
-	apiKeyId: z.string().length(25),
+	apiKeyId: z.string().cuid2(),
 });
 
 /**
