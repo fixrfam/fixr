@@ -3,7 +3,11 @@ import type { Permission } from "@fixr/permissions/permissions";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { redis } from "../../config/redis";
 import { ApiKeysRepository } from "../../modules/api-keys/repositories";
-import { parseApiKey, verifyApiKeySecret } from "../lib/api-key";
+import {
+	extractApiKeyToken,
+	parseApiKey,
+	verifyApiKeySecret,
+} from "../lib/api-key";
 import { AppError } from "../lib/app-error";
 
 /**
@@ -13,31 +17,6 @@ import { AppError } from "../lib/app-error";
  * read-only call into a write and putting one row under constant contention.
  */
 const LAST_USED_THROTTLE_SECONDS = 60;
-
-/**
- * Extracts the raw token from the request.
- *
- * Accepts `Authorization: Bearer <token>` and the `x-api-key` header, so
- * integrations can use whichever their HTTP client makes easier.
- *
- * @param request - The incoming request
- * @returns The raw token, or null when absent
- */
-function extractToken(request: FastifyRequest): string | null {
-	const headerKey = request.headers["x-api-key"];
-
-	if (typeof headerKey === "string" && headerKey.length > 0) {
-		return headerKey;
-	}
-
-	const authorization = request.headers.authorization;
-
-	if (authorization?.startsWith("Bearer ")) {
-		return authorization.slice("Bearer ".length);
-	}
-
-	return null;
-}
 
 /**
  * Builds the ability a key may exercise.
@@ -109,7 +88,7 @@ export const authenticateApiKey = async (
 	request: FastifyRequest,
 	_response: FastifyReply
 ): Promise<void> => {
-	const token = extractToken(request);
+	const token = extractApiKeyToken(request.headers);
 
 	if (!token) {
 		throw new AppError("API_KEY_CREDENTIALS_INVALID");

@@ -77,6 +77,34 @@ export function generateApiKey(): GeneratedApiKey {
 }
 
 /**
+ * Extracts the raw token from request headers.
+ *
+ * Accepts `Authorization: Bearer <token>` and the `x-api-key` header, so
+ * integrations can use whichever their HTTP client makes easier.
+ *
+ * @param headers - The incoming request headers
+ * @returns The raw token, or null when absent
+ */
+export function extractApiKeyToken(headers: {
+	authorization?: string;
+	"x-api-key"?: string | string[];
+}): string | null {
+	const headerKey = headers["x-api-key"];
+
+	if (typeof headerKey === "string" && headerKey.length > 0) {
+		return headerKey;
+	}
+
+	const authorization = headers.authorization;
+
+	if (authorization?.startsWith("Bearer ")) {
+		return authorization.slice("Bearer ".length);
+	}
+
+	return null;
+}
+
+/**
  * Splits a token back into its prefix and secret.
  *
  * @param token - The raw token supplied by the caller
