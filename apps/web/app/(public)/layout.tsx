@@ -45,6 +45,12 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
+			<head>
+				<script
+					defer
+					src="https://tracking.ricardo.gg/api/script.js?siteId=5c232fc77649"
+				/>
+			</head>
 			<body
 				className={`${inter.variable} ${cal.variable} font-(family-name:--font-inter) antialiased`}
 			>
