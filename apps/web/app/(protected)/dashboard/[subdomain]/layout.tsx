@@ -5,6 +5,7 @@ import { SessionProvider } from "@/lib/hooks/use-session";
 import QueryClientWrapper from "@/lib/query-client";
 import "../../../globals.css";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Header } from "@/components/dashboard/sidebar/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
@@ -34,6 +35,10 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
 	const cookieStore = await cookies();
 	const session = getSession(cookieStore);
+
+	if (!session) {
+		redirect("/auth/login");
+	}
 
 	return (
 		<html lang="en" suppressHydrationWarning>

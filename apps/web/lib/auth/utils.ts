@@ -15,15 +15,17 @@ export async function signOut(cookieString?: string) {
 		: await axios.get("/auth/signout");
 }
 
-export function getSession(cookies?: ReadonlyRequestCookies) {
-	if (cookies) {
-		const jwt = parseJwt(cookies.get(cookieKey("session"))?.value);
-		return userJWT.parse(jwt);
-	}
+export function getSession(
+	cookies?: ReadonlyRequestCookies
+): ReturnType<typeof userJWT.parse> | null {
+	const jwt = cookies
+		? parseJwt(cookies.get(cookieKey("session"))?.value)
+		: parseJwt(parseCookies()[cookieKey("session")]);
 
-	const cookieStore = parseCookies();
-	const jwt = parseJwt(cookieStore[cookieKey("session")]); // Corrected access using cookieKey
-	return userJWT.parse(jwt);
+	// Missing/expired sessions are expected (the middleware revalidates the token
+	// before this runs); fail gracefully to null instead of throwing a ZodError.
+	const result = userJWT.safeParse(jwt);
+	return result.success ? result.data : null;
 }
 
 export const getClientSession = (): ReturnType<typeof userJWT.parse> | null => {
