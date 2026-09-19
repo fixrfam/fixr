@@ -2,9 +2,11 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { db } from "@fixr/db/connection";
 import { uploads } from "@fixr/db/schema";
-import type { createUploadPresignSchema } from "@fixr/schemas/uploads";
+import type { uploadPurpose } from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import {
+	buildAvatarObjectKey,
+	buildModelObjectKey,
 	buildObjectPublicUrl,
 	buildUploadObjectKey,
 	r2Bucket,
@@ -12,24 +14,56 @@ import {
 	r2PresignExpiresIn,
 } from "../../../config/r2";
 
+type ApiPurpose = z.infer<typeof uploadPurpose>;
+
+const KEY_BUILDERS: Record<
+	ApiPurpose,
+	(opts: { userId?: string; companyId?: string; fileName: string }) => string
+> = {
+	avatar: ({ userId, fileName }) =>
+		buildAvatarObjectKey({ userId: userId!, fileName }),
+	"service-orders": ({ companyId, fileName }) =>
+		buildUploadObjectKey({ companyId: companyId!, fileName }),
+	models: ({ companyId, fileName }) =>
+		buildModelObjectKey({ companyId: companyId!, fileName }),
+};
+
+const PURPOSE_TO_DB: Record<
+	ApiPurpose,
+	"avatar" | "service_order" | "model_image"
+> = {
+	avatar: "avatar",
+	"service-orders": "service_order",
+	models: "model_image",
+};
+
 export class UploadsRepository {
 	static async createPresignedUpload({
+		purpose,
 		companyId,
 		employeeId,
-		data,
+		userId,
+		fileName,
+		contentType,
+		size,
 	}: {
-		companyId: string;
-		employeeId: string;
-		data: z.infer<typeof createUploadPresignSchema>;
+		purpose: ApiPurpose;
+		companyId?: string;
+		employeeId?: string;
+		userId?: string;
+		fileName: string;
+		contentType: string;
+		size: number;
 	}) {
-		const key = buildUploadObjectKey({ companyId, fileName: data.fileName });
-		const url = buildObjectPublicUrl(key);
+		const buildKey = KEY_BUILDERS[purpose];
+		const key = buildKey({ userId, companyId, fileName });
+		const url = `${buildObjectPublicUrl(key)}${purpose === "avatar" ? `?v=${Date.now()}` : ""}`;
 
 		const command = new PutObjectCommand({
 			Bucket: r2Bucket,
 			Key: key,
-			ContentType: data.contentType,
-			ContentLength: data.size,
+			ContentType: contentType,
+			ContentLength: size,
 		});
 
 		const uploadUrl = await getSignedUrl(r2Client, command, {
@@ -39,13 +73,14 @@ export class UploadsRepository {
 		const [record] = await db
 			.insert(uploads)
 			.values({
-				companyId,
-				employeeId,
+				companyId: companyId ?? null,
+				employeeId: employeeId ?? null,
+				purpose: PURPOSE_TO_DB[purpose],
 				key,
 				url,
-				fileName: data.fileName,
-				contentType: data.contentType,
-				sizeInBytes: data.size,
+				fileName,
+				contentType,
+				sizeInBytes: size,
 				status: "pending",
 			})
 			.$returningId();

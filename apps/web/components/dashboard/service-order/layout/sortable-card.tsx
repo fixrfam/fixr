@@ -28,9 +28,8 @@ export function SortableCard({ id, children }: SortableCardProps) {
 	return (
 		<div
 			className={cn(
-				"relative cursor-grab touch-none transition-shadow",
-				isDragging && "opacity-50",
-				!isDragging && "hover:shadow-sm"
+				"relative cursor-grab touch-none bg-background transition-shadow",
+				isDragging && "opacity-50"
 			)}
 			data-card-id={id}
 			ref={setNodeRef}
@@ -38,7 +37,7 @@ export function SortableCard({ id, children }: SortableCardProps) {
 			{...attributes}
 			{...listeners}
 		>
-			<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full border bg-background/90 px-2 py-1 text-muted-foreground text-xs">
+			<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full border bg-card px-2 py-1 text-muted-foreground text-xs">
 				<GripVertical className="size-3" />
 				Arraste
 			</div>

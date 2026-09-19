@@ -26,7 +26,7 @@ export default async function ServiceOrderDetailsPage({
 			<div className="flex flex-col gap-3">
 				<Button
 					asChild
-					className="w-fit -translate-x-2.5"
+					className="-mt-3 w-fit -translate-x-2.5"
 					size="sm"
 					variant="ghost"
 				>

@@ -15,7 +15,7 @@ function ServiceOrderImageGrid({
 
 	if (!images || images.length === 0) {
 		return (
-			<p className="text-muted-foreground text-sm">
+			<p className="text-2xs text-muted-foreground">
 				Nenhuma imagem registrada.
 			</p>
 		);
@@ -26,7 +26,7 @@ function ServiceOrderImageGrid({
 			<div className="grid grid-cols-2 gap-3">
 				{images.map((image) => (
 					<button
-						className="cursor-pointer overflow-hidden rounded-lg border bg-background transition-colors hover:border-primary/50"
+						className="cursor-pointer overflow-hidden rounded-lg border bg-card transition-colors hover:border-primary/50"
 						key={image.id}
 						onClick={() => setSelected(image)}
 						type="button"
@@ -61,7 +61,7 @@ function ServiceOrderImageGrid({
 								className="max-h-[70vh] w-full rounded-lg object-contain"
 								src={selected.url}
 							/>
-							<p className="text-center text-muted-foreground text-sm">
+							<p className="text-center text-2xs text-muted-foreground">
 								{selected.description}
 							</p>
 						</>

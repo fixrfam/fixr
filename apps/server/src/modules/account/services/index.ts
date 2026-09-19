@@ -5,8 +5,10 @@ import {
 	emailDisplayName,
 	sendAccountDeletionEmail,
 } from "@fixr/mail/services";
+import { jwtPayload } from "@fixr/schemas/auth";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { AppError } from "../../../core/lib/app-error";
+import { signJWT } from "../../../core/lib/jwt";
 import { apiResponse } from "../../../core/lib/response";
 import { AuthRepository } from "../../auth/repositories";
 import { TokensRepository } from "../../tokens/repositories";
@@ -15,6 +17,40 @@ import { AccountRepository } from "../repositories";
 
 /** @description Account business logic */
 export class AccountService {
+	/**
+	 * Remove the authenticated user's avatar URL
+	 *
+	 * @param userId - The authenticated user ID
+	 * @param response - Fastify reply
+	 */
+	static async removeAvatar({
+		userId,
+		response,
+	}: {
+		userId: string;
+		response: FastifyReply;
+	}) {
+		await AccountRepository.updateAvatarUrl(userId, null);
+
+		const payload = await AuthRepository.queryJWTPayloadByUserId(userId);
+		const token = signJWT({
+			payload: jwtPayload.parse(payload),
+		});
+		TokensService.setJWTCookie(response, token);
+
+		const account = await AccountRepository.queryAccountById(userId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "remove_avatar_success",
+				message: "Foto de perfil removida com sucesso.",
+				data: account,
+			})
+		);
+	}
+
 	/**
 	 * Get account details for the authenticated user
 	 *
@@ -36,6 +72,43 @@ export class AccountService {
 				error: null,
 				code: "get_account_success",
 				message: "Account retrieved successfully.",
+				data: account,
+			})
+		);
+	}
+
+	/**
+	 * Update the authenticated user's avatar URL
+	 *
+	 * @param userId - The authenticated user ID
+	 * @param avatarUrl - The new avatar URL
+	 * @param response - Fastify reply
+	 */
+	static async updateAvatar({
+		userId,
+		avatarUrl,
+		response,
+	}: {
+		userId: string;
+		avatarUrl: string;
+		response: FastifyReply;
+	}) {
+		await AccountRepository.updateAvatarUrl(userId, avatarUrl);
+
+		const payload = await AuthRepository.queryJWTPayloadByUserId(userId);
+		const token = signJWT({
+			payload: jwtPayload.parse(payload),
+		});
+		TokensService.setJWTCookie(response, token);
+
+		const account = await AccountRepository.queryAccountById(userId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "update_avatar_success",
+				message: "Avatar atualizado com sucesso.",
 				data: account,
 			})
 		);

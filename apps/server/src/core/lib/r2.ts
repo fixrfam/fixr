@@ -56,3 +56,36 @@ export function buildUploadObjectKey({
 
 	return `companies/${companyId}/service-orders/${uniquePrefix}-${safeName}`;
 }
+
+/**
+ * Build an R2 object key for a model image
+ */
+export function buildModelObjectKey({
+	companyId,
+	fileName,
+}: {
+	companyId: string;
+	fileName: string;
+}): string {
+	const safeName = sanitizeUploadFileName(fileName);
+	const uniquePrefix = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+	return `companies/${companyId}/models/${uniquePrefix}-${safeName}`;
+}
+
+/**
+ * Build an R2 object key for a user avatar
+ * Uses a deterministic key so each upload overwrites the previous one
+ */
+export function buildAvatarObjectKey({
+	userId,
+	fileName,
+}: {
+	userId: string;
+	fileName: string;
+}): string {
+	const safeName = sanitizeUploadFileName(fileName);
+	const ext = safeName.includes(".") ? safeName.split(".").pop() : "jpg";
+
+	return `users/${userId}/avatar.${ext}`;
+}

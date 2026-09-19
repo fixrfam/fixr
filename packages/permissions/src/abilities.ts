@@ -21,11 +21,13 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.serviceOrders.read,
 		permissions.serviceOrders.update,
 		permissions.serviceOrders.changeStatus,
+		permissions.devices.read,
 	],
 	warehouse: [
 		...baseEmployee,
 		permissions.inventory.read,
 		permissions.inventory.update,
+		permissions.devices.read,
 	],
 	financial: [
 		...baseEmployee,
@@ -34,6 +36,7 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.estimates.update,
 		permissions.estimates.delete,
 		permissions.estimates.sendToCustomer,
+		permissions.devices.read,
 	],
 	manager: [
 		...baseEmployee,
@@ -52,6 +55,10 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.estimates.sendToCustomer,
 		permissions.employees.read,
 		permissions.employees.create,
+		permissions.devices.read,
+		permissions.devices.create,
+		permissions.devices.update,
+		permissions.devices.delete,
 	],
 	admin: [
 		...baseEmployee,

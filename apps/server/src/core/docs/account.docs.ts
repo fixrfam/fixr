@@ -26,11 +26,67 @@ const getAccountSchema: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const updateAvatarSchema: FastifySchema = {
+	tags: ["Account"],
+	description: `**Update the authenticated user's avatar URL**
+
+Sets the \`avatarUrl\` field for the current user to the provided URL.
+Call \`POST /uploads/avatar/presign\` first to get a pre-signed upload URL, upload the cropped image, then pass the public URL here.
+`,
+	summary: "Update avatar",
+	body: z.object({
+		url: z.string().url(),
+	}),
+	response: {
+		404: zodResponseSchema({
+			status: 404,
+			error: "Not Found",
+			code: "user_not_found",
+			message: "User not found",
+			data: null,
+		}).describe("Couldn't find user."),
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "update_avatar_success",
+			message: "Avatar atualizado com sucesso.",
+			data: accountSchema,
+		}).describe("Avatar updated successfully."),
+	},
+	security: [{ JWT: [] }],
+};
+
+const removeAvatarSchema: FastifySchema = {
+	tags: ["Account"],
+	description: `**Remove the authenticated user's avatar**
+
+Sets the avatar URL to \`null\` and re-issues the JWT.
+`,
+	summary: "Remove avatar",
+	response: {
+		404: zodResponseSchema({
+			status: 404,
+			error: "Not Found",
+			code: "user_not_found",
+			message: "User not found",
+			data: null,
+		}).describe("Couldn't find user."),
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "remove_avatar_success",
+			message: "Foto de perfil removida com sucesso.",
+			data: accountSchema,
+		}).describe("Avatar removed successfully."),
+	},
+	security: [{ JWT: [] }],
+};
+
 const requestDeletionSchema: FastifySchema = {
 	tags: ["Account"],
 	description: `**Request account deletion and sends a confirmation email.**
-    
-When requested, the account is **not** deleted instantly. 
+
+When requested, the account is **not** deleted instantly.
 For confirmation, we generate a \`oneTimeToken\` of type \`account_deletion\`, save it on the database, and send it to the user email as a confirmation link, that will further hit the \`/account/confirm-deletion\` endpoint.
 
 - Requests are valid for 30 minutes.
@@ -68,7 +124,7 @@ For confirmation, we generate a \`oneTimeToken\` of type \`account_deletion\`, s
 const confirmDeletionSchema: FastifySchema = {
 	tags: ["Account"],
 	description: `**Confirm deletion of account corresponding to the token.**
-        
+
 When the confirmation email is sent, a link to this API route is sent together with the confirmation token.
 
 Once clicked, the account is deleted along with the single use token, then the user is redirected to the \`redirectUrl\`.
@@ -112,6 +168,8 @@ Once clicked, the account is deleted along with the single use token, then the u
 
 export const accountDocs = {
 	getAccountSchema,
+	updateAvatarSchema,
+	removeAvatarSchema,
 	requestDeletionSchema,
 	confirmDeletionSchema,
 };

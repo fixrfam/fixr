@@ -6,13 +6,8 @@ export async function GET(request: NextRequest) {
 	const redirectUrl = new URL("/auth/login", request.url);
 	const response = NextResponse.redirect(redirectUrl);
 
-	const domain = redirectUrl.hostname;
-	const isSecure = request.url.startsWith("https");
 	const baseOptions = {
 		path: "/",
-		domain,
-		secure: isSecure,
-		sameSite: "none" as const,
 		maxAge: 0,
 	};
 

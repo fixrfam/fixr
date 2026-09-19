@@ -4,6 +4,7 @@ import { employees, users } from "@fixr/db/schema";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { z } from "zod";
 import { hashPassword } from "../../../core/lib/hash-password";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 /** @description Employees data access layer */
 export class EmployeesRepository {
@@ -13,6 +14,7 @@ export class EmployeesRepository {
 	 * @param cpf - The employee CPF
 	 * @returns The employee data or undefined
 	 */
+	@Cached({ ttl: 3600, key: "employees:cpf" })
 	static async getEmployeeByCpf(cpf: string) {
 		const [data] = await db
 			.select()
@@ -27,6 +29,7 @@ export class EmployeesRepository {
 	 * @param data - The employee registration data
 	 * @param companyId - The company ID
 	 */
+	@InvalidateCache({ patterns: ["employees:*"] })
 	static async createEmployeeAndAccount({
 		data,
 		companyId,

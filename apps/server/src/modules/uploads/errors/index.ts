@@ -6,4 +6,9 @@ export const uploadsErrors = defineErrors({
 		message: "There's no companies bound to your account",
 		status: 404,
 	},
+	UPLOAD_SIZE_EXCEEDED: {
+		code: "upload_size_exceeded",
+		message: "Arquivo excede o limite de tamanho permitido.",
+		status: 413,
+	},
 });

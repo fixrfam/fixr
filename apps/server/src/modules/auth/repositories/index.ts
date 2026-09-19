@@ -8,12 +8,7 @@ import {
 
 import type { TokenPayload } from "google-auth-library";
 import type { z } from "zod";
-import { redis } from "../../../config/redis";
-import {
-	CACHE_TTL,
-	jwtPayloadCacheKey,
-	userCacheKey,
-} from "../../../core/lib/cache";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 /** @description User data access layer */
 export class AuthRepository {
@@ -23,14 +18,8 @@ export class AuthRepository {
 	 * @param id - The user ID
 	 * @returns The parsed user data
 	 */
+	@Cached({ ttl: 3600, key: "user" })
 	static async queryUserById(id: string) {
-		const cacheKey = userCacheKey(id);
-		const cached = await redis.get(cacheKey);
-
-		if (cached) {
-			return userSchema.parse(JSON.parse(cached));
-		}
-
 		const [user] = await db
 			.select({
 				id: users.id,
@@ -52,8 +41,6 @@ export class AuthRepository {
 			.where(eq(users.id, id))
 			.limit(1);
 
-		await redis.set(cacheKey, JSON.stringify(user), "EX", CACHE_TTL);
-
 		return userSchema.parse(user);
 	}
 
@@ -63,6 +50,7 @@ export class AuthRepository {
 	 * @param email - The user email
 	 * @returns The parsed user data or null if not found
 	 */
+	@Cached({ ttl: 3600, key: "user:email" })
 	static async queryUserByEmail(
 		email: string
 	): Promise<z.infer<typeof userSchema> | null> {
@@ -100,14 +88,8 @@ export class AuthRepository {
 	 * @param userId - The user ID
 	 * @returns The parsed JWT payload
 	 */
+	@Cached({ ttl: 3600, key: "jwt" })
 	static async queryJWTPayloadByUserId(userId: string) {
-		const cacheKey = jwtPayloadCacheKey(userId);
-		const cached = await redis.get(cacheKey);
-
-		if (cached) {
-			return jwtPayload.parse(JSON.parse(cached));
-		}
-
 		const [payload] = await db
 			.select({
 				id: users.id,
@@ -138,8 +120,6 @@ export class AuthRepository {
 			.leftJoin(companies, eq(employees.companyId, companies.id))
 			.where(eq(users.id, userId));
 
-		await redis.set(cacheKey, JSON.stringify(payload), "EX", CACHE_TTL);
-
 		return jwtPayload.parse(payload);
 	}
 
@@ -166,14 +146,12 @@ export class AuthRepository {
 	 *
 	 * @param userId - The user ID
 	 */
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
 	static async setUserVerified(userId: string) {
 		const verifyUser = db
 			.update(users)
 			.set({ verified: true })
 			.where(eq(users.id, userId));
-
-		const cacheKey = userCacheKey(userId);
-		await redis.del(cacheKey);
 
 		return await verifyUser;
 	}
@@ -183,11 +161,9 @@ export class AuthRepository {
 	 *
 	 * @param userId - The user ID
 	 */
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
 	static async deleteUser(userId: string) {
 		const delUser = db.delete(users).where(eq(users.id, userId));
-
-		const cacheKey = userCacheKey(userId);
-		await redis.del(cacheKey);
 
 		return await delUser;
 	}
@@ -198,6 +174,7 @@ export class AuthRepository {
 	 * @param userId - The user ID
 	 * @param data - Google token payload data
 	 */
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
 	static async updateUserWithGoogleData({
 		userId,
 		data,
@@ -205,14 +182,6 @@ export class AuthRepository {
 		userId: string;
 		data: Partial<TokenPayload>;
 	}) {
-		const invalidate = {
-			user: userCacheKey(userId),
-			jwt: jwtPayloadCacheKey(userId),
-		};
-
-		// Use Promise.all for parallel cache invalidation instead of sequential loop
-		await Promise.all(Object.values(invalidate).map((key) => redis.del(key)));
-
 		return await db
 			.update(users)
 			.set({ googleId: data.sub, avatarUrl: data.picture })

@@ -3,6 +3,7 @@ import { Settings } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { z } from "zod";
 import { emailDisplayName } from "@/lib/auth/utils";
+import { useSession } from "@/lib/hooks/use-session";
 import { cn } from "@/lib/utils";
 import { Avatar, type AvatarProps } from "../account/profile-avatar";
 import { SignOutButton } from "../auth/signout-button";
@@ -11,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DashLink } from "./service-order/dash-link";
 
 export function AccountPopover({
-	session,
+	session: initialSession,
 	showData,
 	variant = "rounded",
 	className,
@@ -21,6 +22,9 @@ export function AccountPopover({
 	className?: string;
 	showData?: boolean;
 }) {
+	const { session: contextSession } = useSession();
+	const session = contextSession ?? initialSession;
+
 	const displayName =
 		session.displayName || emailDisplayName(session.email || "");
 	const params = useParams<{ subdomain: string }>();
@@ -42,7 +46,7 @@ export function AccountPopover({
 					/>
 					{showData && (
 						<div className="flex min-w-0 flex-col">
-							<p className="overflow-hidden truncate whitespace-nowrap font-medium text-sm">
+							<p className="overflow-hidden truncate whitespace-nowrap font-medium text-2xs">
 								{displayName}
 							</p>
 							<p className="overflow-hidden truncate whitespace-nowrap text-muted-foreground text-xs">

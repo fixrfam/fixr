@@ -2,7 +2,8 @@
   "name": "fixr",
   "private": true,
   "scripts": {
-    "dev": "dotenv -- bun run --elide-lines 0 --filter './apps/*' dev",
+    "dev": "dotenv -- bun run --elide-lines 0 --filter server --filter web --filter workers dev",
+    "dev:admin": "dotenv -- bun run --elide-lines 0 --filter admin dev",
     "start": "dotenv -- bun run --filter './apps/*' start",
     "build": "bun run --elide-lines 0 build:packages && bun run --elide-lines 0 build:apps",
     "build:packages": "dotenv -- bun run --elide-lines 0 --filter './packages/*' build",
@@ -20,6 +21,7 @@
     "db:studio": "bun run --elide-lines 0 --filter @fixr/db db:studio",
     "db:generate": "bun run --elide-lines 0 --filter @fixr/db db:generate",
     "db:migrate": "bun run --elide-lines 0 --filter @fixr/db db:migrate",
+    "db:seed": "bun run --elide-lines 0 --filter @fixr/db db:seed",
     "db:start": "bun run --elide-lines 0 --filter @fixr/db db:start",
     "db:watch": "bun run --elide-lines 0 --filter @fixr/db db:watch",
     "db:stop": "bun run --elide-lines 0 --filter @fixr/db db:stop",
@@ -73,6 +75,7 @@
     "dotenv": "^17.2.4",
     "dotenv-cli": "^8.0.0",
     "fastify-type-provider-zod": "6.1.0",
+    "vaul": "^1.1.2",
     "vitest": "catalog:"
   },
   "devDependencies": {

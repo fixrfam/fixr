@@ -1,23 +1,30 @@
-import type { jwtPayload } from "@fixr/schemas/auth";
-import type { createUploadPresignSchema } from "@fixr/schemas/uploads";
+import type {
+	createUploadPresignSchema,
+	uploadPurpose,
+} from "@fixr/schemas/uploads";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { UploadsService } from "../services";
 
-/** @description Uploads request handlers */
 export class UploadsController {
 	static createPresignedUpload({
-		userJwt,
+		purpose,
 		data,
+		userId,
+		companyId,
 		response,
 	}: {
-		userJwt: z.infer<typeof jwtPayload>;
+		purpose: z.infer<typeof uploadPurpose>;
 		data: z.infer<typeof createUploadPresignSchema>;
+		userId: string;
+		companyId?: string;
 		response: FastifyReply;
 	}) {
 		return UploadsService.createPresignedUpload({
-			userJwt,
+			purpose,
 			data,
+			userId,
+			companyId,
 			response,
 		});
 	}

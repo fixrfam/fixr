@@ -1,6 +1,13 @@
 import { z } from "zod";
 
 export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_AVATAR_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+
+export const uploadPurpose = z.enum(["avatar", "service-orders", "models"]);
+
+export const presignParamsSchema = z.object({
+	purpose: uploadPurpose,
+});
 
 export const createUploadPresignSchema = z.object({
 	fileName: z
@@ -30,3 +37,18 @@ export const uploadPresignResponseSchema = z.object({
 	url: z.string().url(),
 	expiresIn: z.number().int().positive(),
 });
+
+export const createAvatarUploadPresignSchema = createUploadPresignSchema.extend(
+	{
+		size: z
+			.number({ error: "Tamanho do arquivo é obrigatório." })
+			.int({ message: "Tamanho deve ser um número inteiro." })
+			.positive({ message: "Tamanho deve ser maior que zero." })
+			.max(MAX_AVATAR_UPLOAD_SIZE_BYTES, {
+				message: "Arquivo excede o limite de 5 MB.",
+			}),
+	}
+);
+
+/** @deprecated Use {@link createUploadPresignSchema} instead */
+export const createModelImageUploadPresignSchema = createUploadPresignSchema;

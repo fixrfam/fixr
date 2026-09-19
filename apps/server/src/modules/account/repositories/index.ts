@@ -1,8 +1,7 @@
 import { db, eq, sql } from "@fixr/db/connection";
 import { clients, companies, employees, users } from "@fixr/db/schema";
 import { accountSchema } from "@fixr/schemas/account";
-import { redis } from "../../../config/redis";
-import { accountCacheKey, CACHE_TTL } from "../../../core/lib/cache";
+import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 /** @description Account data access layer */
 export class AccountRepository {
@@ -12,14 +11,8 @@ export class AccountRepository {
 	 * @param id - The user ID
 	 * @returns The parsed account data
 	 */
+	@Cached({ ttl: 3600, key: "account" })
 	static async queryAccountById(id: string) {
-		const cacheKey = accountCacheKey(id);
-		const cached = await redis.get(cacheKey);
-
-		if (cached) {
-			return accountSchema.parse(JSON.parse(cached));
-		}
-
 		const [account] = await db
 			.select({
 				id: users.id,
@@ -29,19 +22,19 @@ export class AccountRepository {
 				cpf: sql`COALESCE(${employees.cpf}, ${clients.cpf})`,
 				phone: sql`COALESCE(${employees.phone}, ${clients.phone})`,
 				profileType: sql`CASE
-                          WHEN ${employees.id} IS NOT NULL THEN 'employee'
-                          WHEN ${clients.id} IS NOT NULL THEN 'client'
-                          ELSE 'unknown'
-                        END`,
+                      WHEN ${employees.id} IS NOT NULL THEN 'employee'
+                      WHEN ${clients.id} IS NOT NULL THEN 'client'
+                      ELSE 'unknown'
+                    END`,
 				company: sql`CASE
-              WHEN ${employees.id} IS NOT NULL THEN JSON_OBJECT(
-                'id', ${companies.id},
-                'name', ${companies.name},
-                'subdomain', ${companies.subdomain},
-                'role', ${employees.role}
-              )
-              ELSE NULL
-            END`,
+          WHEN ${employees.id} IS NOT NULL THEN JSON_OBJECT(
+            'id', ${companies.id},
+            'name', ${companies.name},
+            'subdomain', ${companies.subdomain},
+            'role', ${employees.role}
+          )
+          ELSE NULL
+        END`,
 				createdAt: users.createdAt,
 			})
 			.from(users)
@@ -51,8 +44,17 @@ export class AccountRepository {
 			.where(eq(users.id, id))
 			.limit(1);
 
-		await redis.set(cacheKey, JSON.stringify(account), "EX", CACHE_TTL);
-
 		return accountSchema.parse(account);
+	}
+
+	/**
+	 * Update the avatar URL for a user and clear the cache
+	 *
+	 * @param userId - The user ID
+	 * @param avatarUrl - The new avatar URL
+	 */
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
+	static async updateAvatarUrl(userId: string, avatarUrl: string | null) {
+		await db.update(users).set({ avatarUrl }).where(eq(users.id, userId));
 	}
 }

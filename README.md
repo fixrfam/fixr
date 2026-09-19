@@ -223,49 +223,31 @@ bun install
 
 3. Configure as variáveis de ambiente:
 
-O projeto utiliza um **sistema centralizado de variáveis de ambiente** através do pacote `@fixr/env`. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+O projeto utiliza um **sistema centralizado de variáveis de ambiente** através do pacote `@fixr/env`, mas cada app/pacote carrega o seu próprio arquivo `.env` local (não existe um único `.env` na raiz). Copie o `.env.example` de cada um para `.env` no mesmo diretório e preencha os valores:
+
+```bash
+cp packages/db/.env.example packages/db/.env
+cp apps/server/.env.example apps/server/.env
+cp apps/web/.env.example apps/web/.env
+cp apps/workers/.env.example apps/workers/.env
+cp packages/mail/.env.example packages/mail/.env
+cp apps/admin/.env.example apps/admin/.env   # só necessário se for mexer no painel admin
+```
 
 ---
 
 #### Variáveis de Ambiente
 
-```env
-# Banco de Dados (MySQL)
-MYSQL_ROOT_PASSWORD="docker"
-MYSQL_DATABASE="fixr"
-MYSQL_USER="fixr"
-MYSQL_PASSWORD="fixr"
-DB_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@localhost:3306/${MYSQL_DATABASE}"
+| Arquivo | Principais variáveis |
+| --- | --- |
+| `packages/db/.env` | `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `DB_URL`, `REDIS_PASSWORD` |
+| `apps/server/.env` | `REDIS_URL`, `RESEND_KEY`, `JWT_SECRET`, `COOKIE_ENCRYPTION_SECRET`, `COOKIE_DOMAIN`, `GOOGLE_AUTH_CLIENT_ID`, `GOOGLE_AUTH_CLIENT_SECRET`, `GOOGLE_AUTH_REDIRECT_URI`, `TURNSTILE_SECRET_KEY`, `NODE_PORT`, `FRONTEND_URL`, `ADMIN_URL`, `CLERK_SECRET_KEY`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_URL`, `R2_REGION`, `R2_PUBLIC_BASE_URL`, `R2_PRESIGN_EXPIRES_IN` |
+| `apps/web/.env` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DOCS_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LINKTREE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` |
+| `apps/admin/.env` | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_API_URL`, `REDIS_URL`, `FRONTEND_URL` |
+| `apps/workers/.env` | `RESEND_KEY`, `REDIS_URL` |
+| `packages/mail/.env` | `RESEND_KEY` |
 
-# Redis
-REDIS_PASSWORD="docker"
-REDIS_URL="redis://default:${REDIS_PASSWORD}@localhost:6379/0"
-
-# Servidor (API)
-NODE_PORT="3333"
-FRONTEND_URL="http://localhost:3000"
-JWT_SECRET="seu-jwt-secret-aqui"
-COOKIE_ENCRYPTION_SECRET="seu-cookie-secret-aqui"
-COOKIE_DOMAIN="localhost"
-
-# Autenticação OAuth (Google)
-GOOGLE_AUTH_CLIENT_ID="seu-google-client-id"
-GOOGLE_AUTH_CLIENT_SECRET="seu-google-client-secret"
-GOOGLE_AUTH_REDIRECT_URI="http://localhost:3333/auth/google/callback"
-
-# Email (Resend)
-RESEND_KEY="re_seu-resend-key"
-
-# Web App (Frontend Principal)
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-NEXT_PUBLIC_API_URL="http://localhost:3333"
-NEXT_PUBLIC_DOCS_URL="https://docs.fixr.com.br"
-NEXT_PUBLIC_LINKTREE_URL="https://linktr.ee/fixrfam"
-
-# Admin Panel (Painel Administrativo)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_seu-clerk-key"
-CLERK_SECRET_KEY="sk_test_seu-clerk-secret"
-```
+Os valores de exemplo (senhas `docker`/`fixr`, chaves de teste do Cloudflare Turnstile, etc.) já funcionam para desenvolvimento local; chaves de serviços externos (Resend, Google OAuth, Clerk, Cloudflare R2) precisam ser geradas nos respectivos painéis — veja os comentários em cada `.env.example`.
 
 > **Nota:** As variáveis são validadas automaticamente pelo pacote `@fixr/env` usando Zod, garantindo que todas as configurações necessárias estejam presentes antes da inicialização dos apps.
 
@@ -285,16 +267,22 @@ bun run db:start
 bun run db:migrate
 ```
 
-3. **Inicie os aplicativos em modo desenvolvimento**:
+3. **Inicie server, web e workers em modo desenvolvimento**:
 
 ```bash
 bun run dev
 ```
 
+4. **(Opcional) Inicie o painel admin**, separadamente:
+
+```bash
+bun run dev:admin
+```
+
 Os serviços estarão disponíveis em:
 - **API REST:** `http://localhost:3333`
 - **Web App:** `http://localhost:3000`
-- **Admin Panel:** `http://localhost:6969`
+- **Admin Panel:** `http://localhost:6969` (requer `bun run dev:admin`)
 - **Documentação API (Scalar):** `http://localhost:3333/docs`
 - **Drizzle Studio:** Execute `bun run db:studio` para acessar
 
@@ -302,7 +290,8 @@ Os serviços estarão disponíveis em:
 
 ```bash
 # Desenvolvimento
-bun run dev              # Inicia todos os apps em modo desenvolvimento
+bun run dev              # Inicia server, web e workers em modo desenvolvimento
+bun run dev:admin        # Inicia o painel admin em modo desenvolvimento
 bun run check-types      # Executa verificação de tipos em todos os projetos
 
 # Build
@@ -317,6 +306,7 @@ bun run db:migrate       # Executa migrations
 bun run db:generate      # Gera migrations a partir dos schemas
 bun run db:studio        # Abre Drizzle Studio (GUI do banco)
 bun run db:push          # Push direto do schema (desenvolvimento)
+bun run db:seed          # Popula o banco com dados de exemplo
 
 # Formatação e Lint
 bun run format           # Formata código com Ultracite
@@ -374,3 +364,11 @@ O artigo referente ao 4º semestre** ainda será publicado e atualizado neste RE
 7. TOTVS. _Saiba tudo sobre sistema para assistência técnica_. 15 jun. 2020. [Disponível aqui](https://go.ricardo.gg/fixrtotvsast).
 8. HARSH, Kumar. _O que é Arquitetura de Aplicativos Web? Quebrando um aplicativo da Web_. Kinsta, 17 jan. 2025. [Disponível aqui](https://go.ricardo.gg/fixrarqweb).
 9. MICROSOFT. _Estilo de arquitetura Queue-Worker Web_. Azure Architecture Center, 2025. [Disponível aqui](https://go.ricardo.gg/fixrwebqueue).
+
+#### Contribuindo
+
+Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](./CONTRIBUTING.md) para instruções de setup, convenções de branch/commit e o processo de pull request. Este projeto segue o [Código de Conduta](./CODE_OF_CONDUCT.md).
+
+#### Licença
+
+Este projeto está licenciado sob a [Licença MIT](./LICENSE).

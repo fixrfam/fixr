@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import type { ComponentType } from "react";
+import { cn } from "@/lib/utils";
 import type { ServiceOrderStatusId } from "@/lib/utils/service-orders";
 import type { PhaseStatus } from "./constants";
 
@@ -94,11 +95,13 @@ export function getDotIcon({
 	isCompleted,
 	isActive,
 	Icon,
+	fillableIcon = true,
 }: {
 	isCanceled: boolean;
 	isCompleted: boolean;
 	isActive: boolean;
 	Icon: ComponentType<{ className?: string }>;
+	fillableIcon?: boolean;
 }) {
 	if (isCanceled) {
 		return <X className="size-6 text-red-100" />;
@@ -107,7 +110,14 @@ export function getDotIcon({
 		return <Check className="size-6 text-green-100" />;
 	}
 	if (isActive) {
-		return <Icon className="size-5 fill-primary-100 text-primary-100" />;
+		return (
+			<Icon
+				className={cn(
+					"size-5 text-primary-100",
+					fillableIcon && "fill-current"
+				)}
+			/>
+		);
 	}
 	return null;
 }

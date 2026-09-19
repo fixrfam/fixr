@@ -118,7 +118,7 @@ export function NewEmployeeForm({
 	return (
 		<Form {...form}>
 			<form
-				className="max-w-xl space-y-5"
+				className="max-w-3xl space-y-5"
 				onSubmit={form.handleSubmit(onSubmit)}
 			>
 				<FormField

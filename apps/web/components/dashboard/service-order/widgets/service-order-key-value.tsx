@@ -34,7 +34,7 @@ function ServiceOrderKeyValueItem({
 }) {
 	if (stacked) {
 		return (
-			<div className={cn("space-y-1", className)}>
+			<div className={cn("space-y-1 text-2xs", className)}>
 				<dt className="text-muted-foreground">{label}</dt>
 				<dd className={cn("wrap-break-word font-medium", valueClassName)}>
 					{value}
@@ -44,7 +44,12 @@ function ServiceOrderKeyValueItem({
 	}
 
 	return (
-		<div className={cn("flex items-start justify-between gap-4", className)}>
+		<div
+			className={cn(
+				"flex items-start justify-between gap-4 text-2xs",
+				className
+			)}
+		>
 			<dt className="shrink-0 text-muted-foreground">{label}</dt>
 			<dd
 				className={cn(
