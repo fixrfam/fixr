@@ -374,3 +374,11 @@ O artigo referente ao 4º semestre** ainda será publicado e atualizado neste RE
 7. TOTVS. _Saiba tudo sobre sistema para assistência técnica_. 15 jun. 2020. [Disponível aqui](https://go.ricardo.gg/fixrtotvsast).
 8. HARSH, Kumar. _O que é Arquitetura de Aplicativos Web? Quebrando um aplicativo da Web_. Kinsta, 17 jan. 2025. [Disponível aqui](https://go.ricardo.gg/fixrarqweb).
 9. MICROSOFT. _Estilo de arquitetura Queue-Worker Web_. Azure Architecture Center, 2025. [Disponível aqui](https://go.ricardo.gg/fixrwebqueue).
+
+#### Contribuindo
+
+Contribuições são bem-vindas! Veja o [CONTRIBUTING.md](./CONTRIBUTING.md) para instruções de setup, convenções de branch/commit e o processo de pull request. Este projeto segue o [Código de Conduta](./CODE_OF_CONDUCT.md).
+
+#### Licença
+
+Este projeto está licenciado sob a [Licença MIT](./LICENSE).
