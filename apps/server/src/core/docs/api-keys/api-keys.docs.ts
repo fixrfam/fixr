@@ -4,6 +4,7 @@ import {
 	createApiKeySchema,
 	createdApiKeySchema,
 } from "@fixr/schemas/api-keys";
+import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
 	getPaginatedDataSchema,
 	paginatedDataSchema,
@@ -107,7 +108,12 @@ Revocation is a soft delete: the row is kept so the audit trail survives.
 
 Requires the \`apiKeys:revoke\` permission, which every employee holds.
 `,
-	params: apiKeyIdParamsSchema,
+	/**
+	 * The route sits under `/companies/:subdomain`, so `subdomain` has to be
+	 * declared here too: Fastify replaces `request.params` with whatever this
+	 * schema returns, and zod strips every key it does not know about.
+	 */
+	params: getCompanyNestedDataSchema.extend(apiKeyIdParamsSchema.shape),
 	response: {
 		200: zodResponseSchema({
 			status: 200,
