@@ -10,6 +10,17 @@ const PREFIX_BYTES = 9;
 /** Bytes of entropy for the secret portion. 32 bytes -> 43 base64url chars. */
 const SECRET_BYTES = 32;
 
+/** Unpadded base64url length of a byte count. */
+function encodedLength(bytes: number): number {
+	return Math.ceil((bytes * 4) / 3);
+}
+
+const PREFIX_LENGTH = encodedLength(PREFIX_BYTES);
+const SECRET_LENGTH = encodedLength(SECRET_BYTES);
+
+/** The base64url alphabet, which is why "_" cannot serve as a delimiter. */
+const BASE64URL = /^[A-Za-z0-9_-]+$/;
+
 export interface GeneratedApiKey {
 	/** Public handle stored in the database and safe to display. */
 	prefix: string;
@@ -107,21 +118,37 @@ export function extractApiKeyToken(headers: {
 /**
  * Splits a token back into its prefix and secret.
  *
+ * The parts cannot be recovered by splitting on the separator: base64url
+ * includes "_" in its alphabet, so roughly three keys out of five carry one
+ * inside the prefix or the secret and would split into more pieces than the
+ * layout has. Both parts have a fixed length instead, which makes the single
+ * separator between them unambiguous.
+ *
  * @param token - The raw token supplied by the caller
  * @returns The parsed parts, or null when the token is malformed
  */
 export function parseApiKey(
 	token: string
 ): { prefix: string; secret: string } | null {
-	const parts = token.split("_");
+	const namespace = `${API_KEY_NAMESPACE}_`;
 
-	if (parts.length !== 3) {
+	if (!token.startsWith(namespace)) {
 		return null;
 	}
 
-	const [namespace, prefix, secret] = parts;
+	const body = token.slice(namespace.length);
 
-	if (namespace !== API_KEY_NAMESPACE || !prefix || !secret) {
+	if (
+		body.length !== PREFIX_LENGTH + 1 + SECRET_LENGTH ||
+		body[PREFIX_LENGTH] !== "_"
+	) {
+		return null;
+	}
+
+	const prefix = body.slice(0, PREFIX_LENGTH);
+	const secret = body.slice(PREFIX_LENGTH + 1);
+
+	if (!(BASE64URL.test(prefix) && BASE64URL.test(secret))) {
 		return null;
 	}
 
