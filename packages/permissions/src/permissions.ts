@@ -4,6 +4,11 @@ export const permissions = {
 		update: "account:update",
 		delete: "account:delete",
 	},
+	apiKeys: {
+		read: "apiKeys:read",
+		create: "apiKeys:create",
+		revoke: "apiKeys:revoke",
+	},
 	companies: {
 		read: "companies:read",
 		update: "companies:update",

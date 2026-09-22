@@ -1,5 +1,5 @@
 import { unmask } from "@fixr/constants/masks";
-import { db, eq } from "@fixr/db/connection";
+import { and, db, eq } from "@fixr/db/connection";
 import { employees, users } from "@fixr/db/schema";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { z } from "zod";
@@ -20,6 +20,31 @@ export class EmployeesRepository {
 			.select()
 			.from(employees)
 			.where(eq(employees.cpf, cpf));
+		return data;
+	}
+
+	/**
+	 * Get an employee by the user account and company it belongs to
+	 *
+	 * @param userId - The user account ID
+	 * @param companyId - The company ID
+	 * @returns The employee data or undefined
+	 */
+	@Cached({ ttl: 3600, key: "employees:user-company" })
+	static async getEmployeeByUserAndCompany({
+		userId,
+		companyId,
+	}: {
+		userId: string;
+		companyId: string;
+	}) {
+		const [data] = await db
+			.select()
+			.from(employees)
+			.where(
+				and(eq(employees.userId, userId), eq(employees.companyId, companyId))
+			)
+			.limit(1);
 		return data;
 	}
 
