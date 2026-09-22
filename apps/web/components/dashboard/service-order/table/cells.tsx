@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import { ExternalLink } from "lucide-react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderStatusBadge } from "@/components/dashboard/service-order/service-order-status-badge";
@@ -95,7 +98,8 @@ export function IssueCell({
 	description?: string;
 	notes?: string;
 }) {
-	const desc = description ?? "Sem descrição registrada.";
+	const { t } = useTranslation();
+	const desc = description ?? t("serviceOrders.table.noDescription");
 	return (
 		<div className="flex flex-col">
 			<span className="max-w-55 truncate text-2xs">{desc}</span>

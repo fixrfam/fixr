@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Check, ClipboardList, Clock, Wrench } from "lucide-react";
 import {
 	Timeline,
@@ -19,7 +20,7 @@ import {
 	getDotIcon,
 	getPhaseStatus,
 	getStatusBadgeClass,
-	getStatusLabel,
+	getStatusLabelKey,
 	resolveActivePhase,
 } from "./utils/helpers";
 
@@ -27,6 +28,7 @@ export function ServiceOrderLifecycle({
 	currentStatus,
 	history,
 }: ServiceOrderLifecycleProps) {
+	const { t } = useTranslation();
 	const activeIndex = resolveActivePhase(currentStatus);
 	/** Groups history entries by their status id so each phase can show its own entries. */
 	const historyByStatus = (history ?? []).reduce<
@@ -47,8 +49,8 @@ export function ServiceOrderLifecycle({
 	const phases = [
 		{
 			id: "recognition",
-			title: "Reconhecimento",
-			description: "Análise do problema relatado",
+			title: t("serviceOrders.lifecycle.recognitionTitle"),
+			description: t("serviceOrders.lifecycle.recognitionDescription"),
 			status: getPhaseStatus(0, activeIndex),
 			statuses: ["registered", "analysis"] as ServiceOrderStatusId[],
 			icon: ClipboardList,
@@ -56,8 +58,8 @@ export function ServiceOrderLifecycle({
 		},
 		{
 			id: "pending",
-			title: "Pendências",
-			description: "Análise de pendências da OS",
+			title: t("serviceOrders.lifecycle.pendingTitle"),
+			description: t("serviceOrders.lifecycle.pendingDescription"),
 			status: getPhaseStatus(1, activeIndex),
 			statuses: [
 				"quote_pending",
@@ -69,16 +71,16 @@ export function ServiceOrderLifecycle({
 		},
 		{
 			id: "progress",
-			title: "Reparo em progresso",
-			description: "Um técnico foi designado ao serviço",
+			title: t("serviceOrders.lifecycle.progressTitle"),
+			description: t("serviceOrders.lifecycle.progressDescription"),
 			status: getPhaseStatus(2, activeIndex),
 			statuses: ["in_progress"] as ServiceOrderStatusId[],
 			icon: Wrench,
 		},
 		{
 			id: "finished",
-			title: "Finalizado",
-			description: "Reparo finalizado pelo laboratório",
+			title: t("serviceOrders.lifecycle.finishedTitle"),
+			description: t("serviceOrders.lifecycle.finishedDescription"),
 			status: getPhaseStatus(3, activeIndex),
 			statuses: [
 				"ready_for_pickup",
@@ -159,11 +161,13 @@ export function ServiceOrderLifecycle({
 											}
 										)}`}
 									>
-										{getStatusLabel({
-											isCanceled,
-											isCompleted,
-											isActive,
-										})}
+										{t(
+											getStatusLabelKey({
+												isCanceled,
+												isCompleted,
+												isActive,
+											})
+										)}
 									</span>
 								</div>
 								<TimelineDescription className="text-2xs text-muted-foreground">

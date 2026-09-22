@@ -1,0 +1,22 @@
+export const clients = {
+	form: {
+		nameLabel: "Name",
+		namePlaceholder: "John Smith",
+		emailLabel: "Email",
+		emailPlaceholder: "john.smith@email.com",
+		phoneLabel: "Phone",
+		phonePlaceholder: "(00) 00000-0000",
+		alternativePhoneLabel: "Alternative phone",
+		documentLabel: "CPF",
+		documentPlaceholder: "000.000.000-00",
+		addressLabel: "Address",
+		addressPlaceholder: "Street, avenue...",
+		stateLabel: "State",
+		statePlaceholder: "State",
+		cityLabel: "City",
+		cityPlaceholder: "City",
+		submit: "Finish registration",
+		success: "Client registered!",
+		error: "Could not register the client",
+	},
+} as const;
