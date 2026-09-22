@@ -30,6 +30,7 @@ export const common = {
 		openMenu: "Open menu",
 		seeMore: "See more",
 		toggleSidebar: "Toggle sidebar",
+		sidebarDescription: "Displays the mobile sidebar.",
 		previous: "Previous",
 		next: "Next",
 		more: "More",
@@ -63,6 +64,7 @@ export const common = {
 	logo: {
 		fixr: "Fixr logo",
 		fixrIcon: "Fixr icon",
+		backgroundGrid: "Background grid",
 		google: "Google logo",
 	},
 	fields: {

@@ -74,7 +74,7 @@ function PaginationPrevious({
 
 	return (
 		<PaginationLink
-			aria-label="Go to previous page"
+			aria-label={t("dataTable.pagination.previous")}
 			className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
 			size="default"
 			{...props}
@@ -93,7 +93,7 @@ function PaginationNext({
 
 	return (
 		<PaginationLink
-			aria-label="Go to next page"
+			aria-label={t("dataTable.pagination.next")}
 			className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
 			size="default"
 			{...props}

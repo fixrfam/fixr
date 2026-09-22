@@ -23,6 +23,10 @@ export const admin = {
 		platform: "Platform",
 		teams: "Teams",
 		addTeam: "Add team",
+		projects: "Projects",
+		viewProject: "View project",
+		shareProject: "Share project",
+		deleteProject: "Delete project",
 	},
 	dashboard: {
 		title: "Fixr - Admin",

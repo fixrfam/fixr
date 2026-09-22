@@ -33,6 +33,7 @@ export const common: Translated<typeof source> = {
 		openMenu: "Abrir menu",
 		seeMore: "Ver mais",
 		toggleSidebar: "Alternar barra lateral",
+		sidebarDescription: "Mostra a barra lateral no mobile.",
 		previous: "Anterior",
 		next: "Próximo",
 		more: "Mais",
@@ -66,6 +67,7 @@ export const common: Translated<typeof source> = {
 	logo: {
 		fixr: "Logo do Fixr",
 		fixrIcon: "Ícone do Fixr",
+		backgroundGrid: "Grade de fundo",
 		google: "Logo do Google",
 	},
 	fields: {

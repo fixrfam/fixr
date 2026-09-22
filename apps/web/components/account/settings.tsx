@@ -29,18 +29,12 @@ export function Settings() {
 				</SettingsCardFooter>
 			</SettingsCard>
 			{/* <SettingsCard className='w-full' id='delete_account' destructive>
-                <SettingsCardTitle>Excluir Conta</SettingsCardTitle>
+                <SettingsCardTitle>{t("account.settings.deleteTitle")}</SettingsCardTitle>
                 <SettingsCardContent className='space-y-4'>
-                    <p className='text-sm'>
-                        Excluir sua conta é permanente e não pode ser desfeito. Esta ação irá apagar{" "}
-                        <b>todos os seus dados</b> e <b>dados relacionados a você</b>.
-                    </p>
+                    <p className='text-sm'>{t("account.settings.deleteDescription")}</p>
                 </SettingsCardContent>
                 <SettingsCardFooter className='py-2' destructive>
-                    <p className='text-sm'>
-                        Por favor, certifique-se de que realmente deseja prosseguir antes de
-                        confirmar.
-                    </p>
+                    <p className='text-sm'>{t("account.settings.deleteHint")}</p>
                     <DeleteAccount />
                 </SettingsCardFooter>
             </SettingsCard> */}

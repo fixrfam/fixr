@@ -25,6 +25,10 @@ export const admin: Translated<typeof source> = {
 		platform: "Plataforma",
 		teams: "Times",
 		addTeam: "Adicionar time",
+		projects: "Projetos",
+		viewProject: "Ver projeto",
+		shareProject: "Compartilhar projeto",
+		deleteProject: "Excluir projeto",
 	},
 	dashboard: {
 		title: "Fixr - Admin",

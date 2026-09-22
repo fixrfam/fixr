@@ -11,6 +11,7 @@ Next.js App Router, Tailwind + shadcn/ui (`components/ui`), React Hook Form + Zo
 - `lib/auth/` — JWT/cookie auth against `apps/server` (`axios.ts` is the configured client, `utils.ts` has token helpers). This is a different auth system from `apps/admin`'s Clerk — don't cross-wire them.
 - `lib/services/` — one file per API resource, wrapping the shared `axios` instance with `tryCatch()`. New API calls go here, not inline `fetch`/`axios` in components.
 - `lib/rbac/` — client-side permission checks mirroring the server's `@fixr/permissions` roles; use these instead of re-deriving role logic in components.
+- `lib/i18n/` — `getLocale()` / `getTranslator()` for server components, plus the key maps for data that carries a label (roles, service order statuses). Client components use `useTranslation()` from `@fixr/i18n/react`.
 - `components/ui/**` and `components/magicui/**` are vendored/generated (shadcn-style) and excluded from Biome — avoid hand-editing unless deliberately customizing a primitive.
 
 ## Don't
@@ -18,3 +19,4 @@ Next.js App Router, Tailwind + shadcn/ui (`components/ui`), React Hook Form + Zo
 - Don't call the server API directly from components with raw `fetch`/`axios` — go through `lib/services`.
 - Don't duplicate a Zod schema that already exists in `@fixr/schemas` — import and reuse it so frontend/backend validation stays in sync.
 - Don't reimplement role/permission checks locally — use `lib/rbac` / `@fixr/permissions`.
+- Don't write user facing copy inline — it belongs in `@fixr/i18n` (`bun run i18n:scan` from the repo root lists what is left).
