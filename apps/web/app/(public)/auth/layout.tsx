@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import Image from "next/image";
 import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
@@ -9,11 +12,13 @@ export default function AuthLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="grid min-h-svh w-full p-6 pt-24 lg:grid-cols-2">
 			<div className="relative hidden overflow-clip rounded-3xl bg-muted lg:block">
 				<Image
-					alt="Uma pessoa consertando um laptop com uma chave de fenda."
+					alt={t("auth.layout.imageAlt")}
 					className="absolute inset-0 h-full w-full object-cover"
 					height={1740}
 					src={"/login_bg.webp"}
@@ -30,7 +35,7 @@ export default function AuthLayout({
 							by="character"
 							delay={0.15}
 						>
-							Gerenciando
+							{t("auth.layout.headline.first")}
 						</TextAnimate>
 						<br />{" "}
 						<TextAnimate
@@ -39,7 +44,7 @@ export default function AuthLayout({
 							by="character"
 							delay={0.15 * 2}
 						>
-							serviços
+							{t("auth.layout.headline.second")}
 						</TextAnimate>{" "}
 						<TextAnimate
 							animation="blurInUp"
@@ -47,7 +52,7 @@ export default function AuthLayout({
 							by="character"
 							delay={0.15 * 3}
 						>
-							com
+							{t("auth.layout.headline.third")}
 						</TextAnimate>
 						<br />
 						{""}
@@ -57,19 +62,19 @@ export default function AuthLayout({
 							by="character"
 							delay={0.15 * 4}
 						>
-							excelência.
+							{t("auth.layout.headline.fourth")}
 						</TextAnimate>
 					</h1>
 					<BlurFade delay={0.3} direction="up">
 						<div>
-							<p className="text-white text-xl">Faça login para começar.</p>
+							<p className="text-white text-xl">{t("auth.layout.cta")}</p>
 							<Link
 								href="https://unsplash.com/pt-br/fotografias/uma-pessoa-trabalhando-em-um-laptop-com-uma-caneta-XTs2Fl2iXkY"
 								rel="noopener noreferrer"
 								target="_blank"
 							>
 								<p className="text-white/50 hover:underline">
-									Foto de Samsung Memory na Unsplash
+									{t("auth.layout.photoCredit")}
 								</p>
 							</Link>
 						</div>

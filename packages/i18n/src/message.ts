@@ -27,6 +27,23 @@ export function i18nMessage<K extends TranslationKey>(
 	return `${PREFIX}${key}?${params.toString()}`;
 }
 
+/**
+ * Keys resolved at runtime (an API code, a schema message) cannot be checked
+ * by the typed signature, so widening happens here and nowhere else.
+ */
+function translate(
+	translator: Translator,
+	key: string,
+	values?: Record<string, string>
+): string {
+	const loose = translator.t as (
+		loosekey: string,
+		loosevalues?: Record<string, string>
+	) => string;
+
+	return loose(key, values);
+}
+
 export interface ParsedMessage {
 	key: TranslationKey;
 	values: Record<string, string>;
@@ -66,14 +83,37 @@ export function translateMessage(
 		return value;
 	}
 
-	/**
-	 * The key is only known at runtime here, so the typed signature cannot
-	 * help: widen it once, in this single place.
-	 */
-	const translate = translator.t as (
-		key: string,
-		values?: Record<string, string>
-	) => string;
+	return translate(translator, parsed.key, parsed.values);
+}
 
-	return translate(parsed.key, parsed.values);
+export interface FeedbackMessage {
+	title: string;
+	description: string;
+}
+
+/**
+ * Copy for the `code` the API answered with.
+ *
+ * Unknown codes (a new one shipped by the backend, an unmapped failure) fall
+ * back to a generic message instead of rendering the raw code.
+ */
+export function messageFor(
+	translator: Translator,
+	code: string | undefined,
+	fallback: "success" | "error" = "error"
+): FeedbackMessage {
+	const titleKey = `messages.codes.${code}.title`;
+	const descriptionKey = `messages.codes.${code}.description`;
+
+	if (code && hasTranslation(titleKey) && hasTranslation(descriptionKey)) {
+		return {
+			title: translate(translator, titleKey),
+			description: translate(translator, descriptionKey),
+		};
+	}
+
+	return {
+		title: translator.t(`messages.fallback.${fallback}.title`),
+		description: translator.t(`messages.fallback.${fallback}.description`),
+	};
 }

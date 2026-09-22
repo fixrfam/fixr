@@ -20,9 +20,6 @@ export const localeNames: Record<Locale, string> = {
  */
 export const LOCALE_COOKIE = cookieKey("locale");
 
-/** Header the middleware sets so server components can read the resolved locale. */
-export const LOCALE_HEADER = "x-fixr-locale";
-
 /** How long a manual locale choice is remembered, in seconds. */
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 

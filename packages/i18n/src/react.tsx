@@ -16,6 +16,7 @@ import {
 	type Locale,
 } from "./config";
 import type { Formatter } from "./format";
+import { type FeedbackMessage, messageFor } from "./message";
 import { createTranslator, type Translator } from "./translator";
 import type { TranslationArgs, TranslationKey } from "./types";
 
@@ -112,6 +113,23 @@ export function useTranslation(): I18nContextValue {
 /** Just the active locale, for components that only need to format. */
 export function useLocale(): Locale {
 	return useI18nContext().locale;
+}
+
+/**
+ * Resolves the `code` the API answers with into a title and a description,
+ * ready for a toast.
+ */
+export function useMessage(): (
+	code: string | undefined,
+	fallback?: "success" | "error"
+) => FeedbackMessage {
+	const { locale } = useI18nContext();
+
+	return useCallback(
+		(code, fallback) =>
+			messageFor(createTranslator(locale), code, fallback),
+		[locale]
+	);
 }
 
 /** Dates, numbers and currency in the active locale. */

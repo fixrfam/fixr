@@ -23,6 +23,14 @@ export const validation = {
 		required: "Password is required.",
 		complexity:
 			"Password needs to contain one uppercase character, one lowercase character, one number, one special character and be at least 8 length.",
+		min: "The password must be at least {{count}} characters.",
+		max: "The password must be at most {{count}} characters.",
+		uppercase: "The password must contain at least one uppercase letter.",
+		lowercase: "The password must contain at least one lowercase letter.",
+		number: "The password must contain at least one number.",
+		special: "The password must contain at least one special character.",
+		confirm: "Please confirm your password.",
+		mismatch: "The passwords do not match.",
 	},
 	phone: {
 		required: "Phone number is required",

@@ -178,6 +178,7 @@
         "@fixr/constants": "workspace:*",
         "@fixr/db": "workspace:*",
         "@fixr/env": "workspace:*",
+        "@fixr/i18n": "workspace:*",
         "@fixr/mock": "workspace:*",
         "@fixr/permissions": "workspace:*",
         "@fixr/schemas": "workspace:*",
@@ -316,7 +317,7 @@
       },
       "devDependencies": {
         "@fixr/infra": "workspace:*",
-        "@fixr/typescript-config": "catalog:",
+        "@fixr/typescript-config": "workspace:*",
         "typescript": "catalog:",
       },
     },

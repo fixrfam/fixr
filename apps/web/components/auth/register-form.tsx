@@ -1,6 +1,7 @@
 "use client";
 
 import { PASSWORD_RESTRICTION_REGEXES as REGEXES } from "@fixr/constants/enforcements";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { createUserSchema as baseCreateUserSchema } from "@fixr/schemas/auth";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/lib/auth/axios";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn, type Nullable } from "@/lib/utils";
 import {
 	Form,
@@ -31,6 +31,8 @@ export function RegisterForm({
 }: {
 	onSuccess: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [turnstile, setTurnstile] = useState<{
 		token: Nullable<string>;
@@ -43,26 +45,26 @@ export function RegisterForm({
 		.extend({
 			password: z
 				.string()
-				.min(8, { message: "A senha deve ter no mínimo 8 caracteres." })
-				.max(128, { message: "A senha deve ter no máximo 128 caracteres." })
+				.min(8, { message: t("validation.password.min", { count: 8 }) })
+				.max(128, { message: t("validation.password.max", { count: 128 }) })
 				.refine((password) => REGEXES.uppercase.test(password), {
-					message: "A senha deve conter pelo menos um caractere maiúsculo.",
+					message: t("validation.password.uppercase"),
 				})
 				.refine((password) => REGEXES.lowercase.test(password), {
-					message: "A senha deve conter pelo menos um caractere minúsculo.",
+					message: t("validation.password.lowercase"),
 				})
 				.refine((password) => REGEXES.number.test(password), {
-					message: "A senha deve conter pelo menos um número.",
+					message: t("validation.password.number"),
 				})
 				.refine((password) => REGEXES.number.test(password), {
-					message: "A senha deve conter pelo menos um caractere especial.",
+					message: t("validation.password.special"),
 				}),
 			confirmPassword: z
-				.string({ error: "Confirme sua senha." })
-				.min(1, { message: "Confirme sua senha." }),
+				.string({ error: t("validation.password.confirm") })
+				.min(1, { message: t("validation.password.confirm") }),
 		})
 		.refine((data) => data.password === data.confirmPassword, {
-			message: "As senhas não coincidem.",
+			message: t("validation.password.mismatch"),
 			path: ["confirmPassword"],
 		});
 
@@ -84,23 +86,23 @@ export function RegisterForm({
 				...values,
 				cfTurnstileToken: turnstile.token,
 			});
-			const message = messages[res.data.code] ?? fallbackMessages.success;
+			const feedback = message(res.data.code, "success");
 
 			if (res.status === 201) {
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 			onSuccess(true);
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -115,9 +117,11 @@ export function RegisterForm({
 				onSubmit={form.handleSubmit(onSubmit)}
 			>
 				<div className="flex flex-col items-center gap-2 text-center">
-					<h1 className="font-bold text-2xl tracking-tight">Crie uma conta</h1>
+					<h1 className="font-bold text-2xl tracking-tight">
+						{t("auth.register.title")}
+					</h1>
 					<p className="text-balance text-2xs text-muted-foreground">
-						Preencha o formulário abaixo para começar
+						{t("auth.register.subtitle")}
 					</p>
 				</div>
 				<div className="grid gap-2">
@@ -126,10 +130,10 @@ export function RegisterForm({
 						name="email"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Email *</FormLabel>
+								<FormLabel>{t("auth.register.emailLabel")}</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="m@example.com"
+										placeholder={t("auth.register.emailPlaceholder")}
 										required
 										type="email"
 										{...field}
@@ -144,9 +148,13 @@ export function RegisterForm({
 						name="displayName"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Nome</FormLabel>
+								<FormLabel>{t("auth.register.nameLabel")}</FormLabel>
 								<FormControl>
-									<Input placeholder="João Doe" type="text" {...field} />
+									<Input
+										placeholder={t("auth.register.namePlaceholder")}
+										type="text"
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -157,7 +165,7 @@ export function RegisterForm({
 						name="password"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Senha *</FormLabel>
+								<FormLabel>{t("auth.register.passwordLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										placeholder="••••••••"
@@ -175,7 +183,9 @@ export function RegisterForm({
 						name="confirmPassword"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Confirmar senha *</FormLabel>
+								<FormLabel>
+									{t("auth.register.confirmPasswordLabel")}
+								</FormLabel>
 								<FormControl>
 									<Input
 										placeholder="••••••••"
@@ -212,14 +222,11 @@ export function RegisterForm({
 					}
 				/>
 				{turnstile.error && (
-					<p className="text-destructive text-xs">
-						Falha na verificação de segurança. Recarregue a página e tente
-						novamente.
-					</p>
+					<p className="text-destructive text-xs">{t("auth.turnstile.error")}</p>
 				)}
 				{turnstile.interactive && (
 					<p className="text-muted-foreground text-xs">
-						Verificação de segurança necessária. Complete o desafio CAPTCHA
+						{t("auth.turnstile.interactive")}
 					</p>
 				)}
 				<Button
@@ -235,13 +242,13 @@ export function RegisterForm({
 					{loading || turnstile.loading ? (
 						<Loader2 className="size-4 animate-spin" />
 					) : (
-						"Cadastrar"
+						t("auth.register.submit")
 					)}
 				</Button>
 				<div className="text-center text-2xs">
-					Já tem uma conta?{" "}
+					{t("auth.register.haveAccount")}{" "}
 					<Link className="underline underline-offset-4" href="/auth/login">
-						Faça login
+						{t("auth.register.login")}
 					</Link>
 				</div>
 			</form>

@@ -22,6 +22,14 @@ export const validation: Translated<typeof source> = {
 		required: "A senha é obrigatória.",
 		complexity:
 			"A senha precisa conter uma letra maiúscula, uma minúscula, um número, um caractere especial e ter ao menos 8 caracteres.",
+		min: "A senha deve ter no mínimo {{count}} caracteres.",
+		max: "A senha deve ter no máximo {{count}} caracteres.",
+		uppercase: "A senha deve conter pelo menos um caractere maiúsculo.",
+		lowercase: "A senha deve conter pelo menos um caractere minúsculo.",
+		number: "A senha deve conter pelo menos um número.",
+		special: "A senha deve conter pelo menos um caractere especial.",
+		confirm: "Por favor, confirme sua senha.",
+		mismatch: "As senhas não coincidem.",
 	},
 	phone: {
 		required: "O telefone é obrigatório",

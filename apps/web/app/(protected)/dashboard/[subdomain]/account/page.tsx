@@ -6,8 +6,10 @@ import { Settings } from "@/components/account/settings";
 import { SignOutButton } from "@/components/auth/signout-button";
 import { Heading } from "@/components/dashboard/heading";
 import { axios } from "@/lib/auth/axios";
+import { getTranslator } from "@/lib/i18n/server";
 
 export default async function ServerPage() {
+	const { t } = await getTranslator();
 	const res =
 		await axios.get<ApiResponse<z.infer<typeof accountSchema>>>("/account");
 
@@ -17,11 +19,13 @@ export default async function ServerPage() {
 		<div className="flex w-full flex-col items-center space-y-10">
 			<div className="flex w-full items-center justify-between">
 				<Heading
-					description="Gerencie as configurações da sua conta."
-					title="Perfil"
+					description={t("dashboard.account.description")}
+					title={t("dashboard.account.title")}
 				/>
 				<div className="flex items-center gap-2">
-					<SignOutButton variant={"outline"}>Sair</SignOutButton>
+					<SignOutButton variant={"outline"}>
+						{t("common.auth.logout")}
+					</SignOutButton>
 				</div>
 			</div>
 			<div className="flex w-full flex-col gap-10 lg:flex-row">

@@ -3,7 +3,6 @@ export {
 	isLocale,
 	LOCALE_COOKIE,
 	LOCALE_COOKIE_MAX_AGE,
-	LOCALE_HEADER,
 	type Locale,
 	localeNames,
 	locales,
@@ -12,7 +11,9 @@ export { resolveLocale } from "./detect";
 export { createFormatter, type Formatter } from "./format";
 export { catalogs, en, ptBR } from "./locales";
 export {
+	type FeedbackMessage,
 	i18nMessage,
+	messageFor,
 	type ParsedMessage,
 	parseI18nMessage,
 	translateMessage,
@@ -26,6 +27,7 @@ export {
 export type {
 	Catalog,
 	Messages,
+	StaticTranslationKey,
 	TranslationArgs,
 	TranslationKey,
 	TranslationValues,

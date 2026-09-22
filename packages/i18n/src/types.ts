@@ -72,6 +72,16 @@ type PlaceholderNames<K extends TranslationKey> =
 	| Placeholders<MessageOf<K>>
 	| (IsPlural<K> extends true ? "count" : never);
 
+/**
+ * Keys whose message interpolates nothing.
+ *
+ * Data that carries a key around (menu entries, route names) should be typed
+ * with this: `t` then accepts it without demanding values it cannot know.
+ */
+export type StaticTranslationKey = {
+	[K in TranslationKey]: [PlaceholderNames<K>] extends [never] ? K : never;
+}[TranslationKey];
+
 export type TranslationValues<K extends TranslationKey> = Record<
 	PlaceholderNames<K>,
 	string | number
