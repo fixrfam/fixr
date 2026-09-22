@@ -35,6 +35,10 @@ export const common: Translated<typeof source> = {
 		toggleSidebar: "Alternar barra lateral",
 		previous: "Anterior",
 		next: "Próximo",
+		more: "Mais",
+		morePages: "Mais páginas",
+		previousSlide: "Slide anterior",
+		nextSlide: "Próximo slide",
 	},
 	states: {
 		loading: "Carregando...",
@@ -61,6 +65,7 @@ export const common: Translated<typeof source> = {
 	},
 	logo: {
 		fixr: "Logo do Fixr",
+		fixrIcon: "Ícone do Fixr",
 		google: "Logo do Google",
 	},
 	fields: {

@@ -1,6 +1,7 @@
 import type { Translated } from "../../types";
 import type { en } from "../en";
 import { account } from "./account";
+import { admin } from "./admin";
 import { apiKeys } from "./api-keys";
 import { auth } from "./auth";
 import { clients } from "./clients";
@@ -18,6 +19,7 @@ import { validation } from "./validation";
 
 export const ptBR: Translated<typeof en> = {
 	account,
+	admin,
 	apiKeys,
 	auth,
 	clients,

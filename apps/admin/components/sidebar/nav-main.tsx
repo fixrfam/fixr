@@ -1,5 +1,7 @@
 "use client";
 
+import type { StaticTranslationKey } from "@fixr/i18n";
+import { useTranslation } from "@fixr/i18n/react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
 import {
@@ -21,43 +23,45 @@ import {
 export function NavMain({
 	items,
 }: {
-	items: {
-		title: string;
-		url: string;
-		icon?: LucideIcon;
-		isActive?: boolean;
-		items?: {
-			title: string;
-			url: string;
+	items: readonly {
+		readonly titleKey: StaticTranslationKey;
+		readonly url: string;
+		readonly icon?: LucideIcon;
+		readonly isActive?: boolean;
+		readonly items?: readonly {
+			readonly titleKey: StaticTranslationKey;
+			readonly url: string;
 		}[];
 	}[];
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel>Platform</SidebarGroupLabel>
+			<SidebarGroupLabel>{t("admin.nav.platform")}</SidebarGroupLabel>
 			<SidebarMenu>
 				{items.map((item) => (
 					<Collapsible
 						asChild
 						className="group/collapsible"
 						defaultOpen={item.isActive}
-						key={item.title}
+						key={item.titleKey}
 					>
 						<SidebarMenuItem>
 							<CollapsibleTrigger asChild>
-								<SidebarMenuButton tooltip={item.title}>
+								<SidebarMenuButton tooltip={t(item.titleKey)}>
 									{item.icon && <item.icon />}
-									<span>{item.title}</span>
+									<span>{t(item.titleKey)}</span>
 									<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
 								</SidebarMenuButton>
 							</CollapsibleTrigger>
 							<CollapsibleContent>
 								<SidebarMenuSub>
 									{item.items?.map((subItem) => (
-										<SidebarMenuSubItem key={subItem.title}>
+										<SidebarMenuSubItem key={subItem.titleKey}>
 											<SidebarMenuSubButton asChild>
 												<a href={subItem.url}>
-													<span>{subItem.title}</span>
+													<span>{t(subItem.titleKey)}</span>
 												</a>
 											</SidebarMenuSubButton>
 										</SidebarMenuSubItem>

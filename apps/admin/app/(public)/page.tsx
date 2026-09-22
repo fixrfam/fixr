@@ -9,22 +9,25 @@ import { Lock, LogOut } from "lucide-react";
 import Link from "next/link";
 import Fixr from "@/components/fixr";
 import { Button } from "@/components/ui/button";
+import { getTranslator } from "@/lib/i18n/server";
 
-export default function Home() {
+export default async function Home() {
+	const { t } = await getTranslator();
+
 	return (
 		<main className="flex h-dvh w-full items-center justify-center px-4">
 			<div className="flex flex-col space-y-6">
 				<Fixr className="w-12 text-[#1E64FD]" />
 				<div>
 					<h1 className="font-semibold text-2xl tracking-tight">
-						Painel de administrador
+						{t("admin.landing.title")}
 					</h1>
 					<p className="traking-tight text-muted-foreground">
-						Crie empresas, admins e configure os negócios de nossos clientes.
+						{t("admin.landing.description")}
 					</p>
 					<span className="inline-flex items-center gap-1 text-muted-foreground/50 text-xs">
 						<Lock className="size-3" />
-						Acesso restrito a desenvolvedores
+						{t("admin.landing.restricted")}
 					</span>
 				</div>
 				<SignedOut>
@@ -33,7 +36,7 @@ export default function Home() {
 							fallbackRedirectUrl={"/dash"}
 							forceRedirectUrl={"/dash"}
 						>
-							Entrar
+							{t("common.auth.login")}
 						</SignInButton>
 					</Button>
 				</SignedOut>
@@ -41,13 +44,13 @@ export default function Home() {
 					<hr />
 					<div className="flex items-center justify-between">
 						<Button asChild className="max-w-xs grow">
-							<Link href="/dash">Dashboard</Link>
+							<Link href="/dash">{t("admin.landing.dashboard")}</Link>
 						</Button>
 						<div className="inline-flex items-center gap-2">
 							<Button asChild variant={"ghost"}>
 								<SignOutButton>
 									<span>
-										Sair <LogOut />
+										{t("common.auth.logout")} <LogOut />
 									</span>
 								</SignOutButton>
 							</Button>

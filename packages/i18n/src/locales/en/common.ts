@@ -32,6 +32,10 @@ export const common = {
 		toggleSidebar: "Toggle sidebar",
 		previous: "Previous",
 		next: "Next",
+		more: "More",
+		morePages: "More pages",
+		previousSlide: "Previous slide",
+		nextSlide: "Next slide",
 	},
 	states: {
 		loading: "Loading...",
@@ -58,6 +62,7 @@ export const common = {
 	},
 	logo: {
 		fixr: "Fixr logo",
+		fixrIcon: "Fixr icon",
 		google: "Google logo",
 	},
 	fields: {

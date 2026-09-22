@@ -1,4 +1,5 @@
 import { account } from "./account";
+import { admin } from "./admin";
 import { apiKeys } from "./api-keys";
 import { auth } from "./auth";
 import { clients } from "./clients";
@@ -17,6 +18,7 @@ import { validation } from "./validation";
 /** English is the default locale and the source of truth for every key. */
 export const en = {
 	account,
+	admin,
 	apiKeys,
 	auth,
 	clients,
