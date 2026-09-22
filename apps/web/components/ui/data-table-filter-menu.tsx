@@ -1,5 +1,7 @@
 "use client";
 
+import type { Translator } from "@fixr/i18n";
+import { useTranslation } from "@fixr/i18n/react";
 import type { Column, Table } from "@tanstack/react-table";
 import {
   BadgeCheck,
@@ -66,6 +68,7 @@ export function DataTableFilterMenu<TData>({
   disabled,
   ...props
 }: DataTableFilterMenuProps<TData>) {
+  const { t } = useTranslation();
   const id = React.useId();
 
   const columns = React.useMemo(() => {
@@ -235,7 +238,7 @@ export function DataTableFilterMenu<TData>({
       ))}
       {filters.length > 0 && (
         <Button
-          aria-label="Reset all filters"
+          aria-label={t("dataTable.filters.resetAll")}
           variant="outline"
           size="icon"
           className="size-8"
@@ -247,7 +250,7 @@ export function DataTableFilterMenu<TData>({
       <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <Button
-            aria-label="Open filter command menu"
+            aria-label={t("dataTable.filters.openMenu")}
             variant="outline"
             size={filters.length > 0 ? "icon" : "sm"}
             className={cn(filters.length > 0 && "size-8", "h-8 font-normal")}
@@ -256,7 +259,7 @@ export function DataTableFilterMenu<TData>({
             disabled={disabled}
           >
             <ListFilter className="text-muted-foreground" />
-            {filters.length > 0 ? null : "Filter"}
+            {filters.length > 0 ? null : t("dataTable.filters.trigger")}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -269,7 +272,7 @@ export function DataTableFilterMenu<TData>({
               placeholder={
                 selectedColumn
                   ? (selectedColumn.columnDef.meta?.label ?? selectedColumn.id)
-                  : "Search fields..."
+                  : t("dataTable.filters.searchFields")
               }
               value={inputValue}
               onValueChange={setInputValue}
@@ -341,6 +344,7 @@ function DataTableFilterItem<TData>({
   onFilterRemove,
 }: DataTableFilterItemProps<TData>) {
   {
+    const { t } = useTranslation();
     const [showFieldSelector, setShowFieldSelector] = React.useState(false);
     const [showOperatorSelector, setShowOperatorSelector] =
       React.useState(false);
@@ -406,7 +410,7 @@ function DataTableFilterItem<TData>({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-48 p-0">
             <Command loop>
-              <CommandInput placeholder="Search fields..." />
+              <CommandInput placeholder={t("dataTable.filters.searchFields")} />
               <CommandList>
                 <CommandEmpty>No fields found.</CommandEmpty>
                 <CommandGroup>
@@ -473,12 +477,13 @@ function DataTableFilterItem<TData>({
                 className="lowercase"
                 value={operator.value}
               >
-                {operator.label}
+                {t(operator.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         {onFilterInputRender({
+          t,
           filter,
           column,
           inputId,
@@ -595,7 +600,9 @@ function onFilterInputRender<TData>({
   onFilterUpdate,
   showValueSelector,
   setShowValueSelector,
+  t,
 }: {
+  t: Translator["t"];
   filter: ExtendedColumnFilter<TData>;
   column: Column<TData>;
   inputId: string;
@@ -647,7 +654,10 @@ function onFilterInputRender<TData>({
           id={inputId}
           type={isNumber ? "number" : "text"}
           inputMode={isNumber ? "numeric" : undefined}
-          placeholder={column.columnDef.meta?.placeholder ?? "Enter value..."}
+          placeholder={
+            column.columnDef.meta?.placeholder ??
+            t("dataTable.filters.enterValueShort")
+          }
           className="h-full w-24 rounded-none px-1.5"
           defaultValue={typeof filter.value === "string" ? filter.value : ""}
           onChange={(event) =>
@@ -674,7 +684,13 @@ function onFilterInputRender<TData>({
             aria-controls={inputListboxId}
             className="rounded-none bg-transparent px-1.5 py-0.5 [&_svg]:hidden"
           >
-            <SelectValue placeholder={filter.value ? "True" : "False"} />
+            <SelectValue
+              placeholder={
+                filter.value
+                  ? t("dataTable.filters.true")
+                  : t("dataTable.filters.false")
+              }
+            />
           </SelectTrigger>
           <SelectContent id={inputListboxId}>
             <SelectItem value="true">True</SelectItem>
@@ -709,9 +725,9 @@ function onFilterInputRender<TData>({
             >
               {selectedOptions.length === 0 ? (
                 filter.variant === "multiSelect" ? (
-                  "Select options..."
+                  t("dataTable.filters.selectOptions")
                 ) : (
-                  "Select option..."
+                  t("dataTable.filters.selectOption")
                 )
               ) : (
                 <>
@@ -742,7 +758,7 @@ function onFilterInputRender<TData>({
             className="w-48 p-0"
           >
             <Command>
-              <CommandInput placeholder="Search options..." />
+              <CommandInput placeholder={t("dataTable.filters.searchOptions")} />
               <CommandList>
                 <CommandEmpty>No options found.</CommandEmpty>
                 <CommandGroup>
@@ -805,7 +821,7 @@ function onFilterInputRender<TData>({
           ? `${formatDate(startDate, { month: "short" })} - ${formatDate(endDate, { month: "short" })}`
           : startDate
             ? formatDate(startDate, { month: "short" })
-            : "Pick date...";
+            : t("dataTable.filters.pickDateShort");
 
       return (
         <Popover open={showValueSelector} onOpenChange={setShowValueSelector}>

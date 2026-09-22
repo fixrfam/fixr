@@ -1,4 +1,7 @@
+"use client";
+
 import { env } from "@fixr/env/web";
+import { useTranslation } from "@fixr/i18n/react";
 import { ExternalLink, WandSparkles } from "lucide-react";
 import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
@@ -7,20 +10,22 @@ import { Button } from "@/components/ui/button";
 import { AppPreview } from "./app-preview";
 
 export default function Hero() {
+	const { t } = useTranslation();
+
 	return (
 		<section className="relative z-10 flex w-full max-w-7xl flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10">
 			<div className="z-3 flex w-full flex-col items-start gap-4">
 				<BlurFade delay={0.3} direction="up" inView>
 					<div className="rounded-full border border-primary bg-primary/15 px-3 py-2 font-light text-primary text-xs shadow-[0_4px_30_-8px_var(--primary-500)] md:px-4 md:py-2 md:text-sm">
 						<WandSparkles className="mr-2 inline-block h-4 w-4" />
-						Simplifique e expanda
+						{t("home.hero.badge")}
 					</div>
 				</BlurFade>
 				<div className="flex w-full flex-col justify-between gap-4 lg:flex-row lg:gap-8">
 					<div>
 						<h1 className="font-light 2lg:text-5xl text-2xl sm:text-5xl lg:text-4xl xl:text-5.5xl">
 							<TextAnimate animation="blurInUp" as="span" by="character">
-								O jeito
+								{t("home.hero.titleFirst")}
 							</TextAnimate>{" "}
 							<TextAnimate
 								animation="blurInUp"
@@ -29,7 +34,7 @@ export default function Hero() {
 								className="font-heading"
 								delay={0.3}
 							>
-								fácil
+								{t("home.hero.titleHighlight")}
 							</TextAnimate>{" "}
 							<TextAnimate
 								animation="blurInUp"
@@ -37,7 +42,7 @@ export default function Hero() {
 								by="character"
 								delay={0.3 * 2}
 							>
-								de gerenciar sua
+								{t("home.hero.titleMiddle")}
 							</TextAnimate>
 							<br />
 							<TextAnimate
@@ -47,7 +52,7 @@ export default function Hero() {
 								className="font-heading"
 								delay={0.3 * 3}
 							>
-								assistência técnica
+								{t("home.hero.titleEnd")}
 							</TextAnimate>
 						</h1>
 					</div>
@@ -60,19 +65,18 @@ export default function Hero() {
 							delay={0.3}
 							duration={1}
 						>
-							Consolide suas ordens de serviço, o controle de estoque e o
-							acompanhamento dos consertos em um só lugar.
+							{t("home.hero.subtitle")}
 						</TextAnimate>
 						<div className="flex gap-4">
 							<BlurFade delay={0.3 * 2} inView>
 								<Link href="/auth/login">
-									<Button className="font-light">Acessar o Fixr</Button>
+									<Button className="font-light">{t("home.hero.cta")}</Button>
 								</Link>
 							</BlurFade>
 							<BlurFade delay={0.3 * 2 + 0.15} inView>
 								<Link href={env.NEXT_PUBLIC_DOCS_URL ?? "/"}>
 									<Button className="font-light" variant="outline">
-										Documentação{" "}
+										{t("home.hero.docs")}{" "}
 										<ExternalLink className="ml-2 inline-block h-5 w-5" />
 									</Button>
 								</Link>

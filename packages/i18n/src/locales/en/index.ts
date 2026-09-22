@@ -4,8 +4,10 @@ import { auth } from "./auth";
 import { clients } from "./clients";
 import { common } from "./common";
 import { dashboard } from "./dashboard";
+import { dataTable } from "./data-table";
 import { emails } from "./emails";
 import { employees } from "./employees";
+import { home } from "./home";
 import { messages } from "./messages";
 import { permissions } from "./permissions";
 import { roles } from "./roles";
@@ -20,8 +22,10 @@ export const en = {
 	clients,
 	common,
 	dashboard,
+	dataTable,
 	emails,
 	employees,
+	home,
 	messages,
 	permissions,
 	roles,

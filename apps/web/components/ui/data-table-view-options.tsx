@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
+
 import type { Table } from "@tanstack/react-table";
 import { Check, Settings2 } from "lucide-react";
 import * as React from "react";
@@ -30,6 +32,7 @@ export function DataTableViewOptions<TData>({
   disabled,
   ...props
 }: DataTableViewOptionsProps<TData>) {
+  const { t } = useTranslation();
   const columns = React.useMemo(
     () =>
       table
@@ -45,7 +48,7 @@ export function DataTableViewOptions<TData>({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          aria-label="Alternar colunas"
+          aria-label={t("dataTable.viewOptions.toggle")}
           role="combobox"
           variant="outline"
           size="sm"
@@ -58,9 +61,9 @@ export function DataTableViewOptions<TData>({
       </PopoverTrigger>
       <PopoverContent className="w-44 p-0" {...props}>
         <Command>
-          <CommandInput placeholder="Procurar colunas..." />
+          <CommandInput placeholder={t("dataTable.viewOptions.search")} />
           <CommandList>
-            <CommandEmpty>Nenhuma coluna encontrada.</CommandEmpty>
+            <CommandEmpty>{t("dataTable.viewOptions.empty")}</CommandEmpty>
             <CommandGroup>
               {columns.map((column) => (
                 <CommandItem

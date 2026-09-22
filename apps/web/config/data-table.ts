@@ -1,56 +1,71 @@
+import type { StaticTranslationKey } from "@fixr/i18n";
+
 export type DataTableConfig = typeof dataTableConfig;
 
+/**
+ * Operators the filter UI offers. Each one carries the key of its label so
+ * the same config can render in any language.
+ */
 export const dataTableConfig = {
 	textOperators: [
-		{ label: "Contains", value: "iLike" as const },
-		{ label: "Does not contain", value: "notILike" as const },
-		{ label: "Is", value: "eq" as const },
-		{ label: "Is not", value: "ne" as const },
-		{ label: "Is empty", value: "isEmpty" as const },
-		{ label: "Is not empty", value: "isNotEmpty" as const },
+		{ labelKey: "dataTable.operators.contains", value: "iLike" as const },
+		{ labelKey: "dataTable.operators.notContains", value: "notILike" as const },
+		{ labelKey: "dataTable.operators.is", value: "eq" as const },
+		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
+		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
+		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
 	],
 	numericOperators: [
-		{ label: "Is", value: "eq" as const },
-		{ label: "Is not", value: "ne" as const },
-		{ label: "Is less than", value: "lt" as const },
-		{ label: "Is less than or equal to", value: "lte" as const },
-		{ label: "Is greater than", value: "gt" as const },
-		{ label: "Is greater than or equal to", value: "gte" as const },
-		{ label: "Is between", value: "isBetween" as const },
-		{ label: "Is empty", value: "isEmpty" as const },
-		{ label: "Is not empty", value: "isNotEmpty" as const },
+		{ labelKey: "dataTable.operators.is", value: "eq" as const },
+		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
+		{ labelKey: "dataTable.operators.lessThan", value: "lt" as const },
+		{
+			labelKey: "dataTable.operators.lessThanOrEqual",
+			value: "lte" as const,
+		},
+		{ labelKey: "dataTable.operators.greaterThan", value: "gt" as const },
+		{
+			labelKey: "dataTable.operators.greaterThanOrEqual",
+			value: "gte" as const,
+		},
+		{ labelKey: "dataTable.operators.between", value: "isBetween" as const },
+		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
+		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
 	],
 	dateOperators: [
-		{ label: "Is", value: "eq" as const },
-		{ label: "Is not", value: "ne" as const },
-		{ label: "Is before", value: "lt" as const },
-		{ label: "Is after", value: "gt" as const },
-		{ label: "Is on or before", value: "lte" as const },
-		{ label: "Is on or after", value: "gte" as const },
-		{ label: "Is between", value: "isBetween" as const },
-		{ label: "Is relative to today", value: "isRelativeToToday" as const },
-		{ label: "Is empty", value: "isEmpty" as const },
-		{ label: "Is not empty", value: "isNotEmpty" as const },
+		{ labelKey: "dataTable.operators.is", value: "eq" as const },
+		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
+		{ labelKey: "dataTable.operators.before", value: "lt" as const },
+		{ labelKey: "dataTable.operators.after", value: "gt" as const },
+		{ labelKey: "dataTable.operators.onOrBefore", value: "lte" as const },
+		{ labelKey: "dataTable.operators.onOrAfter", value: "gte" as const },
+		{ labelKey: "dataTable.operators.between", value: "isBetween" as const },
+		{
+			labelKey: "dataTable.operators.relativeToToday",
+			value: "isRelativeToToday" as const,
+		},
+		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
+		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
 	],
 	selectOperators: [
-		{ label: "Is", value: "eq" as const },
-		{ label: "Is not", value: "ne" as const },
-		{ label: "Is empty", value: "isEmpty" as const },
-		{ label: "Is not empty", value: "isNotEmpty" as const },
+		{ labelKey: "dataTable.operators.is", value: "eq" as const },
+		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
+		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
+		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
 	],
 	multiSelectOperators: [
-		{ label: "Has any of", value: "inArray" as const },
-		{ label: "Has none of", value: "notInArray" as const },
-		{ label: "Is empty", value: "isEmpty" as const },
-		{ label: "Is not empty", value: "isNotEmpty" as const },
+		{ labelKey: "dataTable.operators.hasAnyOf", value: "inArray" as const },
+		{ labelKey: "dataTable.operators.hasNoneOf", value: "notInArray" as const },
+		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
+		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
 	],
 	booleanOperators: [
-		{ label: "Is", value: "eq" as const },
-		{ label: "Is not", value: "ne" as const },
+		{ labelKey: "dataTable.operators.is", value: "eq" as const },
+		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
 	],
 	sortOrders: [
-		{ label: "Asc", value: "asc" as const },
-		{ label: "Desc", value: "desc" as const },
+		{ labelKey: "dataTable.sort.asc", value: "asc" as const },
+		{ labelKey: "dataTable.sort.desc", value: "desc" as const },
 	],
 	filterVariants: [
 		"text",
@@ -79,4 +94,8 @@ export const dataTableConfig = {
 		"isRelativeToToday",
 	] as const,
 	joinOperators: ["and", "or"] as const,
+} satisfies {
+	[key: string]:
+		| readonly { labelKey: StaticTranslationKey; value: string }[]
+		| readonly string[];
 };
