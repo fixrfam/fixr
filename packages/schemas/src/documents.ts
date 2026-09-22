@@ -1,3 +1,4 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 
 const REPEATED_DIGITS_REGEX = /^(\d)\1+$/;
@@ -101,7 +102,10 @@ export function documentSchema(type: "cpf" | "cnpj") {
 		if (!valid) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
-				message: `${type.toUpperCase()} inválido`,
+				message:
+					type === "cpf"
+						? i18nMessage("validation.document.cpf")
+						: i18nMessage("validation.document.cnpj"),
 			});
 		}
 	});

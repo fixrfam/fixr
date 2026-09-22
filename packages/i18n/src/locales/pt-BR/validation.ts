@@ -75,6 +75,7 @@ export const validation: Translated<typeof source> = {
 		dateRange: "A data inicial deve ser anterior ou igual à data final.",
 	},
 	upload: {
+		urlInvalid: "URL da foto deve ser uma URL válida.",
 		idRequired: "ID do upload é obrigatório.",
 		fileNameRequired: "Nome do arquivo é obrigatório.",
 		fileNameMax: "Nome do arquivo excede {{count}} caracteres.",

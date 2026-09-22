@@ -1,5 +1,6 @@
 import { APP_NAME } from "@fixr/constants/app";
 import { env } from "@fixr/env/server";
+import type { Locale } from "@fixr/i18n";
 import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { emailDisplayName } from "@fixr/mail/services";
 import type { userJWT } from "@fixr/schemas/auth";
@@ -70,9 +71,11 @@ export class CredentialsService {
 	 */
 	static async requestPasswordReset({
 		email,
+		locale,
 		response,
 	}: {
 		email: string;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
 		await TokensRepository.deleteUserExpiredTokensByEmail(email);
@@ -105,6 +108,7 @@ export class CredentialsService {
 			payload: {
 				to: user.email,
 				appName: APP_NAME,
+				locale,
 				verificationUrl,
 				displayName: user.displayName ?? emailDisplayName(user.email),
 			},

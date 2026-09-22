@@ -76,6 +76,7 @@ export const validation = {
 		dateRange: "The start date must be on or before the end date.",
 	},
 	upload: {
+		urlInvalid: "The picture URL must be a valid URL.",
 		idRequired: "The upload id is required.",
 		fileNameRequired: "The file name is required.",
 		fileNameMax: "The file name exceeds {{count}} characters.",

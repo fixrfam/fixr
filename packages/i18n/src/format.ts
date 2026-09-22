@@ -30,8 +30,6 @@ export interface Formatter {
 	currency(value: number, currency?: string): string;
 	/** Formats a distance in time, e.g. "2 days ago". */
 	relativeTime(value: Date | string | number, now?: Date): string;
-	/** Joins items the way the locale does, e.g. "a, b and c". */
-	list(values: string[], type?: Intl.ListFormatType): string;
 }
 
 function toDate(value: Date | string | number): Date {
@@ -78,7 +76,8 @@ function relativeParts(diffInMilliseconds: number): {
 
 	const match =
 		RELATIVE_UNITS.find(({ limitInDays }) => Math.abs(days) < limitInDays) ??
-		RELATIVE_UNITS.at(-1);
+		// biome-ignore lint/style/useAtIndex: the API targets ES2020, where Array.prototype.at does not exist yet.
+		RELATIVE_UNITS[RELATIVE_UNITS.length - 1];
 
 	return {
 		value: Math.round(days / (match?.divisorInDays ?? 1)),
@@ -119,11 +118,6 @@ export function createFormatter(locale: Locale): Formatter {
 			return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
 				amount,
 				unit
-			);
-		},
-		list(values, type = "conjunction") {
-			return new Intl.ListFormat(locale, { type, style: "long" }).format(
-				values
 			);
 		},
 	};

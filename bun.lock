@@ -131,6 +131,7 @@
         "@fixr/constants": "workspace:*",
         "@fixr/db": "workspace:*",
         "@fixr/env": "workspace:*",
+        "@fixr/i18n": "workspace:*",
         "@fixr/mail": "workspace:*",
         "@fixr/permissions": "workspace:*",
         "@fixr/schemas": "workspace:*",
@@ -361,6 +362,7 @@
         "@biomejs/biome": "catalog:",
         "@fixr/constants": "workspace:*",
         "@fixr/env": "workspace:*",
+        "@fixr/i18n": "workspace:*",
         "@react-email/components": "catalog:",
         "@react-email/tailwind": "1.0.4",
         "@types/bun": "catalog:",
@@ -410,6 +412,7 @@
       "name": "@fixr/schemas",
       "version": "0.0.0",
       "dependencies": {
+        "@fixr/i18n": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {

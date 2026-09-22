@@ -61,6 +61,8 @@ export function createI18nInstance(
 		resources: buildResources(),
 		// Catalogs are bundled, so there is nothing to wait for.
 		initImmediate: false,
+		// Keeps i18next's sponsor banner out of the API and worker logs.
+		showSupportNotice: false,
 		interpolation: { escapeValue: escapeValues },
 		returnNull: false,
 	});
