@@ -282,7 +282,9 @@ export function DataTableFilterMenu<TData>({
               {selectedColumn ? (
                 <>
                   {selectedColumn.columnDef.meta?.options && (
-                    <CommandEmpty>No options found.</CommandEmpty>
+                    <CommandEmpty>
+                      {t("dataTable.filters.noOptions")}
+                    </CommandEmpty>
                   )}
                   <FilterValueSelector
                     column={selectedColumn}
@@ -292,7 +294,7 @@ export function DataTableFilterMenu<TData>({
                 </>
               ) : (
                 <>
-                  <CommandEmpty>No fields found.</CommandEmpty>
+                  <CommandEmpty>{t("dataTable.filters.noFields")}</CommandEmpty>
                   <CommandGroup>
                     {columns.map((column) => (
                       <CommandItem
@@ -412,7 +414,7 @@ function DataTableFilterItem<TData>({
             <Command loop>
               <CommandInput placeholder={t("dataTable.filters.searchFields")} />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>{t("dataTable.filters.noFields")}</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem
@@ -516,6 +518,7 @@ function FilterValueSelector<TData>({
   value,
   onSelect,
 }: FilterValueSelectorProps<TData>) {
+  const { t } = useTranslation();
   const variant = column.columnDef.meta?.variant ?? "text";
 
   switch (variant) {
@@ -523,10 +526,10 @@ function FilterValueSelector<TData>({
       return (
         <CommandGroup>
           <CommandItem value="true" onSelect={() => onSelect("true")}>
-            True
+            {t("dataTable.filters.true")}
           </CommandItem>
           <CommandItem value="false" onSelect={() => onSelect("false")}>
-            False
+            {t("dataTable.filters.false")}
           </CommandItem>
         </CommandGroup>
       );
@@ -578,12 +581,14 @@ function FilterValueSelector<TData>({
             {isEmpty ? (
               <>
                 <Text />
-                <span>Type to add filter...</span>
+                <span>{t("dataTable.filters.typeToAdd")}</span>
               </>
             ) : (
               <>
                 <BadgeCheck />
-                <span className="truncate">Filter by &quot;{value}&quot;</span>
+                <span className="truncate">
+                  {t("dataTable.filters.filterBy", { value })}
+                </span>
               </>
             )}
           </CommandItem>
@@ -760,7 +765,7 @@ function onFilterInputRender<TData>({
             <Command>
               <CommandInput placeholder={t("dataTable.filters.searchOptions")} />
               <CommandList>
-                <CommandEmpty>No options found.</CommandEmpty>
+                <CommandEmpty>{t("dataTable.filters.noOptions")}</CommandEmpty>
                 <CommandGroup>
                   {options.map((option) => (
                     <CommandItem

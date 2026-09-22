@@ -406,7 +406,9 @@ function DataTableFilterItem<TData>({
       >
         <div className="min-w-18 text-center">
           {index === 0 ? (
-            <span className="text-muted-foreground text-sm">Where</span>
+            <span className="text-muted-foreground text-sm">
+              {t("dataTable.filters.where")}
+            </span>
           ) : index === 1 ? (
             <Select
               value={joinOperator}
@@ -461,7 +463,7 @@ function DataTableFilterItem<TData>({
             <Command>
               <CommandInput placeholder={t("dataTable.filters.searchFields")} />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>{t("dataTable.filters.noFields")}</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem
@@ -730,7 +732,7 @@ function onFilterInputRender<TData>({
               }
             />
             <FacetedList>
-              <FacetedEmpty>No options found.</FacetedEmpty>
+              <FacetedEmpty>{t("dataTable.filters.noOptions")}</FacetedEmpty>
               <FacetedGroup>
                 {columnMeta?.options?.map((option) => (
                   <FacetedItem key={option.value} value={option.value}>

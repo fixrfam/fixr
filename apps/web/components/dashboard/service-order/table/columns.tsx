@@ -189,7 +189,9 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 			columnHelper.display({
 				id: "actions",
 				header: () => (
-					<div className="text-right">{t("serviceOrders.table.columns.actions")}</div>
+					<div className="text-right">
+						{t("serviceOrders.table.columns.actions")}
+					</div>
 				),
 				cell: ({ row }) => (
 					<ActionsCell id={row.original.id} subdomain={subdomain} />

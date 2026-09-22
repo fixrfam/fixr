@@ -139,7 +139,7 @@ export function DeleteAccount() {
 						{loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
-							<>{t("account.deleteAccount.submit")}</>
+							t("account.deleteAccount.submit")
 						)}
 					</Button>
 				</AlertDialogFooter>

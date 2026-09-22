@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-
 import { useTranslation } from "@fixr/i18n/react";
 import BoringAvatar from "boring-avatars";
 import { Camera, X } from "lucide-react";

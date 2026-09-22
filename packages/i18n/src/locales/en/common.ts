@@ -28,6 +28,7 @@ export const common = {
 		reset: "Reset",
 		upload: "Upload",
 		openMenu: "Open menu",
+		seeMore: "See more",
 		toggleSidebar: "Toggle sidebar",
 		previous: "Previous",
 		next: "Next",
@@ -54,6 +55,10 @@ export const common = {
 		login: "Log in",
 		logout: "Log out",
 		register: "Sign up",
+	},
+	logo: {
+		fixr: "Fixr logo",
+		google: "Google logo",
 	},
 	fields: {
 		name: "Name",

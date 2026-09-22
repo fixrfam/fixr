@@ -9,9 +9,9 @@ describe("createTranslator", () => {
 	});
 
 	it("interpolates values", () => {
-		expect(
-			createTranslator("en").t("validation.name.min", { count: 3 })
-		).toBe("The name must be at least 3 characters.");
+		expect(createTranslator("en").t("validation.name.min", { count: 3 })).toBe(
+			"The name must be at least 3 characters."
+		);
 	});
 
 	it("falls back to English when a locale misses a key", () => {

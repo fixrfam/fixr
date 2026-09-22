@@ -23,10 +23,7 @@ import type { CardId } from "./utils/constants";
 
 type CardsMap = Record<CardId, React.ReactNode>;
 
-export function getCards(
-	order: ServiceOrderRow,
-	t: Translator["t"]
-): CardsMap {
+export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 	return {
 		summary: (
 			<ServiceOrderDetailsCard

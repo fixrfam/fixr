@@ -58,7 +58,7 @@ export function DataTableToolbar<TData>({
 						variant="outline"
 					>
 						<X />
-						Redefinir
+						{t("dataTable.columnHeader.reset")}
 					</Button>
 				)}
 			</div>

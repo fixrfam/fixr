@@ -18,7 +18,6 @@ import {
 import type { Formatter } from "./format";
 import { type FeedbackMessage, messageFor } from "./message";
 import { createTranslator, type Translator } from "./translator";
-import type { TranslationArgs, TranslationKey } from "./types";
 
 interface I18nContextValue {
 	locale: Locale;
@@ -35,6 +34,7 @@ function persistLocale(locale: Locale) {
 		return;
 	}
 
+	// biome-ignore lint/suspicious/noDocumentCookie: cookieStore is still missing in Safari and Firefox, and this cookie has to be readable by the server on the very next request.
 	document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
 }
 
@@ -126,8 +126,7 @@ export function useMessage(): (
 	const { locale } = useI18nContext();
 
 	return useCallback(
-		(code, fallback) =>
-			messageFor(createTranslator(locale), code, fallback),
+		(code, fallback) => messageFor(createTranslator(locale), code, fallback),
 		[locale]
 	);
 }
@@ -137,4 +136,5 @@ export function useFormatter(): Formatter {
 	return useI18nContext().format;
 }
 
-export type { Locale, TranslationArgs, TranslationKey };
+export type { Locale } from "./config";
+export type { TranslationArgs, TranslationKey } from "./types";

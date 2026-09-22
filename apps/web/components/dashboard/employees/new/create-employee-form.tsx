@@ -42,8 +42,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { axios } from "@/lib/auth/axios";
-import { api, tryCatch } from "@/lib/utils";
 import { roleLabelKeys } from "@/lib/i18n/labels";
+import { api, tryCatch } from "@/lib/utils";
 import { generateRandomPassword } from "@/lib/utils/generate-random-password";
 
 export function NewEmployeeForm({

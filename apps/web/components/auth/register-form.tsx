@@ -183,9 +183,7 @@ export function RegisterForm({
 						name="confirmPassword"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>
-									{t("auth.register.confirmPasswordLabel")}
-								</FormLabel>
+								<FormLabel>{t("auth.register.confirmPasswordLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										placeholder="••••••••"
@@ -222,7 +220,9 @@ export function RegisterForm({
 					}
 				/>
 				{turnstile.error && (
-					<p className="text-destructive text-xs">{t("auth.turnstile.error")}</p>
+					<p className="text-destructive text-xs">
+						{t("auth.turnstile.error")}
+					</p>
 				)}
 				{turnstile.interactive && (
 					<p className="text-muted-foreground text-xs">

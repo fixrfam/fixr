@@ -7,7 +7,8 @@ export const account = {
 		deleteTitle: "Delete account",
 		deleteDescription:
 			"Deleting your account is permanent and cannot be undone. This erases all your data and everything related to you.",
-		deleteHint: "Please make sure you really want to go ahead before confirming.",
+		deleteHint:
+			"Please make sure you really want to go ahead before confirming.",
 	},
 	changePassword: {
 		trigger: "Change",

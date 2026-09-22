@@ -28,8 +28,8 @@ export type {
 	Catalog,
 	Messages,
 	StaticTranslationKey,
+	Translated,
 	TranslationArgs,
 	TranslationKey,
 	TranslationValues,
-	Translated,
 } from "./types";

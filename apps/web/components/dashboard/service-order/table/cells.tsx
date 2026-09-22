@@ -113,9 +113,14 @@ export function IssueCell({
 }
 
 export function PartsCell({ parts }: { parts?: string[] }) {
+	const { t } = useTranslation();
 	const list = parts ?? [];
 	if (list.length === 0) {
-		return <span className="text-muted-foreground text-xs">Sem peças</span>;
+		return (
+			<span className="text-muted-foreground text-xs">
+				{t("serviceOrders.table.noParts")}
+			</span>
+		);
 	}
 
 	const visible = list.slice(0, 2);
@@ -149,9 +154,14 @@ export function UpdatedAtCell({
 }: {
 	history: { label: string; dateTime: string }[];
 }) {
+	const { t } = useTranslation();
 	const lastUpdate = history.at(-1);
 	if (!lastUpdate) {
-		return <span className="text-muted-foreground text-xs">Sem histórico</span>;
+		return (
+			<span className="text-muted-foreground text-xs">
+				{t("serviceOrders.table.noHistory")}
+			</span>
+		);
 	}
 	return (
 		<div className="flex flex-col">
@@ -170,6 +180,8 @@ export function ActionsCell({
 	id: string;
 	subdomain: string;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="text-right">
 			<Button
@@ -180,7 +192,7 @@ export function ActionsCell({
 				variant="outline"
 			>
 				<DashLink href={`/service-orders/${id}`} subdomain={subdomain}>
-					Ver mais
+					{t("common.actions.seeMore")}
 				</DashLink>
 			</Button>
 		</div>

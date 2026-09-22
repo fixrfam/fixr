@@ -96,7 +96,8 @@ export function AvatarUploadDialog({
 			onOpenChange(false);
 		} catch (err) {
 			toast.error({
-				text: err instanceof Error ? err.message : t("account.avatar.updateError"),
+				text:
+					err instanceof Error ? err.message : t("account.avatar.updateError"),
 			});
 			setStep("crop");
 		}

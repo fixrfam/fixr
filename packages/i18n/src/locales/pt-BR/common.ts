@@ -31,6 +31,7 @@ export const common: Translated<typeof source> = {
 		reset: "Redefinir",
 		upload: "Enviar arquivo",
 		openMenu: "Abrir menu",
+		seeMore: "Ver mais",
 		toggleSidebar: "Alternar barra lateral",
 		previous: "Anterior",
 		next: "Próximo",
@@ -57,6 +58,10 @@ export const common: Translated<typeof source> = {
 		login: "Entrar",
 		logout: "Sair",
 		register: "Criar conta",
+	},
+	logo: {
+		fixr: "Logo do Fixr",
+		google: "Logo do Google",
 	},
 	fields: {
 		name: "Nome",

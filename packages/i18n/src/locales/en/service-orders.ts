@@ -45,6 +45,7 @@ export const serviceOrders = {
 		lifecycleDescription: "Order progress by phase and recent entries.",
 		partsTitle: "Parts needed for the repair",
 		partsDescription: "Items expected to finish the job.",
+		noPartsRecorded: "No parts recorded.",
 		imagesTitle: "Device pictures",
 		imagesDescription: "Visual record of the device and the issue.",
 		noHistory: "No history recorded yet.",
@@ -68,6 +69,8 @@ export const serviceOrders = {
 		search: "Search by order, client, device or status...",
 		newOrder: "New service order",
 		noDescription: "No description recorded.",
+		noParts: "No parts",
+		noHistory: "No history",
 		columns: {
 			order: "Order",
 			client: "Client",
@@ -83,6 +86,7 @@ export const serviceOrders = {
 	},
 	layout: {
 		dropHere: "Drop here to move the panel",
+		drag: "Drag",
 	},
 	images: {
 		preview: "Image preview",

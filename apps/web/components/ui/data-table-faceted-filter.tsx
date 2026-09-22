@@ -185,7 +185,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     onSelect={() => onReset()}
                     className="justify-center text-center"
                   >
-                    Limpar filtros
+                    {t("dataTable.filters.clearAll")}
                   </CommandItem>
                 </CommandGroup>
               </>

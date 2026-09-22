@@ -20,7 +20,8 @@ export const messages: Translated<typeof source> = {
 		},
 		revoke_api_key_success: {
 			title: "Chave revogada",
-			description: "As requisições que usavam esta chave passam a ser recusadas.",
+			description:
+				"As requisições que usavam esta chave passam a ser recusadas.",
 		},
 		api_key_name_conflict: {
 			title: "Nome já utilizado",
@@ -92,7 +93,8 @@ export const messages: Translated<typeof source> = {
 		},
 		verification_email_failed: {
 			title: "Falha ao enviar email de verificação",
-			description: "Houve um problema do nosso lado. Tente novamente mais tarde.",
+			description:
+				"Houve um problema do nosso lado. Tente novamente mais tarde.",
 		},
 		user_registered_success: {
 			title: "Conta criada.",

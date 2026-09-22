@@ -19,9 +19,7 @@ const routeNames: Record<string, StaticTranslationKey> = {
 };
 
 /** Translation key naming the route, so the caller renders it in its language. */
-export function getDashboardRouteName(
-	pathname: string
-): StaticTranslationKey {
+export function getDashboardRouteName(pathname: string): StaticTranslationKey {
 	const routes = pathname.split("/").filter(Boolean);
 	const current = routes.at(-1) ?? "";
 

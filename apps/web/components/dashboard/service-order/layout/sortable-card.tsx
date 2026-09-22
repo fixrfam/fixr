@@ -2,6 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslation } from "@fixr/i18n/react";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CardId } from "./utils/constants";
@@ -12,6 +13,7 @@ interface SortableCardProps {
 }
 
 export function SortableCard({ id, children }: SortableCardProps) {
+	const { t } = useTranslation();
 	const {
 		attributes,
 		listeners,
@@ -39,7 +41,7 @@ export function SortableCard({ id, children }: SortableCardProps) {
 		>
 			<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full border bg-card px-2 py-1 text-muted-foreground text-xs">
 				<GripVertical className="size-3" />
-				Arraste
+				{t("serviceOrders.layout.drag")}
 			</div>
 			{children}
 		</div>

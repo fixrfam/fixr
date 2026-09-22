@@ -21,9 +21,9 @@ export function useStatusOptions(): FilterOption[] {
 
 	return useMemo(
 		() =>
-			Array.from(new Set(mockServiceOrders.map((order) => order.status.id))).map(
-				(id) => ({ label: t(serviceOrderStatusKeys[id]), value: id })
-			),
+			Array.from(
+				new Set(mockServiceOrders.map((order) => order.status.id))
+			).map((id) => ({ label: t(serviceOrderStatusKeys[id]), value: id })),
 		[t]
 	);
 }

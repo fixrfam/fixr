@@ -344,7 +344,7 @@ function DataTableSortItem({
             <Command>
               <CommandInput placeholder={t("dataTable.filters.searchFields")} />
               <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
+                <CommandEmpty>{t("dataTable.filters.noFields")}</CommandEmpty>
                 <CommandGroup>
                   {columns.map((column) => (
                     <CommandItem

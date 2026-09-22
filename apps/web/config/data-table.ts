@@ -13,7 +13,10 @@ export const dataTableConfig = {
 		{ labelKey: "dataTable.operators.is", value: "eq" as const },
 		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
 		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
-		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
+		{
+			labelKey: "dataTable.operators.isNotEmpty",
+			value: "isNotEmpty" as const,
+		},
 	],
 	numericOperators: [
 		{ labelKey: "dataTable.operators.is", value: "eq" as const },
@@ -30,7 +33,10 @@ export const dataTableConfig = {
 		},
 		{ labelKey: "dataTable.operators.between", value: "isBetween" as const },
 		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
-		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
+		{
+			labelKey: "dataTable.operators.isNotEmpty",
+			value: "isNotEmpty" as const,
+		},
 	],
 	dateOperators: [
 		{ labelKey: "dataTable.operators.is", value: "eq" as const },
@@ -45,19 +51,28 @@ export const dataTableConfig = {
 			value: "isRelativeToToday" as const,
 		},
 		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
-		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
+		{
+			labelKey: "dataTable.operators.isNotEmpty",
+			value: "isNotEmpty" as const,
+		},
 	],
 	selectOperators: [
 		{ labelKey: "dataTable.operators.is", value: "eq" as const },
 		{ labelKey: "dataTable.operators.isNot", value: "ne" as const },
 		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
-		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
+		{
+			labelKey: "dataTable.operators.isNotEmpty",
+			value: "isNotEmpty" as const,
+		},
 	],
 	multiSelectOperators: [
 		{ labelKey: "dataTable.operators.hasAnyOf", value: "inArray" as const },
 		{ labelKey: "dataTable.operators.hasNoneOf", value: "notInArray" as const },
 		{ labelKey: "dataTable.operators.isEmpty", value: "isEmpty" as const },
-		{ labelKey: "dataTable.operators.isNotEmpty", value: "isNotEmpty" as const },
+		{
+			labelKey: "dataTable.operators.isNotEmpty",
+			value: "isNotEmpty" as const,
+		},
 	],
 	booleanOperators: [
 		{ labelKey: "dataTable.operators.is", value: "eq" as const },

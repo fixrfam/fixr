@@ -49,6 +49,7 @@ export const serviceOrders: Translated<typeof source> = {
 		lifecycleDescription: "Progresso da OS por fases e registros recentes.",
 		partsTitle: "Peças necessárias para o reparo",
 		partsDescription: "Lista de itens previstos para concluir o serviço.",
+		noPartsRecorded: "Nenhuma peça registrada.",
 		imagesTitle: "Imagens do aparelho",
 		imagesDescription: "Registro visual do equipamento e do defeito.",
 		noHistory: "Nenhum histórico registrado.",
@@ -72,6 +73,8 @@ export const serviceOrders: Translated<typeof source> = {
 		search: "Busque por ordem, cliente, aparelho ou status...",
 		newOrder: "Nova ordem de serviço",
 		noDescription: "Sem descrição registrada.",
+		noParts: "Sem peças",
+		noHistory: "Sem histórico",
 		columns: {
 			order: "Ordem",
 			client: "Cliente",
@@ -87,6 +90,7 @@ export const serviceOrders: Translated<typeof source> = {
 	},
 	layout: {
 		dropHere: "Solte aqui para mover o painel",
+		drag: "Arraste",
 	},
 	images: {
 		preview: "Preview da imagem",

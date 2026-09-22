@@ -24,7 +24,5 @@ export const LOCALE_COOKIE = cookieKey("locale");
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export function isLocale(value: unknown): value is Locale {
-	return (
-		typeof value === "string" && locales.includes(value as Locale)
-	);
+	return typeof value === "string" && locales.includes(value as Locale);
 }

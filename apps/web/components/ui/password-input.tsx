@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { forwardRef, useId, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,8 @@ import { cn } from "@/lib/utils";
 const PasswordInput = forwardRef<
 	HTMLInputElement,
 	React.ComponentPropsWithoutRef<"input">
->((props, ref) => {
+>(({ placeholder, ...props }, ref) => {
+	const { t } = useTranslation();
 	const id = useId();
 	const [isVisible, setIsVisible] = useState<boolean>(false);
 
@@ -19,7 +21,7 @@ const PasswordInput = forwardRef<
 			<Input
 				className={cn("pe-9", props.className)}
 				id={id}
-				placeholder="Password"
+				placeholder={placeholder ?? t("common.fields.password")}
 				ref={ref}
 				type={isVisible ? "text" : "password"}
 				{...props}

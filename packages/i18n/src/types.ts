@@ -1,7 +1,9 @@
 import type { en } from "./locales/en";
 
 /** Shape every catalog follows: nested objects of strings, no arrays. */
-export type Catalog = { [key: string]: string | Catalog };
+export interface Catalog {
+	[key: string]: string | Catalog;
+}
 
 /**
  * The English catalog is the source of truth. Every other locale is typed

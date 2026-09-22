@@ -16,9 +16,15 @@ const DAYS_PER_YEAR = 365;
 
 export interface Formatter {
 	/** Formats a date (or ISO string) for the active locale. */
-	date(value: Date | string | number, options?: Intl.DateTimeFormatOptions): string;
+	date(
+		value: Date | string | number,
+		options?: Intl.DateTimeFormatOptions
+	): string;
 	/** Formats a date including hours and minutes. */
-	dateTime(value: Date | string | number, options?: Intl.DateTimeFormatOptions): string;
+	dateTime(
+		value: Date | string | number,
+		options?: Intl.DateTimeFormatOptions
+	): string;
 	number(value: number, options?: Intl.NumberFormatOptions): string;
 	/** Formats an amount of money. Defaults to BRL, the currency we charge in. */
 	currency(value: number, currency?: string): string;
@@ -71,9 +77,8 @@ function relativeParts(diffInMilliseconds: number): {
 	}
 
 	const match =
-		RELATIVE_UNITS.find(
-			({ limitInDays }) => Math.abs(days) < limitInDays
-		) ?? RELATIVE_UNITS.at(-1);
+		RELATIVE_UNITS.find(({ limitInDays }) => Math.abs(days) < limitInDays) ??
+		RELATIVE_UNITS.at(-1);
 
 	return {
 		value: Math.round(days / (match?.divisorInDays ?? 1)),

@@ -1,6 +1,11 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import type { SVGProps } from "react";
 
 export function Google(props: SVGProps<SVGSVGElement>) {
+	const { t } = useTranslation();
+
 	return (
 		<svg
 			overflow="hidden"
@@ -10,7 +15,7 @@ export function Google(props: SVGProps<SVGSVGElement>) {
 			xmlSpace="preserve"
 			{...props}
 		>
-			<title>Google Logo</title>
+			<title>{t("common.logo.google")}</title>
 			<defs>
 				<linearGradient id="a">
 					<stop offset={0} stopColor="#0fbc5c" />

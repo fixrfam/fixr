@@ -39,7 +39,8 @@ export const apiKeys = {
 		namePlaceholder: "ERP integration",
 		nameDescription: "Use a name that says where the key will be used.",
 		expirationLabel: "Expiration",
-		expirationDescription: "Keys with a deadline reduce the blast radius of a leak.",
+		expirationDescription:
+			"Keys with a deadline reduce the blast radius of a leak.",
 		expirationNever: "No expiration",
 		expirationDays: "{{count}} days",
 		expirationYear: "1 year",

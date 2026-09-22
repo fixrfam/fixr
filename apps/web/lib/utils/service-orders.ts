@@ -53,4 +53,3 @@ export const SERVICE_ORDER_LIFECYCLE = [
 	"ready_for_pickup",
 	"finished",
 ] as const satisfies readonly ServiceOrderStatusId[];
-
