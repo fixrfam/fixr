@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
 import { Camera } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
@@ -42,6 +43,7 @@ export function AvatarUploadDialog({
 	onOpenChange,
 	onAvatarChange,
 }: AvatarUploadDialogProps) {
+	const { t } = useTranslation();
 	const isDesktop = useMediaQuery("(min-width: 768px)");
 	const { refreshSession } = useSession();
 	const [step, setStep] = useState<Step>("select");
@@ -90,23 +92,20 @@ export function AvatarUploadDialog({
 
 			await refreshSession();
 			onAvatarChange(url);
-			toast.success({ text: "Foto de perfil atualizada com sucesso!" });
+			toast.success({ text: t("account.avatar.updateSuccess") });
 			onOpenChange(false);
 		} catch (err) {
 			toast.error({
-				text:
-					err instanceof Error
-						? err.message
-						: "Erro ao atualizar foto de perfil",
+				text: err instanceof Error ? err.message : t("account.avatar.updateError"),
 			});
 			setStep("crop");
 		}
-	}, [imageUrl, fileName, onAvatarChange, onOpenChange, refreshSession]);
+	}, [imageUrl, fileName, onAvatarChange, onOpenChange, refreshSession, t]);
 
 	const descriptions: Record<Step, string> = {
-		select: "Escolha uma foto para seu perfil.",
-		crop: "Ajuste o enquadramento da sua foto.",
-		uploading: "Salvando...",
+		select: t("account.avatar.stepSelect"),
+		crop: t("account.avatar.stepCrop"),
+		uploading: t("account.avatar.stepUploading"),
 	};
 	const description = descriptions[step];
 
@@ -117,7 +116,7 @@ export function AvatarUploadDialog({
 			</div>
 			<div>
 				<DialogTitle className="font-heading font-semibold text-2xl lg:text-3xl">
-					Alterar Foto do Perfil
+					{t("account.avatar.uploadTitle")}
 				</DialogTitle>
 				<DialogDescription className="text-muted-foreground text-sm">
 					{description}
@@ -133,7 +132,7 @@ export function AvatarUploadDialog({
 			</div>
 			<div className="space-y-1">
 				<DrawerTitle className="font-heading font-semibold text-2xl">
-					Alterar Foto do Perfil
+					{t("account.avatar.uploadTitle")}
 				</DrawerTitle>
 				<DrawerDescription className="text-muted-foreground text-sm">
 					{description}
@@ -166,14 +165,14 @@ export function AvatarUploadDialog({
 				onClick={reset}
 				type="button"
 			>
-				Cancelar
+				{t("common.actions.cancel")}
 			</button>
 			<button
 				className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
 				onClick={handleSave}
 				type="button"
 			>
-				Salvar
+				{t("common.actions.save")}
 			</button>
 		</div>
 	);

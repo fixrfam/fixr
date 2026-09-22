@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import {
 	Cropper,
@@ -83,6 +86,8 @@ export function CropStep({
 	onRotationChange,
 	onCropAreaChange,
 }: CropStepProps) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex items-center justify-center">
@@ -96,7 +101,7 @@ export function CropStep({
 					shape="circle"
 					zoom={zoom}
 				>
-					<CropperImage alt="Foto do perfil" src={imageUrl} />
+					<CropperImage alt={t("account.avatar.alt")} src={imageUrl} />
 					<CropperArea />
 				</Cropper>
 			</div>

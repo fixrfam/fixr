@@ -1,6 +1,6 @@
 "use client";
 
-import { roleLabels } from "@fixr/constants/roles";
+import { useTranslation } from "@fixr/i18n/react";
 import type { accountSchema } from "@fixr/schemas/account";
 import type { employeeRoles } from "@fixr/schemas/roles";
 import { BriefcaseBusiness, Building2 } from "lucide-react";
@@ -8,6 +8,7 @@ import { useState } from "react";
 import type { z } from "zod";
 import { Separator } from "@/components/ui/separator";
 import { useAvatar } from "@/lib/hooks/use-avatar";
+import { roleLabelKeys } from "@/lib/i18n/labels";
 import { AvatarUploadDialog } from "./avatar-upload-dialog";
 import { Avatar } from "./profile-avatar";
 import { RemoveAvatarDialog } from "./remove-avatar-dialog";
@@ -24,6 +25,7 @@ interface AvatarSectionProps {
  * the upload dialog, and the destructive remove-confirmation dialog.
  */
 export function AvatarSection({ account }: AvatarSectionProps) {
+	const { t } = useTranslation();
 	const { avatarUrl, setAvatarUrl, handleRemove, isRemoving } = useAvatar(
 		account.avatarUrl
 	);
@@ -53,14 +55,14 @@ export function AvatarSection({ account }: AvatarSectionProps) {
 						<h2
 							className={`w-full truncate text-3xl tracking-tight ${account.displayName && "font-semibold"}`}
 						>
-							{account.displayName ?? "Sem nome de exibição"}
+							{account.displayName ?? t("account.profile.noDisplayName")}
 						</h2>
 						<p className="text-muted-foreground">{account.email}</p>
 					</div>
 					<Separator className="my-8" />
 					<div>
 						<p className="mb-4 font-semibold text-muted-foreground text-xs uppercase">
-							Info
+							{t("account.profile.info")}
 						</p>
 						<div className="flex flex-col gap-2">
 							<div className="inline-flex items-center gap-2 tracking-tight">
@@ -73,11 +75,11 @@ export function AvatarSection({ account }: AvatarSectionProps) {
 								<div className="rounded-md bg-primary/30 p-1 text-primary">
 									<BriefcaseBusiness className="size-5" />
 								</div>
-								{
-									roleLabels[
+								{t(
+									roleLabelKeys[
 										account.company?.role as z.infer<typeof employeeRoles>
 									]
-								}
+								)}
 							</div>
 						</div>
 					</div>

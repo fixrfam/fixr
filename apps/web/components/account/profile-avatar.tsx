@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
 
+
+import { useTranslation } from "@fixr/i18n/react";
 import BoringAvatar from "boring-avatars";
 import { Camera, X } from "lucide-react";
 import { forwardRef, type HTMLAttributes } from "react";
@@ -54,6 +57,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 		},
 		ref
 	) => {
+		const { t } = useTranslation();
 		const round = { square: "rounded-md", rounded: "rounded-full" };
 
 		return (
@@ -77,7 +81,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 				)}
 				{src && (
 					<img
-						aria-label="Foto do usuário"
+						aria-label={t("account.avatar.userPhoto")}
 						className="aspect-square size-full object-cover"
 						height={256}
 						src={src}
@@ -93,7 +97,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 								type="button"
 							>
 								<Camera className="size-6" />
-								<span className="sr-only">Alterar foto do perfil</span>
+								<span className="sr-only">{t("account.avatar.change")}</span>
 							</button>
 						)}
 						{onDelete && (
@@ -103,7 +107,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
 								type="button"
 							>
 								<X className="size-6" />
-								<span className="sr-only">Remover foto do perfil</span>
+								<span className="sr-only">{t("account.avatar.remove")}</span>
 							</button>
 						)}
 					</span>

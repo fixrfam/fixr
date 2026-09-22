@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
@@ -11,7 +12,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { axios } from "@/lib/auth/axios";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api } from "@/lib/utils";
 import {
 	AlertDialog,
@@ -35,12 +35,14 @@ import {
 const DELETE_MATCH_REGEX = /^delete my account$/;
 
 export function DeleteAccount() {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 
 	const requestAccountDeletionSchema = z.object({
 		confirmPhrase: z.string().regex(DELETE_MATCH_REGEX, {
-			message: "Frase inválida.",
+			message: t("account.deleteAccount.phraseInvalid"),
 		}),
 	});
 
@@ -63,22 +65,22 @@ export function DeleteAccount() {
 				}
 			);
 			if (res.status === 201) {
-				const message = messages[res.data.code] ?? fallbackMessages.success;
+				const feedback = message(res.data.code, "success");
 				setOpen(false);
 
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -90,15 +92,16 @@ export function DeleteAccount() {
 		<AlertDialog onOpenChange={setOpen} open={open}>
 			<AlertDialogTrigger asChild>
 				<Button size={"sm"} variant={"destructive"}>
-					Solicitar exclusão
+					{t("account.deleteAccount.trigger")}
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+					<AlertDialogTitle>
+						{t("account.deleteAccount.title")}
+					</AlertDialogTitle>
 					<AlertDialogDescription>
-						Esta ação não pode ser desfeita. Isso excluirá permanentemente sua
-						conta e removerá seus dados dos nossos servidores.
+						{t("account.deleteAccount.description")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<Form {...form}>
@@ -109,12 +112,11 @@ export function DeleteAccount() {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>
-										Por favor, digite &quot;delete my account&quot; para
-										continuar
+										{t("account.deleteAccount.phraseLabel")}
 									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Digite aqui"
+											placeholder={t("account.deleteAccount.phrasePlaceholder")}
 											required
 											type="text"
 											{...field}
@@ -127,7 +129,7 @@ export function DeleteAccount() {
 					</form>
 				</Form>
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancelar</AlertDialogCancel>
+					<AlertDialogCancel>{t("common.actions.cancel")}</AlertDialogCancel>
 					<Button
 						disabled={loading || !formState.isValid}
 						form="change_password"
@@ -137,7 +139,7 @@ export function DeleteAccount() {
 						{loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
-							<>Excluir</>
+							<>{t("account.deleteAccount.submit")}</>
 						)}
 					</Button>
 				</AlertDialogFooter>

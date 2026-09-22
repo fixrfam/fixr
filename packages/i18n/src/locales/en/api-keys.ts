@@ -1,0 +1,75 @@
+export const apiKeys = {
+	page: {
+		title: "API keys",
+		description: "Your keys for programmatic access to the Fixr API.",
+	},
+	table: {
+		search: "Search your keys...",
+		empty: "You have not created any keys yet",
+		columns: {
+			name: "Key",
+			status: "Status",
+			scopes: "Permissions",
+			lastUsed: "Last used",
+			expiresAt: "Expires on",
+			createdAt: "Created on",
+			actions: "Actions",
+		},
+		neverUsed: "Never used",
+		noExpiration: "No expiration",
+		inheritsRole: "Inherits your role",
+		scopeCount_one: "{{count}} permission",
+		scopeCount_other: "{{count}} permissions",
+	},
+	status: {
+		active: "Active",
+		revoked: "Revoked",
+		expired: "Expired",
+	},
+	actions: {
+		revoke: "Revoke",
+		newKey: "New key",
+	},
+	create: {
+		title: "New API key",
+		description: "The key is yours and carries the permissions of your role.",
+		createdTitle: "Key created",
+		createdDescription: 'Keep the secret of "{{name}}" somewhere safe.',
+		nameLabel: "Key name",
+		namePlaceholder: "ERP integration",
+		nameDescription: "Use a name that says where the key will be used.",
+		expirationLabel: "Expiration",
+		expirationDescription: "Keys with a deadline reduce the blast radius of a leak.",
+		expirationNever: "No expiration",
+		expirationDays: "{{count}} days",
+		expirationYear: "1 year",
+		scopesLabel: "Permissions",
+		scopesInherit: "inherits your role",
+		scopesSelected_one: "{{count}} selected",
+		scopesSelected_other: "{{count}} selected",
+		scopesHint:
+			"With none selected, the key uses exactly the permissions of your role. Selecting narrows it: a key can never hold more access than you.",
+		submit: "Create key",
+	},
+	secret: {
+		warningTitle: "Copy it now, this secret will not be shown again",
+		warningDescription:
+			"Fixr only keeps a hash of the key. If you lose this value, you have to revoke the key and create another one.",
+		label: "Your secret",
+		copy: "Copy secret",
+		copied: "Secret copied",
+		copyFailedTitle: "Could not copy",
+		copyFailedDescription: "Select the text and copy it by hand.",
+		/** Split around the two inline code snippets rendered next to it. */
+		usageBefore: "Send it in the",
+		usageBetween: "header or as",
+		secretWord: "secret",
+		done: "I copied it, close",
+	},
+	revoke: {
+		title: 'Revoke "{{name}}"?',
+		description:
+			"Any integration using this key starts getting authentication errors immediately. This action cannot be undone.",
+		confirm: "Revoke",
+	},
+} as const;

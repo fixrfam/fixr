@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
@@ -12,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { axios } from "@/lib/auth/axios";
 
 export default function ApiKeysPage() {
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	const { isPending, data } = useQuery<
@@ -27,9 +29,9 @@ export default function ApiKeysPage() {
 	return (
 		<div className="flex flex-col gap-2">
 			<Heading
-				description={"Suas chaves para acesso programático à API do Fixr."}
+				description={t("apiKeys.page.description")}
 				Icon={KeyRound}
-				title={"Chaves de API"}
+				title={t("apiKeys.page.title")}
 			/>
 			{isPending ? (
 				<div className="mt-4 space-y-2">
