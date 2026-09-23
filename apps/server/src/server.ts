@@ -28,6 +28,7 @@ import { cookieKey } from "./../../../packages/constants/src/cookies";
 import { apiDescription } from "./core/docs/main";
 import { AppError } from "./core/lib/app-error";
 import { apiResponse } from "./core/lib/response";
+import { setupRateLimit } from "./core/middlewares/rate-limit";
 import { accountRoutes } from "./modules/account/routes";
 import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
@@ -202,6 +203,9 @@ async function registerPlugins() {
 	await server.register(fastifyCookie, {
 		secret: env.COOKIE_ENCRYPTION_SECRET,
 	});
+
+	// Registered before routes so the global limit covers every one of them.
+	await setupRateLimit(server);
 
 	await server.register(fastifyStatic, {
 		root: join(cwd(), "public"),

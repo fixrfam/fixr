@@ -3,7 +3,12 @@ import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { HealthController } from "../controllers";
 
 export function healthRoutes(fastify: FastifyTypedInstance) {
-	fastify.get("/health", { schema: healthSchema }, async (_, response) => {
-		await HealthController.check(response);
-	});
+	fastify.get(
+		"/health",
+		// Exempt: load balancer and orchestrator probes must never be throttled.
+		{ schema: healthSchema, config: { rateLimit: false } },
+		async (_, response) => {
+			await HealthController.check(response);
+		}
+	);
 }
