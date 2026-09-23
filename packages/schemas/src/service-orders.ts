@@ -1,3 +1,4 @@
+import { i18nMessage } from "@fixr/i18n";
 import { formattedIMEI } from "@fixr/schemas/common";
 import { z } from "zod";
 import { getPaginatedDataSchema } from "./utils";
@@ -14,44 +15,56 @@ export const serviceOrderStatuses = z.enum([
 
 export const createServiceOrderPhotoSchema = z.object({
 	uploadId: z
-		.string({ error: "ID do upload é obrigatório." })
-		.min(1, { message: "ID do upload é obrigatório." }),
+		.string({ error: i18nMessage("validation.upload.idRequired") })
+		.min(1, { message: i18nMessage("validation.upload.idRequired") }),
 	description: z
 		.string()
-		.max(255, { message: "Descrição excede 255 caracteres." })
+		.max(255, {
+			message: i18nMessage("validation.serviceOrder.photoDescriptionMax", {
+				count: 255,
+			}),
+		})
 		.optional()
 		.nullable(),
 });
 
 export const createServiceOrderMockSchema = z.object({
-	clientId: z.string().cuid2({ message: "Cliente inválido." }),
+	clientId: z
+		.string()
+		.cuid2({ message: i18nMessage("validation.serviceOrder.clientInvalid") }),
 	deviceBrandId: z
 		.string()
-		.cuid2({ message: "Marca do dispositivo inválida." }),
+		.cuid2({ message: i18nMessage("validation.serviceOrder.brandInvalid") }),
 	deviceCategoryId: z
 		.string()
-		.cuid2({ message: "Categoria do dispositivo inválida." }),
+		.cuid2({ message: i18nMessage("validation.serviceOrder.categoryInvalid") }),
 	deviceModel: z
-		.string({ error: "Modelo do dispositivo é obrigatório." })
-		.min(1, { message: "Modelo do dispositivo é obrigatório." })
-		.max(100, { message: "Modelo do dispositivo excede 100 caracteres." }),
+		.string({ error: i18nMessage("validation.serviceOrder.modelRequired") })
+		.min(1, { message: i18nMessage("validation.serviceOrder.modelRequired") })
+		.max(100, {
+			message: i18nMessage("validation.serviceOrder.modelMax", { count: 100 }),
+		}),
 	imei: z
 		.string()
-		.max(50, { message: "IMEI excede 50 caracteres." })
+		.max(50, {
+			message: i18nMessage("validation.serviceOrder.imeiMax", { count: 50 }),
+		})
 		.optional()
 		.nullable(),
 	reportedDefect: z
-		.string({ error: "Defeito relatado é obrigatório." })
-		.min(1, { message: "Defeito relatado é obrigatório." })
-		.max(65_535, { message: "Defeito relatado excede o limite permitido." }),
+		.string({ error: i18nMessage("validation.serviceOrder.issueRequired") })
+		.min(1, { message: i18nMessage("validation.serviceOrder.issueRequired") })
+		.max(65_535, { message: i18nMessage("validation.serviceOrder.issueMax") }),
 	observations: z
 		.string()
-		.max(65_535, { message: "Observações excedem o limite permitido." })
+		.max(65_535, { message: i18nMessage("validation.serviceOrder.notesMax") })
 		.optional()
 		.nullable(),
 	photos: z
 		.array(createServiceOrderPhotoSchema)
-		.max(20, { message: "Máximo de 20 fotos por ordem de serviço." })
+		.max(20, {
+			message: i18nMessage("validation.serviceOrder.photosMax", { count: 20 }),
+		})
 		.default([]),
 });
 
@@ -62,15 +75,23 @@ export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 	.extend({
 		deviceCategoryId: z
 			.string()
-			.cuid2({ message: "Categoria do dispositivo inválida." })
+			.cuid2({
+				message: i18nMessage("validation.serviceOrder.categoryInvalid"),
+			})
 			.optional(),
 		employeeId: z
 			.string()
-			.cuid2({ message: "Responsável inválido." })
+			.cuid2({
+				message: i18nMessage("validation.serviceOrder.assigneeInvalid"),
+			})
 			.optional(),
 		status: serviceOrderStatuses.optional(),
-		dateFrom: z.coerce.date({ message: "Data inicial inválida." }).optional(),
-		dateTo: z.coerce.date({ message: "Data final inválida." }).optional(),
+		dateFrom: z.coerce
+			.date({ message: i18nMessage("validation.serviceOrder.dateFromInvalid") })
+			.optional(),
+		dateTo: z.coerce
+			.date({ message: i18nMessage("validation.serviceOrder.dateToInvalid") })
+			.optional(),
 	})
 	.refine(
 		(data) => {
@@ -80,7 +101,7 @@ export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 			return true;
 		},
 		{
-			message: "A data inicial deve ser anterior ou igual à data final.",
+			message: i18nMessage("validation.serviceOrder.dateRange"),
 			path: ["dateTo"],
 		}
 	);

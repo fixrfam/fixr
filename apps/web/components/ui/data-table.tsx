@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import {
   flexRender,
   type Row,
@@ -31,6 +34,7 @@ export function DataTable<TData>({
   onRowClick,
   ...props
 }: DataTableProps<TData>) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
@@ -92,7 +96,7 @@ export function DataTable<TData>({
                   colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
-                  Sem resultados.
+                  {t("dataTable.empty")}
                 </TableCell>
               </TableRow>
             )}

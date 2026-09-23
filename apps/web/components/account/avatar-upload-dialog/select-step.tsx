@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import { Camera } from "lucide-react";
 import { FileUpload, FileUploadDropzone } from "@/components/ui/file-upload";
 
@@ -12,6 +15,8 @@ interface SelectStepProps {
 }
 
 export function SelectStep({ onFileSelected }: SelectStepProps) {
+	const { t } = useTranslation();
+
 	return (
 		<FileUpload
 			accept="image/*"
@@ -23,10 +28,10 @@ export function SelectStep({ onFileSelected }: SelectStepProps) {
 				<Camera />
 				<div className="flex flex-col gap-1">
 					<p className="font-medium text-sm">
-						Arraste sua foto aqui ou clique para selecionar
+						{t("account.avatar.dropzoneTitle")}
 					</p>
 					<p className="text-muted-foreground text-xs">
-						PNG, JPG ou WebP. Máximo de 5MB.
+						{t("account.avatar.dropzoneHint")}
 					</p>
 				</div>
 			</FileUploadDropzone>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { useParams, usePathname } from "next/navigation";
 import { Logo } from "@/components/svg/logo";
 import { getDashboardRouteName } from "@/lib/utils/get-dashboard-route-name";
@@ -7,6 +8,7 @@ import { DashLink } from "../service-order/dash-link";
 import { FloatingToggle } from "./floating-toggle";
 
 export function Header() {
+	const { t } = useTranslation();
 	const pathname = usePathname();
 	const params = useParams<{ subdomain: string }>();
 
@@ -15,7 +17,7 @@ export function Header() {
 			<DashLink href="/home" subdomain={params.subdomain}>
 				<Logo className="size-6 text-secondary-foreground" />
 			</DashLink>
-			<p className="text-2xs">{getDashboardRouteName(pathname)}</p>
+			<p className="text-2xs">{t(getDashboardRouteName(pathname))}</p>
 			<FloatingToggle className="relative z-999" />
 		</header>
 	);

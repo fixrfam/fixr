@@ -53,16 +53,3 @@ export const SERVICE_ORDER_LIFECYCLE = [
 	"ready_for_pickup",
 	"finished",
 ] as const satisfies readonly ServiceOrderStatusId[];
-
-export const SERVICE_ORDER_STATUS_LABELS: Record<ServiceOrderStatusId, string> =
-	{
-		registered: "Registrada",
-		parts_pending: "Pendente de peças",
-		analysis: "Em análise",
-		finished: "Finalizada",
-		canceled: "Cancelada",
-		quote_pending: "Pendente de orçamento",
-		approval_pending: "Pendente de aprovação",
-		in_progress: "Reparo em progresso",
-		ready_for_pickup: "Pronto para retirada",
-	};

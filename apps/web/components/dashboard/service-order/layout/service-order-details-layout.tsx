@@ -14,6 +14,7 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useTranslation } from "@fixr/i18n/react";
 import type { ServiceOrderRow } from "@fixr/mock";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -40,14 +41,17 @@ interface Props {
  * showing exactly where the card will land once dropped.
  */
 function DropPlaceholder() {
+	const { t } = useTranslation();
+
 	return (
 		<div className="rounded-lg border-2 border-primary/60 border-dashed bg-primary/5 px-4 py-8 text-center text-muted-foreground text-sm">
-			Solte aqui para mover o painel
+			{t("serviceOrders.layout.dropHere")}
 		</div>
 	);
 }
 
 export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
+	const { t } = useTranslation();
 	const availableCards = useMemo(() => {
 		const cards: CardId[] = [
 			"summary",
@@ -78,7 +82,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 		useSensor(KeyboardSensor)
 	);
 
-	const cards = useMemo(() => getCards(order), [order]);
+	const cards = useMemo(() => getCards(order, t), [order, t]);
 
 	const renderCard = (cardId: CardId) => {
 		const content = cards[cardId];

@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import type { userJWT } from "@fixr/schemas/auth";
 import { Settings } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -22,6 +23,7 @@ export function AccountPopover({
 	className?: string;
 	showData?: boolean;
 }) {
+	const { t } = useTranslation();
 	const { session: contextSession } = useSession();
 	const session = contextSession ?? initialSession;
 
@@ -90,7 +92,7 @@ export function AccountPopover({
 							>
 								<DashLink href="/account" subdomain={params.subdomain}>
 									<Settings className="size-4" />
-									Gerenciar
+									{t("dashboard.account.manage")}
 								</DashLink>
 							</Button>
 							<SignOutButton

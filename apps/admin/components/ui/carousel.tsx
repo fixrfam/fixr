@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
+
 import useEmblaCarousel, {
 	type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -184,6 +186,8 @@ function CarouselPrevious({
 }: React.ComponentProps<typeof Button>) {
 	const { orientation, scrollPrev, canScrollPrev } = useCarousel();
 
+	const { t } = useTranslation();
+
 	return (
 		<Button
 			className={cn(
@@ -201,7 +205,7 @@ function CarouselPrevious({
 			{...props}
 		>
 			<ArrowLeft />
-			<span className="sr-only">Previous slide</span>
+			<span className="sr-only">{t("common.actions.previousSlide")}</span>
 		</Button>
 	);
 }
@@ -213,6 +217,8 @@ function CarouselNext({
 	...props
 }: React.ComponentProps<typeof Button>) {
 	const { orientation, scrollNext, canScrollNext } = useCarousel();
+
+	const { t } = useTranslation();
 
 	return (
 		<Button
@@ -231,7 +237,7 @@ function CarouselNext({
 			{...props}
 		>
 			<ArrowRight />
-			<span className="sr-only">Next slide</span>
+			<span className="sr-only">{t("common.actions.nextSlide")}</span>
 		</Button>
 	);
 }

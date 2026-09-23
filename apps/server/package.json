@@ -40,6 +40,7 @@
     "@fixr/constants": "workspace:*",
     "@fixr/db": "workspace:*",
     "@fixr/env": "workspace:*",
+    "@fixr/i18n": "workspace:*",
     "@fixr/mail": "workspace:*",
     "@fixr/permissions": "workspace:*",
     "@fixr/schemas": "workspace:*",

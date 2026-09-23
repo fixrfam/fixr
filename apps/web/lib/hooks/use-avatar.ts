@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
 import { useCallback, useState } from "react";
 import { axios } from "@/lib/auth/axios";
@@ -11,6 +12,7 @@ import { useSession } from "@/lib/hooks/use-session";
  * an `isRemoving` flag for loading states.
  */
 export function useAvatar(initialUrl: string | null) {
+	const { t } = useTranslation();
 	const { refreshSession } = useSession();
 	const [avatarUrl, setAvatarUrl] = useState<string | null>(initialUrl);
 	const [isRemoving, setIsRemoving] = useState(false);
@@ -21,13 +23,13 @@ export function useAvatar(initialUrl: string | null) {
 			await axios.delete("/account/avatar");
 			await refreshSession();
 			setAvatarUrl(null);
-			toast.success({ text: "Foto de perfil removida com sucesso." });
+			toast.success({ text: t("account.avatar.removeSuccess") });
 		} catch {
-			toast.error({ text: "Erro ao remover foto de perfil." });
+			toast.error({ text: t("account.avatar.removeError") });
 		} finally {
 			setIsRemoving(false);
 		}
-	}, [refreshSession]);
+	}, [refreshSession, t]);
 
 	return { avatarUrl, setAvatarUrl, handleRemove, isRemoving } as const;
 }

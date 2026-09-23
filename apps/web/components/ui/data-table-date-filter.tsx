@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
+
 import type { Column } from "@tanstack/react-table";
 import { CalendarIcon, XCircle } from "lucide-react";
 import * as React from "react";
@@ -61,6 +63,7 @@ export function DataTableDateFilter<TData>({
   title,
   multiple,
 }: DataTableDateFilterProps<TData>) {
+  const { t } = useTranslation();
   const columnFilterValue = column.getFilterValue();
 
   const selectedDates = React.useMemo<DateSelection>(() => {
@@ -131,7 +134,7 @@ export function DataTableDateFilter<TData>({
       const hasSelectedDates = selectedDates.from || selectedDates.to;
       const dateText = hasSelectedDates
         ? formatDateRange(selectedDates)
-        : "Selecione um intervalo de datas";
+        : t("dataTable.filters.pickDateRange");
 
       return (
         <span className="flex items-center gap-2">
@@ -154,7 +157,7 @@ export function DataTableDateFilter<TData>({
     const hasSelectedDate = selectedDates.length > 0;
     const dateText = hasSelectedDate
       ? formatDate(selectedDates[0])
-      : "Selecione uma data";
+      : t("dataTable.filters.pickDate");
 
     return (
       <span className="flex items-center gap-2">

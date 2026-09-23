@@ -1,5 +1,6 @@
 "use client";
 
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { requestPasswordResetSchema } from "@fixr/schemas/credentials";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +12,6 @@ import { type Dispatch, type SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Turnstile } from "@/components/auth/turnstile";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import {
@@ -29,6 +29,8 @@ export function ForgotPasswordForm({
 }: {
 	onSuccess: Dispatch<SetStateAction<boolean>>;
 }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [turnstile, setTurnstile] = useState<{
 		token: string | null;
@@ -58,22 +60,22 @@ export function ForgotPasswordForm({
 				}
 			);
 			if (res.status === 201) {
-				const message = messages[res.data.code] ?? fallbackMessages.success;
+				const feedback = message(res.data.code, "success");
 
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				onSuccess(true);
 			}
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -91,10 +93,10 @@ export function ForgotPasswordForm({
 						<ShieldQuestion className="size-5" />
 					</div>
 					<h1 className="whitespace-nowrap font-bold text-2xl tracking-tight">
-						Esqueceu sua senha?
+						{t("auth.forgotPassword.title")}
 					</h1>
 					<p className="text-balance text-2xs text-muted-foreground">
-						Digite seu e-mail abaixo, redefinimos para você!
+						{t("auth.forgotPassword.subtitle")}
 					</p>
 				</div>
 				<div className="grid gap-6">
@@ -103,10 +105,10 @@ export function ForgotPasswordForm({
 						name="email"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>E-mail *</FormLabel>
+								<FormLabel>{t("auth.forgotPassword.emailLabel")}</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="email@exemplo.com"
+										placeholder={t("auth.forgotPassword.emailPlaceholder")}
 										required
 										type="email"
 										{...field}
@@ -140,13 +142,12 @@ export function ForgotPasswordForm({
 					/>
 					{turnstile.error && (
 						<p className="text-destructive text-xs">
-							Falha na verificação de segurança. Recarregue a página e tente
-							novamente.
+							{t("auth.turnstile.error")}
 						</p>
 					)}
 					{turnstile.interactive && (
 						<p className="text-muted-foreground text-xs">
-							Verificação de segurança necessária. Complete o desafio CAPTCHA
+							{t("auth.turnstile.interactive")}
 						</p>
 					)}
 					<Button
@@ -162,13 +163,13 @@ export function ForgotPasswordForm({
 						{loading || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
-							"Redefinir senha"
+							t("auth.forgotPassword.submit")
 						)}
 					</Button>
 				</div>
 				<div className="text-center text-2xs">
 					<Link className="underline underline-offset-4" href="/auth/login">
-						Voltar
+						{t("common.actions.back")}
 					</Link>
 				</div>
 			</form>

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { I18nProvider } from "@/components/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
+import { getLocale, getTranslator } from "@/lib/i18n/server";
 
 const geistSans = localFont({
 	src: "../fonts/GeistVF.woff",
@@ -21,31 +23,39 @@ const geistMono = localFont({
 	weight: "100 900",
 });
 
-export const metadata: Metadata = {
-	title: "Fixr Admin",
-	description: "Painel de administrador",
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const { t } = await getTranslator();
 
-export default function RootLayout({
+	return {
+		title: t("admin.metadata.title"),
+		description: t("admin.metadata.description"),
+	};
+}
+
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const locale = await getLocale();
+
 	return (
 		<ClerkProvider>
-			<html lang="en" suppressHydrationWarning>
+			<html lang={locale} suppressHydrationWarning>
 				<body
 					className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-(family-name:--font-inter) antialiased`}
 				>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="system"
-						disableTransitionOnChange
-						enableSystem
-					>
-						{children}
-						<ThemedToaster />
-					</ThemeProvider>
+					<I18nProvider locale={locale}>
+						<ThemeProvider
+							attribute="class"
+							defaultTheme="system"
+							disableTransitionOnChange
+							enableSystem
+						>
+							{children}
+							<ThemedToaster />
+						</ThemeProvider>
+					</I18nProvider>
 				</body>
 			</html>
 		</ClerkProvider>

@@ -1,6 +1,7 @@
 "use client";
 
 import { PASSWORD_RESTRICTION_REGEXES as REGEXES } from "@fixr/constants/enforcements";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { confirmPasswordResetSchema as baseConfirmPasswordResetSchema } from "@fixr/schemas/credentials";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +12,6 @@ import { type Dispatch, type SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Turnstile } from "@/components/auth/turnstile";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import {
@@ -32,6 +32,8 @@ export function ResetPasswordForm({
 	onSuccess: Dispatch<SetStateAction<boolean>>;
 	token: string;
 }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [turnstile, setTurnstile] = useState<{
 		token: string | null;
@@ -44,26 +46,26 @@ export function ResetPasswordForm({
 		.extend({
 			password: z
 				.string()
-				.min(8, { message: "Deve ter pelo menos 8 caracteres." })
-				.max(128, { message: "Deve ter no máximo 128 caracteres." })
+				.min(8, { message: t("validation.password.min", { count: 8 }) })
+				.max(128, { message: t("validation.password.max", { count: 128 }) })
 				.refine((password) => REGEXES.uppercase.test(password), {
-					message: "Deve conter pelo menos uma letra maiúscula.",
+					message: t("validation.password.uppercase"),
 				})
 				.refine((password) => REGEXES.lowercase.test(password), {
-					message: "Deve conter pelo menos uma letra minúscula.",
+					message: t("validation.password.lowercase"),
 				})
 				.refine((password) => REGEXES.number.test(password), {
-					message: "Deve conter pelo menos um número.",
+					message: t("validation.password.number"),
 				})
 				.refine((password) => REGEXES.special.test(password), {
-					message: "Deve conter pelo menos um caractere especial.",
+					message: t("validation.password.special"),
 				}),
 			confirmPassword: z
-				.string({ error: "Por favor, confirme sua senha." })
-				.min(1, { message: "Confirme sua senha." }),
+				.string({ error: t("validation.password.confirm") })
+				.min(1, { message: t("validation.password.confirm") }),
 		})
 		.refine((data) => data.password === data.confirmPassword, {
-			message: "As senhas não coincidem.",
+			message: t("validation.password.mismatch"),
 			path: ["confirmPassword"],
 		});
 
@@ -90,22 +92,22 @@ export function ResetPasswordForm({
 				}
 			);
 			if (res.status === 200) {
-				const message = messages[res.data.code] ?? fallbackMessages.success;
+				const feedback = message(res.data.code, "success");
 
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				onSuccess(true);
 			}
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -123,10 +125,10 @@ export function ResetPasswordForm({
 						<Lock className="size-5" />
 					</div>
 					<h1 className="whitespace-nowrap font-bold text-2xl tracking-tight">
-						Alterar sua senha
+						{t("auth.resetPassword.title")}
 					</h1>
 					<p className="text-balance text-2xs text-muted-foreground">
-						Crie uma nova senha segura e preencha abaixo.
+						{t("auth.resetPassword.subtitle")}
 					</p>
 				</div>
 				<div className="grid gap-6">
@@ -135,7 +137,7 @@ export function ResetPasswordForm({
 						name="password"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Senha *</FormLabel>
+								<FormLabel>{t("auth.resetPassword.passwordLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										placeholder="••••••••"
@@ -153,7 +155,9 @@ export function ResetPasswordForm({
 						name="confirmPassword"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Confirmar senha *</FormLabel>
+								<FormLabel>
+									{t("auth.resetPassword.confirmPasswordLabel")}
+								</FormLabel>
 								<FormControl>
 									<Input
 										placeholder="••••••••"
@@ -163,8 +167,7 @@ export function ResetPasswordForm({
 									/>
 								</FormControl>
 								<FormDescription className="text-2xs">
-									A confirmação ajuda a garantir que não haja erros de
-									digitação, mantendo sua conta segura.
+									{t("auth.resetPassword.confirmDescription")}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -194,13 +197,12 @@ export function ResetPasswordForm({
 					/>
 					{turnstile.error && (
 						<p className="text-destructive text-xs">
-							Falha na verificação de segurança. Recarregue a página e tente
-							novamente.
+							{t("auth.turnstile.error")}
 						</p>
 					)}
 					{turnstile.interactive && (
 						<p className="text-muted-foreground text-xs">
-							Verificação de segurança necessária. Complete o desafio CAPTCHA
+							{t("auth.turnstile.interactive")}
 						</p>
 					)}
 					<Button
@@ -216,7 +218,7 @@ export function ResetPasswordForm({
 						{loading || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
-							"Alterar senha"
+							t("auth.resetPassword.submit")
 						)}
 					</Button>
 				</div>

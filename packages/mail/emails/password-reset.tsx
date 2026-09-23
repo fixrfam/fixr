@@ -1,3 +1,10 @@
+/**
+ * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
+ * from our own catalogs and every interpolated value is escaped by the
+ * translator, so the only markup that reaches the email is the emphasis the
+ * design asks for.
+ */
+import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
 import {
 	Body,
 	Button,
@@ -20,69 +27,83 @@ interface EmailProps {
 	displayName: string;
 	appName: string;
 	verificationUrl: string;
+	/** Language of the recipient. Defaults to the app's default locale. */
+	locale?: Locale;
 }
 
 const _baseUrl = process.env.VERCEL_URL
 	? `https://${process.env.VERCEL_URL}`
 	: "";
 
-export const PasswordReset = ({ displayName, verificationUrl }: EmailProps) => (
-	<Tailwind
-		config={{
-			theme: {
-				extend: {
-					colors: {
-						brand: "#1F65FE",
-						border: "#dedede",
+export const PasswordReset = ({
+	displayName,
+	appName,
+	verificationUrl,
+	locale = defaultLocale,
+}: EmailProps) => {
+	const { t } = createTranslator(locale, { escapeValues: true });
+
+	return (
+		<Tailwind
+			config={{
+				theme: {
+					extend: {
+						colors: {
+							brand: "#1F65FE",
+							border: "#dedede",
+						},
 					},
 				},
-			},
-		}}
-	>
-		<Html>
-			<Head />
-			<Preview>Redefinição de senha</Preview>
-			<Body style={main}>
-				<Container className="mx-auto max-w-[480px]">
-					<FixrHeader />
+			}}
+		>
+			<Html>
+				<Head />
+				<Preview>{t("emails.passwordReset.preview")}</Preview>
+				<Body style={main}>
+					<Container className="mx-auto max-w-[480px]">
+						<FixrHeader />
 
-					<Text className="my-0 text-lg tracking-tight">
-						Olá, <i className="italic">{displayName}</i>!
-					</Text>
-					<Heading className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:text-3xl">
-						Esqueceu sua senha? 🔒
-					</Heading>
-					<Section className="gap-0">
-						<Text>
-							Recebemos uma solicitação para alterar a senha da sua conta no
-							Fixr.
-							<br />
-							Se foi você, pode definir uma nova senha clicando no botão abaixo:
-						</Text>
+						<Text
+							className="my-0 text-lg tracking-tight"
+							dangerouslySetInnerHTML={{
+								__html: t("emails.passwordReset.greeting", {
+									name: displayName,
+								}),
+							}}
+						/>
+						<Heading className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:text-3xl">
+							{t("emails.passwordReset.heading")}
+						</Heading>
+						<Section className="gap-0">
+							<Text
+								dangerouslySetInnerHTML={{
+									__html: t("emails.passwordReset.body", { app: appName }),
+								}}
+							/>
 
-						<Container>
-							<Container className="flex w-full items-center justify-center text-center" />
-							<Button
-								className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
-								href={verificationUrl}
-							>
-								Redefinir minha senha
-							</Button>
-						</Container>
-						<Text className="my-0 text-center font-bold">
-							Para manter sua conta segura, não encaminhe este e-mail a ninguém.
+							<Container>
+								<Container className="flex w-full items-center justify-center text-center" />
+								<Button
+									className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
+									href={verificationUrl}
+								>
+									{t("emails.passwordReset.cta")}
+								</Button>
+							</Container>
+							<Text className="my-0 text-center font-bold">
+								{t("emails.passwordReset.warning")}
+							</Text>
+						</Section>
+						<Hr className="my-12" />
+						<Text className="text-center text-[#6a737d] text-sm">
+							{t("emails.passwordReset.footer")}
 						</Text>
-					</Section>
-					<Hr className="my-12" />
-					<Text className="text-center text-[#6a737d] text-sm">
-						Se você não solicitou essa alteração, basta ignorar e excluir esta
-						mensagem.
-					</Text>
-				</Container>
-			</Body>
-		</Html>
-	</Tailwind>
-);
+					</Container>
+				</Body>
+			</Html>
+		</Tailwind>
+	);
+};
 
 PasswordReset.PreviewProps = {
 	displayName: "alanturing",
@@ -149,16 +170,14 @@ export async function renderEmail({
 	verificationUrl,
 	displayName,
 	appName,
-}: {
-	verificationUrl: string;
-	displayName: string;
-	appName: string;
-}): Promise<string> {
+	locale,
+}: EmailProps): Promise<string> {
 	try {
 		return await render(
 			<PasswordReset
 				appName={appName}
 				displayName={displayName}
+				locale={locale}
 				verificationUrl={verificationUrl}
 			/>
 		);

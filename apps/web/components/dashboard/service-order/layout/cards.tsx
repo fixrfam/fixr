@@ -1,3 +1,4 @@
+import type { Translator } from "@fixr/i18n";
 import type { ServiceOrderRow } from "@fixr/mock";
 import {
 	ClipboardList,
@@ -16,57 +17,70 @@ import {
 	ServiceOrderKeyValueList,
 } from "@/components/dashboard/service-order/widgets/service-order-key-value";
 import { ServiceOrderPartsList } from "@/components/dashboard/service-order/widgets/service-order-parts-list";
+import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import type { CardId } from "./utils/constants";
 
 type CardsMap = Record<CardId, React.ReactNode>;
 
-export function getCards(order: ServiceOrderRow): CardsMap {
+export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 	return {
 		summary: (
 			<ServiceOrderDetailsCard
-				description="Informacoes principais da OS e status atual."
+				description={t("serviceOrders.cards.summaryDescription")}
 				icon={ClipboardList}
-				title="Resumo da ordem"
+				title={t("serviceOrders.cards.summaryTitle")}
 			>
 				<ServiceOrderKeyValueList>
-					<ServiceOrderKeyValueItem label="Numero" value={order.orderNumber} />
 					<ServiceOrderKeyValueItem
-						label="Status"
+						label={t("serviceOrders.fields.number")}
+						value={order.orderNumber}
+					/>
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.status")}
 						value={
 							<ServiceOrderStatusBadge
 								className="rounded-lg px-2.5 py-1 font-semibold text-xs"
 								variant={order.status.id}
 							>
-								{order.status.label}
+								{t(serviceOrderStatusKeys[order.status.id])}
 							</ServiceOrderStatusBadge>
 						}
 					/>
-					<ServiceOrderKeyValueItem label="Categoria" value={order.category} />
-					<ServiceOrderKeyValueItem label="Marca" value={order.mark} />
-					<ServiceOrderKeyValueItem label="Modelo" value={order.model} />
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.category")}
+						value={order.category}
+					/>
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.brand")}
+						value={order.mark}
+					/>
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.model")}
+						value={order.model}
+					/>
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
 		device: order.orderDetails ? (
 			<ServiceOrderDetailsCard
-				description="Dados tecnicos, data de recebimento e defeito."
+				description={t("serviceOrders.cards.deviceDescription")}
 				icon={Wrench}
-				title="Detalhes do aparelho"
+				title={t("serviceOrders.cards.deviceTitle")}
 			>
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
-						label="Recebimento"
+						label={t("serviceOrders.fields.receivedAt")}
 						value={order.orderDetails.receivedAt}
 					/>
 					{order.orderDetails.imei && (
 						<ServiceOrderKeyValueItem
-							label="IMEI"
+							label={t("serviceOrders.fields.imei")}
 							value={order.orderDetails.imei}
 						/>
 					)}
 					<ServiceOrderKeyValueItem
-						label="Descrição"
+						label={t("serviceOrders.fields.description")}
 						stacked
 						value={order.orderDetails.description}
 					/>
@@ -75,18 +89,18 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 		) : null,
 		technician: (
 			<ServiceOrderDetailsCard
-				description="Responsavel atribuido e observacoes internas."
+				description={t("serviceOrders.cards.technicianDescription")}
 				icon={User}
-				title="Dados do técnico"
+				title={t("serviceOrders.cards.technicianTitle")}
 			>
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
-						label="Responsável"
+						label={t("serviceOrders.fields.assignee")}
 						value={order.technician}
 					/>
 					{order.notes && (
 						<ServiceOrderKeyValueItem
-							label="Observações"
+							label={t("serviceOrders.fields.notes")}
 							stacked
 							value={order.notes}
 						/>
@@ -96,15 +110,21 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 		),
 		client: (
 			<ServiceOrderDetailsCard
-				description="Informacoes de contato e identificacao."
+				description={t("serviceOrders.cards.clientDescription")}
 				icon={FileUser}
-				title="Dados do cliente"
+				title={t("serviceOrders.cards.clientTitle")}
 			>
 				<ServiceOrderKeyValueList>
-					<ServiceOrderKeyValueItem label="Nome" value={order.client.name} />
-					<ServiceOrderKeyValueItem label="CPF" value={order.client.cpf} />
 					<ServiceOrderKeyValueItem
-						label="Telefone"
+						label={t("serviceOrders.fields.name")}
+						value={order.client.name}
+					/>
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.document")}
+						value={order.client.cpf}
+					/>
+					<ServiceOrderKeyValueItem
+						label={t("serviceOrders.fields.phone")}
 						value={order.client.phone}
 					/>
 				</ServiceOrderKeyValueList>
@@ -112,9 +132,9 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 		),
 		lifecycle: (
 			<ServiceOrderDetailsCard
-				description="Progresso da OS por fases e registros recentes."
+				description={t("serviceOrders.cards.lifecycleDescription")}
 				icon={History}
-				title="Ciclo de vida"
+				title={t("serviceOrders.cards.lifecycleTitle")}
 			>
 				{order.history.length > 0 ? (
 					<ServiceOrderLifecycle
@@ -123,25 +143,25 @@ export function getCards(order: ServiceOrderRow): CardsMap {
 					/>
 				) : (
 					<p className="text-muted-foreground text-sm">
-						Nenhum histórico registrado.
+						{t("serviceOrders.cards.noHistory")}
 					</p>
 				)}
 			</ServiceOrderDetailsCard>
 		),
 		parts: (
 			<ServiceOrderDetailsCard
-				description="Lista de itens previstos para concluir o serviço."
+				description={t("serviceOrders.cards.partsDescription")}
 				icon={Package}
-				title="Peças necessárias para o reparo"
+				title={t("serviceOrders.cards.partsTitle")}
 			>
 				<ServiceOrderPartsList parts={order.parts} />
 			</ServiceOrderDetailsCard>
 		),
 		images: (
 			<ServiceOrderDetailsCard
-				description="Registro visual do equipamento e do defeito."
+				description={t("serviceOrders.cards.imagesDescription")}
 				icon={ImageIcon}
-				title="Imagens do aparelho"
+				title={t("serviceOrders.cards.imagesTitle")}
 			>
 				<ServiceOrderImageGrid images={order.images} />
 			</ServiceOrderDetailsCard>

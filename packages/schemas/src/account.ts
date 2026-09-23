@@ -1,3 +1,4 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 import { documentSchema } from "./documents";
 import { employeeRoles } from "./roles";
@@ -5,7 +6,9 @@ import { employeeRoles } from "./roles";
 export const accountSchema = z
 	.object({
 		id: z.cuid2(),
-		email: z.string().email({ message: "Invalid email address" }),
+		email: z
+			.string()
+			.email({ message: i18nMessage("validation.email.invalid") }),
 		avatarUrl: z.string().url().nullable(),
 		displayName: z.string().min(3).max(100).nullable(),
 		cpf: documentSchema("cpf"),

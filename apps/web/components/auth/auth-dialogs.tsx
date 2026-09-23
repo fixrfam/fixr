@@ -1,4 +1,7 @@
+"use client";
+
 import { cookieKey } from "@fixr/constants/cookies";
+import { useTranslation } from "@fixr/i18n/react";
 import { ArrowRight, Trash2 } from "lucide-react";
 import CookieDialog from "../cookie-dialog";
 import { Logo } from "../svg/logo";
@@ -10,18 +13,20 @@ export function AuthDialogs({
 	showVerifiedDialog: boolean;
 	showDeletedDialog: boolean;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<>
 			<CookieDialog
 				close={{
 					cta: (
 						<>
-							Iniciar <ArrowRight />
+							{t("auth.verifiedDialog.cta")} <ArrowRight />
 						</>
 					),
 					toast: {
-						text: "Entre para explorar o app.",
-						description: "Estamos esperando por voc!",
+						text: t("auth.verifiedDialog.toastTitle"),
+						description: t("auth.verifiedDialog.toastDescription"),
 					},
 				}}
 				cookieKey={cookieKey("showVerifiedDialog")}
@@ -33,26 +38,25 @@ export function AuthDialogs({
 					</div>
 					<div className="space-y-1 text-center text-foreground">
 						<h2 className="font-bold text-2xl tracking-tight">
-							Conta verificada com sucesso!
+							{t("auth.verifiedDialog.title")}
 						</h2>
 						<p className="text-muted-foreground">
-							A verificação da sua conta foi concluída com sucesso.
+							{t("auth.verifiedDialog.description")}
 						</p>
 					</div>
 					<div className="space-y-1 text-center text-foreground">
 						<p className="text-muted-foreground text-sm">
-							O seu e-mail foi verificado com sucesso e a sua conta está pronta
-							para uso. Clique abaixo para entrar e começar a explorar.
+							{t("auth.verifiedDialog.details")}
 						</p>
 					</div>
 				</div>
 			</CookieDialog>
 			<CookieDialog
 				close={{
-					cta: "Fechar",
+					cta: t("auth.deletedDialog.cta"),
 					toast: {
-						text: "Até mais!",
-						description: "A sua conta foi excluída. Volte quando quiser.",
+						text: t("auth.deletedDialog.toastTitle"),
+						description: t("auth.deletedDialog.toastDescription"),
 					},
 				}}
 				cookieKey={cookieKey("showDeletedDialog")}
@@ -62,16 +66,15 @@ export function AuthDialogs({
 					<Trash2 className="size-8 text-destructive" />
 					<div className="space-y-1 text-center text-foreground">
 						<h2 className="font-bold text-2xl tracking-tight">
-							A sua conta foi excluída
+							{t("auth.deletedDialog.title")}
 						</h2>
 						<p className="text-muted-foreground">
-							Estamos tristes em ver você ir embora!
+							{t("auth.deletedDialog.description")}
 						</p>
 					</div>
 					<div className="space-y-1 text-center text-foreground">
 						<p className="text-muted-foreground text-sm">
-							Se você decidir voltar, estaremos aqui para recebê-lo de volta.
-							Sinta-se à vontade para se inscrever novamente a qualquer momento!
+							{t("auth.deletedDialog.details")}
 						</p>
 					</div>
 				</div>

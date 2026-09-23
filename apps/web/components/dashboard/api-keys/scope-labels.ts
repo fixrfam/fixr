@@ -1,32 +1,34 @@
-/** Human-readable names for the resource half of a permission string. */
-const RESOURCE_LABELS: Record<string, string> = {
-	account: "Conta",
-	apiKeys: "Chaves de API",
-	companies: "Empresa",
-	customers: "Clientes",
-	devices: "Aparelhos",
-	employees: "Funcionários",
-	estimates: "Orçamentos",
-	inventory: "Estoque",
-	logs: "Registros",
-	parts: "Peças",
-	serviceOrders: "Ordens de Serviço",
-	settings: "Configurações",
-	suppliers: "Fornecedores",
+import type { Locale, StaticTranslationKey, Translator } from "@fixr/i18n";
+
+/** Translation key for the resource half of a permission string. */
+const RESOURCE_KEYS: Record<string, StaticTranslationKey> = {
+	account: "permissions.resources.account",
+	apiKeys: "permissions.resources.apiKeys",
+	companies: "permissions.resources.companies",
+	customers: "permissions.resources.customers",
+	devices: "permissions.resources.devices",
+	employees: "permissions.resources.employees",
+	estimates: "permissions.resources.estimates",
+	inventory: "permissions.resources.inventory",
+	logs: "permissions.resources.logs",
+	parts: "permissions.resources.parts",
+	serviceOrders: "permissions.resources.serviceOrders",
+	settings: "permissions.resources.settings",
+	suppliers: "permissions.resources.suppliers",
 };
 
-/** Human-readable names for the action half of a permission string. */
-const ACTION_LABELS: Record<string, string> = {
-	adjust: "Ajustar",
-	assign: "Atribuir",
-	changeStatus: "Alterar status",
-	create: "Criar",
-	delete: "Excluir",
-	read: "Ler",
-	revoke: "Revogar",
-	security: "Segurança",
-	sendToCustomer: "Enviar ao cliente",
-	update: "Editar",
+/** Translation key for the action half of a permission string. */
+const ACTION_KEYS: Record<string, StaticTranslationKey> = {
+	adjust: "permissions.actions.adjust",
+	assign: "permissions.actions.assign",
+	changeStatus: "permissions.actions.changeStatus",
+	create: "permissions.actions.create",
+	delete: "permissions.actions.delete",
+	read: "permissions.actions.read",
+	revoke: "permissions.actions.revoke",
+	security: "permissions.actions.security",
+	sendToCustomer: "permissions.actions.sendToCustomer",
+	update: "permissions.actions.update",
 };
 
 export interface ScopeGroup {
@@ -35,25 +37,35 @@ export interface ScopeGroup {
 	scopes: string[];
 }
 
-/** Turns "serviceOrders:read" into "Ler". */
-export function scopeLabel(scope: string): string {
+/** Turns "serviceOrders:read" into "Read". */
+export function scopeLabel(t: Translator["t"], scope: string): string {
 	const action = scope.split(":")[1] ?? scope;
-	return ACTION_LABELS[action] ?? action;
+	const key = ACTION_KEYS[action];
+
+	return key ? t(key) : action;
 }
 
-/** Turns "serviceOrders:read" into "Ordens de Serviço". */
-export function resourceLabel(resource: string): string {
-	return RESOURCE_LABELS[resource] ?? resource;
+/** Turns "serviceOrders" into "Service orders". */
+export function resourceLabel(t: Translator["t"], resource: string): string {
+	const key = RESOURCE_KEYS[resource];
+
+	return key ? t(key) : resource;
 }
 
 /**
  * Groups flat permission strings by their resource, so the picker can render
  * one row per resource instead of a single long list.
  *
+ * @param t - Translator for the active locale
+ * @param locale - Locale driving the alphabetical order of the groups
  * @param scopes - Permission strings such as "serviceOrders:read"
- * @returns Groups sorted by their display label
+ * @returns Groups sorted by their translated label
  */
-export function groupScopes(scopes: string[]): ScopeGroup[] {
+export function groupScopes(
+	t: Translator["t"],
+	locale: Locale,
+	scopes: string[]
+): ScopeGroup[] {
 	const byResource = new Map<string, string[]>();
 
 	for (const scope of scopes) {
@@ -66,8 +78,8 @@ export function groupScopes(scopes: string[]): ScopeGroup[] {
 	return [...byResource.entries()]
 		.map(([resource, list]) => ({
 			resource,
-			label: resourceLabel(resource),
+			label: resourceLabel(t, resource),
 			scopes: list,
 		}))
-		.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+		.sort((a, b) => a.label.localeCompare(b.label, locale));
 }

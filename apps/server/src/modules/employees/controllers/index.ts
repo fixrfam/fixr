@@ -1,3 +1,4 @@
+import type { Locale } from "@fixr/i18n";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { getPaginatedDataSchema } from "@fixr/schemas/utils";
@@ -41,17 +42,20 @@ export class EmployeesController {
 		userJwt,
 		subdomain,
 		data,
+		locale,
 		response,
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
 		data: z.infer<typeof createEmployeeSchema>;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
 		return EmployeesService.registerEmployee({
 			userJwt,
 			subdomain,
 			data,
+			locale,
 			response,
 		});
 	}

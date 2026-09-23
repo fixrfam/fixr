@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -24,7 +25,7 @@ interface RemoveAvatarDialogProps {
 /**
  * Destructive confirmation dialog for removing the user's profile picture.
  *
- * Renders a red "Remover" action button and a "Cancelar" cancel button.
+ * Renders a red remove action button next to a cancel button.
  */
 export function RemoveAvatarDialog({
 	open,
@@ -32,24 +33,29 @@ export function RemoveAvatarDialog({
 	onConfirm,
 	loading = false,
 }: RemoveAvatarDialogProps) {
+	const { t } = useTranslation();
+
 	return (
 		<AlertDialog onOpenChange={onOpenChange} open={open}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Remover foto do perfil</AlertDialogTitle>
+					<AlertDialogTitle>{t("account.avatar.removeTitle")}</AlertDialogTitle>
 					<AlertDialogDescription>
-						Tem certeza que deseja remover sua foto de perfil? Essa ação não
-						pode ser desfeita.
+						{t("account.avatar.removeDescription")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+					<AlertDialogCancel disabled={loading}>
+						{t("common.actions.cancel")}
+					</AlertDialogCancel>
 					<AlertDialogAction
 						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						disabled={loading}
 						onClick={onConfirm}
 					>
-						{loading ? "Removendo..." : "Remover"}
+						{loading
+							? t("account.avatar.removing")
+							: t("common.actions.remove")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

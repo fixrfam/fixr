@@ -93,12 +93,8 @@
           "name": "api_keys_employee_id_employees_id_fk",
           "tableFrom": "api_keys",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -106,12 +102,8 @@
           "name": "api_keys_company_id_companies_id_fk",
           "tableFrom": "api_keys",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -119,17 +111,13 @@
       "compositePrimaryKeys": {
         "api_keys_id": {
           "name": "api_keys_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "api_keys_prefix_unique": {
           "name": "api_keys_prefix_unique",
-          "columns": [
-            "prefix"
-          ]
+          "columns": ["prefix"]
         }
       },
       "checkConstraint": {}
@@ -187,12 +175,8 @@
           "name": "clients_user_id_users_id_fk",
           "tableFrom": "clients",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -200,17 +184,13 @@
       "compositePrimaryKeys": {
         "clients_id": {
           "name": "clients_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "clients_cpf_unique": {
           "name": "clients_cpf_unique",
-          "columns": [
-            "cpf"
-          ]
+          "columns": ["cpf"]
         }
       },
       "checkConstraint": {}
@@ -267,23 +247,17 @@
       "compositePrimaryKeys": {
         "companies_id": {
           "name": "companies_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "companies_cnpj_unique": {
           "name": "companies_cnpj_unique",
-          "columns": [
-            "cnpj"
-          ]
+          "columns": ["cnpj"]
         },
         "companies_subdomain_unique": {
           "name": "companies_subdomain_unique",
-          "columns": [
-            "subdomain"
-          ]
+          "columns": ["subdomain"]
         }
       },
       "checkConstraint": {}
@@ -348,9 +322,7 @@
       "compositePrimaryKeys": {
         "model_makers_id": {
           "name": "model_makers_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -423,12 +395,8 @@
           "name": "employees_user_id_users_id_fk",
           "tableFrom": "employees",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -436,12 +404,8 @@
           "name": "employees_company_id_companies_id_fk",
           "tableFrom": "employees",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -449,17 +413,13 @@
       "compositePrimaryKeys": {
         "employees_id": {
           "name": "employees_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "employees_cpf_unique": {
           "name": "employees_cpf_unique",
-          "columns": [
-            "cpf"
-          ]
+          "columns": ["cpf"]
         }
       },
       "checkConstraint": {}
@@ -494,9 +454,7 @@
       "compositePrimaryKeys": {
         "model_categories_id": {
           "name": "model_categories_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -564,12 +522,8 @@
           "name": "model_images_model_id_models_id_fk",
           "tableFrom": "model_images",
           "tableTo": "models",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -577,12 +531,8 @@
           "name": "model_images_upload_id_uploads_id_fk",
           "tableFrom": "model_images",
           "tableTo": "uploads",
-          "columnsFrom": [
-            "upload_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["upload_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -590,9 +540,7 @@
       "compositePrimaryKeys": {
         "model_images_id": {
           "name": "model_images_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -952,12 +900,8 @@
           "name": "models_maker_id_model_makers_id_fk",
           "tableFrom": "models",
           "tableTo": "model_makers",
-          "columnsFrom": [
-            "maker_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["maker_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -965,12 +909,8 @@
           "name": "models_category_id_model_categories_id_fk",
           "tableFrom": "models",
           "tableTo": "model_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -978,12 +918,8 @@
           "name": "models_company_id_companies_id_fk",
           "tableFrom": "models",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -991,18 +927,13 @@
       "compositePrimaryKeys": {
         "models_id": {
           "name": "models_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "slug_company_unique": {
           "name": "slug_company_unique",
-          "columns": [
-            "slug",
-            "company_id"
-          ]
+          "columns": ["slug", "company_id"]
         }
       },
       "checkConstraint": {}
@@ -1067,12 +998,8 @@
           "name": "one_time_tokens_user_id_users_id_fk",
           "tableFrom": "one_time_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1080,17 +1007,13 @@
       "compositePrimaryKeys": {
         "one_time_tokens_id": {
           "name": "one_time_tokens_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "one_time_tokens_token_unique": {
           "name": "one_time_tokens_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "checkConstraint": {}
@@ -1141,12 +1064,8 @@
           "name": "refresh_tokens_user_id_users_id_fk",
           "tableFrom": "refresh_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1154,17 +1073,13 @@
       "compositePrimaryKeys": {
         "refresh_tokens_id": {
           "name": "refresh_tokens_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "refresh_tokens_token_unique": {
           "name": "refresh_tokens_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "checkConstraint": {}
@@ -1222,12 +1137,8 @@
           "name": "service_order_images_service_order_id_service_orders_id_fk",
           "tableFrom": "service_order_images",
           "tableTo": "service_orders",
-          "columnsFrom": [
-            "service_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["service_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1235,12 +1146,8 @@
           "name": "service_order_images_employee_id_employees_id_fk",
           "tableFrom": "service_order_images",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1248,12 +1155,8 @@
           "name": "service_order_images_upload_id_uploads_id_fk",
           "tableFrom": "service_order_images",
           "tableTo": "uploads",
-          "columnsFrom": [
-            "upload_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["upload_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1261,9 +1164,7 @@
       "compositePrimaryKeys": {
         "service_order_images_id": {
           "name": "service_order_images_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1373,12 +1274,8 @@
           "name": "service_orders_company_id_companies_id_fk",
           "tableFrom": "service_orders",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1386,12 +1283,8 @@
           "name": "service_orders_client_id_clients_id_fk",
           "tableFrom": "service_orders",
           "tableTo": "clients",
-          "columnsFrom": [
-            "client_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1399,12 +1292,8 @@
           "name": "service_orders_employee_id_employees_id_fk",
           "tableFrom": "service_orders",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1412,12 +1301,8 @@
           "name": "service_orders_device_brand_id_model_makers_id_fk",
           "tableFrom": "service_orders",
           "tableTo": "model_makers",
-          "columnsFrom": [
-            "device_brand_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["device_brand_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1425,12 +1310,8 @@
           "name": "service_orders_device_category_id_model_categories_id_fk",
           "tableFrom": "service_orders",
           "tableTo": "model_categories",
-          "columnsFrom": [
-            "device_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["device_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1438,9 +1319,7 @@
       "compositePrimaryKeys": {
         "service_orders_id": {
           "name": "service_orders_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1535,12 +1414,8 @@
           "name": "uploads_company_id_companies_id_fk",
           "tableFrom": "uploads",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1548,12 +1423,8 @@
           "name": "uploads_employee_id_employees_id_fk",
           "tableFrom": "uploads",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1561,9 +1432,7 @@
       "compositePrimaryKeys": {
         "uploads_id": {
           "name": "uploads_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1629,23 +1498,17 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_google_id_unique": {
           "name": "users_google_id_unique",
-          "columns": [
-            "google_id"
-          ]
+          "columns": ["google_id"]
         }
       },
       "checkConstraint": {}

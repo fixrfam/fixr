@@ -16,6 +16,7 @@
     "@clerk/nextjs": "^6.12.5",
     "@fixr/constants": "workspace:*",
     "@fixr/env": "workspace:*",
+    "@fixr/i18n": "workspace:*",
     "@fixr/schemas": "workspace:*",
     "@fixr/typescript-config": "workspace:*",
     "@hookform/resolvers": "^5.2.2",

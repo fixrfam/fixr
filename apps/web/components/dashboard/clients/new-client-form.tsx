@@ -1,6 +1,7 @@
 "use client";
 
 import { cpf, phone, unmask } from "@fixr/constants/masks";
+import { useTranslation } from "@fixr/i18n/react";
 import { createClientSchema } from "@fixr/schemas/clients";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
@@ -39,6 +40,7 @@ export function NewClientForm({
 	onCustomerCreated: (cpf: string) => void;
 	cols?: number;
 } & ComponentPropsWithoutRef<"form">) {
+	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof createClientSchema>>({
@@ -74,13 +76,13 @@ export function NewClientForm({
 
 		try {
 			toast.success({
-				text: "Cliente cadastrado com sucesso!",
+				text: t("clients.form.success"),
 			});
 
 			onCustomerCreated(formattedData.cpf);
 		} catch {
 			toast.error({
-				text: "Erro ao cadastrar cliente",
+				text: t("clients.form.error"),
 			});
 		} finally {
 			setLoading(false);
@@ -106,10 +108,14 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<User className="inline-block size-3.5" /> Nome
+									<User className="inline-block size-3.5" />{" "}
+									{t("clients.form.nameLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="João da Silva" {...field} />
+									<Input
+										placeholder={t("clients.form.namePlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -121,10 +127,14 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<Mail className="inline-block size-3.5" /> Email
+									<Mail className="inline-block size-3.5" />{" "}
+									{t("clients.form.emailLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="joao.silva@email.com" {...field} />
+									<Input
+										placeholder={t("clients.form.emailPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -136,11 +146,12 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<PhoneIcon className="inline-block size-3.5" /> Telefone
+									<PhoneIcon className="inline-block size-3.5" />{" "}
+									{t("clients.form.phoneLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="(00) 00000-0000"
+										placeholder={t("clients.form.phonePlaceholder")}
 										{...field}
 										onInput={(e) =>
 											form.setValue("phone", e.currentTarget.value)
@@ -158,12 +169,12 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<Smartphone className="inline-block size-3.5" /> Telefone
-									alternativo
+									<Smartphone className="inline-block size-3.5" />{" "}
+									{t("clients.form.alternativePhoneLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="(00) 00000-0000"
+										placeholder={t("clients.form.phonePlaceholder")}
 										{...field}
 										onInput={(e) =>
 											form.setValue("alternativePhone", e.currentTarget.value)
@@ -181,11 +192,12 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<IdCard className="inline-block size-3.5" /> CPF
+									<IdCard className="inline-block size-3.5" />{" "}
+									{t("clients.form.documentLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="000.000.000-00"
+										placeholder={t("clients.form.documentPlaceholder")}
 										{...field}
 										onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
 										ref={cpfMask}
@@ -201,10 +213,14 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem className="col-span-full">
 								<FormLabel>
-									<MapPin className="inline-block size-3.5" /> Endereço
+									<MapPin className="inline-block size-3.5" />{" "}
+									{t("clients.form.addressLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="Rua, Av..." {...field} />
+									<Input
+										placeholder={t("clients.form.addressPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -216,10 +232,14 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<Building className="inline-block size-3.5" /> Estado
+									<Building className="inline-block size-3.5" />{" "}
+									{t("clients.form.stateLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="UF" {...field} />
+									<Input
+										placeholder={t("clients.form.statePlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -231,10 +251,14 @@ export function NewClientForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<Building className="inline-block size-3.5" /> Cidade
+									<Building className="inline-block size-3.5" />{" "}
+									{t("clients.form.cityLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="Cidade" {...field} />
+									<Input
+										placeholder={t("clients.form.cityPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -242,7 +266,7 @@ export function NewClientForm({
 					/>
 				</div>
 				<Button className="mt-4 w-full" disabled={loading} type="submit">
-					Finalizar cadastro{" "}
+					{t("clients.form.submit")}{" "}
 					{loading ? <Loader2 className="animate-spin" /> : <User />}
 				</Button>
 			</form>
