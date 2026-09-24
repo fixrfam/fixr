@@ -20,7 +20,8 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@types/bun": "catalog:",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@fixr/constants": "workspace:*",
@@ -32,7 +33,6 @@
     "dotenv": "catalog:",
     "ioredis": "catalog:",
     "tsup": "^8.3.5",
-    "typescript": "catalog:",
-    "vitest": "^2.0.5"
+    "typescript": "catalog:"
   }
 }
