@@ -82,6 +82,21 @@ apps/server/
 
 See `e2e/README.md`. Playwright starts `apps/server` and `apps/web` against a dedicated database (never the dev database), seeds data **through the API**, and reuses a `storageState` per role so tests don't log in repeatedly.
 
+## CI (`.github/workflows/ci.yml`)
+
+| Job | Runs | When |
+| -- | -- | -- |
+| `Lint` | `bun run lint:ci` | every PR, push to `develop`/`main` |
+| `Types` | `bun run check-types:ci` | every PR, push to `develop`/`main` |
+| `Unit tests` | `bun run test:ci` (coverage + thresholds, summary posted on the PR) | every PR, push to `develop`/`main` |
+| `Integration tests (server)` | `bun run test:integration` (Docker on `ubuntu-latest`) | every PR, push to `develop`/`main` |
+| `E2E tests` | `bun run test:e2e` (HTML report + traces uploaded on failure) | PRs to `main`, push to `develop`/`main`, manual |
+
+- New pushes to a PR cancel the previous run (`cancel-in-progress: true`).
+- No secrets are used: every suite ships its own deterministic, non-secret test env (`apps/server/test/env.ts`, `e2e/support/env.ts`). Never wire production secrets into CI.
+- **Required checks**: mark `Lint`, `Types` and `Unit tests` (and ideally `Integration tests (server)`) as required in the branch protection of `develop` and `main` (GitHub → Settings → Branches). That is what stops a PR with a broken test from being merged.
+- **Relation with `deploy.yml`**: the deploy workflow is intentionally left independent (it is infra, see `AGENTS.md` guardrails). It deploys previews for PRs to `main` and production on pushes to `main`. With the checks above required on `main`, nothing reaches `main` (and therefore production) without green CI; previews for a red PR can still be built, which is fine for review. If deploys should also wait for CI, gate the job with `workflow_run` on `CI` — a change to `deploy.yml` that needs an explicit decision.
+
 ## Coverage
 
 Coverage uses the V8 provider (`bun run test:ci`). Thresholds start low on purpose — the codebase starts from zero — and are stricter for security-critical code (`packages/permissions`, `apps/server/src/core/middlewares`). Raise them as coverage grows; never lower them to get a PR through.

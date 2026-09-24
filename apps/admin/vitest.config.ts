@@ -27,6 +27,7 @@ export default defineConfig({
 			include: ["lib/**", "components/**", "app/**", "middleware.ts"],
 			exclude: ["components/ui/**", "**/*.spec.*"],
 			reporter: ["text", "json-summary", "lcov"],
+			thresholds: { lines: 45, branches: 40, functions: 35, statements: 45 },
 		},
 	},
 });

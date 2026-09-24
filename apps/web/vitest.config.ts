@@ -32,9 +32,16 @@ export default defineConfig({
 		},
 		coverage: {
 			provider: "v8",
-			include: ["lib/**", "components/**", "app/**"],
+			include: [
+				"lib/**/*.{ts,tsx}",
+				"components/**/*.{ts,tsx}",
+				"app/**/*.{ts,tsx}",
+				"middleware.ts",
+			],
 			exclude: ["components/ui/**", "components/magicui/**", "**/*.spec.*"],
 			reporter: ["text", "json-summary", "lcov"],
+			// Start low (the codebase started at zero) and ratchet up; never lower them to merge.
+			thresholds: { lines: 35, branches: 30, functions: 30, statements: 35 },
 		},
 	},
 });

@@ -9,6 +9,7 @@ export default defineConfig({
 			provider: "v8",
 			include: ["emails/**", "services/**"],
 			reporter: ["text", "json-summary", "lcov"],
+			thresholds: { lines: 85, branches: 60, functions: 90, statements: 85 },
 		},
 	},
 });

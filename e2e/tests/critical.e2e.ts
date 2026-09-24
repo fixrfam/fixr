@@ -61,8 +61,12 @@ test.describe("employee management (admin)", () => {
 	});
 
 	// No endpoint exists yet to change an employee's role or remove an employee (#95 findings).
-	test.fixme("changes an employee's role and the menu follows", async () => {});
-	test.fixme("removes an employee and they lose access", async () => {});
+	test.fixme("changes an employee's role and the menu follows", async () => {
+		// Pending: see the reason above.
+	});
+	test.fixme("removes an employee and they lose access", async () => {
+		// Pending: see the reason above.
+	});
 });
 
 /**
@@ -187,14 +191,17 @@ test.describe("service orders", () => {
 
 	// The service order screens still render @fixr/mock data and the create form
 	// only logs to the console: they are not wired to the API yet (#95 findings).
-	test.fixme(
-		"create an order end to end and see it in the list",
-		async () => {}
-	);
-	test.fixme("advance the status and see it in the list", async () => {});
+	test.fixme("create an order end to end and see it in the list", async () => {
+		// Pending: see the reason above.
+	});
+	test.fixme("advance the status and see it in the list", async () => {
+		// Pending: see the reason above.
+	});
 	test.fixme(
 		"assign a technician and the order shows up for them",
-		async () => {}
+		async () => {
+			// Pending: see the reason above.
+		}
 	);
 });
 
@@ -202,9 +209,13 @@ test.describe("catalog", () => {
 	// There are no maker/model/category screens in apps/web yet (API only).
 	test.fixme(
 		"create maker -> model -> use it in a new service order",
-		async () => {}
+		async () => {
+			// Pending: see the reason above.
+		}
 	);
-	test.fixme("upload a model image", async () => {});
+	test.fixme("upload a model image", async () => {
+		// Pending: see the reason above.
+	});
 });
 
 // Sanity check that the seeded roles exist for every role in roleAbilities.

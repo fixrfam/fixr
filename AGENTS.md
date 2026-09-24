@@ -40,7 +40,9 @@ Run from the repo root unless noted:
 - `bun run db:migrate` — apply migrations
 - `bun run db:generate` — generate migration SQL from schema changes
 - `bun run db:studio` — Drizzle Studio GUI
-- Inside `apps/server` or `apps/workers`: `bun run test` (Vitest)
+- `bun run test` / `test:ci` — unit tests of every workspace (`test:ci` adds coverage thresholds)
+- `bun run test:integration` — server integration tests (Docker) · `bun run test:e2e` — Playwright e2e (Docker)
+- `bun run lint:ci` — lint without the TTY-only `--elide-lines` flag (what CI runs)
 
 ## Code conventions
 

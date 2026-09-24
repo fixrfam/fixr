@@ -17,6 +17,20 @@ export default defineConfig({
 			include: ["src/**/*.ts"],
 			exclude: ["src/**/*.spec.ts", "src/server.ts", "src/core/docs/**"],
 			reporter: ["text", "json-summary", "lcov"],
+			// Start low (the codebase started at zero) and ratchet up; never lower them to merge.
+			thresholds: {
+				lines: 60,
+				branches: 65,
+				functions: 65,
+				statements: 60,
+				// Security-critical: authentication and RBAC middlewares.
+				"src/core/middlewares/**": {
+					lines: 90,
+					branches: 80,
+					functions: 100,
+					statements: 90,
+				},
+			},
 		},
 		projects: [
 			{

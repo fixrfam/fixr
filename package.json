@@ -16,6 +16,7 @@
     "build:admin": "dotenv -- bun run --elide-lines 0 --filter admin build",
     "lint": "dotenv -- bun run --elide-lines 0 --filter '*' lint",
     "lint:write": "dotenv -- bun run --elide-lines 0 --filter '*' lint:write",
+    "lint:ci": "bun run --filter '*' lint",
     "format": "ultracite fix",
     "db:push": "bun run --elide-lines 0 --filter @fixr/db db:push",
     "db:studio": "bun run --elide-lines 0 --filter @fixr/db db:studio",
