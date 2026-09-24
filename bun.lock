@@ -269,6 +269,7 @@
       "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@types/bun": "catalog:",
+        "@vitest/coverage-v8": "catalog:",
         "tsx": "^4.19.2",
         "vitest": "catalog:",
       },
@@ -362,7 +363,9 @@
       "devDependencies": {
         "@types/react": "catalog:",
         "@types/react-dom": "catalog:",
+        "@vitest/coverage-v8": "catalog:",
         "react-email": "3.0.7",
+        "vitest": "catalog:",
       },
     },
     "packages/mock": {

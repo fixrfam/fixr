@@ -6,7 +6,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "dotenv -- vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:ci": "vitest run --coverage",
     "start": "dotenv -- node dist/index.js",
     "dev": "dotenv -- tsx watch src/index.ts",
     "build": "dotenv -- tsup",
@@ -21,7 +24,8 @@
     "@biomejs/biome": "catalog:",
     "@types/bun": "catalog:",
     "tsx": "^4.19.2",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
   },
   "dependencies": {
     "@fixr/constants": "workspace:*",
