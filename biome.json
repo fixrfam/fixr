@@ -106,7 +106,8 @@
             "useTopLevelRegex": "off"
           },
           "suspicious": {
-            "useAwait": "off"
+            "useAwait": "off",
+            "noDocumentCookie": "off"
           }
         }
       }
