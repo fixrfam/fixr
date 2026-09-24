@@ -21,13 +21,21 @@ export function Turnstile({
 }: TurnstileProps) {
 	const [mounted, setMounted] = useState(false);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// Parents pass inline callbacks; keep the latest ones without re-arming the load timeout.
+	const callbacksRef = useRef({ onToken, onError });
+
+	useEffect(() => {
+		callbacksRef.current = { onToken, onError };
+	}, [onToken, onError]);
 
 	useEffect(() => {
 		setMounted(true);
 
+		// Armed once per mount: re-arming on every parent render made the widget
+		// report an error 15s after the user's last keystroke, even once loaded.
 		timeoutRef.current = setTimeout(() => {
-			onToken(null);
-			onError?.();
+			callbacksRef.current.onToken(null);
+			callbacksRef.current.onError?.();
 		}, TURNSTILE_TIMEOUT);
 
 		return () => {
@@ -35,7 +43,7 @@ export function Turnstile({
 				clearTimeout(timeoutRef.current);
 			}
 		};
-	}, [onError, onToken]);
+	}, []);
 
 	if (!mounted) {
 		return null;
