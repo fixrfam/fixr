@@ -17,6 +17,10 @@ export interface MakeUserInput {
 	avatarUrl?: string | null;
 }
 
+/**
+ * A bare `users` row. The API expects every user to also be an employee or a
+ * client (profileType), so prefer `makeEmployee()` / `makeClient()` in tests.
+ */
 export async function makeUser(input: MakeUserInput = {}) {
 	const id = createId();
 	const user = {

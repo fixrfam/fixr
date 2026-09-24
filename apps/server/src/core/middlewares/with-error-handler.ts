@@ -1,7 +1,7 @@
 import { env } from "@fixr/env/server";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { AppError } from "../lib/app-error";
-import { apiResponse } from "../lib/response";
+import { sendErrorResponse } from "../lib/response";
 
 function errorResponseData(err: unknown) {
 	const data: Record<string, unknown> = {};
@@ -38,15 +38,13 @@ export function withErrorHandler<
 
 			req.log.error(err, "Unexpected error in route handler");
 
-			return res.status(500).send(
-				apiResponse({
-					status: 500,
-					error: "Internal Server Error",
-					code: "internal_error",
-					message: err instanceof Error ? err.message : "Something went wrong.",
-					data: errorResponseData(err),
-				})
-			);
+			return sendErrorResponse(res, {
+				status: 500,
+				error: "Internal Server Error",
+				code: "internal_error",
+				message: err instanceof Error ? err.message : "Something went wrong.",
+				data: errorResponseData(err),
+			});
 		}
 	};
 }

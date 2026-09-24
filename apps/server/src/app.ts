@@ -28,7 +28,7 @@ import { apiDescription } from "./core/docs/main";
 import type { FastifyTypedInstance } from "./core/interfaces/fastify";
 import { AppError } from "./core/lib/app-error";
 import { bindJWT } from "./core/lib/jwt";
-import { apiResponse } from "./core/lib/response";
+import { sendErrorResponse } from "./core/lib/response";
 import { accountRoutes } from "./modules/account/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
@@ -125,43 +125,37 @@ export function registerErrorHandler(app: FastifyTypedInstance) {
 		}
 
 		if (error instanceof ZodError) {
-			return reply.status(400).send(
-				apiResponse({
-					status: 400,
-					error: "Bad Request",
-					code: "bad_request",
-					message: "Type validation failed",
-					data: error.issues,
-				})
-			);
+			return sendErrorResponse(reply, {
+				status: 400,
+				error: "Bad Request",
+				code: "bad_request",
+				message: "Type validation failed",
+				data: error.issues,
+			});
 		}
 
 		if (hasZodFastifySchemaValidationErrors(error)) {
-			return reply.code(400).send(
-				apiResponse({
-					status: 400,
-					error: "Bad Request",
-					code: "request_validation_error",
-					message: "Request doesn't match the schema",
-					data: {
-						issues: error.validation,
-						method: request.method,
-						url: request.url,
-					},
-				})
-			);
+			return sendErrorResponse(reply, {
+				status: 400,
+				error: "Bad Request",
+				code: "request_validation_error",
+				message: "Request doesn't match the schema",
+				data: {
+					issues: error.validation,
+					method: request.method,
+					url: request.url,
+				},
+			});
 		}
 
 		if (isResponseSerializationError(error)) {
-			return reply.code(500).send(
-				apiResponse({
-					status: 500,
-					error: "Internal Server Error",
-					code: "response_serialization_failed",
-					message: "Response doesn't match the schema",
-					data: error,
-				})
-			);
+			return sendErrorResponse(reply, {
+				status: 500,
+				error: "Internal Server Error",
+				code: "response_serialization_failed",
+				message: "Response doesn't match the schema",
+				data: error,
+			});
 		}
 
 		return reply.send(error);

@@ -2,10 +2,13 @@ import { db } from "@fixr/db/connection";
 import { clients } from "@fixr/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { nextSeq, uniqueDigits } from "./sequence";
-import { makeUser } from "./user";
+import { type MakeUserInput, makeUser } from "./user";
 
-export async function makeClient(input: { name?: string } = {}) {
-	const user = await makeUser();
+/** A client account (user + clients row), i.e. a regular non-employee login. */
+export async function makeClient(
+	input: MakeUserInput & { name?: string } = {}
+) {
+	const user = await makeUser(input);
 	const client = {
 		id: createId(),
 		name: input.name ?? `Client ${nextSeq()}`,

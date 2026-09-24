@@ -5,6 +5,8 @@ import { AppError } from "./app-error";
 function fakeReply() {
 	const reply = {
 		status: vi.fn(() => reply),
+		type: vi.fn(() => reply),
+		serializer: vi.fn(() => reply),
 		send: vi.fn(() => reply),
 	};
 	return reply;
@@ -34,6 +36,8 @@ describe("AppError", () => {
 		new AppError("AUTH_JWT_INVALID").send(reply as never);
 
 		expect(reply.status).toHaveBeenCalledWith(401);
+		// Error envelopes bypass the route's (literal) response schema.
+		expect(reply.serializer).toHaveBeenCalledWith(JSON.stringify);
 		expect(reply.send).toHaveBeenCalledWith({
 			status: 401,
 			error: "Unauthorized",

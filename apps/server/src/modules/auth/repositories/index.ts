@@ -120,7 +120,11 @@ export class AuthRepository {
 			.leftJoin(companies, eq(employees.companyId, companies.id))
 			.where(eq(users.id, userId));
 
-		return jwtPayload.parse(payload);
+		// Non-employees get SQL NULL for company; the payload models it as absent.
+		return jwtPayload.parse({
+			...payload,
+			company: payload?.company ?? undefined,
+		});
 	}
 
 	/**
