@@ -9,6 +9,7 @@ export const testEnv = {
 	NODE_ENV: "test",
 	NODE_PORT: "3333",
 	JWT_SECRET: "test-jwt-secret-0123456789abcdef0123456789",
+	API_KEY_SECRET: "test-api-key-secret-0123456789abcdef012345",
 	COOKIE_ENCRYPTION_SECRET: "test-cookie-secret-0123456789abcdef012345",
 	COOKIE_DOMAIN: "localhost",
 	FRONTEND_URL: "http://localhost:3000",

@@ -13,7 +13,7 @@ import {
 import type { z } from "zod";
 import { modelsDocs } from "../../../core/docs/models/models.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { ModelsController } from "../controllers";
@@ -24,7 +24,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.read),
 			],
 			schema: modelsDocs.listModelsSchema,
@@ -47,7 +47,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/:slug",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.read),
 			],
 			schema: modelsDocs.getModelBySlugSchema,
@@ -70,7 +70,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.create),
 			],
 			schema: modelsDocs.createModelSchema,
@@ -93,7 +93,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/:modelId",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.update),
 			],
 			schema: modelsDocs.patchModelSchema,
@@ -118,7 +118,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/:modelId",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.delete),
 			],
 			schema: modelsDocs.deleteModelSchema,
@@ -141,7 +141,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/:modelId/images",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.update),
 			],
 			schema: modelsDocs.createModelImageSchema,
@@ -166,7 +166,7 @@ export function modelsRoutes(fastify: FastifyTypedInstance) {
 		"/:modelId/images/:imageId",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.update),
 			],
 			schema: modelsDocs.deleteModelImageSchema,

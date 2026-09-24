@@ -30,6 +30,7 @@ import { AppError } from "./core/lib/app-error";
 import { bindJWT } from "./core/lib/jwt";
 import { sendErrorResponse } from "./core/lib/response";
 import { accountRoutes } from "./modules/account/routes";
+import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
 import { companiesRoutes } from "./modules/companies/routes";
@@ -97,6 +98,11 @@ const OPENAPI_TAGS = [
 	{
 		name: "Devices",
 		description: "Device catalog management: categories, makers, and models.",
+	},
+	{
+		name: "API Keys",
+		description:
+			"Integration keys for programmatic access, scoped to a company.",
 	},
 	{
 		name: "Health",
@@ -257,6 +263,9 @@ export async function buildApp(
 	});
 	await app.register(modelsRoutes, {
 		prefix: "/companies/:subdomain/models",
+	});
+	await app.register(apiKeysRoutes, {
+		prefix: "/companies/:subdomain/api-keys",
 	});
 	await app.register(uploadsRoutes, { prefix: "/uploads" });
 

@@ -19,6 +19,10 @@
       "types": "./src/account.ts",
       "default": "./src/account.ts"
     },
+    "./api-keys": {
+      "types": "./src/api-keys.ts",
+      "default": "./src/api-keys.ts"
+    },
     "./auth": {
       "types": "./src/auth.ts",
       "default": "./src/auth.ts"

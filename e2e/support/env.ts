@@ -22,6 +22,7 @@ export const apiEnv = {
 	MYSQL_PASSWORD: "e2e",
 	REDIS_PASSWORD: "unused-e2e",
 	JWT_SECRET: "e2e-jwt-secret-0123456789abcdef0123456789",
+	API_KEY_SECRET: "e2e-api-key-secret-0123456789abcdef0123456",
 	COOKIE_ENCRYPTION_SECRET: "e2e-cookie-secret-0123456789abcdef01234",
 	COOKIE_DOMAIN: "localhost",
 	FRONTEND_URL: WEB_URL,
