@@ -1,3 +1,4 @@
+import { env } from "@fixr/env/server";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { AppError } from "../lib/app-error";
 import { apiResponse } from "../lib/response";
@@ -6,7 +7,8 @@ function errorResponseData(err: unknown) {
 	const data: Record<string, unknown> = {};
 	if (err instanceof Error) {
 		data.message = err.message;
-		if (err.stack) {
+		// Stack traces help locally but must not leak to API clients in production.
+		if (err.stack && env.NODE_ENV !== "production") {
 			data.stack = err.stack.split("\n").slice(0, 4).join("\n");
 		}
 	} else if (err && typeof err === "object") {
