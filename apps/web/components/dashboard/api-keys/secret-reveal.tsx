@@ -54,6 +54,7 @@ export function SecretReveal({
 						{secret}
 					</code>
 					<Button
+						aria-label={copied ? "Segredo copiado" : "Copiar segredo"}
 						onClick={copy}
 						size="icon"
 						type="button"

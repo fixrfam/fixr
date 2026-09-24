@@ -90,6 +90,7 @@ const CUSTOM_GUARD_ROUTES = new Set(["POST /uploads/:purpose/presign"]);
 const AUTH_MIDDLEWARES = new Set([
 	"authenticate",
 	"authenticateEmployee",
+	"authenticateEmployeeOrApiKey",
 	"authenticateAdmin",
 ]);
 
@@ -167,6 +168,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	},
 	"POST /companies/:subdomain/models": { name: "Model", makerId: "x" },
 	"PATCH /companies/:subdomain/models/:modelId": {},
+	"POST /companies/:subdomain/api-keys": { name: "Integração" },
 	"POST /companies/:subdomain/models/:modelId/images": { uploadId: "x" },
 };
 
@@ -175,7 +177,8 @@ const roles = Object.keys(roleAbilities) as EmployeeRole[];
 function requestFor(route: CollectedRoute, subdomain: string) {
 	const url = route.url
 		.replace(":subdomain", subdomain)
-		.replace(/:[a-zA-Z]+/g, "x");
+		// cuid2-shaped so id params validated as cuid2 (e.g. :apiKeyId) reach the guards.
+		.replace(/:[a-zA-Z]+/g, "x0000000000000000000000x");
 	return {
 		method: route.method as "GET",
 		url: route.method === "GET" ? `${url}?page=1` : url,
