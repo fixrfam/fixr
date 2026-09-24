@@ -156,9 +156,13 @@ export async function middleware(request: NextRequest) {
 	return NextResponse.next();
 
 	function redirectToHome(tenant: string) {
-		return NextResponse.redirect(
-			new URL(`/dashboard/${tenant}/home`, env.NEXT_PUBLIC_APP_URL)
-		);
+		const home = `/dashboard/${tenant}/home`;
+		// A role that can't see home either (e.g. guest) would loop home -> home;
+		// send it to the public support page instead.
+		const target =
+			request.nextUrl.pathname === home ? `/dashboard/${tenant}/support` : home;
+
+		return NextResponse.redirect(new URL(target, env.NEXT_PUBLIC_APP_URL));
 	}
 }
 

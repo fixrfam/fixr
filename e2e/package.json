@@ -21,6 +21,8 @@
     "bcryptjs": "^2.4.3",
     "@types/bcryptjs": "^2.4.6",
     "mysql2": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@fixr/permissions": "workspace:*",
+    "@fixr/schemas": "workspace:*"
   }
 }

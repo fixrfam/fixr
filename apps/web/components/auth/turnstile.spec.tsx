@@ -47,7 +47,9 @@ describe("Turnstile wrapper", () => {
 			widget.props.onSuccess?.("token");
 		});
 		// A parent re-render (e.g. typing in the form) passes fresh inline callbacks.
-		rerender(<Turnstile onError={() => onError()} onToken={(t) => onToken(t)} />);
+		rerender(
+			<Turnstile onError={() => onError()} onToken={(t) => onToken(t)} />
+		);
 		act(() => {
 			vi.advanceTimersByTime(60_000);
 		});

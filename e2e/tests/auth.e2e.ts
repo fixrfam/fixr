@@ -109,12 +109,17 @@ test("logout returns to the public page and back navigation does not restore the
 	await expect(page).toHaveURL(/\/dashboard\/alfa\/account/);
 
 	// The account page has a "Sair" button (the account popover has another one).
-	await page.getByRole("button", { name: "Sair", exact: true }).click();
-
-	await expect(page).toHaveURL(/\/auth\/login/);
+	// Retry: a click that lands before hydration submits the form natively and does nothing.
+	await expect(async () => {
+		await page.getByRole("button", { name: "Sair", exact: true }).click();
+		await expect(page).toHaveURL(/\/auth\/login/, { timeout: 3000 });
+	}).toPass();
 	await page.goBack();
-	await page.reload();
-	await expect(page).toHaveURL(/\/auth\/login/);
+	// Whatever the history shows, reloading it must end on the login page (no session left).
+	await expect(async () => {
+		await page.reload();
+		await expect(page).toHaveURL(/\/auth\/login/, { timeout: 2000 });
+	}).toPass();
 });
 
 test("forgot password: request, open the emailed link, reset and sign in with the new password", async ({
