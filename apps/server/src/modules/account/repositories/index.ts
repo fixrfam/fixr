@@ -44,7 +44,11 @@ export class AccountRepository {
 			.where(eq(users.id, id))
 			.limit(1);
 
-		return accountSchema.parse(account);
+		// Non-employees get SQL NULL for company; the schema models it as absent.
+		return accountSchema.parse({
+			...account,
+			company: account?.company ?? undefined,
+		});
 	}
 
 	/**

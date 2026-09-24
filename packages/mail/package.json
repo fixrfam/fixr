@@ -9,7 +9,11 @@
     "studio": "email dev",
     "export": "email export",
     "lint": "biome check",
-    "lint:write": "biome check --write"
+    "lint:write": "biome check --write",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:ci": "vitest run --coverage"
   },
   "exports": {
     "./services": {
@@ -41,6 +45,8 @@
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "react-email": "3.0.7"
+    "react-email": "3.0.7",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
   }
 }

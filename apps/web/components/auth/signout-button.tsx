@@ -40,7 +40,12 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		return (
 			<form onSubmit={(e) => onSubmit(e)}>
-				<Button disabled={loading} ref={ref} {...props}>
+				<Button
+					aria-label={children ? undefined : "Sair"}
+					disabled={loading}
+					ref={ref}
+					{...props}
+				>
 					{children}
 					{loading ? <Loader2 className="animate-spin" /> : <LogOut />}
 				</Button>

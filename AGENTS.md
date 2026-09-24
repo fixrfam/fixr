@@ -40,7 +40,9 @@ Run from the repo root unless noted:
 - `bun run db:migrate` — apply migrations
 - `bun run db:generate` — generate migration SQL from schema changes
 - `bun run db:studio` — Drizzle Studio GUI
-- Inside `apps/server` or `apps/workers`: `bun run test` (Vitest)
+- `bun run test` / `test:ci` — unit tests of every workspace (`test:ci` adds coverage thresholds)
+- `bun run test:integration` — server integration tests (Docker) · `bun run test:e2e` — Playwright e2e (Docker)
+- `bun run lint:ci` — lint without the TTY-only `--elide-lines` flag (what CI runs)
 
 ## Code conventions
 
@@ -95,4 +97,10 @@ Follow this layering for new modules/endpoints — don't put query logic in cont
 
 ## Testing
 
-Vitest is set up in `apps/server` and `apps/workers` (`bun run test` from inside the app). Coverage is currently minimal — check whether a module already has tests before assuming a suite exists, and don't remove the placeholder spec files as a way to "pass" checks.
+**Read `TESTING.md` before writing or changing tests** — it defines the stack (Vitest, RTL + MSW, Testcontainers, Playwright), file naming/locations and the rules (e.g. unit tests never touch DB/Redis/network; integration tests never mock repositories).
+
+- `bun run test` — unit tests of every workspace (no Docker needed)
+- `bun run test:integration` — `apps/server` integration suite against real MySQL/Redis (needs Docker)
+- `bun run test:e2e` — Playwright suite in `e2e/`
+
+Security tests (RBAC matrix in `packages/permissions`, the route guard sweep in `apps/server/test/integration/rbac`, tenant-isolation cases) are intentionally strict. Don't weaken or delete them to make a change pass — flag the gap instead.

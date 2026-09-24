@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "@pheralb/toast";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent } from "./ui/dialog";
 
@@ -24,10 +24,14 @@ export default function CookieDialog({
 }) {
 	const [openDialog, setOpenDialog] = useState(open);
 
-	if (open) {
-		// biome-ignore lint/suspicious/noDocumentCookie: <TODO: Refactor to CookieStore API https://developer.mozilla.org/en-US/docs/Web/API/CookieStore>
-		document.cookie = `${cookieKey}=; max-age=0; path=/`;
-	}
+	// Clear the one-shot cookie after mounting: writing document.cookie during
+	// render crashed the server render (500) whenever the dialog was open.
+	useEffect(() => {
+		if (open) {
+			// biome-ignore lint/suspicious/noDocumentCookie: <TODO: Refactor to CookieStore API https://developer.mozilla.org/en-US/docs/Web/API/CookieStore>
+			document.cookie = `${cookieKey}=; max-age=0; path=/`;
+		}
+	}, [open, cookieKey]);
 
 	const openChangeHandler = (bool: boolean) => {
 		setOpenDialog(bool);

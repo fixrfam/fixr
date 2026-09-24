@@ -1,6 +1,6 @@
 import type { FastifyReply } from "fastify";
 import { type ErrorKey, errors } from "../errors";
-import { apiResponse, httpStatusCodes } from "./response";
+import { httpStatusCodes, sendErrorResponse } from "./response";
 
 /**
  * Application-level error with typed error codes from the central registry.
@@ -37,14 +37,12 @@ export class AppError extends Error {
 	 * @param {FastifyReply} response - Fastify reply object
 	 */
 	send(response: FastifyReply) {
-		return response.status(this.status).send(
-			apiResponse({
-				status: this.status,
-				error: httpStatusCodes[this.status],
-				code: this.code,
-				message: this.message,
-				data: this.details ?? null,
-			})
-		);
+		return sendErrorResponse(response, {
+			status: this.status,
+			error: httpStatusCodes[this.status] ?? null,
+			code: this.code,
+			message: this.message,
+			data: this.details ?? null,
+		});
 	}
 }

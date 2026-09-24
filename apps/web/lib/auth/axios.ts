@@ -83,16 +83,25 @@ axiosClient.interceptors.request.use(
 	}
 );
 
-axios.interceptors.response.use(
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+// Registered on axiosClient (the instance every service uses), not on the global axios default.
+axiosClient.interceptors.response.use(
 	(response) => response,
 	async (error: AxiosError) => {
-		const originalRequest = error.config;
+		const originalRequest = error.config as RetriableConfig | undefined;
 
 		if (
 			error.response?.status === 401 &&
+			!originalRequest?._retry &&
 			!originalRequest?.url?.includes("/auth") &&
 			!originalRequest?.url?.includes("/api")
 		) {
+			// Retry each request at most once, so a failing refresh can't loop forever.
+			if (originalRequest) {
+				originalRequest._retry = true;
+			}
+
 			if (!isRefreshing) {
 				isRefreshing = true;
 

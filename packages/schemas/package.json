@@ -7,7 +7,12 @@
     "dev": "tsc --watch",
     "build": "biome check && tsc",
     "lint": "biome check",
-    "lint:write": "biome check --write"
+    "lint:write": "biome check --write",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:ci": "vitest run --coverage",
+    "check-types": "tsc --noEmit"
   },
   "exports": {
     "./account": {
@@ -73,7 +78,11 @@
     "@types/bun": "catalog:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@fixr/permissions": "workspace:*"
   },
   "dependencies": {
     "zod": "catalog:"

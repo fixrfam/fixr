@@ -22,13 +22,22 @@ Supports three purposes controlled by the path parameter:
 	}),
 	body: createUploadPresignSchema,
 	response: {
+		// One success code per purpose (see SUCCESS_CODES in modules/uploads/services).
 		200: zodResponseSchema({
 			status: 200,
 			error: null,
 			message: "Upload URL generated successfully.",
 			code: "create_avatar_presign_success",
 			data: uploadPresignResponseSchema,
-		}).describe("Presigned upload URL generated."),
+		})
+			.extend({
+				code: z.enum([
+					"create_avatar_presign_success",
+					"create_upload_presign_success",
+					"create_model_image_presign_success",
+				]),
+			})
+			.describe("Presigned upload URL generated."),
 		403: zodResponseSchema({
 			status: 403,
 			error: "Forbidden",
