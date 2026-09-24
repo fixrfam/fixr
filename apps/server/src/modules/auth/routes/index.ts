@@ -21,7 +21,7 @@ export function authRoutes(fastify: FastifyTypedInstance) {
 			schema: authDocs.registerSchema,
 			preHandler: [requireTurnstile()],
 		},
-		withErrorHandler(async (request, response) => {
+		withErrorHandler(async (request, _response) => {
 			await createUserSchema.parseAsync(request.body);
 
 			// Public sign-up is disabled; accounts are created by company admins.

@@ -13,7 +13,7 @@ import { env } from "@fixr/env/server";
 import { accountSchema } from "@fixr/schemas/account";
 import { apiResponseSchema } from "@fixr/schemas/utils";
 import scalarUi from "@scalar/fastify-api-reference";
-import { type FastifyServerOptions, fastify } from "fastify";
+import { type FastifyServerOptions, fastify, type RouteOptions } from "fastify";
 import {
 	hasZodFastifySchemaValidationErrors,
 	isResponseSerializationError,
@@ -60,6 +60,8 @@ export interface BuildAppOptions {
 	logger?: FastifyServerOptions["logger"];
 	/** Register Swagger, Scalar (`/docs`), Swagger UI (`/reference`) and `/openapi.json`. Defaults to `true`. */
 	docs?: boolean;
+	/** Called for every registered route (used by the RBAC route sweep in tests). */
+	onRoute?: (route: RouteOptions) => void;
 }
 
 const OPENAPI_TAGS = [
@@ -172,7 +174,7 @@ export function registerErrorHandler(app: FastifyTypedInstance) {
 export async function buildApp(
 	options: BuildAppOptions = {}
 ): Promise<FastifyTypedInstance> {
-	const { logger = envToLogger.development, docs = true } = options;
+	const { logger = envToLogger.development, docs = true, onRoute } = options;
 
 	registerSchemas();
 
@@ -186,6 +188,10 @@ export async function buildApp(
 	app.setSerializerCompiler(serializerCompiler);
 
 	registerErrorHandler(app);
+
+	if (onRoute) {
+		app.addHook("onRoute", onRoute);
+	}
 
 	if (docs) {
 		// @fastify/swagger must be registered before routes (route discovery).
