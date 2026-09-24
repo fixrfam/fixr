@@ -71,6 +71,8 @@ test("email verification link verifies the account and lets the user sign in", a
 	);
 
 	await expect(page).toHaveURL(/\/auth\/login/);
+	// The login page must render the success dialog (it used to 500 on the server here).
+	await expect(page.getByText("Conta verificada com sucesso!")).toBeVisible();
 	const login = await request.post(`${API_URL}/auth/login`, {
 		data: {
 			email: "verify-me@alfa.test",
@@ -174,6 +176,8 @@ test.describe("expired session", () => {
 		await page.goto(`/dashboard/${COMPANY_A.subdomain}/home`);
 
 		await expect(page).toHaveURL(`/dashboard/${COMPANY_A.subdomain}/home`);
+		// The page itself must render on this first request (it used to 500 here).
+		await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
 		expect((await context.cookies()).some((c) => c.name === SESSION)).toBe(
 			true
 		);

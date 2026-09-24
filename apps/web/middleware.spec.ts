@@ -62,3 +62,42 @@ describe("web middleware", () => {
 		);
 	});
 });
+
+describe("web middleware session refresh", () => {
+	it("forwards refreshed cookies to the current request as well as the browser", async () => {
+		const { server } = await import("@/test/msw/server");
+		const { HttpResponse, http } = await import("msw");
+		const fresh = fakeJwt();
+		server.use(
+			http.post("http://api.test/auth/token", () =>
+				HttpResponse.json(
+					{ status: 200 },
+					{
+						headers: [
+							[
+								"Set-Cookie",
+								`${cookieKey("session")}=${fresh}; Path=/; Secure`,
+							],
+							[
+								"Set-Cookie",
+								`${cookieKey("refreshToken")}=r2; Path=/; HttpOnly`,
+							],
+						],
+					}
+				)
+			)
+		);
+		const req = new NextRequest(`${APP}/dashboard/fixr/home`);
+		req.cookies.set(cookieKey("refreshToken"), "r1");
+
+		const res = await middleware(req);
+
+		expect(res.headers.get("location")).toBeNull();
+		// Browser gets the new cookies...
+		expect(res.headers.getSetCookie().join("\n")).toContain(fresh);
+		// ...and so does this request's render (Next exposes it as an override header).
+		const forwarded = res.headers.get("x-middleware-request-cookie") ?? "";
+		expect(forwarded).toContain(`${cookieKey("session")}=${fresh}`);
+		expect(forwarded).toContain(`${cookieKey("refreshToken")}=r2`);
+	});
+});
