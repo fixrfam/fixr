@@ -7,7 +7,7 @@ const routeNames = {
 	"service-orders": "Ordens de Serviço",
 	estimates: "Orçamentos",
 	suppliers: "Fornecedores",
-	parts: "Peças",
+	parts: "Peças e Serviços",
 	inventory: "Estoque",
 	support: "Suporte",
 	customers: "Clientes",

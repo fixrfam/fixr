@@ -13,10 +13,12 @@ import { cn } from "@/lib/utils";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
 	table: Table<TData>;
+	showViewOptions?: boolean;
 }
 
 export function DataTableToolbar<TData>({
 	table,
+	showViewOptions = true,
 	children,
 	className,
 	...props
@@ -61,7 +63,9 @@ export function DataTableToolbar<TData>({
 			</div>
 			<div className="flex items-center gap-2">
 				{children}
-				<DataTableViewOptions align="end" table={table} />
+				{showViewOptions && (
+					<DataTableViewOptions align="end" table={table} />
+				)}
 			</div>
 		</div>
 	);

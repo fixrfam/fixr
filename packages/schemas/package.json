@@ -58,6 +58,10 @@
       "types": "./src/uploads.ts",
       "default": "./src/uploads.ts"
     },
+    "./parts": {
+      "types": "./src/parts.ts",
+      "default": "./src/parts.ts"
+    },
     "./models": {
       "types": "./src/models.ts",
       "default": "./src/models.ts"

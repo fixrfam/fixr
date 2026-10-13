@@ -84,7 +84,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "parts",
-				label: "Peças",
+				label: "Peças e Serviços",
 				href: "/parts",
 				type: "route",
 				icon: "Puzzle",

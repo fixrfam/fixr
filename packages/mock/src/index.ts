@@ -14,6 +14,23 @@ export {
 	getStatuses,
 	getTechnicians,
 } from "./options/filter-order";
+export type {
+	PartCategory,
+	PartRow,
+	ServiceDeviceCategory,
+	ServiceRow,
+	SupplierRow,
+} from "./options/parts";
+export {
+	getParts,
+	getServices,
+	getSuppliers,
+	mockParts,
+	mockServices,
+	mockSuppliers,
+	partCategories,
+	serviceDeviceCategories,
+} from "./options/parts";
 export type { ServiceOrderRow } from "./options/table-order";
 export {
 	mockServiceOrders as mockServiceOrdersTable,
