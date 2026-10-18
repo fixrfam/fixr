@@ -1,9 +1,3 @@
 export { NewPartForm } from "./forms/new-part-form";
-export { NewServiceForm } from "./forms/new-service-form";
-export { NewSupplierForm } from "./forms/new-supplier-form";
-export { PartsTabs } from "./parts-tabs";
-export { ServiceDetails } from "./service-details";
 export { usePartsStore } from "./store";
 export { PartsTable } from "./table/parts-table";
-export { ServicesTable } from "./table/services-table";
-export { SuppliersTable } from "./table/suppliers-table";

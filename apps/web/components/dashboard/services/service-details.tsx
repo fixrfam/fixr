@@ -1,8 +1,12 @@
 import type { ReactNode } from "react";
+import {
+	DurationCell,
+	PriceCell,
+	SkuCell,
+} from "@/components/dashboard/parts/table/cells";
+import type { ServiceTableRow } from "@/components/dashboard/parts/table/data";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { DurationCell, PriceCell, SkuCell } from "./table/cells";
-import type { ServiceTableRow } from "./table/data";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (

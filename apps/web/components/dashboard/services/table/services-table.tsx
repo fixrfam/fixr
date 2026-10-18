@@ -13,13 +13,13 @@ import {
 } from "@tanstack/react-table";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
+import { useServiceRows } from "@/components/dashboard/parts/store";
+import { searchServices } from "@/components/dashboard/parts/table/data";
+import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { useServiceRows } from "../store";
 import { useServiceColumns } from "./columns";
-import { searchServices } from "./data";
-import { TableToolbar } from "./toolbar";
 
 export function ServicesTable() {
 	const router = useRouter();
@@ -34,7 +34,7 @@ export function ServicesTable() {
 
 	const handleRowClick = useCallback(
 		(row: { original: { id: string } }) => {
-			router.push(`/dashboard/${subdomain}/parts/services/${row.original.id}`);
+			router.push(`/dashboard/${subdomain}/services/${row.original.id}`);
 		},
 		[router, subdomain]
 	);
@@ -66,7 +66,7 @@ export function ServicesTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
-				createHref="/parts/services/new"
+				createHref="/services/new"
 				createLabel="Novo serviço"
 				onClear={() => {
 					setSearch("");

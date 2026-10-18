@@ -1,13 +1,15 @@
 "use client";
 
 import { type ServiceRow, serviceDeviceCategories } from "@fixr/mock";
-import { createServiceSchema } from "@fixr/schemas/parts";
+import { createServiceSchema } from "@fixr/schemas/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
 import { Check, ChevronsUpDown, Plus, Save, X } from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { numberInputProps } from "@/components/dashboard/parts/forms/number-input";
+import { usePartsStore } from "@/components/dashboard/parts/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,8 +37,6 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { usePartsStore } from "../store";
-import { numberInputProps } from "./number-input";
 import { TopicsInput } from "./topics-input";
 
 function toggle(ids: string[], id: string) {

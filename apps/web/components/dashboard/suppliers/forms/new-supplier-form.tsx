@@ -1,7 +1,7 @@
 "use client";
 
 import { cnpj, phone } from "@fixr/constants/masks";
-import { createSupplierSchema } from "@fixr/schemas/parts";
+import { createSupplierSchema } from "@fixr/schemas/suppliers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
@@ -9,6 +9,7 @@ import { Building2, IdCard, Mail, PhoneIcon, Plus, User } from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { usePartsStore } from "@/components/dashboard/parts/store";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { usePartsStore } from "../store";
 
 export function NewSupplierForm({
 	onSuccess,

@@ -4,7 +4,7 @@ import { Wrench } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
-import { NewServiceForm } from "@/components/dashboard/parts/forms/new-service-form";
+import { NewServiceForm } from "@/components/dashboard/services/forms/new-service-form";
 
 export default function NewServicePage() {
 	const router = useRouter();
@@ -21,7 +21,9 @@ export default function NewServicePage() {
 			<div>
 				<NewServiceForm
 					className="max-w-2xl"
-					onSuccess={() => router.push(`/dashboard/${params.subdomain}/parts`)}
+					onSuccess={() =>
+						router.push(`/dashboard/${params.subdomain}/services`)
+					}
 				/>
 			</div>
 		</div>

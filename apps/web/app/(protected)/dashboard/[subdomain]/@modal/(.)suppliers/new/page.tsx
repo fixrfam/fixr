@@ -2,7 +2,7 @@
 
 import { Package } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { NewSupplierForm } from "@/components/dashboard/parts/forms/new-supplier-form";
+import { NewSupplierForm } from "@/components/dashboard/suppliers/forms/new-supplier-form";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
 
 export default function NewSupplierModal() {

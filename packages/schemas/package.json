@@ -58,6 +58,14 @@
       "types": "./src/uploads.ts",
       "default": "./src/uploads.ts"
     },
+    "./services": {
+      "types": "./src/services.ts",
+      "default": "./src/services.ts"
+    },
+    "./suppliers": {
+      "types": "./src/suppliers.ts",
+      "default": "./src/suppliers.ts"
+    },
     "./parts": {
       "types": "./src/parts.ts",
       "default": "./src/parts.ts"

@@ -8,12 +8,12 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
+import { useSupplierRows } from "@/components/dashboard/parts/store";
+import { searchSuppliers } from "@/components/dashboard/parts/table/data";
+import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { useSupplierRows } from "../store";
 import { useSupplierColumns } from "./columns";
-import { searchSuppliers } from "./data";
-import { TableToolbar } from "./toolbar";
 
 export function SuppliersTable() {
 	const [search, setSearch] = useState("");

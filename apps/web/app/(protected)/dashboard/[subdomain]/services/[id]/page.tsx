@@ -4,8 +4,8 @@ import { Wrench } from "lucide-react";
 import { notFound, useParams } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
-import { ServiceDetails } from "@/components/dashboard/parts/service-details";
 import { useServiceRow } from "@/components/dashboard/parts/store";
+import { ServiceDetails } from "@/components/dashboard/services/service-details";
 
 export default function ServiceDetailsPage() {
 	const { id } = useParams<{ id: string }>();

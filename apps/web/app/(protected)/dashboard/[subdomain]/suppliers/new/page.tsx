@@ -4,7 +4,7 @@ import { Package } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
-import { NewSupplierForm } from "@/components/dashboard/parts/forms/new-supplier-form";
+import { NewSupplierForm } from "@/components/dashboard/suppliers/forms/new-supplier-form";
 
 export default function NewSupplierPage() {
 	const router = useRouter();

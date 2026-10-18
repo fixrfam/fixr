@@ -2,8 +2,8 @@
 
 import { Wrench } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { NewServiceForm } from "@/components/dashboard/parts/forms/new-service-form";
 import { usePartsStore } from "@/components/dashboard/parts/store";
+import { NewServiceForm } from "@/components/dashboard/services/forms/new-service-form";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
 
 export default function EditServiceModal() {

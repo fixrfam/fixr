@@ -1,5 +1,5 @@
 import { Heading } from "@/components/dashboard/heading";
-import { SuppliersTable } from "@/components/dashboard/parts";
+import { SuppliersTable } from "@/components/dashboard/suppliers";
 
 export default function SuppliersPage() {
 	return (

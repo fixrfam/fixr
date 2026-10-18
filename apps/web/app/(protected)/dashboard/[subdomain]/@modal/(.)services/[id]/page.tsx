@@ -2,8 +2,8 @@
 
 import { Wrench } from "lucide-react";
 import { useParams } from "next/navigation";
-import { ServiceDetails } from "@/components/dashboard/parts/service-details";
 import { useServiceRow } from "@/components/dashboard/parts/store";
+import { ServiceDetails } from "@/components/dashboard/services/service-details";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
 
 export default function ServiceDetailsModal() {
