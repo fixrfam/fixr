@@ -8,6 +8,7 @@ const routeNames = {
 	estimates: "Orçamentos",
 	suppliers: "Fornecedores",
 	parts: "Peças",
+	services: "Serviços",
 	inventory: "Estoque",
 	support: "Suporte",
 	customers: "Clientes",
