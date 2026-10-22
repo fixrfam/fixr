@@ -372,9 +372,13 @@
       "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@fixr/typescript-config": "workspace:*",
+        "@testing-library/react": "catalog:",
         "@types/bun": "catalog:",
         "@types/react": "catalog:",
+        "@vitest/coverage-v8": "catalog:",
+        "jsdom": "catalog:",
         "react": "catalog:",
+        "react-dom": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
       },
