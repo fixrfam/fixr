@@ -29,7 +29,7 @@ describe("email senders", () => {
 	it.each([
 		["sendAccountVerificationEmail", "Verify your email, @maria!"],
 		["sendAccountDeletionEmail", "maria's account delete confirmation."],
-		["sendPasswordResetEmail", "Esqueceu sua senha, maria?"],
+		["sendPasswordResetEmail", "Forgot your password, maria?"],
 	] as const)("%s sends rendered HTML to the recipient", async (sender, subject) => {
 		send.mockResolvedValue({ data: { id: "e1" }, error: null });
 
@@ -39,6 +39,18 @@ describe("email senders", () => {
 		const [message] = send.mock.calls[0]!;
 		expect(message).toMatchObject({ to: ["maria@fixr.test"], subject });
 		expect(message.html).toContain("https://fixr.test/x");
+	});
+
+	it.each([
+		["sendAccountVerificationEmail", "Confirme seu email, @maria!"],
+		["sendAccountDeletionEmail", "Confirmação de exclusão da conta de maria."],
+		["sendPasswordResetEmail", "Esqueceu sua senha, maria?"],
+	] as const)("%s writes the subject in the recipient's locale", async (sender, subject) => {
+		send.mockResolvedValue({ data: { id: "e1" }, error: null });
+
+		await emails[sender]({ ...linkProps, locale: "pt-BR" });
+
+		expect(send.mock.calls[0]![0]).toMatchObject({ subject });
 	});
 
 	it("sendInviteEmail sends the invite", async () => {
@@ -54,6 +66,23 @@ describe("email senders", () => {
 		});
 
 		expect(send.mock.calls[0]![0].html).toContain("Central");
+		expect(send.mock.calls[0]![0].subject).toContain("Welcome to Fixr");
+	});
+
+	it("sendInviteEmail follows the recipient's locale", async () => {
+		send.mockResolvedValue({ data: { id: "e2" }, error: null });
+
+		await emails.sendInviteEmail({
+			to: "joao@fixr.test",
+			appName: "Fixr",
+			displayName: "João",
+			companyName: "Central",
+			password: "P@ss1word",
+			ctaUrl: "https://fixr.test/login",
+			locale: "pt-BR",
+		});
+
+		expect(send.mock.calls[0]![0].subject).toContain("Bem-vindo ao Fixr");
 	});
 
 	it("throws when Resend reports an error (so the worker retries)", async () => {

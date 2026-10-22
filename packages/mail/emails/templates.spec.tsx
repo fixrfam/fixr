@@ -1,3 +1,4 @@
+import { createTranslator, type Locale } from "@fixr/i18n";
 import { describe, expect, it } from "vitest";
 import { renderEmail as renderDeletion } from "./account-deletion";
 import { renderEmail as renderInvite } from "./invite";
@@ -11,16 +12,32 @@ const linkProps = {
 };
 
 describe.each([
-	["verification", renderVerification],
-	["account deletion", renderDeletion],
-	["password reset", renderPasswordReset],
-])("%s email", (_name, render) => {
+	["verification", renderVerification, "emails.verification.cta"],
+	["account deletion", renderDeletion, "emails.accountDeletion.cta"],
+	["password reset", renderPasswordReset, "emails.passwordReset.cta"],
+] as const)("%s email", (_name, render, ctaKey) => {
 	it("renders HTML with the name and the action link", async () => {
 		const html = await render(linkProps);
 
 		expect(html).toContain("<html");
 		expect(html).toContain("maria");
 		expect(html).toContain("https://fixr.test/confirm?token=abc123");
+	});
+
+	it.each([
+		"en",
+		"pt-BR",
+	] as Locale[])("renders the call to action in %s", async (locale) => {
+		const html = await render({ ...linkProps, locale });
+
+		expect(html).toContain(createTranslator(locale).t(ctaKey));
+	});
+
+	it("defaults to English when no locale is given", async () => {
+		const html = await render(linkProps);
+
+		expect(html).toContain(createTranslator("en").t(ctaKey));
+		expect(html).not.toContain(createTranslator("pt-BR").t(ctaKey));
 	});
 
 	it("escapes interpolated values", async () => {
@@ -57,5 +74,11 @@ describe("invite email", () => {
 		expect(html).toContain("Assistência Central");
 		expect(html).toContain("Gen3rated!Pw");
 		expect(html).toContain("https://fixr.test/auth/login");
+	});
+
+	it("renders in Portuguese for a pt-BR recipient", async () => {
+		const html = await renderInvite({ ...props, locale: "pt-BR" });
+
+		expect(html).toContain(createTranslator("pt-BR").t("emails.invite.cta"));
 	});
 });
