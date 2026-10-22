@@ -178,7 +178,23 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 	if (revalidateResponse.ok) {
 		const setCookies = revalidateResponse.headers.getSetCookie();
 		if (setCookies.length > 0) {
-			const res = NextResponse.next();
+			/**
+			 * Apply the refreshed cookies to the current request as well, so Server
+			 * Components rendered right after this middleware (e.g. getSession) see
+			 * the new session instead of the expired one that triggered the revalidation.
+			 */
+			for (const cookie of setCookies) {
+				const nameValue = cookie.split(";")[0] ?? "";
+				const separatorIndex = nameValue.indexOf("=");
+				if (separatorIndex === -1) {
+					continue;
+				}
+				const name = nameValue.slice(0, separatorIndex).trim();
+				const value = nameValue.slice(separatorIndex + 1).trim();
+				request.cookies.set(name, value);
+			}
+
+			const res = NextResponse.next({ request });
 			for (const cookie of setCookies) {
 				res.headers.append("Set-Cookie", cookie);
 			}

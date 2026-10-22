@@ -5,6 +5,7 @@ import { SessionProvider } from "@/lib/hooks/use-session";
 import QueryClientWrapper from "@/lib/query-client";
 import "../../../globals.css";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Header } from "@/components/dashboard/sidebar/header";
 import { I18nProvider } from "@/components/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -41,6 +42,10 @@ export default async function RootLayout({
 	const cookieStore = await cookies();
 	const session = getSession(cookieStore);
 	const locale = await getLocale();
+
+	if (!session) {
+		redirect("/auth/login");
+	}
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
