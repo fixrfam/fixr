@@ -11,7 +11,7 @@
     "test:unit": "vitest run",
     "test:ci": "vitest run --coverage",
     "start": "dotenv -- node dist/index.js",
-    "dev": "dotenv -- tsx watch src/index.ts",
+    "dev": "dotenv -e ../../.env -- tsx watch src/index.ts",
     "build": "dotenv -- tsup",
     "lint": "biome check",
     "lint:write": "biome check --write",

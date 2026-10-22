@@ -1,3 +1,8 @@
+# Local MySQL + Redis. Credentials come from the root `.env`.
+# The project keeps the name it had in `packages/db`, so existing local
+# containers and volumes are reused.
+name: db
+
 services:
     mysql:
         image: mysql:8.3.0-oraclelinux8

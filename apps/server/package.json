@@ -12,7 +12,7 @@
     "test:integration": "vitest run --project integration",
     "test:ci": "vitest run --project unit --coverage",
     "start": "dotenv -- node dist/server.js",
-    "dev": "dotenv -- tsx watch src/server.ts",
+    "dev": "dotenv -e ../../.env -- tsx watch src/server.ts",
     "build": "dotenv -- tsup src/server.ts",
     "lint": "biome check",
     "lint:write": "biome check --write",

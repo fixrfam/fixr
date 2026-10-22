@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dotenv -- next dev --turbopack -p 6969",
+    "dev": "dotenv -e ../../.env -- next dev --turbopack -p 6969",
     "build": "biome check && dotenv -- next build",
     "start": "dotenv -- next start -p 6969",
     "lint": "biome check",
