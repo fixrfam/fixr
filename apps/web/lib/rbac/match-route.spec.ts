@@ -1,4 +1,5 @@
-import { permissions } from "@fixr/permissions";
+import { createAbility, permissions } from "@fixr/permissions";
+import { employeeRoles } from "@fixr/schemas/roles";
 import { describe, expect, it } from "vitest";
 import {
 	getRequiredPermission,
@@ -74,6 +75,44 @@ describe("matchRoute", () => {
 		const rules: RouteRule[] = [{ path: "/a/:id", public: true }];
 
 		expect(matchRoute("/a/1/2", rules)?.params).toEqual({ id: "1" });
+	});
+});
+
+describe("parts, services and suppliers routes", () => {
+	it.each([
+		["/dashboard/fixr/parts", permissions.parts.read],
+		["/dashboard/fixr/parts/new", permissions.parts.create],
+		["/dashboard/fixr/parts/p1/edit", permissions.parts.update],
+		["/dashboard/fixr/services", permissions.services.read],
+		["/dashboard/fixr/services/new", permissions.services.create],
+		["/dashboard/fixr/services/s1", permissions.services.read],
+		["/dashboard/fixr/services/s1/edit", permissions.services.update],
+		["/dashboard/fixr/suppliers", permissions.suppliers.read],
+		["/dashboard/fixr/suppliers/new", permissions.suppliers.create],
+		["/dashboard/fixr/suppliers/sup1", permissions.suppliers.read],
+	])("%s requires %s", (path, permission) => {
+		expect(getRequiredPermission(path, routeRules)).toBe(permission);
+	});
+
+	it("no longer gates parts behind the inventory permission", () => {
+		expect(getRequiredPermission("/dashboard/fixr/parts", routeRules)).not.toBe(
+			permissions.inventory.read
+		);
+	});
+
+	it.each([
+		"/dashboard/fixr/parts",
+		"/dashboard/fixr/parts/new",
+		"/dashboard/fixr/services",
+		"/dashboard/fixr/services/s1/edit",
+		"/dashboard/fixr/suppliers/new",
+	])("only admins reach %s", (path) => {
+		const permission = getRequiredPermission(path, routeRules)!;
+		const allowed = employeeRoles.options.filter((role) =>
+			createAbility(role).can(permission)
+		);
+
+		expect(allowed).toEqual(["admin"]);
 	});
 });
 
