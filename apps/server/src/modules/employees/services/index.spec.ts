@@ -179,6 +179,7 @@ describe("EmployeesService.registerEmployee", () => {
 			userJwt: userJwt as never,
 			subdomain,
 			data: { ...data, ...overrides } as never,
+			locale: "en",
 			response: asReply(createFakeReply()),
 		});
 
@@ -205,6 +206,7 @@ describe("EmployeesService.registerEmployee", () => {
 				to: "novo@fixr.test",
 				password: "Gen3rated!Pw",
 				companyName: "Fixr",
+				locale: "en",
 			}),
 		});
 	});

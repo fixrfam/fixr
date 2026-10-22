@@ -75,7 +75,12 @@ const jwtPayload = {
 	createdAt: new Date(),
 };
 
-const request = { protocol: "https", host: "api.fixr.test" } as never;
+const request = {
+	protocol: "https",
+	host: "api.fixr.test",
+	headers: { "accept-language": "pt-BR,pt;q=0.9,en;q=0.8" },
+	cookies: {},
+} as never;
 
 beforeEach(() => {
 	vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -146,6 +151,17 @@ describe("AuthService.register", () => {
 		expect(email.verificationUrl).toBe(
 			`https://api.fixr.test/auth/verify?token=${encodeURIComponent("a/b+c")}&redirectUrl=${encodeURIComponent("http://localhost:3000/auth/login")}`
 		);
+	});
+
+	it("writes the verification email in the language the browser asks for", async () => {
+		await AuthService.register({
+			body: { email: "new@fixr.test", password: PASSWORD },
+			request,
+			response: asReply(createFakeReply()),
+		});
+
+		const [email] = mocks.sendAccountVerificationEmail.mock.calls[0]!;
+		expect(email.locale).toBe("pt-BR");
 	});
 
 	it("rolls the user back and fails when the verification email cannot be sent", async () => {

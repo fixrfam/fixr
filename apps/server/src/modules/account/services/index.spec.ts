@@ -1,4 +1,5 @@
 import { cookieKey } from "@fixr/constants/cookies";
+import { LOCALE_COOKIE } from "@fixr/i18n";
 import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
@@ -125,7 +126,12 @@ describe("AccountService.requestAccountDeletion", () => {
 
 		await AccountService.requestAccountDeletion({
 			userId,
-			request: { protocol: "https", host: "api.test" } as never,
+			request: {
+				protocol: "https",
+				host: "api.test",
+				headers: {},
+				cookies: { [LOCALE_COOKIE]: "pt-BR" },
+			} as never,
 			response: asReply(reply),
 		});
 
@@ -141,6 +147,7 @@ describe("AccountService.requestAccountDeletion", () => {
 		expect(email.verificationUrl).toContain(
 			`https://api.test/account/confirm-deletion?token=${encodeURIComponent("t+1")}`
 		);
+		expect(email.locale).toBe("pt-BR");
 		expect(reply.state.statusCode).toBe(201);
 	});
 

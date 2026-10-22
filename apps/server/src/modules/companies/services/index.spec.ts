@@ -151,7 +151,11 @@ describe("CompaniesService.createCompany", () => {
 	it("normalizes subdomain/documents, creates the org and queues the invite", async () => {
 		const reply = createFakeReply();
 
-		await CompaniesService.createCompany({ body, response: asReply(reply) });
+		await CompaniesService.createCompany({
+			body,
+			locale: "pt-BR",
+			response: asReply(reply),
+		});
 
 		expect(mocks.CompaniesRepository.createOrgWithAdmin).toHaveBeenCalledWith({
 			...body,
@@ -165,6 +169,7 @@ describe("CompaniesService.createCompany", () => {
 				to: "owner@fixr.test",
 				companyName: "Nova",
 				password: "Str0ng!Pass",
+				locale: "pt-BR",
 			}),
 		});
 		expect(reply.state.statusCode).toBe(201);
@@ -181,6 +186,7 @@ describe("CompaniesService.createCompany", () => {
 		await expect(
 			CompaniesService.createCompany({
 				body,
+				locale: "en",
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code, status: 409 });
@@ -190,6 +196,7 @@ describe("CompaniesService.createCompany", () => {
 	it("checks subdomain uniqueness against the normalized value", async () => {
 		await CompaniesService.createCompany({
 			body,
+			locale: "en",
 			response: asReply(createFakeReply()),
 		});
 

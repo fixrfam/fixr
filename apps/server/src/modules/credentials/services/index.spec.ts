@@ -121,6 +121,7 @@ describe("CredentialsService.requestPasswordReset", () => {
 
 		await CredentialsService.requestPasswordReset({
 			email: "a@fixr.test",
+			locale: "pt-BR",
 			response: asReply(reply),
 		});
 
@@ -138,6 +139,7 @@ describe("CredentialsService.requestPasswordReset", () => {
 				to: "a@fixr.test",
 				displayName: "a",
 				verificationUrl: `http://localhost:3000/auth/forgot-password/${encodeURIComponent("a/b")}`,
+				locale: "pt-BR",
 			}),
 		});
 		expect(reply.state.statusCode).toBe(201);
@@ -151,6 +153,7 @@ describe("CredentialsService.requestPasswordReset", () => {
 		await expect(
 			CredentialsService.requestPasswordReset({
 				email: "a@fixr.test",
+				locale: "en",
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "existing_password_reset_request" });
@@ -164,6 +167,7 @@ describe("CredentialsService.requestPasswordReset", () => {
 
 		await CredentialsService.requestPasswordReset({
 			email: "a@fixr.test",
+			locale: "en",
 			response: asReply(createFakeReply()),
 		});
 
@@ -178,6 +182,7 @@ describe("CredentialsService.requestPasswordReset", () => {
 		await expect(
 			CredentialsService.requestPasswordReset({
 				email: "ghost@fixr.test",
+				locale: "en",
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "user_not_found", status: 404 });
