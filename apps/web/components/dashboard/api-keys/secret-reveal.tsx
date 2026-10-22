@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
 import { Check, Copy, TriangleAlert } from "lucide-react";
 import { useState } from "react";
@@ -19,17 +20,18 @@ export function SecretReveal({
 	secret: string;
 	onDone: () => void;
 }) {
+	const { t } = useTranslation();
 	const [copied, setCopied] = useState(false);
 
 	async function copy() {
 		try {
 			await navigator.clipboard.writeText(secret);
 			setCopied(true);
-			toast.success({ text: "Segredo copiado" });
+			toast.success({ text: t("apiKeys.secret.copied") });
 		} catch {
 			toast.error({
-				text: "Não foi possível copiar",
-				description: "Selecione o texto e copie manualmente.",
+				text: t("apiKeys.secret.copyFailedTitle"),
+				description: t("apiKeys.secret.copyFailedDescription"),
 			});
 		}
 	}
@@ -38,17 +40,14 @@ export function SecretReveal({
 		<div className="space-y-5">
 			<Alert variant="warning">
 				<TriangleAlert />
-				<AlertTitle>
-					Copie agora, este segredo não será exibido de novo
-				</AlertTitle>
+				<AlertTitle>{t("apiKeys.secret.warningTitle")}</AlertTitle>
 				<AlertDescription>
-					O Fixr guarda apenas um hash da chave. Se você perder este valor, será
-					preciso revogar a chave e criar outra.
+					{t("apiKeys.secret.warningDescription")}
 				</AlertDescription>
 			</Alert>
 
 			<div className="space-y-2">
-				<p className="font-medium text-sm">Seu segredo</p>
+				<p className="font-medium text-sm">{t("apiKeys.secret.label")}</p>
 				<div className="flex items-center gap-2">
 					<code className="min-w-0 grow break-all rounded-md border border-border bg-muted px-3 py-2 font-mono text-xs">
 						{secret}
@@ -64,17 +63,21 @@ export function SecretReveal({
 						) : (
 							<Copy className="size-4" />
 						)}
-						<span className="sr-only">Copiar segredo</span>
+						<span className="sr-only">{t("apiKeys.secret.copy")}</span>
 					</Button>
 				</div>
 				<p className="text-muted-foreground text-xs">
-					Envie no header <code>x-api-key</code> ou como{" "}
-					<code>Authorization: Bearer &lt;segredo&gt;</code>.
+					{t("apiKeys.secret.usageBefore")} <code>x-api-key</code>{" "}
+					{t("apiKeys.secret.usageBetween")}{" "}
+					<code>
+						Authorization: Bearer &lt;{t("apiKeys.secret.secretWord")}&gt;
+					</code>
+					.
 				</p>
 			</div>
 
 			<Button className="w-full" onClick={onDone} type="button">
-				Já copiei, fechar
+				{t("apiKeys.secret.done")}
 			</Button>
 		</div>
 	);

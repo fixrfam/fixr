@@ -1,6 +1,7 @@
 "use client";
 
 import { cpf, unmask } from "@fixr/constants/masks";
+import { useTranslation } from "@fixr/i18n/react";
 import { getDevices } from "@fixr/mock";
 import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,11 +48,14 @@ import {
 import { cn } from "@/lib/utils";
 import { NewClientForm } from "../clients/new-client-form";
 
+/** Developer-facing: this never reaches the screen, only the console. */
+const IMAGE_READ_ERROR = "Failed to read the image file";
+
 function fileToDataUrl(file: File): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
 		reader.onload = () => resolve(String(reader.result));
-		reader.onerror = () => reject(new Error("Erro ao ler imagem"));
+		reader.onerror = () => reject(new Error(IMAGE_READ_ERROR));
 		reader.readAsDataURL(file);
 	});
 }
@@ -63,6 +67,7 @@ export function NewServiceOrderForm({
 	className,
 	...props
 }: ComponentPropsWithoutRef<"form">) {
+	const { t } = useTranslation();
 	const form = useForm<z.infer<typeof createOrderServiceSchema>>({
 		resolver: zodResolver(createOrderServiceSchema),
 		defaultValues: {
@@ -133,15 +138,15 @@ export function NewServiceOrderForm({
 
 	const modeloPlaceholder = useMemo(() => {
 		if (!(selectedMarca && selectedCategoria)) {
-			return "Selecione marca e categoria primeiro";
+			return t("serviceOrders.form.modelBlocked");
 		}
 
 		if (loadingDevices) {
-			return "Carregando modelos...";
+			return t("serviceOrders.form.modelLoading");
 		}
 
-		return "Selecione um modelo";
-	}, [selectedMarca, selectedCategoria, loadingDevices]);
+		return t("serviceOrders.form.modelPlaceholder");
+	}, [selectedMarca, selectedCategoria, loadingDevices, t]);
 
 	const selectedImages = form.watch("images") ?? [];
 
@@ -173,10 +178,14 @@ export function NewServiceOrderForm({
 							name="customerCPF"
 							render={({ field }) => (
 								<FormItem className="grow">
-									<FormLabel>CPF do cliente</FormLabel>
+									<FormLabel>
+										{t("serviceOrders.form.clientDocumentLabel")}
+									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="123.456.789-00"
+											placeholder={t(
+												"serviceOrders.form.clientDocumentPlaceholder"
+											)}
 											{...field}
 											onInput={(e) =>
 												form.setValue("customerCPF", e.currentTarget.value)
@@ -193,14 +202,17 @@ export function NewServiceOrderForm({
 					<Sheet>
 						<SheetTrigger asChild className="mt-5.5">
 							<Button className="shrink-0" type="button">
-								Cadastrar novo <UserPlus className="size-4" />
+								{t("serviceOrders.form.newClient")}{" "}
+								<UserPlus className="size-4" />
 							</Button>
 						</SheetTrigger>
 						<SheetContent>
 							<SheetHeader>
-								<SheetTitle>Novo cliente</SheetTitle>
+								<SheetTitle>
+									{t("serviceOrders.form.newClientTitle")}
+								</SheetTitle>
 								<SheetDescription>
-									Cadastre um novo cliente preenchendo os campos abaixo.
+									{t("serviceOrders.form.newClientDescription")}
 								</SheetDescription>
 							</SheetHeader>
 							<NewClientForm
@@ -216,12 +228,12 @@ export function NewServiceOrderForm({
 					name="description"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
-							<FormLabel>Defeito relatado pelo cliente</FormLabel>
+							<FormLabel>{t("serviceOrders.form.issueLabel")}</FormLabel>
 							<FormControl>
 								<Textarea
 									autoCapitalize="off"
 									autoCorrect="off"
-									placeholder="Descreva o defeito relatado pelo cliente"
+									placeholder={t("serviceOrders.form.issuePlaceholder")}
 									spellCheck={false}
 									{...field}
 								/>
@@ -232,7 +244,7 @@ export function NewServiceOrderForm({
 				/>
 
 				<FormItem className="flex-grow">
-					<FormLabel>Marca</FormLabel>
+					<FormLabel>{t("serviceOrders.form.brandLabel")}</FormLabel>
 					<FormControl>
 						<Select
 							disabled={loadingDevices}
@@ -246,7 +258,9 @@ export function NewServiceOrderForm({
 							<SelectTrigger className="w-full">
 								<SelectValue
 									placeholder={
-										loadingDevices ? "Carregando..." : "Selecione uma marca"
+										loadingDevices
+											? t("serviceOrders.form.brandLoading")
+											: t("serviceOrders.form.brandPlaceholder")
 									}
 								/>
 							</SelectTrigger>
@@ -263,7 +277,7 @@ export function NewServiceOrderForm({
 				</FormItem>
 
 				<FormItem className="flex-grow">
-					<FormLabel>Categoria do aparelho</FormLabel>
+					<FormLabel>{t("serviceOrders.form.categoryLabel")}</FormLabel>
 					<FormControl>
 						<Select
 							disabled={!selectedMarca || loadingDevices}
@@ -277,8 +291,8 @@ export function NewServiceOrderForm({
 								<SelectValue
 									placeholder={
 										loadingDevices
-											? "Carregando categorias..."
-											: "Selecione uma categoria"
+											? t("serviceOrders.form.categoryLoading")
+											: t("serviceOrders.form.categoryPlaceholder")
 									}
 								/>
 							</SelectTrigger>
@@ -299,7 +313,7 @@ export function NewServiceOrderForm({
 					name="deviceId"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
-							<FormLabel>Modelo</FormLabel>
+							<FormLabel>{t("serviceOrders.form.modelLabel")}</FormLabel>
 							<FormControl>
 								<Select
 									disabled={
@@ -330,9 +344,12 @@ export function NewServiceOrderForm({
 					name="deviceIMEI"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
-							<FormLabel>Número de IMEI</FormLabel>
+							<FormLabel>{t("serviceOrders.form.imeiLabel")}</FormLabel>
 							<FormControl>
-								<Input placeholder="123456789012345" {...field} />
+								<Input
+									placeholder={t("serviceOrders.form.imeiPlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -344,12 +361,12 @@ export function NewServiceOrderForm({
 					name="notes"
 					render={({ field }) => (
 						<FormItem className="flex-grow">
-							<FormLabel>Observações</FormLabel>
+							<FormLabel>{t("serviceOrders.form.notesLabel")}</FormLabel>
 							<FormControl>
 								<Textarea
 									autoCapitalize="off"
 									autoCorrect="off"
-									placeholder="Adicione observações sobre a ordem de serviço"
+									placeholder={t("serviceOrders.form.notesPlaceholder")}
 									spellCheck={false}
 									{...field}
 								/>
@@ -364,7 +381,7 @@ export function NewServiceOrderForm({
 					name="images"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Fotos do aparelho</FormLabel>
+							<FormLabel>{t("serviceOrders.form.imagesLabel")}</FormLabel>
 							<FormControl>
 								<div className="space-y-3">
 									<input
@@ -385,8 +402,10 @@ export function NewServiceOrderForm({
 									>
 										<span>
 											{selectedImages.length > 0
-												? `${selectedImages.length} imagem(ns) selecionada(s)`
-												: "Selecione fotos do aparelho (PNG, JPG, WEBP)"}
+												? t("serviceOrders.form.imagesSelected", {
+														count: selectedImages.length,
+													})
+												: t("serviceOrders.form.imagesPlaceholder")}
 										</span>
 										<ImagePlus className="h-4 w-4" />
 									</label>
@@ -415,7 +434,9 @@ export function NewServiceOrderForm({
 														/>
 
 														<button
-															aria-label={`Remover ${file.name}`}
+															aria-label={t("serviceOrders.form.imageRemove", {
+																name: file.name,
+															})}
 															className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
 															onClick={() => {
 																const nextFiles = selectedImages.filter(
@@ -442,7 +463,7 @@ export function NewServiceOrderForm({
 
 				<div className="pt-4">
 					<Button className="w-full" type="submit">
-						Salvar ordem de serviço
+						{t("serviceOrders.form.submit")}
 					</Button>
 				</div>
 			</form>

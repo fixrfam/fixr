@@ -1,14 +1,10 @@
+import { useTranslation } from "@fixr/i18n/react";
 import { ExternalLink, Pencil } from "lucide-react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { STOCK_STATUS_LABELS, type StockStatusId } from "./data";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-	style: "currency",
-	currency: "BRL",
-});
+import { STOCK_STATUS_KEYS, type StockStatusId } from "./data";
 
 function formatDuration(minutes: number) {
 	const hours = Math.floor(minutes / 60);
@@ -65,9 +61,11 @@ export function TextCell({ value }: { value: string }) {
 }
 
 export function PriceCell({ value }: { value: number }) {
+	const { format } = useTranslation();
+
 	return (
 		<span className="whitespace-nowrap tabular-nums">
-			{currencyFormatter.format(value)}
+			{format.currency(value)}
 		</span>
 	);
 }
@@ -79,6 +77,8 @@ export function StockCell({
 	stock: number;
 	status: StockStatusId;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="flex items-center gap-2">
 			<span className="font-medium tabular-nums">{stock}</span>
@@ -86,7 +86,7 @@ export function StockCell({
 				className={cn("rounded-md", STOCK_STATUS_STYLES[status])}
 				variant="outline"
 			>
-				{STOCK_STATUS_LABELS[status]}
+				{t(STOCK_STATUS_KEYS[status])}
 			</Badge>
 		</div>
 	);
@@ -97,9 +97,13 @@ export function QuantityCell({ value }: { value: number }) {
 }
 
 export function SupplierCell({ name, cnpj }: { name?: string; cnpj?: string }) {
+	const { t } = useTranslation();
+
 	if (!name) {
 		return (
-			<span className="text-muted-foreground text-xs">Sem fornecedor</span>
+			<span className="text-muted-foreground text-xs">
+				{t("parts.table.noSupplier")}
+			</span>
 		);
 	}
 
@@ -186,6 +190,8 @@ export function EditCell({
 	label: string;
 	subdomain: string;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<div>
 			<Button
@@ -196,7 +202,7 @@ export function EditCell({
 				variant="outline"
 			>
 				<DashLink aria-label={label} href={href} subdomain={subdomain}>
-					<Pencil className="size-3.5" /> Editar
+					<Pencil className="size-3.5" /> {t("common.actions.edit")}
 				</DashLink>
 			</Button>
 		</div>

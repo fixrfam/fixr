@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	type ColumnDef,
 	createColumnHelper,
@@ -29,31 +30,42 @@ function deviceCategoriesFilter(
 export function useServiceColumns(
 	subdomain: string
 ): ColumnDef<ServiceTableRow>[] {
+	const { t } = useTranslation();
+
 	return useMemo(
 		() => [
 			serviceColumnHelper.accessor("name", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Nome" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.name")}
+					/>
 				),
 				cell: ({ getValue }) => <NameCell clickable name={getValue()} />,
-				meta: { label: "Nome" },
+				meta: { label: t("services.table.headers.name") },
 			}),
 			serviceColumnHelper.accessor("description", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Descrição" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.description")}
+					/>
 				),
 				cell: ({ getValue }) => (
 					<span className="block max-w-80 truncate text-2xs">{getValue()}</span>
 				),
-				meta: { label: "Descrição" },
+				meta: { label: t("services.table.headers.description") },
 			}),
 			serviceColumnHelper.accessor("deviceCategories", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Categorias" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.categories")}
+					/>
 				),
 				cell: ({ getValue }) => (
 					<LinkedItemsCell
-						emptyLabel="Sem categoria"
+						emptyLabel={t("services.table.noCategory")}
 						items={getValue().map((category) => ({
 							id: category,
 							label: category,
@@ -68,40 +80,49 @@ export function useServiceColumns(
 				filterFn: deviceCategoriesFilter,
 				getUniqueValues: (row) => row.deviceCategories,
 				meta: {
-					label: "Categorias",
+					label: t("services.table.headers.categories"),
 					variant: "multiSelect",
 					options: DEVICE_CATEGORY_OPTIONS,
 				},
 			}),
 			serviceColumnHelper.accessor("estimatedDurationMinutes", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Duração estimada" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.duration")}
+					/>
 				),
 				cell: ({ getValue }) => <DurationCell minutes={getValue()} />,
-				meta: { label: "Duração estimada" },
+				meta: { label: t("services.table.headers.duration") },
 			}),
 			serviceColumnHelper.accessor("price", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Preço" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.price")}
+					/>
 				),
 				cell: ({ getValue }) => <PriceCell value={getValue()} />,
-				meta: { label: "Preço" },
+				meta: { label: t("services.table.headers.price") },
 			}),
 			serviceColumnHelper.accessor((row) => row.parts.length, {
 				id: "parts",
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Peças vinculadas" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("services.table.headers.parts")}
+					/>
 				),
 				cell: ({ row }) => (
 					<LinkedItemsCell
-						emptyLabel="Sem peças"
+						emptyLabel={t("services.table.noParts")}
 						items={row.original.parts.map((part) => ({
 							id: part.id,
 							label: part.name,
 						}))}
 					/>
 				),
-				meta: { label: "Peças vinculadas" },
+				meta: { label: t("services.table.headers.parts") },
 			}),
 			serviceColumnHelper.display({
 				id: "actions",
@@ -109,13 +130,13 @@ export function useServiceColumns(
 					<DataTableColumnHeader
 						className="px-0.5"
 						column={column}
-						label="Editar"
+						label={t("services.table.headers.actions")}
 					/>
 				),
 				cell: ({ row }) => (
 					<EditCell
 						href={`/services/${row.original.id}/edit`}
-						label={`Editar ${row.original.name}`}
+						label={t("services.table.editLabel", { name: row.original.name })}
 						subdomain={subdomain}
 					/>
 				),
@@ -123,6 +144,6 @@ export function useServiceColumns(
 				enableHiding: false,
 			}),
 		],
-		[subdomain]
+		[subdomain, t]
 	) as ColumnDef<ServiceTableRow>[];
 }

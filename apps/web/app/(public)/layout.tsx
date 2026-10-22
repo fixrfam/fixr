@@ -4,9 +4,11 @@ import "../globals.css";
 import { ApiDowntimeBanner } from "@/components/home/api-downtime-banner";
 import Footer from "@/components/home/layout/footer";
 import Header from "@/components/home/layout/header";
+import { I18nProvider } from "@/components/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { SessionProvider } from "@/lib/hooks/use-session";
+import { getLocale, getTranslator } from "@/lib/i18n/server";
 
 const inter = localFont({
 	src: "../fonts/InterVF.ttf",
@@ -20,31 +22,36 @@ const cal = localFont({
 	weight: "100 200 300 400 500 600 700 800 900",
 });
 
-export const metadata: Metadata = {
-	title: "Fixr",
-	description: "O jeito fácil de gerenciar sua assistência técnica.",
-	openGraph: {
-		type: "website",
-		url: "https://fixr.com.br",
-		title: "O jeito fácil de gerenciar sua assistência técnica",
-		description:
-			"Simplifique processos, reduza erros e ofereça um atendimento mais ágil e profissional na sua assistência técnica.",
-		siteName: "Fixr",
-		images: [{ url: "https://fixr.com.br/og_image.jpg" }],
-	},
-	twitter: {
-		card: "summary_large_image",
-		images: "https://fixr.com.br/twitter_image.jpg",
-	},
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const { t } = await getTranslator();
 
-export default function RootLayout({
+	return {
+		title: t("common.app.name"),
+		description: t("common.app.tagline"),
+		openGraph: {
+			type: "website",
+			url: "https://fixr.com.br",
+			title: t("common.app.tagline"),
+			description: t("common.app.description"),
+			siteName: t("common.app.name"),
+			images: [{ url: "https://fixr.com.br/og_image.jpg" }],
+		},
+		twitter: {
+			card: "summary_large_image",
+			images: "https://fixr.com.br/twitter_image.jpg",
+		},
+	};
+}
+
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const locale = await getLocale();
+
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang={locale} suppressHydrationWarning>
 			<head>
 				<script
 					defer
@@ -54,22 +61,24 @@ export default function RootLayout({
 			<body
 				className={`${inter.variable} ${cal.variable} font-(family-name:--font-inter) antialiased`}
 			>
-				<SessionProvider>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="system"
-						disableTransitionOnChange
-						enableSystem
-					>
-						<div className="min-h-screen items-center justify-items-center gap-16">
-							<ApiDowntimeBanner />
-							<Header />
-							{children}
-							<Footer className="z-2" />
-						</div>
-						<ThemedToaster />
-					</ThemeProvider>
-				</SessionProvider>
+				<I18nProvider locale={locale}>
+					<SessionProvider>
+						<ThemeProvider
+							attribute="class"
+							defaultTheme="system"
+							disableTransitionOnChange
+							enableSystem
+						>
+							<div className="min-h-screen items-center justify-items-center gap-16">
+								<ApiDowntimeBanner />
+								<Header />
+								{children}
+								<Footer className="z-2" />
+							</div>
+							<ThemedToaster />
+						</ThemeProvider>
+					</SessionProvider>
+				</I18nProvider>
 			</body>
 		</html>
 	);

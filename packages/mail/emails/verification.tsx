@@ -1,3 +1,10 @@
+/**
+ * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
+ * from our own catalogs and every interpolated value is escaped by the
+ * translator, so the only markup that reaches the email is the emphasis the
+ * design asks for.
+ */
+import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
 import {
 	Body,
 	Button,
@@ -5,7 +12,6 @@ import {
 	Head,
 	Html,
 	Img,
-	Link,
 	Preview,
 	Section,
 	Text,
@@ -18,6 +24,8 @@ interface EmailProps {
 	displayName: string;
 	appName: string;
 	verificationUrl: string;
+	/** Language of the recipient. Defaults to the app's default locale. */
+	locale?: Locale;
 }
 
 const _baseUrl = process.env.VERCEL_URL
@@ -28,40 +36,51 @@ export const VerificationEmail = ({
 	displayName,
 	appName,
 	verificationUrl,
-}: EmailProps) => (
-	<Html>
-		<Head />
-		<Preview>{displayName}, Confirm your email!</Preview>
-		<Body style={main}>
-			<Container style={container}>
-				<Img alt="" height="25" src={"/public/logo.png"} width="31" />
+	locale = defaultLocale,
+}: EmailProps) => {
+	const { t } = createTranslator(locale, { escapeValues: true });
 
-				<Text style={title}>
-					<strong>{displayName}</strong>, your new account is just one step
-					away.
-				</Text>
+	return (
+		<Html>
+			<Head />
+			<Preview>
+				{t("emails.verification.preview", { name: displayName })}
+			</Preview>
+			<Body style={main}>
+				<Container style={container}>
+					<Img alt="" height="25" src={"/public/logo.png"} width="31" />
 
-				<Section style={section}>
-					<Text style={text}>
-						Hey <strong>{displayName}</strong>!
-					</Text>
-					<Text style={text}>
-						You have registered a new account on <Link>{appName}</Link>, click
-						the button below to confirm your identity.
-					</Text>
+					<Text
+						dangerouslySetInnerHTML={{
+							__html: t("emails.verification.title", { name: displayName }),
+						}}
+						style={title}
+					/>
 
-					<Button href={verificationUrl} style={button} target="_blank">
-						Verify email
-					</Button>
-				</Section>
+					<Section style={section}>
+						<Text
+							dangerouslySetInnerHTML={{
+								__html: t("emails.verification.greeting", {
+									name: displayName,
+								}),
+							}}
+							style={text}
+						/>
+						<Text style={text}>
+							{t("emails.verification.body", { app: appName })}
+						</Text>
 
-				<Text style={footer}>
-					If you haven't registered, please ignore this email.
-				</Text>
-			</Container>
-		</Body>
-	</Html>
-);
+						<Button href={verificationUrl} style={button} target="_blank">
+							{t("emails.verification.cta")}
+						</Button>
+					</Section>
+
+					<Text style={footer}>{t("emails.verification.footer")}</Text>
+				</Container>
+			</Body>
+		</Html>
+	);
+};
 
 VerificationEmail.PreviewProps = {
 	displayName: "alanturing",
@@ -128,16 +147,14 @@ export async function renderEmail({
 	verificationUrl,
 	displayName,
 	appName,
-}: {
-	verificationUrl: string;
-	displayName: string;
-	appName: string;
-}): Promise<string> {
+	locale,
+}: EmailProps): Promise<string> {
 	try {
 		return await render(
 			<VerificationEmail
 				appName={appName}
 				displayName={displayName}
+				locale={locale}
 				verificationUrl={verificationUrl}
 			/>
 		);

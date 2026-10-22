@@ -16,7 +16,8 @@ apps/
 packages/
  ├─ db/                 Drizzle ORM schema, migrations, MySQL connection
  ├─ schemas/            Zod schemas shared between frontend and backend
- ├─ constants/          Shared constants/enums (roles, cookies, masks, messages)
+ ├─ constants/          Shared constants/enums (cookies, masks, slugs)
+ ├─ i18n/               Translation catalogs (en, pt-BR) + typed translator
  ├─ env/                Centralized env var validation (Zod, per app)
  ├─ permissions/        RBAC ability definitions
  ├─ mail/                React Email templates + mail queue
@@ -49,6 +50,7 @@ Run from the repo root unless noted:
 - **IDs**: use `createId()` from `@paralleldrive/cuid2` for primary keys (`.$defaultFn(() => createId())` in Drizzle schema). Not UUID, not auto-increment.
 - **Workspace imports**: use the `@fixr/<package>` workspace protocol with subpath exports, e.g. `@fixr/db/connection`, `@fixr/db/schema`, `@fixr/schemas/account`, `@fixr/permissions`. Don't deep-import across a package's internal file paths.
 - **Env vars**: always go through `@fixr/env/<app>` (Zod-validated via `@t3-oss/env-core`). Never read `process.env` directly in app code — add the var to the relevant `packages/env/src/<app>.ts` first.
+- **User facing text**: never hardcode copy in a component. Add the key to `packages/i18n/src/locales/en` and `pt-BR`, then render it with `useTranslation()` (client), `getTranslator()` (server components) or `createTranslator(locale)` (API, workers, emails). Schemas emit keys with `i18nMessage(...)`, and the API answers with a `code` that the frontend turns into copy — the backend never sends user facing text. `bun run i18n:scan` lists copy still written inline. See `packages/i18n/README.md`.
 
 ### Server (`apps/server`) module structure
 

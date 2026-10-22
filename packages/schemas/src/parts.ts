@@ -1,33 +1,38 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 
 export const createPartSchema = z
 	.object({
 		sku: z
 			.string()
-			.min(1, "O SKU é obrigatório")
-			.max(50, "O SKU excede 50 caracteres"),
+			.min(1, i18nMessage("validation.part.skuRequired"))
+			.max(50, i18nMessage("validation.part.skuMax", { count: 50 })),
 		name: z
 			.string()
-			.min(1, "O nome é obrigatório")
-			.max(120, "O nome excede 120 caracteres"),
-		category: z.string().min(1, "Selecione a categoria"),
+			.min(1, i18nMessage("validation.name.required"))
+			.max(120, i18nMessage("validation.name.atMost", { count: 120 })),
+		category: z
+			.string()
+			.min(1, i18nMessage("validation.part.categoryRequired")),
 		costPrice: z
-			.number({ error: "Informe o preço de custo" })
-			.min(0, "O preço de custo não pode ser negativo"),
+			.number({ error: i18nMessage("validation.part.costPriceRequired") })
+			.min(0, i18nMessage("validation.part.costPriceMin")),
 		salePrice: z
-			.number({ error: "Informe o preço de venda" })
-			.min(0, "O preço de venda não pode ser negativo"),
+			.number({ error: i18nMessage("validation.part.salePriceRequired") })
+			.min(0, i18nMessage("validation.part.salePriceMin")),
 		stock: z
-			.number({ error: "Informe o estoque" })
-			.int("O estoque deve ser um número inteiro")
-			.min(0, "O estoque não pode ser negativo"),
+			.number({ error: i18nMessage("validation.part.stockRequired") })
+			.int(i18nMessage("validation.part.stockInteger"))
+			.min(0, i18nMessage("validation.part.stockMin")),
 		minStock: z
-			.number({ error: "Informe o estoque mínimo" })
-			.int("O estoque mínimo deve ser um número inteiro")
-			.min(0, "O estoque mínimo não pode ser negativo"),
-		supplierId: z.string().min(1, "Selecione o fornecedor"),
+			.number({ error: i18nMessage("validation.part.minStockRequired") })
+			.int(i18nMessage("validation.part.minStockInteger"))
+			.min(0, i18nMessage("validation.part.minStockMin")),
+		supplierId: z
+			.string()
+			.min(1, i18nMessage("validation.part.supplierRequired")),
 	})
 	.refine((data) => data.salePrice >= data.costPrice, {
-		message: "O preço de venda deve ser maior ou igual ao preço de custo",
+		message: i18nMessage("validation.part.salePriceBelowCost"),
 		path: ["salePrice"],
 	});

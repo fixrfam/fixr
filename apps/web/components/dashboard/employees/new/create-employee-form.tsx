@@ -1,7 +1,6 @@
 "use client";
 import { cpf, unmask } from "@fixr/constants/masks";
-import { defaultMessages, messages } from "@fixr/constants/messages";
-import { roleLabels } from "@fixr/constants/roles";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { createEmployeeSchema } from "@fixr/schemas/employees";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +42,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { axios } from "@/lib/auth/axios";
+import { roleLabelKeys } from "@/lib/i18n/labels";
 import { api, tryCatch } from "@/lib/utils";
 import { generateRandomPassword } from "@/lib/utils/generate-random-password";
 
@@ -51,6 +51,8 @@ export function NewEmployeeForm({
 }: ComponentPropsWithoutRef<"form"> & {
 	onSuccess?: () => void;
 }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const { subdomain } = useParams<{ subdomain: string }>();
 
@@ -82,22 +84,20 @@ export function NewEmployeeForm({
 			>(axios.post(api(`/companies/${subdomain}/employees`), formatted));
 
 			if (error && error instanceof AxiosError) {
-				const message =
-					messages[error.response?.data.code] ?? defaultMessages.error;
+				const feedback = message(error.response?.data.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				return;
 			}
 
-			const message =
-				messages[response?.data.code as string] ?? defaultMessages.success;
+			const feedback = message(response?.data.code, "success");
 
 			toast.success({
-				text: message.title,
-				description: message.description,
+				text: feedback.title,
+				description: feedback.description,
 			});
 
 			onSuccess?.();
@@ -128,13 +128,16 @@ export function NewEmployeeForm({
 						<FormItem>
 							<FormLabel>
 								<User className="mr-1 inline-block size-3.5" />
-								Nome do funcionário
+								{t("employees.form.nameLabel")}
 							</FormLabel>
 							<FormControl>
-								<Input placeholder="João da Silva" {...field} />
+								<Input
+									placeholder={t("employees.form.namePlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Este será o nome exibido no sistema.
+								{t("employees.form.nameDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -147,24 +150,26 @@ export function NewEmployeeForm({
 						<FormItem>
 							<FormLabel>
 								<BriefcaseBusiness className="mr-1 inline-block size-3.5" />
-								Cargo
+								{t("employees.form.roleLabel")}
 							</FormLabel>
 							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger className="w-full">
-										<SelectValue placeholder="Selecione um cargo" />
+										<SelectValue
+											placeholder={t("employees.form.rolePlaceholder")}
+										/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{Object.entries(roleLabels).map(([role, label]) => (
+									{Object.entries(roleLabelKeys).map(([role, labelKey]) => (
 										<SelectItem key={role} value={role}>
-											{label}
+											{t(labelKey)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 							<FormDescription>
-								Nível de acesso do funcionário no Fixr.
+								{t("employees.form.roleDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -177,11 +182,11 @@ export function NewEmployeeForm({
 						<FormItem>
 							<FormLabel>
 								<IdCard className="mr-1 inline-block size-3.5" />
-								CPF
+								{t("employees.form.documentLabel")}
 							</FormLabel>
 							<FormControl>
 								<Input
-									placeholder="123.456.789-00"
+									placeholder={t("employees.form.documentPlaceholder")}
 									{...field}
 									onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
 									ref={cpfMask}
@@ -198,13 +203,16 @@ export function NewEmployeeForm({
 						<FormItem>
 							<FormLabel>
 								<Mail className="mr-1 inline-block size-3.5" />
-								Email
+								{t("employees.form.emailLabel")}
 							</FormLabel>
 							<FormControl>
-								<Input placeholder="email@funcionario.com" {...field} />
+								<Input
+									placeholder={t("employees.form.emailPlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Utilizado para login no sistema.
+								{t("employees.form.emailDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -217,7 +225,7 @@ export function NewEmployeeForm({
 						<FormItem>
 							<FormLabel>
 								<Lock className="mr-1 inline-block size-3.5" />
-								Senha
+								{t("employees.form.passwordLabel")}
 							</FormLabel>
 							<FormControl>
 								<div className="flex w-full items-center gap-2">
@@ -232,11 +240,13 @@ export function NewEmployeeForm({
 										variant={"outline"}
 									>
 										<Dices className="size-3.5" />
-										Gerar
+										{t("employees.form.generate")}
 									</Button>
 								</div>
 							</FormControl>
-							<FormDescription>A senha de login do funcionário</FormDescription>
+							<FormDescription>
+								{t("employees.form.passwordDescription")}
+							</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -247,7 +257,7 @@ export function NewEmployeeForm({
 						disabled={!form.formState.isValid || loading}
 						type="submit"
 					>
-						Cadastrar{" "}
+						{t("employees.form.submit")}{" "}
 						{loading ? <Loader2 className="animate-spin" /> : <Plus />}
 					</Button>
 				</div>

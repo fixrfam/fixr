@@ -25,6 +25,7 @@
     "@biomejs/biome": "catalog:",
     "@fixr/constants": "workspace:*",
     "@fixr/env": "workspace:*",
+    "@fixr/i18n": "workspace:*",
     "@react-email/components": "catalog:",
     "@react-email/tailwind": "1.0.4",
     "@types/bun": "catalog:",

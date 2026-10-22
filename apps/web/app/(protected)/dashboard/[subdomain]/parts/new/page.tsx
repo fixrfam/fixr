@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Puzzle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -8,15 +9,16 @@ import { NewPartForm } from "@/components/dashboard/parts/forms/new-part-form";
 
 export default function NewPartPage() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	return (
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Preencha os campos abaixo para cadastrar uma nova peça."
+				description={t("parts.page.newDescription")}
 				Icon={Puzzle}
-				title="Cadastrar peça"
+				title={t("parts.page.newTitle")}
 			/>
 			<div>
 				<NewPartForm

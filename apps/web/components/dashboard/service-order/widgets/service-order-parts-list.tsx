@@ -1,10 +1,18 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
+
 /**
  * List of parts required for a service order.
  */
 function ServiceOrderPartsList({ parts }: { parts?: string[] }) {
+	const { t } = useTranslation();
+
 	if (!parts || parts.length === 0) {
 		return (
-			<p className="text-2xs text-muted-foreground">Nenhuma peça registrada.</p>
+			<p className="text-2xs text-muted-foreground">
+				{t("serviceOrders.cards.noPartsRecorded")}
+			</p>
 		);
 	}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { createAbility, permissions } from "@fixr/permissions";
 import {
 	type ColumnFiltersState,
@@ -25,6 +26,7 @@ import { CreateApiKeyDialog } from "./create-api-key-dialog";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 
 export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
+	const { t, format } = useTranslation();
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [revoking, setRevoking] = useState<ApiKeyRow | null>(null);
 	const { session } = useSession();
@@ -35,8 +37,8 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 	const canRevoke = ability.can(permissions.apiKeys.revoke);
 
 	const columns = useMemo(
-		() => buildColumns({ onRevoke: setRevoking, canRevoke }),
-		[canRevoke]
+		() => buildColumns({ onRevoke: setRevoking, canRevoke, t, format }),
+		[canRevoke, t, format]
 	);
 
 	const table = useReactTable({
@@ -58,7 +60,7 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}
-						placeholder="Procurar nas suas chaves..."
+						placeholder={t("apiKeys.table.search")}
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 					/>
 				</div>
@@ -102,7 +104,7 @@ export function ApiKeysTable({ data }: { data: ApiKeyRow[] }) {
 									className="h-18 text-center"
 									colSpan={columns.length}
 								>
-									Você ainda não criou nenhuma chave
+									{t("apiKeys.table.empty")}
 								</TableCell>
 							</TableRow>
 						)}

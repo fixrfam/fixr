@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -18,6 +21,7 @@ export function TableToolbar({
 	onClear,
 	children,
 }: TableToolbarProps) {
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	return (
@@ -26,12 +30,12 @@ export function TableToolbar({
 				<Input
 					className="max-w-sm"
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder="Busque por ordem, cliente, aparelho ou status..."
+					placeholder={t("serviceOrders.table.search")}
 					value={search}
 				/>
 				<div className="flex items-center gap-2">
 					<Button onClick={onClear} variant="ghost">
-						Limpar
+						{t("common.actions.clear")}
 					</Button>
 				</div>
 			</div>
@@ -43,7 +47,7 @@ export function TableToolbar({
 						prefetch
 						subdomain={params.subdomain}
 					>
-						Nova ordem de serviço <Plus className="size-3.5" />
+						{t("serviceOrders.table.newOrder")} <Plus className="size-3.5" />
 					</DashLink>
 				</Button>
 			</div>

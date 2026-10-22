@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import type { ServiceOrderRow } from "@fixr/mock";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -11,12 +12,13 @@ function ServiceOrderImageGrid({
 }: {
 	images: ServiceOrderRow["images"];
 }) {
+	const { t } = useTranslation();
 	const [selected, setSelected] = useState<ImageItem | null>(null);
 
 	if (!images || images.length === 0) {
 		return (
 			<p className="text-2xs text-muted-foreground">
-				Nenhuma imagem registrada.
+				{t("serviceOrders.images.empty")}
 			</p>
 		);
 	}
@@ -51,7 +53,7 @@ function ServiceOrderImageGrid({
 			>
 				<DialogContent className="max-w-3xl">
 					<DialogTitle className="sr-only">
-						{selected?.description ?? "Preview da imagem"}
+						{selected?.description ?? t("serviceOrders.images.preview")}
 					</DialogTitle>
 					{selected && (
 						<>

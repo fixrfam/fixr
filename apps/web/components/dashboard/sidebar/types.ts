@@ -1,9 +1,11 @@
+import type { StaticTranslationKey } from "@fixr/i18n";
 import type { Permission } from "@fixr/permissions";
 import type * as icons from "lucide-react";
 
 export interface BaseItem {
 	readonly id: string;
-	readonly label: string;
+	/** Key of the label, translated when the item is rendered. */
+	readonly labelKey: StaticTranslationKey;
 	icon: keyof typeof icons;
 }
 
@@ -21,6 +23,6 @@ export type MenuItem = BaseItem & {
 export type SidebarItem = RouteItem | MenuItem;
 
 export interface SidebarSection {
-	readonly title: string;
+	readonly titleKey: StaticTranslationKey;
 	readonly items: readonly SidebarItem[];
 }

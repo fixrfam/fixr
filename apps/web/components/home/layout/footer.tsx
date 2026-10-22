@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 import { TextLogo } from "@/components/svg/text-logo";
@@ -7,6 +10,8 @@ export default function Footer({
 	className,
 	...props
 }: ComponentPropsWithoutRef<"footer">) {
+	const { t } = useTranslation();
+
 	return (
 		<footer
 			className={cn(
@@ -16,9 +21,9 @@ export default function Footer({
 			{...props}
 		>
 			<p className="px-4 text-center text-muted-foreground/50 text-sm">
-				Construído pela equipe{" "}
-				<TextLogo className="inline-flex w-11 align-sub" /> como projeto
-				acadêmico na{" "}
+				{t("home.footer.builtByBefore")}{" "}
+				<TextLogo className="inline-flex w-11 align-sub" />{" "}
+				{t("home.footer.builtByAfter")}{" "}
 				<Link
 					className="underline"
 					href="https://vemprafam.com.br/"
@@ -27,7 +32,7 @@ export default function Footer({
 				>
 					FAM
 				</Link>
-				. © {new Date().getFullYear()} Fixr. Código disponível no{" "}
+				. © {new Date().getFullYear()} Fixr. {t("home.footer.codeAvailable")}{" "}
 				<Link
 					className="underline"
 					href="https://github.com/fixrfam/fixr"
@@ -40,10 +45,10 @@ export default function Footer({
 			</p>
 			<div className="flex items-center gap-4 text-muted-foreground text-sm">
 				<Link className="hover:underline" href="/legal/privacy-policy">
-					Política de Privacidade
+					{t("home.footer.privacy")}
 				</Link>
 				<Link className="hover:underline" href="/legal/terms-and-conditions">
-					Termos de Uso
+					{t("home.footer.terms")}
 				</Link>
 			</div>
 		</footer>

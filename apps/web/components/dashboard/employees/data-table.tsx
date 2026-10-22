@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	type ColumnDef,
 	type ColumnFiltersState,
@@ -41,6 +42,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
 	const params = useParams<{ subdomain: string }>();
 
+	const { t } = useTranslation();
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
@@ -67,7 +69,7 @@ export function DataTable<TData, TValue>({
 						onChange={(event) =>
 							table.getColumn("name")?.setFilterValue(event.target.value)
 						}
-						placeholder="Procurar funcionários..."
+						placeholder={t("employees.table.search")}
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 					/>
 				</div>
@@ -75,7 +77,8 @@ export function DataTable<TData, TValue>({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline">
-								Colunas <ChevronDown className="size-4" />
+								{t("employees.table.columns")}{" "}
+								<ChevronDown className="size-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
@@ -104,7 +107,7 @@ export function DataTable<TData, TValue>({
 						subdomain={params.subdomain}
 					>
 						<Button>
-							Cadastrar funcionários
+							{t("employees.table.create")}
 							<Plus />
 						</Button>
 					</DashLink>
@@ -153,7 +156,7 @@ export function DataTable<TData, TValue>({
 									className="h-18 text-center"
 									colSpan={columns.length}
 								>
-									Sem resultados
+									{t("common.states.noResults")}
 								</TableCell>
 							</TableRow>
 						)}

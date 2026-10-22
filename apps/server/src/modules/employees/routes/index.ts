@@ -7,6 +7,7 @@ import type { z } from "zod";
 import { requirePermission } from "@/src/core/middlewares/rbac";
 import { employeesDocs } from "../../../core/docs/companies/employees/employees.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { requestLocale } from "../../../core/lib/locale";
 import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { EmployeesController } from "../controllers";
@@ -60,6 +61,7 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 				userJwt,
 				data: body,
 				subdomain,
+				locale: requestLocale(request),
 				response,
 			});
 		})

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	Folder,
 	Forward,
@@ -34,11 +35,12 @@ export function NavProjects({
 		icon: LucideIcon;
 	}[];
 }) {
+	const { t } = useTranslation();
 	const { isMobile } = useSidebar();
 
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Projects</SidebarGroupLabel>
+			<SidebarGroupLabel>{t("admin.nav.projects")}</SidebarGroupLabel>
 			<SidebarMenu>
 				{projects.map((item) => (
 					<SidebarMenuItem key={item.name}>
@@ -52,7 +54,7 @@ export function NavProjects({
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuAction showOnHover>
 									<MoreHorizontal />
-									<span className="sr-only">More</span>
+									<span className="sr-only">{t("common.actions.more")}</span>
 								</SidebarMenuAction>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
@@ -62,16 +64,16 @@ export function NavProjects({
 							>
 								<DropdownMenuItem>
 									<Folder className="text-muted-foreground" />
-									<span>View Project</span>
+									<span>{t("admin.nav.viewProject")}</span>
 								</DropdownMenuItem>
 								<DropdownMenuItem>
 									<Forward className="text-muted-foreground" />
-									<span>Share Project</span>
+									<span>{t("admin.nav.shareProject")}</span>
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem>
 									<Trash2 className="text-muted-foreground" />
-									<span>Delete Project</span>
+									<span>{t("admin.nav.deleteProject")}</span>
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -80,7 +82,7 @@ export function NavProjects({
 				<SidebarMenuItem>
 					<SidebarMenuButton className="text-sidebar-foreground/70">
 						<MoreHorizontal className="text-sidebar-foreground/70" />
-						<span>More</span>
+						<span>{t("common.actions.more")}</span>
 					</SidebarMenuButton>
 				</SidebarMenuItem>
 			</SidebarMenu>

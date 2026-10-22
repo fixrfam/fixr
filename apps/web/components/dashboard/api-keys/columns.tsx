@@ -1,6 +1,7 @@
 "use client";
 
 import { apiKeyPublicSchema } from "@fixr/db/schema";
+import type { Translator } from "@fixr/i18n";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Ban, KeyRound, MoreHorizontal } from "lucide-react";
 import type { z } from "zod";
@@ -26,14 +27,17 @@ export type ApiKeyRow = z.infer<typeof dataSchema>;
  * variants use the primary colour. Revoked is the deliberate action and keeps a
  * hint of destructive; expired just happened on its own and stays muted.
  */
-export function getKeyStatus(key: ApiKeyRow): {
+export function getKeyStatus(
+	t: Translator["t"],
+	key: ApiKeyRow
+): {
 	label: string;
 	variant: "default" | "secondary" | "destructive" | "outline";
 	className?: string;
 } {
 	if (key.revokedAt) {
 		return {
-			label: "Revogada",
+			label: t("apiKeys.status.revoked"),
 			variant: "outline",
 			className: "border-destructive/40 text-destructive",
 		};
@@ -41,38 +45,33 @@ export function getKeyStatus(key: ApiKeyRow): {
 
 	if (key.expiresAt && new Date(key.expiresAt) <= new Date()) {
 		return {
-			label: "Expirada",
+			label: t("apiKeys.status.expired"),
 			variant: "outline",
 			className: "text-muted-foreground",
 		};
 	}
 
-	return { label: "Ativa", variant: "secondary" };
-}
-
-function formatDate(value: Date | string | null) {
-	if (!value) {
-		return "-";
-	}
-
-	return new Intl.DateTimeFormat("pt-BR", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(new Date(value));
+	return { label: t("apiKeys.status.active"), variant: "secondary" };
 }
 
 export function buildColumns({
 	onRevoke,
 	canRevoke,
+	t,
+	format,
 }: {
 	onRevoke: (key: ApiKeyRow) => void;
 	canRevoke: boolean;
+	t: Translator["t"];
+	format: Translator["format"];
 }): ColumnDef<ApiKeyRow>[] {
+	const formatDate = (value: Date | string | null) =>
+		value ? format.date(value, { dateStyle: "long" }) : "-";
+
 	return [
 		{
 			accessorKey: "name",
-			header: "Chave",
+			header: t("apiKeys.table.columns.name"),
 			cell: ({ row }) => (
 				<div className="inline-flex items-center gap-3">
 					<div className="rounded-md bg-primary/30 p-1.5 text-primary">
@@ -89,9 +88,9 @@ export function buildColumns({
 		},
 		{
 			id: "status",
-			header: "Status",
+			header: t("apiKeys.table.columns.status"),
 			cell: ({ row }) => {
-				const status = getKeyStatus(row.original);
+				const status = getKeyStatus(t, row.original);
 				return (
 					<Badge className={status.className} variant={status.variant}>
 						{status.label}
@@ -101,53 +100,57 @@ export function buildColumns({
 		},
 		{
 			accessorKey: "scopes",
-			header: "Permissões",
+			header: t("apiKeys.table.columns.scopes"),
 			cell: ({ row }) => {
 				const scopes = row.original.scopes ?? [];
 
 				if (scopes.length === 0) {
 					return (
 						<span className="text-muted-foreground text-sm">
-							Herda seu cargo
+							{t("apiKeys.table.inheritsRole")}
 						</span>
 					);
 				}
 
 				return (
 					<span className="text-sm">
-						{scopes.length} {scopes.length === 1 ? "permissão" : "permissões"}
+						{t("apiKeys.table.scopeCount", { count: scopes.length })}
 					</span>
 				);
 			},
 		},
 		{
 			accessorKey: "lastUsedAt",
-			header: "Último uso",
+			header: t("apiKeys.table.columns.lastUsed"),
 			cell: ({ row }) =>
 				row.original.lastUsedAt ? (
 					formatDate(row.original.lastUsedAt)
 				) : (
-					<span className="text-muted-foreground">Nunca usada</span>
+					<span className="text-muted-foreground">
+						{t("apiKeys.table.neverUsed")}
+					</span>
 				),
 		},
 		{
 			accessorKey: "expiresAt",
-			header: "Expira em",
+			header: t("apiKeys.table.columns.expiresAt"),
 			cell: ({ row }) =>
 				row.original.expiresAt ? (
 					formatDate(row.original.expiresAt)
 				) : (
-					<span className="text-muted-foreground">Sem expiração</span>
+					<span className="text-muted-foreground">
+						{t("apiKeys.table.noExpiration")}
+					</span>
 				),
 		},
 		{
 			accessorKey: "createdAt",
-			header: "Criada em",
+			header: t("apiKeys.table.columns.createdAt"),
 			cell: ({ row }) => formatDate(row.original.createdAt),
 		},
 		{
 			id: "actions",
-			header: "Ações",
+			header: t("apiKeys.table.columns.actions"),
 			cell: ({ row }) => {
 				const isRevoked = Boolean(row.original.revokedAt);
 
@@ -155,19 +158,22 @@ export function buildColumns({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button className="h-8 w-8 p-0" variant="ghost">
-								<span className="sr-only">Abrir menu</span>
+								<span className="sr-only">{t("common.actions.openMenu")}</span>
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
-							<DropdownMenuLabel>Ações</DropdownMenuLabel>
+							<DropdownMenuLabel>
+								{t("apiKeys.table.columns.actions")}
+							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								className="text-destructive"
 								disabled={isRevoked || !canRevoke}
 								onSelect={() => onRevoke(row.original)}
 							>
-								<Ban className="text-destructive" /> Revogar
+								<Ban className="text-destructive" />{" "}
+								{t("apiKeys.actions.revoke")}
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Wrench } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -8,15 +9,16 @@ import { NewServiceForm } from "@/components/dashboard/services/forms/new-servic
 
 export default function NewServicePage() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	return (
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Preencha os campos abaixo para cadastrar um novo serviço."
+				description={t("services.page.newDescription")}
 				Icon={Wrench}
-				title="Cadastrar serviço"
+				title={t("services.page.newTitle")}
 			/>
 			<div>
 				<NewServiceForm

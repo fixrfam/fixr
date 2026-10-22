@@ -88,6 +88,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@fixr/i18n": "workspace:*",
     "zod": "catalog:"
   }
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
@@ -24,6 +25,7 @@ export function TableToolbar({
 	onClear,
 	children,
 }: TableToolbarProps) {
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	return (
@@ -37,7 +39,7 @@ export function TableToolbar({
 				/>
 				<div className="flex items-center gap-2">
 					<Button onClick={onClear} variant="ghost">
-						Limpar
+						{t("common.actions.clear")}
 					</Button>
 				</div>
 			</div>

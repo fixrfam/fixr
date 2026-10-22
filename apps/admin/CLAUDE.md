@@ -14,3 +14,4 @@ Next.js App Router, **Clerk** for auth (`@clerk/nextjs`, `@clerk/backend`) — t
 
 - Don't introduce a second auth mechanism here — Clerk is the only auth system for this app.
 - Don't duplicate Zod schemas already defined in `@fixr/schemas`.
+- Don't write user facing copy inline — it belongs in `@fixr/i18n` (`admin.*` namespace; server components read it through `lib/i18n/server.ts`).

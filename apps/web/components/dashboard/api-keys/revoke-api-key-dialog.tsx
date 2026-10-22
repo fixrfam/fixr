@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultMessages, messages } from "@fixr/constants/messages";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { toast } from "@pheralb/toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,6 +35,8 @@ export function RevokeApiKeyDialog({
 	apiKey: ApiKeyRow | null;
 	onOpenChange: (open: boolean) => void;
 }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const queryClient = useQueryClient();
@@ -52,22 +54,20 @@ export function RevokeApiKeyDialog({
 			>(axios.delete(api(`/companies/${subdomain}/api-keys/${apiKey.id}`)));
 
 			if (error && error instanceof AxiosError) {
-				const message =
-					messages[error.response?.data.code] ?? defaultMessages.error;
+				const feedback = message(error.response?.data.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				return;
 			}
 
-			const message =
-				messages[response?.data.code as string] ?? defaultMessages.success;
+			const feedback = message(response?.data.code, "success");
 
 			toast.success({
-				text: message.title,
-				description: message.description,
+				text: feedback.title,
+				description: feedback.description,
 			});
 
 			queryClient.invalidateQueries({ queryKey: ["apiKeysData"] });
@@ -82,15 +82,16 @@ export function RevokeApiKeyDialog({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
-						Revogar &ldquo;{apiKey?.name}&rdquo;?
+						{t("apiKeys.revoke.title", { name: apiKey?.name ?? "" })}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
-						Qualquer integração que use esta chave passa a receber erro de
-						autenticação imediatamente. Esta ação não pode ser desfeita.
+						{t("apiKeys.revoke.description")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+					<AlertDialogCancel disabled={loading}>
+						{t("common.actions.cancel")}
+					</AlertDialogCancel>
 					<AlertDialogAction
 						className="bg-destructive text-white hover:bg-destructive/90"
 						disabled={loading}
@@ -99,7 +100,8 @@ export function RevokeApiKeyDialog({
 							revoke();
 						}}
 					>
-						Revogar {loading && <Loader2 className="animate-spin" />}
+						{t("apiKeys.revoke.confirm")}{" "}
+						{loading && <Loader2 className="animate-spin" />}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

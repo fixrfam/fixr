@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Puzzle } from "lucide-react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -9,6 +10,7 @@ import { usePartsStore } from "@/components/dashboard/parts/store";
 
 export default function EditPartPage() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string; id: string }>();
 	const part = usePartsStore((state) =>
 		state.parts.find((item) => item.id === params.id)
@@ -22,9 +24,9 @@ export default function EditPartPage() {
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Altere os campos abaixo e salve as modificações."
+				description={t("parts.page.editDescription")}
 				Icon={Puzzle}
-				title="Editar peça"
+				title={t("parts.page.editTitle")}
 			/>
 			<div>
 				<NewPartForm

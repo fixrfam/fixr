@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
+
 import type { Column } from "@tanstack/react-table";
 import { PlusCircle, XCircle } from "lucide-react";
 import * as React from "react";
@@ -55,6 +57,7 @@ export function DataTableSliderFilter<TData>({
   column,
   title,
 }: DataTableSliderFilterProps<TData>) {
+  const { t } = useTranslation();
   const id = React.useId();
 
   const columnFilterValue = parseValuesAsNumbers(column.getFilterValue());
@@ -151,7 +154,9 @@ export function DataTableSliderFilter<TData>({
           {columnFilterValue ? (
             <div
               role="button"
-              aria-label={`Clear ${title} filter`}
+              aria-label={t("dataTable.filters.clearFilter", {
+                name: title ?? "",
+              })}
               tabIndex={0}
               className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={onReset}
@@ -182,7 +187,7 @@ export function DataTableSliderFilter<TData>({
           </p>
           <div className="flex items-center gap-4">
             <Label htmlFor={`${id}-from`} className="sr-only">
-              From
+              {t("dataTable.filters.from")}
             </Label>
             <div className="relative">
               <Input
@@ -243,12 +248,14 @@ export function DataTableSliderFilter<TData>({
           />
         </div>
         <Button
-          aria-label={`Clear ${title} filter`}
+          aria-label={t("dataTable.filters.clearFilter", {
+            name: title ?? "",
+          })}
           variant="outline"
           size="sm"
           onClick={onReset}
         >
-          Clear
+          {t("common.actions.clear")}
         </Button>
       </PopoverContent>
     </Popover>

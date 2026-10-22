@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -22,6 +23,7 @@ import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { useServiceColumns } from "./columns";
 
 export function ServicesTable() {
+	const { t } = useTranslation();
 	const router = useRouter();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const [search, setSearch] = useState("");
@@ -67,13 +69,13 @@ export function ServicesTable() {
 		<div className="space-y-4">
 			<TableToolbar
 				createHref="/services/new"
-				createLabel="Novo serviço"
+				createLabel={t("services.table.create")}
 				onClear={() => {
 					setSearch("");
 					setColumnFilters([]);
 				}}
 				onSearchChange={setSearch}
-				placeholder="Busque por serviço, descrição, categoria, peça ou fornecedor..."
+				placeholder={t("services.table.search")}
 				search={search}
 			>
 				<DataTableViewOptions align="end" table={table} />

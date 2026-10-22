@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { type PartRow, partCategories } from "@fixr/mock";
 import { createPartSchema } from "@fixr/schemas/parts";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +41,7 @@ export function NewPartForm({
 	part?: PartRow;
 	onSuccess?: () => void;
 }) {
+	const { t, format } = useTranslation();
 	const suppliers = usePartsStore((state) => state.suppliers);
 	const addPart = usePartsStore((state) => state.addPart);
 	const updatePart = usePartsStore((state) => state.updatePart);
@@ -55,6 +57,8 @@ export function NewPartForm({
 		mode: "all",
 	});
 
+	const pricePlaceholder = format.number(0, { minimumFractionDigits: 2 });
+
 	function onSubmit(values: z.infer<typeof createPartSchema>) {
 		//TODO: enviar para a API quando a rota de peças existir
 		const data = {
@@ -64,10 +68,10 @@ export function NewPartForm({
 
 		if (part) {
 			updatePart(part.id, data);
-			toast.success({ text: "Peça atualizada com sucesso!" });
+			toast.success({ text: t("parts.form.updated") });
 		} else {
 			addPart(data);
-			toast.success({ text: "Peça cadastrada com sucesso!" });
+			toast.success({ text: t("parts.form.created") });
 		}
 
 		onSuccess?.();
@@ -86,9 +90,12 @@ export function NewPartForm({
 						name="sku"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>SKU</FormLabel>
+								<FormLabel>{t("parts.form.skuLabel")}</FormLabel>
 								<FormControl>
-									<Input placeholder="TEL-IP13-OLED" {...field} />
+									<Input
+										placeholder={t("parts.form.skuPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -99,9 +106,12 @@ export function NewPartForm({
 						name="name"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Nome</FormLabel>
+								<FormLabel>{t("parts.form.nameLabel")}</FormLabel>
 								<FormControl>
-									<Input placeholder="Tela OLED iPhone 13" {...field} />
+									<Input
+										placeholder={t("parts.form.namePlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -112,11 +122,13 @@ export function NewPartForm({
 						name="category"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Categoria</FormLabel>
+								<FormLabel>{t("parts.form.categoryLabel")}</FormLabel>
 								<Select onValueChange={field.onChange} value={field.value}>
 									<FormControl>
 										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Selecione uma categoria" />
+											<SelectValue
+												placeholder={t("parts.form.categoryPlaceholder")}
+											/>
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
@@ -136,11 +148,13 @@ export function NewPartForm({
 						name="supplierId"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Fornecedor</FormLabel>
+								<FormLabel>{t("parts.form.supplierLabel")}</FormLabel>
 								<Select onValueChange={field.onChange} value={field.value}>
 									<FormControl>
 										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Selecione um fornecedor" />
+											<SelectValue
+												placeholder={t("parts.form.supplierPlaceholder")}
+											/>
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
@@ -160,11 +174,11 @@ export function NewPartForm({
 						name="costPrice"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Preço de custo (R$)</FormLabel>
+								<FormLabel>{t("parts.form.costPriceLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={0}
-										placeholder="0,00"
+										placeholder={pricePlaceholder}
 										step="0.01"
 										{...numberInputProps(field)}
 									/>
@@ -178,11 +192,11 @@ export function NewPartForm({
 						name="salePrice"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Preço de venda (R$)</FormLabel>
+								<FormLabel>{t("parts.form.salePriceLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={0}
-										placeholder="0,00"
+										placeholder={pricePlaceholder}
 										step="0.01"
 										{...numberInputProps(field)}
 									/>
@@ -196,7 +210,7 @@ export function NewPartForm({
 						name="stock"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Estoque</FormLabel>
+								<FormLabel>{t("parts.form.stockLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={0}
@@ -214,7 +228,7 @@ export function NewPartForm({
 						name="minStock"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Estoque mínimo</FormLabel>
+								<FormLabel>{t("parts.form.minStockLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={0}
@@ -224,8 +238,7 @@ export function NewPartForm({
 									/>
 								</FormControl>
 								<FormDescription>
-									Abaixo ou igual a esse valor a peça aparece como estoque
-									baixo.
+									{t("parts.form.minStockDescription")}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -238,11 +251,11 @@ export function NewPartForm({
 						disabled={!form.formState.isDirty}
 						type="submit"
 					>
-						Salvar alterações <Save />
+						{t("common.actions.saveChanges")} <Save />
 					</Button>
 				) : (
 					<Button className="w-full" type="submit">
-						Cadastrar peça <Plus />
+						{t("parts.form.submit")} <Plus />
 					</Button>
 				)}
 			</form>
