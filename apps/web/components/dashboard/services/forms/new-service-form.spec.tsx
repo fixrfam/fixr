@@ -9,6 +9,16 @@ import { render } from "@/test/render";
 import { NewServiceForm } from "./new-service-form";
 
 const { t } = createTranslator("pt-BR");
+
+/** Pastes instead of typing key by key: these forms have many fields. */
+async function enter(
+	user: ReturnType<typeof userEvent.setup>,
+	element: HTMLElement,
+	text: string
+) {
+	await user.click(element);
+	await user.paste(text);
+}
 const initialState = usePartsStore.getState();
 
 beforeEach(() => {
@@ -23,20 +33,27 @@ const submitButton = () =>
 	screen.getByRole("button", { name: t("services.form.submit") });
 
 async function fillRequired(user: ReturnType<typeof userEvent.setup>) {
-	await user.type(
+	await enter(
+		user,
 		screen.getByLabelText(t("services.form.nameLabel")),
 		"Troca de alto-falante"
 	);
-	await user.type(
+	await enter(
+		user,
 		screen.getByLabelText(t("services.form.descriptionLabel")),
 		"Substitui o alto-falante e testa o volume."
 	);
 	await user.click(screen.getByRole("button", { name: "Telefonia" }));
-	await user.type(
+	await enter(
+		user,
 		screen.getByLabelText(t("services.form.durationLabel")),
 		"45"
 	);
-	await user.type(screen.getByLabelText(t("services.form.priceLabel")), "120");
+	await enter(
+		user,
+		screen.getByLabelText(t("services.form.priceLabel")),
+		"120"
+	);
 }
 
 describe("NewServiceForm", () => {

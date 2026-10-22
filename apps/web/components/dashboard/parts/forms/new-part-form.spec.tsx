@@ -9,6 +9,16 @@ import { usePartsStore } from "../store";
 import { NewPartForm } from "./new-part-form";
 
 const { t } = createTranslator("pt-BR");
+
+/** Pastes instead of typing key by key: these forms have many fields. */
+async function enter(
+	user: ReturnType<typeof userEvent.setup>,
+	element: HTMLElement,
+	text: string
+) {
+	await user.click(element);
+	await user.paste(text);
+}
 const initialState = usePartsStore.getState();
 
 beforeEach(() => {
@@ -35,14 +45,14 @@ async function fill(
 	user: ReturnType<typeof userEvent.setup>,
 	{ costPrice = "100", salePrice = "180" } = {}
 ) {
-	await user.type(label("parts.form.skuLabel"), "BAT-TEST");
-	await user.type(label("parts.form.nameLabel"), "Bateria de teste");
+	await enter(user, label("parts.form.skuLabel"), "BAT-TEST");
+	await enter(user, label("parts.form.nameLabel"), "Bateria de teste");
 	await pick(user, 0, "Baterias");
 	await pick(user, 1, mockSuppliers[0]!.name);
-	await user.type(label("parts.form.costPriceLabel"), costPrice);
-	await user.type(label("parts.form.salePriceLabel"), salePrice);
-	await user.type(label("parts.form.stockLabel"), "3");
-	await user.type(label("parts.form.minStockLabel"), "1");
+	await enter(user, label("parts.form.costPriceLabel"), costPrice);
+	await enter(user, label("parts.form.salePriceLabel"), salePrice);
+	await enter(user, label("parts.form.stockLabel"), "3");
+	await enter(user, label("parts.form.minStockLabel"), "1");
 }
 
 describe("NewPartForm", () => {
