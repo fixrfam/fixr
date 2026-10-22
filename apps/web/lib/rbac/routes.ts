@@ -91,9 +91,31 @@ export const routeRules: RouteRule[] = [
 		permission: permissions.inventory.read,
 	},
 
+	// Specific routes first: a rule also matches every path below it
+	{
+		path: "/dashboard/:subdomain/parts/new",
+		permission: permissions.parts.create,
+	},
+	{
+		path: "/dashboard/:subdomain/parts/:id/edit",
+		permission: permissions.parts.update,
+	},
 	{
 		path: "/dashboard/:subdomain/parts",
-		permission: permissions.inventory.read,
+		permission: permissions.parts.read,
+	},
+
+	{
+		path: "/dashboard/:subdomain/services/new",
+		permission: permissions.services.create,
+	},
+	{
+		path: "/dashboard/:subdomain/services/:id/edit",
+		permission: permissions.services.update,
+	},
+	{
+		path: "/dashboard/:subdomain/services",
+		permission: permissions.services.read,
 	},
 
 	{

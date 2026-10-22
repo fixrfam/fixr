@@ -3,6 +3,7 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashLink } from "../dash-link";
@@ -11,12 +12,14 @@ interface TableToolbarProps {
 	search: string;
 	onSearchChange: (value: string) => void;
 	onClear: () => void;
+	children?: ReactNode;
 }
 
 export function TableToolbar({
 	search,
 	onSearchChange,
 	onClear,
+	children,
 }: TableToolbarProps) {
 	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
@@ -36,7 +39,8 @@ export function TableToolbar({
 					</Button>
 				</div>
 			</div>
-			<div className="flex justify-start">
+			<div className="flex items-center justify-start gap-4">
+				{children}
 				<Button asChild className="shrink-0">
 					<DashLink
 						href={"/service-orders/new"}

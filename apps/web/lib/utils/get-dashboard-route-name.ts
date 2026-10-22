@@ -11,6 +11,7 @@ const routeNames: Record<string, StaticTranslationKey> = {
 	estimates: "dashboard.nav.estimates",
 	suppliers: "dashboard.nav.suppliers",
 	parts: "dashboard.nav.parts",
+	services: "dashboard.nav.services",
 	inventory: "dashboard.nav.inventory",
 	support: "dashboard.nav.support",
 	customers: "dashboard.nav.customers",

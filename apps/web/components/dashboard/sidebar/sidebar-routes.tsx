@@ -99,6 +99,14 @@ export const sidebarSections: readonly SidebarSection[] = [
 				permission: permissions.parts.read,
 			},
 			{
+				id: "services",
+				label: "Serviços",
+				href: "/services",
+				type: "route",
+				icon: "Wrench",
+				permission: permissions.services.read,
+			},
+			{
 				id: "inventory",
 				labelKey: "dashboard.nav.inventory",
 				href: "/inventory",
