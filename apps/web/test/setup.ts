@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "./msw/server";
 
@@ -26,6 +26,9 @@ if (!globalThis.ResizeObserver) {
 }
 
 // Unhandled requests fail the test: every HTTP call must be declared in a handler.
+// findBy*/waitFor give up after 1s by default, too tight when CI runs every workspace at once.
+configure({ asyncUtilTimeout: 5000 });
+
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
 	server.resetHandlers();
