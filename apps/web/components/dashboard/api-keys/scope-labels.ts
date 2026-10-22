@@ -13,6 +13,7 @@ const RESOURCE_KEYS: Record<string, StaticTranslationKey> = {
 	logs: "permissions.resources.logs",
 	parts: "permissions.resources.parts",
 	serviceOrders: "permissions.resources.serviceOrders",
+	services: "permissions.resources.services",
 	settings: "permissions.resources.settings",
 	suppliers: "permissions.resources.suppliers",
 };
