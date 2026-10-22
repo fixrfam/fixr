@@ -10,6 +10,20 @@ if (!Element.prototype.hasPointerCapture) {
 if (!Element.prototype.scrollIntoView) {
 	Element.prototype.scrollIntoView = () => undefined;
 }
+// Radix's tooltip popper measures itself with ResizeObserver, which jsdom lacks.
+if (!globalThis.ResizeObserver) {
+	globalThis.ResizeObserver = class {
+		observe() {
+			// noop
+		}
+		unobserve() {
+			// noop
+		}
+		disconnect() {
+			// noop
+		}
+	};
+}
 // The sidebar's mobile hook reads media queries; jsdom has no layout, so nothing matches.
 if (!window.matchMedia) {
 	window.matchMedia = (query: string) =>
