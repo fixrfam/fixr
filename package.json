@@ -2,6 +2,7 @@
   "name": "fixr",
   "private": true,
   "scripts": {
+    "setup": "bun run scripts/setup.ts",
     "dev": "dotenv -- turbo run dev --filter=server --filter=web --filter=workers",
     "dev:admin": "dotenv -- turbo run dev --filter=admin",
     "start": "dotenv -- bun run --filter './apps/*' start",
