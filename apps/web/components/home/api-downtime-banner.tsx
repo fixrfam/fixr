@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
@@ -8,6 +9,7 @@ import { getApiHealthStatus } from "@/lib/services/api";
 const apiHealthQuery = getApiHealthStatus();
 
 export function ApiDowntimeBanner() {
+	const { t } = useTranslation();
 	const healthy = use(apiHealthQuery);
 
 	if (healthy) {
@@ -19,14 +21,15 @@ export function ApiDowntimeBanner() {
 			<input className="peer hidden" id="hide-api-banner" type="checkbox" />
 			<div className="flex items-center justify-center rounded-full bg-amber-500/30 px-3 py-1.5 peer-checked:hidden">
 				<p className="items-center text-center text-amber-900 text-xs dark:text-amber-400">
-					<TriangleAlert className="inline-flex size-3.5" /> API indisponível –{" "}
+					<TriangleAlert className="inline-flex size-3.5" />{" "}
+					{t("home.banner.apiDown")} –{" "}
 					<Link className="underline" href="/downtime">
-						Saiba mais
+						{t("home.banner.learnMore")}
 					</Link>
 				</p>
 
 				<label
-					aria-label="Fechar"
+					aria-label={t("common.actions.close")}
 					className="inline-fle ml-2 cursor-pointer"
 					htmlFor="hide-api-banner"
 				>

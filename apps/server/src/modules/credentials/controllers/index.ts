@@ -1,3 +1,4 @@
+import type { Locale } from "@fixr/i18n";
 import type { userJWT } from "@fixr/schemas/auth";
 import type {
 	changePasswordAuthenticatedSchema,
@@ -33,13 +34,16 @@ export class CredentialsController {
 	 */
 	static requestPasswordReset({
 		email,
+		locale,
 		response,
 	}: {
 		email: string;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
 		return CredentialsService.requestPasswordReset({
 			email,
+			locale,
 			response,
 		});
 	}

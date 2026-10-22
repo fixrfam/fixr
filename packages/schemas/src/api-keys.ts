@@ -1,3 +1,4 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 
 /** Maximum lifetime we allow a caller to request, in days. */
@@ -5,9 +6,9 @@ export const API_KEY_MAX_TTL_DAYS = 365;
 
 export const createApiKeySchema = z.object({
 	name: z
-		.string({ error: "Preencha este campo" })
-		.min(3, { message: "O nome deve ter no mínimo 3 caracteres." })
-		.max(100, { message: "Ops! Nome muito grande..." }),
+		.string({ error: i18nMessage("validation.generic.required") })
+		.min(3, { message: i18nMessage("validation.name.min", { count: 3 }) })
+		.max(100, { message: i18nMessage("validation.name.max") }),
 	/**
 	 * Permissions the key may use. Always intersected with the creator's role,
 	 * so a scope can only narrow access, never widen it.
@@ -20,7 +21,7 @@ export const createApiKeySchema = z.object({
 		// Compare against "now" at validation time: `.min(new Date())` would freeze
 		// the date the module was loaded, accepting past dates on a long-running server.
 		.refine((date) => date > new Date(), {
-			message: "A data de expiração deve ser no futuro.",
+			message: i18nMessage("validation.apiKey.expirationInPast"),
 		})
 		.optional()
 		.nullable(),

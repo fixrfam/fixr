@@ -1,0 +1,124 @@
+/**
+ * Form validation copy. Schemas in `@fixr/schemas` emit these keys instead of
+ * plain text, and the form layer renders them in the reader's language.
+ */
+export const validation = {
+	generic: {
+		required: "Fill in this field",
+		invalidFormat: "Invalid format.",
+	},
+	name: {
+		required: "Name is required",
+		min: "The name must be at least {{count}} characters.",
+		max: "Oops! That name is too long...",
+		tooLong: "Name too long.",
+		atLeast: "Name must be at least {{count}} characters.",
+		atMost: "Name must be at most {{count}} characters long.",
+	},
+	email: {
+		required: "Email is required.",
+		invalid: "Invalid email address",
+	},
+	password: {
+		required: "Password is required.",
+		complexity:
+			"Password needs to contain one uppercase character, one lowercase character, one number, one special character and be at least 8 length.",
+		min: "The password must be at least {{count}} characters.",
+		max: "The password must be at most {{count}} characters.",
+		uppercase: "The password must contain at least one uppercase letter.",
+		lowercase: "The password must contain at least one lowercase letter.",
+		number: "The password must contain at least one number.",
+		special: "The password must contain at least one special character.",
+		confirm: "Please confirm your password.",
+		mismatch: "The passwords do not match.",
+	},
+	phone: {
+		required: "Phone number is required",
+		incomplete: "Incomplete phone number.",
+	},
+	address: {
+		required: "Address is required",
+		min: "Address must be at least {{count}} characters long.",
+		max: "Address must be at most {{count}} characters long.",
+	},
+	city: {
+		required: "City is required",
+	},
+	state: {
+		required: "State is required",
+	},
+	document: {
+		cpf: "Invalid CPF",
+		cnpj: "Invalid CNPJ",
+	},
+	subdomain: {
+		min: "Subdomain must be at least {{count}} character long.",
+		max: "Subdomain must be at most {{count}} characters long.",
+	},
+	apiKey: {
+		expirationInPast: "The expiration date must be in the future.",
+	},
+	serviceOrder: {
+		clientInvalid: "Invalid client.",
+		brandInvalid: "Invalid device brand.",
+		categoryInvalid: "Invalid device category.",
+		assigneeInvalid: "Invalid assignee.",
+		modelRequired: "The device model is required.",
+		modelMax: "The device model exceeds {{count}} characters.",
+		imeiMax: "The IMEI exceeds {{count}} characters.",
+		issueRequired: "The reported issue is required.",
+		issueMax: "The reported issue exceeds the allowed limit.",
+		notesMax: "The notes exceed the allowed limit.",
+		photosMax: "At most {{count}} photos per service order.",
+		photoDescriptionMax: "The description exceeds {{count}} characters.",
+		dateFromInvalid: "Invalid start date.",
+		dateToInvalid: "Invalid end date.",
+		dateRange: "The start date must be on or before the end date.",
+	},
+	part: {
+		skuRequired: "The SKU is required.",
+		skuMax: "The SKU exceeds {{count}} characters.",
+		categoryRequired: "Pick a category.",
+		supplierRequired: "Pick a supplier.",
+		costPriceRequired: "Enter the cost price.",
+		costPriceMin: "The cost price can't be negative.",
+		salePriceRequired: "Enter the sale price.",
+		salePriceMin: "The sale price can't be negative.",
+		salePriceBelowCost:
+			"The sale price must be greater than or equal to the cost price.",
+		stockRequired: "Enter the stock.",
+		stockInteger: "The stock must be a whole number.",
+		stockMin: "The stock can't be negative.",
+		minStockRequired: "Enter the minimum stock.",
+		minStockInteger: "The minimum stock must be a whole number.",
+		minStockMin: "The minimum stock can't be negative.",
+	},
+	service: {
+		descriptionRequired: "The description is required.",
+		descriptionMax: "The description exceeds {{count}} characters.",
+		durationRequired: "Enter the estimated duration.",
+		durationInteger: "The duration must be in whole minutes.",
+		durationMin: "The duration must be at least 1 minute.",
+		priceRequired: "Enter the price.",
+		priceMin: "The price can't be negative.",
+		deviceCategoriesRequired: "Pick at least one device category.",
+		topicMax: "The topic exceeds {{count}} characters.",
+	},
+	supplier: {
+		cnpjRequired: "The CNPJ is required.",
+		contactRequired: "The contact name is required.",
+	},
+	upload: {
+		urlInvalid: "The picture URL must be a valid URL.",
+		idRequired: "The upload id is required.",
+		fileNameRequired: "The file name is required.",
+		fileNameMax: "The file name exceeds {{count}} characters.",
+		contentTypeRequired: "The content type is required.",
+		contentTypeMax: "The content type exceeds {{count}} characters.",
+		contentTypeInvalid: "The content type must be a valid MIME type.",
+		sizeRequired: "The file size is required.",
+		sizeInteger: "The size must be a whole number.",
+		sizePositive: "The size must be greater than zero.",
+		sizeMax: "The file exceeds the {{limit}} limit.",
+	},
+} as const;

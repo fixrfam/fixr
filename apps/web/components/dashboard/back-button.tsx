@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button, type ButtonProps } from "../ui/button";
 
 export function BackButton({ className, ...props }: ButtonProps) {
+	const { t } = useTranslation();
 	const router = useRouter();
 
 	return (
@@ -16,7 +18,7 @@ export function BackButton({ className, ...props }: ButtonProps) {
 			{...props}
 		>
 			<ArrowLeft />
-			Voltar
+			{t("common.actions.back")}
 		</Button>
 	);
 }

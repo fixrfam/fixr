@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { UserRoundPlus } from "lucide-react";
 import { redirect, useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -8,6 +9,7 @@ import { Heading } from "@/components/dashboard/heading";
 import { useSession } from "@/lib/hooks/use-session";
 
 export default function NewEmployeePage() {
+	const { t } = useTranslation();
 	const session = useSession();
 
 	const router = useRouter();
@@ -22,9 +24,9 @@ export default function NewEmployeePage() {
 			<div className="space-y-2">
 				<BackButton className="-translate-x-3" variant={"link"} />
 				<Heading
-					description={"Adicione um ou mais os funcionários na sua empresa."}
+					description={t("employees.page.newDescription")}
 					Icon={UserRoundPlus}
-					title={"Cadastrar funcionários"}
+					title={t("employees.page.newTitle")}
 				/>
 			</div>
 			<NewEmployeeForm

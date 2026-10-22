@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
+
 import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 
@@ -138,12 +140,13 @@ function FacetedBadgeList(props: FacetedBadgeListProps) {
   const {
     options = [],
     max = 2,
-    placeholder = "Select options...",
+    placeholder,
     className,
     badgeClassName,
     ...badgeListProps
   } = props;
 
+  const { t } = useTranslation();
   const context = useFacetedContext("FacetedBadgeList");
   const values = Array.isArray(context.value)
     ? context.value
@@ -163,7 +166,7 @@ function FacetedBadgeList(props: FacetedBadgeListProps) {
         {...badgeListProps}
         className="flex w-full items-center gap-1 text-muted-foreground"
       >
-        {placeholder}
+        {placeholder ?? t("dataTable.filters.selectOptions")}
         <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-50" />
       </div>
     );

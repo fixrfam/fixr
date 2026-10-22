@@ -1,8 +1,10 @@
 "use client";
 
 import { env } from "@fixr/env/web";
+import { useTranslation } from "@fixr/i18n/react";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { LanguageToggle } from "@/components/language-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
 import { TextLogo } from "@/components/svg/text-logo";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,7 @@ import { useScrollPosition } from "@/lib/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
 
 export default function Header() {
+	const { t } = useTranslation();
 	const { hasScrolled } = useScrollPosition();
 
 	return (
@@ -30,11 +33,11 @@ export default function Header() {
 					</Link>
 					<nav className="hidden lg:block">
 						<ul className="flex gap-6 font-light">
-							<li>Funcionalidades</li>
-							<li>Produtos</li>
-							<li>Preços</li>
-							<li>Clientes</li>
-							<li>Contato</li>
+							<li>{t("home.nav.features")}</li>
+							<li>{t("home.nav.products")}</li>
+							<li>{t("home.nav.pricing")}</li>
+							<li>{t("home.nav.customers")}</li>
+							<li>{t("home.nav.contact")}</li>
 						</ul>
 					</nav>
 				</div>
@@ -45,12 +48,14 @@ export default function Header() {
 							size="sm"
 							variant="outline"
 						>
-							Docs <ExternalLink className="inline-block h-3.5 w-3.5" />
+							{t("home.nav.docs")}{" "}
+							<ExternalLink className="inline-block h-3.5 w-3.5" />
 						</Button>
 					</Link>
 					<Link href="/auth/login" prefetch>
-						<Button size="sm">Entrar</Button>
+						<Button size="sm">{t("common.auth.login")}</Button>
 					</Link>
+					<LanguageToggle size={"sm"} />
 					<ModeToggle size={"sm"} />
 				</div>
 			</div>

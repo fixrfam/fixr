@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import type { z } from "zod";
 import {
-	columns,
+	buildColumns,
 	type dataSchema,
 } from "@/components/dashboard/employees/columns";
 import { DataTable } from "@/components/dashboard/employees/data-table";
@@ -15,7 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { axios } from "@/lib/auth/axios";
 
 export default function EmployeesPage() {
+	const { t, format } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
+	const columns = useMemo(() => buildColumns({ t, format }), [t, format]);
 
 	const { isPending, data } = useQuery<
 		AxiosResponse<ApiResponse<PaginatedData<z.infer<typeof dataSchema>>>>
@@ -30,8 +34,8 @@ export default function EmployeesPage() {
 	return (
 		<div className="flex flex-col gap-2">
 			<Heading
-				description={"Veja ou gerencie os funcionários da sua empresa"}
-				title={"Funcionários"}
+				description={t("employees.page.description")}
+				title={t("employees.page.title")}
 			/>
 			{isPending ? (
 				<div className="mt-4 space-y-2">

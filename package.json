@@ -18,6 +18,7 @@
     "lint:write": "dotenv -- bun run --elide-lines 0 --filter '*' lint:write",
     "lint:ci": "bun run --filter '*' lint",
     "format": "ultracite fix",
+    "i18n:scan": "bun run scripts/scan-hardcoded-strings.ts",
     "db:push": "bun run --elide-lines 0 --filter @fixr/db db:push",
     "db:studio": "bun run --elide-lines 0 --filter @fixr/db db:studio",
     "db:generate": "bun run --elide-lines 0 --filter @fixr/db db:generate",

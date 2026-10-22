@@ -9,6 +9,7 @@ import { jwtPayload } from "@fixr/schemas/auth";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { AppError } from "../../../core/lib/app-error";
 import { signJWT } from "../../../core/lib/jwt";
+import { requestLocale } from "../../../core/lib/locale";
 import { apiResponse } from "../../../core/lib/response";
 import { AuthRepository } from "../../auth/repositories";
 import { TokensRepository } from "../../tokens/repositories";
@@ -154,6 +155,7 @@ export class AccountService {
 		await sendAccountDeletionEmail({
 			to: account.email,
 			appName: APP_NAME,
+			locale: requestLocale(request),
 			verificationUrl,
 			displayName: account.displayName ?? emailDisplayName(account.email),
 		});

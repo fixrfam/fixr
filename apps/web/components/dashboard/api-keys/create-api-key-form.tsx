@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultMessages, messages } from "@fixr/constants/messages";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { createAbility } from "@fixr/permissions";
 import { createApiKeySchema } from "@fixr/schemas/api-keys";
 import type { ApiResponse } from "@fixr/schemas/utils";
@@ -48,13 +48,14 @@ import { api, tryCatch } from "@/lib/utils";
 import { groupScopes, scopeLabel } from "./scope-labels";
 
 const EXPIRATION_PRESETS = [
-	{ value: "never", label: "Sem expiração", days: null },
-	{ value: "30", label: "30 dias", days: 30 },
-	{ value: "90", label: "90 dias", days: 90 },
-	{ value: "365", label: "1 ano", days: 365 },
+	{ value: "never", days: null },
+	{ value: "30", days: 30 },
+	{ value: "90", days: 90 },
+	{ value: "365", days: 365 },
 ] as const;
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+const DAYS_IN_A_YEAR = 365;
 
 interface CreatedKey {
 	secret: string;
@@ -66,6 +67,8 @@ export function CreateApiKeyForm({
 }: {
 	onCreated: (key: CreatedKey) => void;
 }) {
+	const { t, locale } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [expiration, setExpiration] = useState<string>("never");
 	const [scopes, setScopes] = useState<string[]>([]);
@@ -78,7 +81,7 @@ export function CreateApiKeyForm({
 	 * scope the creator does not hold, since a key may narrow but never widen.
 	 */
 	const ability = createAbility(session?.company?.role ?? "guest");
-	const availableScopes = groupScopes([...ability.permissions]);
+	const availableScopes = groupScopes(t, locale, [...ability.permissions]);
 
 	const form = useForm<z.input<typeof createApiKeySchema>>({
 		resolver: zodResolver(createApiKeySchema),
@@ -86,6 +89,19 @@ export function CreateApiKeyForm({
 		mode: "all",
 		reValidateMode: "onChange",
 	});
+
+	/** The presets are data, so their copy is resolved at render time. */
+	function expirationLabel(days: number | null) {
+		if (days === null) {
+			return t("apiKeys.create.expirationNever");
+		}
+
+		if (days === DAYS_IN_A_YEAR) {
+			return t("apiKeys.create.expirationYear");
+		}
+
+		return t("apiKeys.create.expirationDays", { count: days });
+	}
 
 	function toggleScope(scope: string) {
 		setScopes((current) =>
@@ -115,12 +131,11 @@ export function CreateApiKeyForm({
 			);
 
 			if (error && error instanceof AxiosError) {
-				const message =
-					messages[error.response?.data.code] ?? defaultMessages.error;
+				const feedback = message(error.response?.data.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				return;
 			}
@@ -128,9 +143,11 @@ export function CreateApiKeyForm({
 			const secret = response?.data.data?.secret;
 
 			if (!secret) {
+				const feedback = message(undefined, "error");
+
 				toast.error({
-					text: defaultMessages.error.title,
-					description: defaultMessages.error.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				return;
 			}
@@ -152,13 +169,16 @@ export function CreateApiKeyForm({
 						<FormItem>
 							<FormLabel>
 								<Tag className="mr-1 inline-block size-3.5" />
-								Nome da chave
+								{t("apiKeys.create.nameLabel")}
 							</FormLabel>
 							<FormControl>
-								<Input placeholder="Integração com o ERP" {...field} />
+								<Input
+									placeholder={t("apiKeys.create.namePlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Use um nome que identifique onde a chave será usada.
+								{t("apiKeys.create.nameDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -168,7 +188,7 @@ export function CreateApiKeyForm({
 				<FormItem>
 					<FormLabel>
 						<CalendarClock className="mr-1 inline-block size-3.5" />
-						Validade
+						{t("apiKeys.create.expirationLabel")}
 					</FormLabel>
 					<Select onValueChange={setExpiration} value={expiration}>
 						<FormControl>
@@ -179,13 +199,13 @@ export function CreateApiKeyForm({
 						<SelectContent>
 							{EXPIRATION_PRESETS.map((preset) => (
 								<SelectItem key={preset.value} value={preset.value}>
-									{preset.label}
+									{expirationLabel(preset.days)}
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
 					<FormDescription>
-						Chaves com prazo reduzem o impacto de um vazamento.
+						{t("apiKeys.create.expirationDescription")}
 					</FormDescription>
 				</FormItem>
 
@@ -197,11 +217,13 @@ export function CreateApiKeyForm({
 							variant="ghost"
 						>
 							<span className="text-sm">
-								Permissões
+								{t("apiKeys.create.scopesLabel")}
 								<span className="ml-2 text-muted-foreground">
 									{scopes.length === 0
-										? "herda seu cargo"
-										: `${scopes.length} selecionada(s)`}
+										? t("apiKeys.create.scopesInherit")
+										: t("apiKeys.create.scopesSelected", {
+												count: scopes.length,
+											})}
 								</span>
 							</span>
 							<ChevronsUpDown className="size-4" />
@@ -209,9 +231,7 @@ export function CreateApiKeyForm({
 					</CollapsibleTrigger>
 					<CollapsibleContent className="space-y-4 border-border border-t p-3">
 						<p className="text-muted-foreground text-xs">
-							Sem nenhuma selecionada, a chave usa exatamente as permissões do
-							seu cargo. Selecionar restringe: uma chave nunca pode ter mais
-							acesso do que você.
+							{t("apiKeys.create.scopesHint")}
 						</p>
 						{availableScopes.map((group) => (
 							<div className="space-y-2" key={group.resource}>
@@ -227,7 +247,7 @@ export function CreateApiKeyForm({
 												type="button"
 												variant={selected ? "default" : "outline"}
 											>
-												{scopeLabel(scope)}
+												{scopeLabel(t, scope)}
 											</Button>
 										);
 									})}
@@ -242,7 +262,7 @@ export function CreateApiKeyForm({
 					disabled={!form.formState.isValid || loading}
 					type="submit"
 				>
-					Criar chave{" "}
+					{t("apiKeys.create.submit")}{" "}
 					{loading ? (
 						<Loader2 className="animate-spin" />
 					) : (

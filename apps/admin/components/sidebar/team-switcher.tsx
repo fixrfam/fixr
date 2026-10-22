@@ -1,5 +1,7 @@
 "use client";
 
+import type { StaticTranslationKey } from "@fixr/i18n";
+import { useTranslation } from "@fixr/i18n/react";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import * as React from "react";
 
@@ -22,12 +24,13 @@ import {
 export function TeamSwitcher({
 	teams,
 }: {
-	teams: {
-		name: string;
-		logo: React.ElementType;
-		plan: string;
+	teams: readonly {
+		readonly name: string;
+		readonly logo: React.ElementType;
+		readonly planKey: StaticTranslationKey;
 	}[];
 }) {
+	const { t } = useTranslation();
 	const { isMobile } = useSidebar();
 	const [activeTeam, setActiveTeam] = React.useState(teams[0]);
 
@@ -51,7 +54,9 @@ export function TeamSwitcher({
 								<span className="truncate font-semibold">
 									{activeTeam.name}
 								</span>
-								<span className="truncate text-xs">{activeTeam.plan}</span>
+								<span className="truncate text-xs">
+									{t(activeTeam.planKey)}
+								</span>
 							</div>
 							<ChevronsUpDown className="ml-auto" />
 						</SidebarMenuButton>
@@ -63,7 +68,7 @@ export function TeamSwitcher({
 						sideOffset={4}
 					>
 						<DropdownMenuLabel className="text-muted-foreground text-xs">
-							Teams
+							{t("admin.nav.teams")}
 						</DropdownMenuLabel>
 						{teams.map((team, index) => (
 							<DropdownMenuItem
@@ -83,7 +88,9 @@ export function TeamSwitcher({
 							<div className="flex size-6 items-center justify-center rounded-md border bg-background">
 								<Plus className="size-4" />
 							</div>
-							<div className="font-medium text-muted-foreground">Add team</div>
+							<div className="font-medium text-muted-foreground">
+								{t("admin.nav.addTeam")}
+							</div>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

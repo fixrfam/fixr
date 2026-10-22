@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { cnpj, cpf } from "@fixr/constants/masks";
-import { defaultMessages, messages } from "@fixr/constants/messages";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { createCompanySchema } from "@fixr/schemas/companies";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +33,8 @@ import PasswordInput from "@/components/ui/password-input";
 import { generateRandomPassword, tryCatch } from "@/lib/utils";
 
 export function CreateCompany() {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const { getToken } = useAuth();
 
@@ -72,22 +74,20 @@ export function CreateCompany() {
 			);
 
 			if (error && error instanceof AxiosError) {
-				const message =
-					messages[error.response?.data.code] ?? defaultMessages.error;
+				const feedback = message(error.response?.data.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				return;
 			}
 
-			const message =
-				messages[response?.data.code as string] ?? defaultMessages.success;
+			const feedback = message(response?.data.code, "success");
 
 			toast.success({
-				text: message.title,
-				description: message.description,
+				text: feedback.title,
+				description: feedback.description,
 			});
 		} finally {
 			setLoading(false);
@@ -113,12 +113,15 @@ export function CreateCompany() {
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Nome da empresa *</FormLabel>
+							<FormLabel>{t("admin.createCompany.nameLabel")}</FormLabel>
 							<FormControl>
-								<Input placeholder="Acme Inc." {...field} />
+								<Input
+									placeholder={t("admin.createCompany.namePlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Como o nome fantasia da empresa.
+								{t("admin.createCompany.nameDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -129,10 +132,10 @@ export function CreateCompany() {
 					name="cnpj"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>CNPJ *</FormLabel>
+							<FormLabel>{t("admin.createCompany.documentLabel")}</FormLabel>
 							<FormControl>
 								<Input
-									placeholder="12.345.678/0001-00"
+									placeholder={t("admin.createCompany.documentPlaceholder")}
 									{...field}
 									onInput={(e) => form.setValue("cnpj", e.currentTarget.value)}
 									ref={cnpjMask}
@@ -148,16 +151,19 @@ export function CreateCompany() {
 					name="subdomain"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Subdomínio</FormLabel>
+							<FormLabel>{t("admin.createCompany.subdomainLabel")}</FormLabel>
 							<FormControl>
-								<Input placeholder="example" {...field} />
+								<Input
+									placeholder={t("admin.createCompany.subdomainPlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Domínio -{" "}
-								{form.getValues("subdomain").length
-									? form.getValues("subdomain")
-									: "exemplo"}
-								.fixr.ricardo.gg
+								{t("admin.createCompany.subdomainDescription", {
+									subdomain:
+										form.getValues("subdomain") ||
+										t("admin.createCompany.subdomainFallback"),
+								})}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -168,12 +174,15 @@ export function CreateCompany() {
 					name="owner_email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Email do proprietário *</FormLabel>
+							<FormLabel>{t("admin.createCompany.ownerEmailLabel")}</FormLabel>
 							<FormControl>
-								<Input placeholder="email@exemplo.com" {...field} />
+								<Input
+									placeholder={t("admin.createCompany.ownerEmailPlaceholder")}
+									{...field}
+								/>
 							</FormControl>
 							<FormDescription>
-								Ele receberá sua senha de acesso (redefinível) neste email.
+								{t("admin.createCompany.ownerEmailDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -184,10 +193,14 @@ export function CreateCompany() {
 					name="owner_cpf"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>CPF do proprietário *</FormLabel>
+							<FormLabel>
+								{t("admin.createCompany.ownerDocumentLabel")}
+							</FormLabel>
 							<FormControl>
 								<Input
-									placeholder="123.456.789-00"
+									placeholder={t(
+										"admin.createCompany.ownerDocumentPlaceholder"
+									)}
 									{...field}
 									onInput={(e) =>
 										form.setValue("owner_cpf", e.currentTarget.value)
@@ -204,7 +217,9 @@ export function CreateCompany() {
 					name="owner_password"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Senha do proprietário*</FormLabel>
+							<FormLabel>
+								{t("admin.createCompany.ownerPasswordLabel")}
+							</FormLabel>
 							<FormControl>
 								<div className="flex w-full items-center gap-2">
 									<PasswordInput
@@ -218,12 +233,12 @@ export function CreateCompany() {
 										variant={"outline"}
 									>
 										<Dices className="size-4" />
-										Gerar
+										{t("admin.createCompany.generate")}
 									</Button>
 								</div>
 							</FormControl>
 							<FormDescription>
-								Será enviada para o email especificado.
+								{t("admin.createCompany.ownerPasswordDescription")}
 							</FormDescription>
 							<FormMessage />
 						</FormItem>
@@ -233,7 +248,7 @@ export function CreateCompany() {
 				<Collapsible>
 					<CollapsibleTrigger className="inline-flex items-center gap-1 text-muted-foreground text-xs">
 						<ChevronsUpDown className="size-3" />
-						Campos opcionais
+						{t("admin.createCompany.optionalFields")}
 					</CollapsibleTrigger>
 					<CollapsibleContent className="mt-2">
 						<FormField
@@ -241,9 +256,12 @@ export function CreateCompany() {
 							name="address"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Endereço</FormLabel>
+									<FormLabel>{t("admin.createCompany.addressLabel")}</FormLabel>
 									<FormControl>
-										<Input placeholder="1234 Main St" {...field} />
+										<Input
+											placeholder={t("admin.createCompany.addressPlaceholder")}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -256,7 +274,8 @@ export function CreateCompany() {
 					disabled={!form.formState.isValid || loading}
 					type="submit"
 				>
-					Criar {loading ? <Loader2 className="animate-spin" /> : <Plus />}
+					{t("admin.createCompany.submit")}{" "}
+					{loading ? <Loader2 className="animate-spin" /> : <Plus />}
 				</Button>
 			</form>
 		</Form>

@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/style/noNestedTernary :false positive*/
+import type { StaticTranslationKey } from "@fixr/i18n";
 import type { Column } from "@tanstack/react-table";
 import { dataTableConfig } from "@/config/data-table"; // [!code ++]
 import type {
@@ -42,7 +43,7 @@ export function getColumnPinningStyles<TData>({
 export function getFilterOperators(filterVariant: FilterVariant) {
 	const operatorMap: Record<
 		FilterVariant,
-		{ label: string; value: FilterOperator }[]
+		readonly { labelKey: StaticTranslationKey; value: FilterOperator }[]
 	> = {
 		text: dataTableConfig.textOperators,
 		number: dataTableConfig.numericOperators,

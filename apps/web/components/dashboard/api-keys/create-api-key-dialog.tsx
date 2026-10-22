@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { KeyRound, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { SecretReveal } from "./secret-reveal";
  * closes: the API returns it exactly once and never again.
  */
 export function CreateApiKeyDialog() {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [created, setCreated] = useState<{
 		secret: string;
@@ -41,18 +43,20 @@ export function CreateApiKeyDialog() {
 			className="max-w-xl!"
 			description={
 				created
-					? `Guarde o segredo de "${created.name}" em local seguro.`
-					: "A chave é sua e carrega as permissões do seu cargo."
+					? t("apiKeys.create.createdDescription", { name: created.name })
+					: t("apiKeys.create.description")
 			}
 			dismissible={!revealing}
 			icon={<KeyRound />}
 			onOpenChange={handleOpenChange}
 			open={open}
-			title={created ? "Chave criada" : "Nova chave de API"}
+			title={
+				created ? t("apiKeys.create.createdTitle") : t("apiKeys.create.title")
+			}
 			trigger={
 				<Button>
 					<Plus className="size-4" />
-					Nova chave
+					{t("apiKeys.actions.newKey")}
 				</Button>
 			}
 		>
