@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import * as icons from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -22,13 +23,14 @@ export function SidebarButton({
 	//biome-ignore lint/performance/noDynamicNamespaceImportAccess: <This is needed so the user can pass a string as the Icon>
 	const Icon = icons[data.icon] as icons.LucideIcon;
 
+	const { t } = useTranslation();
 	const currentPath = usePathname();
 	const params = useParams<{ subdomain: string }>();
 
 	const { close } = useSidebarStore();
 
 	if (data.type === "route") {
-		const { id, label, href } = data;
+		const { id, labelKey, href } = data;
 
 		const path = `/dashboard/${params.subdomain}${href}`;
 		const active = path === currentPath;
@@ -52,13 +54,13 @@ export function SidebarButton({
 						<div className="absolute left-[calc(1rem-0.5px)] h-1/2 w-px bg-primary" />
 					) : null}
 					<Icon className="size-3.5" />
-					{label}
+					{t(labelKey)}
 				</div>
 			</Link>
 		);
 	}
 
-	const { label, items } = data;
+	const { labelKey, items } = data;
 
 	return (
 		<Collapsible>
@@ -66,7 +68,7 @@ export function SidebarButton({
 				<div className="group flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-2xs text-secondary-foreground hover:bg-muted/50">
 					<div className="inline-flex items-center gap-2">
 						<Icon className="size-3.5" />
-						{label}
+						{t(labelKey)}
 					</div>
 					<icons.ChevronDown className="size-3.5 text-muted-foreground transition-all group-data-[state=open]:rotate-180" />
 				</div>

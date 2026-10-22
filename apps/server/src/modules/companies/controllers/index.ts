@@ -1,3 +1,4 @@
+import type { Locale } from "@fixr/i18n";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createCompanySchema } from "@fixr/schemas/companies";
 import type { FastifyReply } from "fastify";
@@ -43,11 +44,13 @@ export class CompaniesController {
 	 */
 	static createCompany({
 		body,
+		locale,
 		response,
 	}: {
 		body: z.infer<typeof createCompanySchema>;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
-		return CompaniesService.createCompany({ body, response });
+		return CompaniesService.createCompany({ body, locale, response });
 	}
 }

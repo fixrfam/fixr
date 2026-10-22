@@ -1,5 +1,6 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
 import dotenv from "dotenv";
 import { resend } from "../config/resend";
 import { renderEmail as renderDeletionEmail } from "../emails/account-deletion";
@@ -18,6 +19,11 @@ dotenv.config({ path: join(__dirname, "../.env") });
 interface EmailCommonProps {
 	to: string;
 	appName: string;
+	/**
+	 * Language of the recipient. Callers that know it (a request carries
+	 * `Accept-Language`) should pass it; otherwise the default is used.
+	 */
+	locale?: Locale;
 }
 
 const sendEmail = async ({
@@ -52,14 +58,18 @@ const sendEmail = async ({
 export const sendInviteEmail = async ({
 	to,
 	appName,
+	locale = defaultLocale,
 	...props
 }: InviteEmailProps & EmailCommonProps) =>
 	sendEmail({
 		to,
 		appName,
-		subject: "🎉 Bem-vindo ao Fixr – Seu acesso ao sistema",
+		subject: createTranslator(locale).t("emails.invite.subject", {
+			app: appName,
+		}),
 		html: await renderInviteEmail({
 			appName,
+			locale,
 			...props,
 		}),
 	});
@@ -69,15 +79,19 @@ export const sendAccountVerificationEmail = async ({
 	verificationUrl,
 	displayName,
 	appName,
+	locale = defaultLocale,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
 	sendEmail({
 		to,
 		appName,
-		subject: `Verify your email, @${displayName}!`,
+		subject: createTranslator(locale).t("emails.verification.subject", {
+			name: displayName,
+		}),
 		html: await renderVerificationEmail({
 			verificationUrl,
 			displayName,
 			appName,
+			locale,
 		}),
 	});
 
@@ -86,12 +100,20 @@ export const sendAccountDeletionEmail = async ({
 	verificationUrl,
 	displayName,
 	appName,
+	locale = defaultLocale,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
 	sendEmail({
 		to,
 		appName,
-		subject: `${displayName}'s account delete confirmation.`,
-		html: await renderDeletionEmail({ verificationUrl, displayName, appName }),
+		subject: createTranslator(locale).t("emails.accountDeletion.subject", {
+			name: displayName,
+		}),
+		html: await renderDeletionEmail({
+			verificationUrl,
+			displayName,
+			appName,
+			locale,
+		}),
 	});
 
 export const sendPasswordResetEmail = async ({
@@ -99,15 +121,19 @@ export const sendPasswordResetEmail = async ({
 	verificationUrl,
 	displayName,
 	appName,
+	locale = defaultLocale,
 }: EmailCommonProps & { verificationUrl: string; displayName: string }) =>
 	sendEmail({
 		to,
 		appName,
-		subject: `Esqueceu sua senha, ${displayName}?`,
+		subject: createTranslator(locale).t("emails.passwordReset.subject", {
+			name: displayName,
+		}),
 		html: await renderPasswordResetEmail({
 			verificationUrl,
 			displayName,
 			appName,
+			locale,
 		}),
 	});
 

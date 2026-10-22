@@ -2,6 +2,7 @@
 
 import { cookieKey } from "@fixr/constants/cookies";
 import { env } from "@fixr/env/web";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { loginUserSchema } from "@fixr/schemas/auth";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,6 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api, cn, type Nullable, parseJwt } from "@/lib/utils";
 import CookieAlert from "../cookie-alert";
 import { Google } from "../svg/google";
@@ -32,6 +32,8 @@ import {
 import { Turnstile } from "./turnstile";
 
 export function LoginForm({ errors }: { errors?: { google?: string } }) {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [googleLoading, setGoogleLoading] = useState(false);
 	const [turnstile, setTurnstile] = useState<{
@@ -65,11 +67,11 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 				}
 			);
 			if (res.status === 200) {
-				const message = messages[res.data.code] ?? fallbackMessages.success;
+				const feedback = message(res.data.code, "success");
 
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 				const jwt = parseJwt(res.data.data?.token);
 				router.push(`/dashboard/${jwt?.company?.subdomain}/account`);
@@ -77,11 +79,11 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -103,10 +105,10 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 				<div className="flex flex-col items-center gap-2 text-center">
 					<Logo className="size-8 text-primary" />
 					<h1 className="font-bold text-2xl tracking-tight">
-						Bem vindo ao Fixr!
+						{t("auth.login.title")}
 					</h1>
 					<p className="text-balance text-2xs text-muted-foreground">
-						Insira suas credenciais e entre na sua conta
+						{t("auth.login.subtitle")}
 					</p>
 				</div>
 				<div className="grid gap-6">
@@ -115,10 +117,10 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						name="email"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>E-mail *</FormLabel>
+								<FormLabel>{t("auth.login.emailLabel")}</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="email@exemplo.com"
+										placeholder={t("auth.login.emailPlaceholder")}
 										required
 										type="email"
 										{...field}
@@ -134,12 +136,12 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						render={({ field }) => (
 							<FormItem>
 								<div className="flex items-center">
-									<FormLabel>Senha *</FormLabel>
+									<FormLabel>{t("auth.login.passwordLabel")}</FormLabel>
 									<Link
 										className="ml-auto text-2xs underline-offset-4 hover:underline"
 										href="/auth/forgot-password"
 									>
-										Esqueceu sua senha?
+										{t("auth.login.forgotPassword")}
 									</Link>
 								</div>
 								<FormControl>
@@ -178,13 +180,12 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 					/>
 					{turnstile.error && (
 						<p className="text-destructive text-xs">
-							Falha na verificação de segurança. Recarregue a página e tente
-							novamente.
+							{t("auth.turnstile.error")}
 						</p>
 					)}
 					{turnstile.interactive && (
 						<p className="text-muted-foreground text-xs">
-							Verificação de segurança necessária. Complete o desafio CAPTCHA
+							{t("auth.turnstile.interactive")}
 						</p>
 					)}
 					<Button
@@ -200,12 +201,12 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						{loading || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
 						) : (
-							"Entrar"
+							t("auth.login.submit")
 						)}
 					</Button>
 					<div className="relative text-center text-2xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
 						<span className="relative z-10 bg-background px-2 text-muted-foreground">
-							Ou continue com
+							{t("auth.login.orContinueWith")}
 						</span>
 					</div>
 					<Button
@@ -220,7 +221,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						) : (
 							<Google />
 						)}
-						Entrar com Google
+						{t("auth.login.google")}
 					</Button>
 					{errors?.google && (
 						<CookieAlert
@@ -230,15 +231,15 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 							variant="destructive"
 						>
 							<AlertCircleIcon />
-							<AlertTitle>{messages[errors.google]?.title}</AlertTitle>
+							<AlertTitle>{message(errors.google).title}</AlertTitle>
 							<AlertDescription>
-								<p>{messages[errors.google]?.description}</p>
+								<p>{message(errors.google).description}</p>
 							</AlertDescription>
 						</CookieAlert>
 					)}
 				</div>
 				<div className="text-center text-2xs opacity-30">
-					Projeto universitário sem fins lucrativos.
+					{t("auth.login.disclaimer")}
 				</div>
 			</form>
 		</Form>

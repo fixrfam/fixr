@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
 import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -8,6 +9,7 @@ import { Button, type ButtonProps } from "../ui/button";
 
 const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 	({ children, ...props }, ref) => {
+		const { t } = useTranslation();
 		const [loading, setLoading] = useState(false);
 
 		const router = useRouter();
@@ -28,11 +30,11 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			};
 
 			toast.loading({
-				text: "Saindo, aguarde um momento...",
+				text: t("auth.signOut.loading"),
 				options: {
 					promise: fetchSignout(),
-					success: "Até logo!",
-					error: "Erro ao sair, tente novamente.",
+					success: t("auth.signOut.success"),
+					error: t("auth.signOut.error"),
 					autoDismiss: false,
 				},
 			});

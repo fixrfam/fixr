@@ -1,18 +1,18 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 import { employeeRoles } from "./roles";
 
 export const passwordSchema = z
-	.string({ error: "Password is required." })
+	.string({ error: i18nMessage("validation.password.required") })
 	.min(8)
 	.max(128)
 	.regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {
-		message:
-			"Password needs to contain one uppercase character, one lowercase character, one number, one special character and be at least 8 length.",
+		message: i18nMessage("validation.password.complexity"),
 	});
 
 export const userSchema = z.object({
 	id: z.string().cuid2(),
-	email: z.string().email({ message: "Invalid email address" }),
+	email: z.string().email({ message: i18nMessage("validation.email.invalid") }),
 	displayName: z.string().min(3).max(100).nullable(),
 	avatarUrl: z.string().url().nullable(),
 	profileType: z.union([z.literal("client"), z.literal("employee")]),
@@ -23,8 +23,8 @@ export const userSchema = z.object({
 
 export const createUserSchema = z.object({
 	email: z
-		.string({ error: "Email is required." })
-		.email({ message: "Invalid email address" }),
+		.string({ error: i18nMessage("validation.email.required") })
+		.email({ message: i18nMessage("validation.email.invalid") }),
 	password: passwordSchema,
 	cfTurnstileToken: z.string().optional(),
 	displayName: z
@@ -33,17 +33,17 @@ export const createUserSchema = z.object({
 		.optional()
 		//The transform conflicts with string length, so we can't use the min and max methods here
 		.refine((value) => value === undefined || value.length >= 3, {
-			message: "Name must be at least 3 characters.",
+			message: i18nMessage("validation.name.atLeast", { count: 3 }),
 		})
 		.refine((value) => value === undefined || value.length <= 64, {
-			message: "Name too long.",
+			message: i18nMessage("validation.name.tooLong"),
 		}),
 });
 
 z.lazy;
 
 export const loginUserSchema = z.object({
-	email: z.string().email({ message: "Email inválido" }),
+	email: z.string().email({ message: i18nMessage("validation.email.invalid") }),
 	password: z.string(),
 	cfTurnstileToken: z.string().optional(),
 });
@@ -51,7 +51,9 @@ export const loginUserSchema = z.object({
 export const jwtPayload = z
 	.object({
 		id: z.string().cuid2(),
-		email: z.string().email({ message: "Invalid email address" }),
+		email: z
+			.string()
+			.email({ message: i18nMessage("validation.email.invalid") }),
 		displayName: z.string().min(3).max(100).nullable(),
 		avatarUrl: z.string().url().nullable(),
 		profileType: z.union([z.literal("client"), z.literal("employee")]),

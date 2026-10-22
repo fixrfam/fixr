@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { createAbility } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { PanelLeft, Search } from "lucide-react";
 import type { z } from "zod";
 import { Avatar } from "@/components/account/profile-avatar";
+import { LanguageToggle } from "@/components/language-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/svg/logo";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,7 @@ import { sidebarSections } from "./sidebar-routes";
 import type { MenuItem, SidebarItem } from "./types";
 
 export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
+	const { t } = useTranslation();
 	const { isOpen, close } = useSidebarStore();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 
@@ -80,7 +83,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 									{session.company?.name}
 								</p>
 								<p className="text-muted-foreground text-xs tracking-tight">
-									Minha empresa
+									{t("dashboard.sidebar.myCompany")}
 								</p>
 							</div>
 						</div>
@@ -92,7 +95,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 						>
 							<div className="inline-flex items-center gap-1.5">
 								<Search className={"size-3.5"} />
-								Acesso rápido
+								{t("dashboard.sidebar.quickAccess")}
 							</div>
 							<div className="inline-flex items-center gap-1.5">
 								<Badge
@@ -123,9 +126,9 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 					}}
 				>
 					{filteredSections.map((section) => (
-						<div className="space-y-1" key={section.title}>
+						<div className="space-y-1" key={section.titleKey}>
 							<p className="px-5 font-medium text-muted-foreground text-xs">
-								{section.title}
+								{t(section.titleKey)}
 							</p>
 							<div className="px-3">
 								{section.items.map((item) => (
@@ -144,7 +147,10 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 							variant="square"
 						/>
 					</div>
-					<ModeToggle />
+					<div className="flex items-center">
+						<LanguageToggle />
+						<ModeToggle />
+					</div>
 				</div>
 			</aside>
 			<button

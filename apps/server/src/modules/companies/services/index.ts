@@ -2,6 +2,7 @@ import { APP_NAME } from "@fixr/constants/app";
 import { unmask } from "@fixr/constants/masks";
 import { companySelectSchema } from "@fixr/db/schema";
 import { env } from "@fixr/env/server";
+import type { Locale } from "@fixr/i18n";
 import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { emailDisplayName } from "@fixr/mail/services";
 import type { jwtPayload } from "@fixr/schemas/auth";
@@ -90,9 +91,11 @@ export class CompaniesService {
 	 */
 	static async createCompany({
 		body,
+		locale,
 		response,
 	}: {
 		body: z.infer<typeof createCompanySchema>;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
 		const formatted = {
@@ -139,6 +142,7 @@ export class CompaniesService {
 			payload: {
 				to: formatted.owner_email,
 				appName: APP_NAME,
+				locale,
 				companyName: formatted.name,
 				ctaUrl: `${env.FRONTEND_URL}/auth/login`,
 				displayName: `Admin - ${emailDisplayName(formatted.owner_email)}`,

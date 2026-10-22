@@ -7,7 +7,8 @@ import type { z } from "zod";
 import { requirePermission } from "@/src/core/middlewares/rbac";
 import { employeesDocs } from "../../../core/docs/companies/employees/employees.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { requestLocale } from "../../../core/lib/locale";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { EmployeesController } from "../controllers";
 
@@ -17,7 +18,7 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.employees.read),
 			],
 			schema: employeesDocs.getCompanyEmployeesSchema,
@@ -46,7 +47,7 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.employees.create),
 			],
 			schema: employeesDocs.registerEmployeeSchema,
@@ -60,6 +61,7 @@ export function employeesRoutes(fastify: FastifyTypedInstance) {
 				userJwt,
 				data: body,
 				subdomain,
+				locale: requestLocale(request),
 				response,
 			});
 		})

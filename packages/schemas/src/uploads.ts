@@ -1,3 +1,4 @@
+import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 
 export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
@@ -11,22 +12,26 @@ export const presignParamsSchema = z.object({
 
 export const createUploadPresignSchema = z.object({
 	fileName: z
-		.string({ error: "Nome do arquivo é obrigatório." })
-		.min(1, { message: "Nome do arquivo é obrigatório." })
-		.max(255, { message: "Nome do arquivo excede 255 caracteres." }),
+		.string({ error: i18nMessage("validation.upload.fileNameRequired") })
+		.min(1, { message: i18nMessage("validation.upload.fileNameRequired") })
+		.max(255, {
+			message: i18nMessage("validation.upload.fileNameMax", { count: 255 }),
+		}),
 	contentType: z
-		.string({ error: "Tipo de conteúdo é obrigatório." })
-		.min(1, { message: "Tipo de conteúdo é obrigatório." })
-		.max(255, { message: "Tipo de conteúdo excede 255 caracteres." })
+		.string({ error: i18nMessage("validation.upload.contentTypeRequired") })
+		.min(1, { message: i18nMessage("validation.upload.contentTypeRequired") })
+		.max(255, {
+			message: i18nMessage("validation.upload.contentTypeMax", { count: 255 }),
+		})
 		.regex(/^[^/]+\/[^/]+$/, {
-			message: "Tipo de conteúdo deve ser um MIME válido.",
+			message: i18nMessage("validation.upload.contentTypeInvalid"),
 		}),
 	size: z
-		.number({ error: "Tamanho do arquivo é obrigatório." })
-		.int({ message: "Tamanho deve ser um número inteiro." })
-		.positive({ message: "Tamanho deve ser maior que zero." })
+		.number({ error: i18nMessage("validation.upload.sizeRequired") })
+		.int({ message: i18nMessage("validation.upload.sizeInteger") })
+		.positive({ message: i18nMessage("validation.upload.sizePositive") })
 		.max(MAX_UPLOAD_SIZE_BYTES, {
-			message: "Arquivo excede o limite de 10 MB.",
+			message: i18nMessage("validation.upload.sizeMax", { limit: "10 MB" }),
 		}),
 });
 
@@ -41,11 +46,11 @@ export const uploadPresignResponseSchema = z.object({
 export const createAvatarUploadPresignSchema = createUploadPresignSchema.extend(
 	{
 		size: z
-			.number({ error: "Tamanho do arquivo é obrigatório." })
-			.int({ message: "Tamanho deve ser um número inteiro." })
-			.positive({ message: "Tamanho deve ser maior que zero." })
+			.number({ error: i18nMessage("validation.upload.sizeRequired") })
+			.int({ message: i18nMessage("validation.upload.sizeInteger") })
+			.positive({ message: i18nMessage("validation.upload.sizePositive") })
 			.max(MAX_AVATAR_UPLOAD_SIZE_BYTES, {
-				message: "Arquivo excede o limite de 5 MB.",
+				message: i18nMessage("validation.upload.sizeMax", { limit: "5 MB" }),
 			}),
 	}
 );

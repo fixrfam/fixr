@@ -13,6 +13,10 @@ export const env = createEnv({
 	server: {
 		REDIS_URL: z.url().describe("Redis connection URL"),
 		JWT_SECRET: z.string().min(32).describe("JWT signing secret"),
+		API_KEY_SECRET: z
+			.string()
+			.min(32)
+			.describe("Pepper used to derive the HMAC of API key secrets"),
 		COOKIE_ENCRYPTION_SECRET: z
 			.string()
 			.min(32)

@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+echo "Running lint..."
+bun run lint
+
+echo "Running type checks..."
+bun run check-types:ci
+
+echo "Formatting..."
+bun run format
+
+if ! git diff --quiet; then
+  echo ""
+  echo "Formatter made changes. Committing them now..."
+  git add -A
+  git commit -m "chore(Repo): Run formatter"
+  echo ""
+  echo "A new commit with formatting fixes was created locally."
+  echo "Push again to include it."
+  exit 1
+fi
+
+echo "All checks passed!"
+exit 0

@@ -53,7 +53,7 @@ export class AccountRepository {
 	 * @param userId - The user ID
 	 * @param avatarUrl - The new avatar URL
 	 */
-	@InvalidateCache({ patterns: ["account:*", "jwt:*"] })
+	@InvalidateCache({ patterns: ["user:*", "jwt:*", "account:*"] })
 	static async updateAvatarUrl(userId: string, avatarUrl: string | null) {
 		await db.update(users).set({ avatarUrl }).where(eq(users.id, userId));
 	}

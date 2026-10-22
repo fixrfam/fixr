@@ -7,8 +7,9 @@ import {
 import type { z } from "zod";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { requestLocale } from "../../../core/lib/locale";
 import { authenticateAdmin } from "../../../core/middlewares/authenticate-admin";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { CompaniesController } from "../controllers";
@@ -19,7 +20,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.companies.read),
 			],
 			schema: companiesDocs.getUserCompanySchema,
@@ -35,7 +36,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 		"/:subdomain",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.companies.read),
 			],
 			schema: companiesDocs.getCompanyByIdSchema,
@@ -74,6 +75,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 
 			await CompaniesController.createCompany({
 				body,
+				locale: requestLocale(request),
 				response,
 			});
 		})

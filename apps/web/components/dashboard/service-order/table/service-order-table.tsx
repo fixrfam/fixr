@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
+import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { useColumns } from "./columns";
 import { TableToolbar } from "./toolbar";
 
@@ -91,9 +92,11 @@ export function ServiceOrdersTable({ subdomain }: Props) {
 				}}
 				onSearchChange={setSearch}
 				search={search}
-			/>
+			>
+				<DataTableViewOptions align="end" table={table} />
+			</TableToolbar>
 			<DataTable className="w-full" onRowClick={handleRowClick} table={table}>
-				<DataTableToolbar table={table} />
+				<DataTableToolbar showViewOptions={false} table={table} />
 			</DataTable>
 		</div>
 	);

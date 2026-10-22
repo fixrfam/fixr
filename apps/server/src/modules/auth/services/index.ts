@@ -13,6 +13,7 @@ import { OAuth2Client } from "google-auth-library";
 import { AppError } from "../../../core/lib/app-error";
 import { hashPassword } from "../../../core/lib/hash-password";
 import { signJWT } from "../../../core/lib/jwt";
+import { requestLocale } from "../../../core/lib/locale";
 import { apiResponse } from "../../../core/lib/response";
 import { generateRefreshToken } from "../../../core/lib/tokens";
 import { TokensRepository } from "../../tokens/repositories";
@@ -76,6 +77,7 @@ export class AuthService {
 		await sendAccountVerificationEmail({
 			to: newUser.email,
 			appName: APP_NAME,
+			locale: requestLocale(request),
 			verificationUrl,
 			displayName: newUser.displayName ?? emailDisplayName(newUser.email),
 		}).catch(async () => {

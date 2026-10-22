@@ -22,14 +22,6 @@
       "types": "./src/masks.ts",
       "default": "./src/masks.ts"
     },
-    "./messages": {
-      "types": "./src/messages.ts",
-      "default": "./src/messages.ts"
-    },
-    "./roles": {
-      "types": "./src/roles.ts",
-      "default": "./src/roles.ts"
-    },
     "./enforcements": {
       "types": "./src/enforcements.ts",
       "default": "./src/enforcements.ts"

@@ -18,7 +18,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@fixr/typescript-config": "catalog:",
+    "@fixr/typescript-config": "workspace:*",
     "@fixr/infra": "workspace:*",
     "typescript": "catalog:"
   }
