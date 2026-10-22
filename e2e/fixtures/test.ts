@@ -15,6 +15,10 @@ export const authFile = (role: SeededRole | "beta-admin") =>
 export const test = base.extend({
 	page: async ({ page }, use) => {
 		await stubTurnstile(page);
+		// Analytics is a third-party script: keep it (and its console errors) out of the suite.
+		await page.route("https://tracking.ricardo.gg/**", (route) =>
+			route.fulfill({ contentType: "application/javascript", body: "" })
+		);
 		await page.addInitScript(() => {
 			const style = document.createElement("style");
 			style.textContent =

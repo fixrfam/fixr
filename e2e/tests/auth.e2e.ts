@@ -177,7 +177,7 @@ test.describe("expired session", () => {
 
 		await expect(page).toHaveURL(`/dashboard/${COMPANY_A.subdomain}/home`);
 		// The page itself must render on this first request (it used to 500 here).
-		await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
+		await expect(page.getByRole("heading", { name: "Início" })).toBeVisible();
 		expect((await context.cookies()).some((c) => c.name === SESSION)).toBe(
 			true
 		);
