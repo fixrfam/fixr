@@ -37,11 +37,15 @@ describe("numberInputProps", () => {
 		expect(f.onChange).toHaveBeenCalledWith(12.5);
 	});
 
-	it("clears the field back to undefined when the input is emptied", () => {
+	it("clears the field with null, so react-hook-form does not restore the default", () => {
 		const f = field(3);
 
 		numberInputProps(f as never).onChange(changeEvent("", Number.NaN));
 
-		expect(f.onChange).toHaveBeenCalledWith(undefined);
+		expect(f.onChange).toHaveBeenCalledWith(null);
+	});
+
+	it("shows an empty input once the field was cleared", () => {
+		expect(numberInputProps(field(null) as never).value).toBe("");
 	});
 });
