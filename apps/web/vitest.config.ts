@@ -15,6 +15,8 @@ export default defineConfig({
 	},
 	test: {
 		environment: "jsdom",
+		// Form specs type through userEvent and i18next; 5s is too tight when every workspace runs at once.
+		testTimeout: 15_000,
 		include: ["**/*.spec.{ts,tsx}"],
 		exclude: [
 			"node_modules/**",
