@@ -48,17 +48,23 @@ describe("getSession", () => {
 				name === cookieKey("session") ? { name, value: fakeJwt() } : undefined,
 		};
 
-		expect(getSession(cookies as never).company?.role).toBe("manager");
+		expect(getSession(cookies as never)?.company?.role).toBe("manager");
 	});
 
 	it("reads the session from document.cookie on the client", () => {
 		setSessionCookie(fakeJwt());
 
-		expect(getSession().email).toBe("maria@fixr.test");
+		expect(getSession()?.email).toBe("maria@fixr.test");
 	});
 
-	it("throws when there is no valid session", () => {
-		expect(() => getSession()).toThrow();
+	it("returns null when there is no session", () => {
+		expect(getSession()).toBeNull();
+	});
+
+	it("returns null instead of throwing for a malformed session", () => {
+		setSessionCookie("not-a-jwt");
+
+		expect(getSession()).toBeNull();
 	});
 });
 

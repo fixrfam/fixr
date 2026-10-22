@@ -1,8 +1,9 @@
 import { mockServiceOrders } from "@fixr/mock";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { router } from "@/test/mocks";
+import { render } from "@/test/render";
 import { ServiceOrdersTable } from "./service-order-table";
 
 // NOTE: the table still renders @fixr/mock data; it is not wired to the API yet (#95 findings).

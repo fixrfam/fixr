@@ -1,10 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
+import { render } from "@/test/render";
 import { ForgotPasswordForm } from "./forgot-password-form";
 
 afterEach(() => {

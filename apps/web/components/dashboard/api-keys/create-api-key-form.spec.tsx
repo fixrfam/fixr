@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +8,7 @@ import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
+import { render } from "@/test/render";
 import { CreateApiKeyForm } from "./create-api-key-form";
 
 function session(role: string) {

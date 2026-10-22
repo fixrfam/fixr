@@ -1,3 +1,4 @@
+import { hasTranslation } from "@fixr/i18n";
 import { passwordSchema } from "@fixr/schemas/auth";
 import { describe, expect, it } from "vitest";
 import { generateRandomPassword } from "./generate-random-password";
@@ -6,8 +7,8 @@ import {
 	getStatusClass,
 	getStatusClassTable,
 	SERVICE_ORDER_LIFECYCLE,
-	SERVICE_ORDER_STATUS_LABELS,
 	STATUS_STYLE_MAP,
+	STATUS_STYLE_MAP_TABLE,
 } from "./service-orders";
 
 describe("generateRandomPassword", () => {
@@ -28,26 +29,37 @@ describe("generateRandomPassword", () => {
 
 describe("getDashboardRouteName", () => {
 	it.each([
-		["/dashboard/fixr/home", "Início"],
-		["/dashboard/fixr/service-orders", "Ordens de Serviço"],
-		["/dashboard/fixr/settings/security", "Segurança"],
-		["/dashboard/fixr/employees/", "Funcionários"],
-	])("%s -> %s", (path, name) => {
-		expect(getDashboardRouteName(path)).toBe(name);
+		["/dashboard/fixr/home", "dashboard.nav.home"],
+		["/dashboard/fixr/service-orders", "dashboard.nav.serviceOrders"],
+		["/dashboard/fixr/settings/security", "dashboard.nav.security"],
+		["/dashboard/fixr/employees/", "dashboard.nav.employees"],
+		["/dashboard/fixr/parts", "dashboard.nav.parts"],
+		["/dashboard/fixr/services", "dashboard.nav.services"],
+		["/dashboard/fixr/suppliers", "dashboard.nav.suppliers"],
+	])("%s -> %s", (path, key) => {
+		expect(getDashboardRouteName(path)).toBe(key);
+	});
+
+	it("only returns keys that exist in the catalog", () => {
+		for (const segment of ["home", "account", "api-keys", "parts", "x"]) {
+			expect(
+				hasTranslation(getDashboardRouteName(`/dashboard/a/${segment}`))
+			).toBe(true);
+		}
 	});
 
 	it.each([
 		"/dashboard/fixr/employees/abc123",
 		"/",
 		"",
-	])("falls back to Fixr for %j", (path) => {
-		expect(getDashboardRouteName(path)).toBe("Fixr");
+	])("falls back to the app name for %j", (path) => {
+		expect(getDashboardRouteName(path)).toBe("common.app.name");
 	});
 });
 
 describe("service order status helpers", () => {
-	it("has a label for every status", () => {
-		expect(Object.keys(SERVICE_ORDER_STATUS_LABELS).sort()).toEqual(
+	it("styles the same statuses in the cards and in the table", () => {
+		expect(Object.keys(STATUS_STYLE_MAP_TABLE).sort()).toEqual(
 			Object.keys(STATUS_STYLE_MAP).sort()
 		);
 	});

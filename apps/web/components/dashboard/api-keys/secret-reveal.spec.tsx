@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/test/mocks";
+import { render } from "@/test/render";
 import { SecretReveal } from "./secret-reveal";
 
 afterEach(() => {

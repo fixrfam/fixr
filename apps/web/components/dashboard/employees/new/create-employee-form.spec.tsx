@@ -1,15 +1,20 @@
-import { roleLabels } from "@fixr/constants/roles";
+import { createTranslator } from "@fixr/i18n";
 import { employeeRoles } from "@fixr/schemas/roles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { roleLabelKeys } from "@/lib/i18n/labels";
 import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
+import { render } from "@/test/render";
 import { NewEmployeeForm } from "./create-employee-form";
+
+const { t } = createTranslator("pt-BR");
+const roleLabel = (role: keyof typeof roleLabelKeys) => t(roleLabelKeys[role]);
 
 function renderForm(onSuccess = vi.fn()) {
 	const client = new QueryClient();
@@ -33,7 +38,7 @@ async function fill(user: ReturnType<typeof userEvent.setup>) {
 	);
 	await user.click(screen.getByRole("combobox"));
 	await user.click(
-		await screen.findByRole("option", { name: roleLabels.technician })
+		await screen.findByRole("option", { name: roleLabel("technician") })
 	);
 	// The password field starts as "" (invalid), so generate one like a user would.
 	await user.click(screen.getByRole("button", { name: /gerar/i }));
@@ -56,7 +61,7 @@ describe("NewEmployeeForm", () => {
 		const options = await screen.findAllByRole("option");
 
 		expect(options.map((o) => o.textContent).sort()).toEqual(
-			employeeRoles.options.map((role) => roleLabels[role]).sort()
+			employeeRoles.options.map((role) => roleLabel(role)).sort()
 		);
 	});
 

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -6,6 +6,7 @@ import { fakeJwt } from "@/test/jwt";
 import { router, toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
+import { render } from "@/test/render";
 import { LoginForm } from "./login-form";
 
 afterEach(() => {
