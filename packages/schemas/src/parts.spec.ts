@@ -1,0 +1,114 @@
+import { parseI18nMessage } from "@fixr/i18n";
+import { describe, expect, it } from "vitest";
+import { createPartSchema } from "./parts";
+import { issuePaths } from "./test-utils";
+
+const validPart = {
+	sku: "SCR-IP13-OLED",
+	name: "iPhone 13 OLED screen",
+	category: "screens",
+	costPrice: 350,
+	salePrice: 600,
+	stock: 4,
+	minStock: 2,
+	supplierId: "sup_1",
+};
+
+describe("createPartSchema", () => {
+	it("accepts a valid part", () => {
+		expect(createPartSchema.safeParse(validPart).success).toBe(true);
+	});
+
+	it.each([
+		"sku",
+		"name",
+		"category",
+		"supplierId",
+	])("rejects an empty %s", (field) => {
+		expect(
+			issuePaths(createPartSchema, { ...validPart, [field]: "" })
+		).toContain(field);
+	});
+
+	it.each([
+		["sku", 51],
+		["name", 121],
+	])("limits %s to %i characters", (field, length) => {
+		expect(
+			issuePaths(createPartSchema, {
+				...validPart,
+				[field]: "x".repeat(length),
+			})
+		).toEqual([field]);
+	});
+
+	it.each([
+		"costPrice",
+		"salePrice",
+		"stock",
+		"minStock",
+	])("rejects a negative %s", (field) => {
+		expect(
+			issuePaths(createPartSchema, { ...validPart, [field]: -1 })
+		).toContain(field);
+	});
+
+	it.each(["stock", "minStock"])("only accepts whole units in %s", (field) => {
+		expect(
+			issuePaths(createPartSchema, { ...validPart, [field]: 1.5 })
+		).toEqual([field]);
+	});
+
+	it("accepts cents in prices", () => {
+		expect(
+			createPartSchema.safeParse({
+				...validPart,
+				costPrice: 10.25,
+				salePrice: 19.9,
+			}).success
+		).toBe(true);
+	});
+
+	it("rejects prices sent as text", () => {
+		expect(
+			issuePaths(createPartSchema, { ...validPart, costPrice: "10" })
+		).toContain("costPrice");
+	});
+
+	it("rejects a sale price below the cost, on salePrice", () => {
+		expect(
+			issuePaths(createPartSchema, {
+				...validPart,
+				costPrice: 100,
+				salePrice: 99.99,
+			})
+		).toEqual(["salePrice"]);
+	});
+
+	it("allows selling at cost", () => {
+		expect(
+			createPartSchema.safeParse({ ...validPart, costPrice: 50, salePrice: 50 })
+				.success
+		).toBe(true);
+	});
+
+	it("only reports translation keys the catalog knows", () => {
+		const result = createPartSchema.safeParse({
+			sku: "",
+			name: "",
+			category: "",
+			costPrice: -1,
+			salePrice: "x",
+			stock: 1.5,
+			minStock: -1,
+			supplierId: "",
+		});
+
+		expect(result.success).toBe(false);
+		for (const issue of result.error?.issues ?? []) {
+			expect(parseI18nMessage(issue.message), issue.path.join(".")).not.toBe(
+				null
+			);
+		}
+	});
+});
