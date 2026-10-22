@@ -8,6 +8,7 @@ import {
 import type { FastifyRequest } from "fastify";
 import { authDocs } from "../../../core/docs/auth.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { AppError } from "../../../core/lib/app-error";
 import { requireTurnstile } from "../../../core/middlewares/turnstile";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { AuthController } from "../controllers";
@@ -20,16 +21,11 @@ export function authRoutes(fastify: FastifyTypedInstance) {
 			schema: authDocs.registerSchema,
 			preHandler: [requireTurnstile()],
 		},
-		withErrorHandler(async (request, response) => {
+		withErrorHandler(async (request, _response) => {
 			await createUserSchema.parseAsync(request.body);
 
-			return response.status(500).send({
-				status: 501,
-				error: "Not implemented",
-				code: "not_implemented",
-				message: "This endpoint is not implemented or disabled.",
-				data: null,
-			});
+			// Public sign-up is disabled; accounts are created by company admins.
+			throw new AppError("AUTH_NOT_IMPLEMENTED");
 		})
 	);
 

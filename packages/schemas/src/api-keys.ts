@@ -18,7 +18,9 @@ export const createApiKeySchema = z.object({
 	/** Optional expiration. When omitted the key never expires. */
 	expiresAt: z.coerce
 		.date()
-		.min(new Date(), {
+		// Compare against "now" at validation time: `.min(new Date())` would freeze
+		// the date the module was loaded, accepting past dates on a long-running server.
+		.refine((date) => date > new Date(), {
 			message: i18nMessage("validation.apiKey.expirationInPast"),
 		})
 		.optional()

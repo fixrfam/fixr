@@ -7,20 +7,24 @@ Fastify + `fastify-type-provider-zod` (Zod is the source of truth for both valid
 ## Adding a route
 
 1. Add/extend the module under `src/modules/<name>/` following the `routes/controllers/services/repositories/schemas/errors` layout (see root `AGENTS.md`).
-2. Register the route plugin in `src/server.ts` (`await server.register(xRoutes, { prefix: "..." })`) and add its OpenAPI tag to the `tags` array there if it's a new module.
+2. Register the route plugin in `buildApp()` in `src/app.ts` (`await app.register(xRoutes, { prefix: "..." })`) and add its OpenAPI tag to `OPENAPI_TAGS` there if it's a new module. `src/server.ts` is only the entrypoint that calls `listen()`.
 3. Add a docs schema entry in `src/core/docs/<module>.docs.ts` — this drives the Scalar/Swagger UI at `/docs` and `/reference`. Don't skip it; every route in existing modules has one.
 4. Gate with `[authenticate, requirePermission(permissions.<resource>.<action>)]` in `preHandler` unless the route is intentionally public (e.g. health check, email confirmation links).
 5. Wrap the handler body in `withErrorHandler(...)`.
 
 ## Auth specifics
 
-- Session JWT is read from a signed cookie (`cookieKey("session")` from `@fixr/constants/cookies`) via `@fastify/jwt` + `@fastify/cookie`, configured in `server.ts`.
+- Session JWT is read from a signed cookie (`cookieKey("session")` from `@fixr/constants/cookies`) via `@fastify/jwt` + `@fastify/cookie`, configured in `src/app.ts`.
 - Refresh tokens and one-time tokens (email confirmation, password reset, account deletion) are separate DB tables (`refresh_tokens`, `one_time_tokens`) — see `modules/auth` and `modules/account` for the patterns before adding another token-based flow.
 - `request.ability` (RBAC) is populated in two places: the `authenticate` middleware and `setupRBAC`'s `onRequest` hook. If you touch one, check the other stays consistent.
 
 ## Errors
 
-Central error handling in `server.ts` has three layers, in this order: `ZodError` (request/response shape) → `AppError` (domain errors, see `core/lib/app-error.ts`) → Fastify schema validation errors. New domain errors go through a module's `defineErrors({...})` registry, not a new ad-hoc handler.
+Central error handling lives in a single `setErrorHandler` in `src/app.ts`, in this order: `AppError` (domain errors, see `core/lib/app-error.ts`) → `ZodError` (request/response shape) → Fastify schema validation errors → response serialization errors. New domain errors go through a module's `defineErrors({...})` registry, not a new ad-hoc handler.
+
+## Testing
+
+See the root `TESTING.md`. Unit specs live next to the file (`*.spec.ts`), integration specs in `test/integration/<module>/` and run against real MySQL/Redis via Testcontainers (`bun run test:integration`, needs Docker). A new protected route must appear in the RBAC sweep (`test/integration/rbac/`) — a route without `requirePermission` fails it.
 
 ## Don't
 

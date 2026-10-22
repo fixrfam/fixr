@@ -24,6 +24,10 @@ export const authenticate = async (
 		const role = jwt.company?.role ?? "guest";
 		req.ability = createAbility(role);
 	} catch (error) {
+		// AppError also has string `code`/`name`, so it must be rethrown before the Fastify check.
+		if (error instanceof AppError) {
+			throw error;
+		}
 		if (isFastifyError(error)) {
 			throw new AppError("AUTH_JWT_INVALID");
 		}

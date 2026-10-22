@@ -156,9 +156,13 @@ export async function middleware(request: NextRequest) {
 	return NextResponse.next();
 
 	function redirectToHome(tenant: string) {
-		return NextResponse.redirect(
-			new URL(`/dashboard/${tenant}/home`, env.NEXT_PUBLIC_APP_URL)
-		);
+		const home = `/dashboard/${tenant}/home`;
+		// A role that can't see home either (e.g. guest) would loop home -> home;
+		// send it to the public support page instead.
+		const target =
+			request.nextUrl.pathname === home ? `/dashboard/${tenant}/support` : home;
+
+		return NextResponse.redirect(new URL(target, env.NEXT_PUBLIC_APP_URL));
 	}
 }
 
@@ -178,23 +182,21 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 	if (revalidateResponse.ok) {
 		const setCookies = revalidateResponse.headers.getSetCookie();
 		if (setCookies.length > 0) {
-			/**
-			 * Apply the refreshed cookies to the current request as well, so Server
-			 * Components rendered right after this middleware (e.g. getSession) see
-			 * the new session instead of the expired one that triggered the revalidation.
-			 */
+			// Forward the refreshed cookies to this same request too: server
+			// components rendering it read request cookies, and without them they
+			// still see the expired/missing session and fail (500) until the next load.
 			for (const cookie of setCookies) {
-				const nameValue = cookie.split(";")[0] ?? "";
-				const separatorIndex = nameValue.indexOf("=");
-				if (separatorIndex === -1) {
-					continue;
+				const [pair = ""] = cookie.split(";");
+				const separator = pair.indexOf("=");
+				if (separator > 0) {
+					request.cookies.set(
+						pair.slice(0, separator).trim(),
+						pair.slice(separator + 1).trim()
+					);
 				}
-				const name = nameValue.slice(0, separatorIndex).trim();
-				const value = nameValue.slice(separatorIndex + 1).trim();
-				request.cookies.set(name, value);
 			}
 
-			const res = NextResponse.next({ request });
+			const res = NextResponse.next({ request: { headers: request.headers } });
 			for (const cookie of setCookies) {
 				res.headers.append("Set-Cookie", cookie);
 			}

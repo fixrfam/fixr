@@ -90,5 +90,27 @@
       "tailwindDirectives": true
     }
   },
-  "extends": ["ultracite/biome/core", "ultracite/biome/react"]
+  "extends": ["ultracite/biome/core", "ultracite/biome/react"],
+  "overrides": [
+    {
+      "includes": [
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/*.e2e.ts",
+        "**/test/**",
+        "**/e2e/**"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "useTopLevelRegex": "off"
+          },
+          "suspicious": {
+            "useAwait": "off",
+            "noDocumentCookie": "off"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -41,6 +41,27 @@ export class ModelsService {
 		} as typeof models.$inferInsert;
 	}
 	/**
+	 * Load a model the company is allowed to modify.
+	 *
+	 * Another company's model is reported as not found (its existence is not
+	 * leaked); a shared catalog model (no company) can be read by everyone but
+	 * modified by no single tenant.
+	 */
+	private static async queryWritableModel(modelId: string, companyId: string) {
+		const model = await ModelsRepository.queryModelById(modelId);
+
+		if (!model || (model.companyId && model.companyId !== companyId)) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		if (!model.companyId) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		return model;
+	}
+
+	/**
 	 * List models with pagination, fulltext search, and filters
 	 *
 	 * @param userJwt - Authenticated user JWT payload
@@ -346,11 +367,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const updateData: Record<string, unknown> = {};
 
@@ -414,10 +434,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		await ModelsRepository.deleteModel(model.id);
 
@@ -461,10 +481,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const [uploadRecord] = await db
 			.select({ companyId: uploads.companyId })
@@ -554,10 +574,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const images = await ModelsRepository.queryModelImages(model.id);
 		const image = images.find((img) => img.id === imageId);

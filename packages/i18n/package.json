@@ -5,7 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "tsc --watch",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:ci": "vitest run --coverage",
     "build": "biome check && tsc",
     "lint": "biome check",
     "lint:write": "biome check --write",
@@ -28,9 +31,13 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@fixr/typescript-config": "workspace:*",
+    "@testing-library/react": "catalog:",
     "@types/bun": "catalog:",
     "@types/react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
     "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
