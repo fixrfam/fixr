@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ interface TopicsInputProps {
 }
 
 /**
- * Edits a list of short text topics: type one, press Enter (or "Adicionar")
+ * Edits a list of short text topics: type one, press Enter (or "Add")
  * and it joins the bulleted list below.
  */
 export function TopicsInput({
@@ -20,6 +21,7 @@ export function TopicsInput({
 	onChange,
 	placeholder,
 }: TopicsInputProps) {
+	const { t } = useTranslation();
 	const [draft, setDraft] = useState("");
 
 	function addTopic() {
@@ -50,7 +52,7 @@ export function TopicsInput({
 					type="button"
 					variant="outline"
 				>
-					Adicionar <Plus className="size-3.5" />
+					{t("services.form.addTopic")} <Plus className="size-3.5" />
 				</Button>
 			</div>
 			{value.length > 0 && (
@@ -60,7 +62,7 @@ export function TopicsInput({
 							<div className="flex items-start justify-between gap-2">
 								<span>{topic}</span>
 								<button
-									aria-label={`Remover ${topic}`}
+									aria-label={t("services.form.removeItem", { name: topic })}
 									className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
 									onClick={() => onChange(value.filter((v) => v !== topic))}
 									type="button"

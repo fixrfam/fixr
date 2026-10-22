@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	getCoreRowModel,
 	getPaginationRowModel,
@@ -16,6 +17,7 @@ import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { useSupplierColumns } from "./columns";
 
 export function SuppliersTable() {
+	const { t } = useTranslation();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -47,10 +49,10 @@ export function SuppliersTable() {
 		<div className="space-y-4">
 			<TableToolbar
 				createHref="/suppliers/new"
-				createLabel="Novo fornecedor"
+				createLabel={t("suppliers.table.create")}
 				onClear={() => setSearch("")}
 				onSearchChange={setSearch}
-				placeholder="Busque por fornecedor, CNPJ, contato, telefone, email ou peça..."
+				placeholder={t("suppliers.table.search")}
 				search={search}
 			>
 				<DataTableViewOptions align="end" table={table} />

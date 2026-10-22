@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Wrench } from "lucide-react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -9,6 +10,7 @@ import { NewServiceForm } from "@/components/dashboard/services/forms/new-servic
 
 export default function EditServicePage() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string; id: string }>();
 	const service = usePartsStore((state) =>
 		state.services.find((item) => item.id === params.id)
@@ -22,9 +24,9 @@ export default function EditServicePage() {
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Altere os campos abaixo e salve as modificações."
+				description={t("services.page.editDescription")}
 				Icon={Wrench}
-				title="Editar serviço"
+				title={t("services.page.editTitle")}
 			/>
 			<div>
 				<NewServiceForm

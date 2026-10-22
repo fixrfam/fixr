@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	type ColumnDef,
 	createColumnHelper,
@@ -17,7 +18,7 @@ import {
 	TextCell,
 } from "./cells";
 import type { PartTableRow } from "./data";
-import { CATEGORY_OPTIONS, STOCK_STATUS_OPTIONS } from "./filter-options";
+import { CATEGORY_OPTIONS, stockStatusOptions } from "./filter-options";
 
 const partColumnHelper = createColumnHelper<PartTableRow>();
 
@@ -31,54 +32,73 @@ function multiSelectFilter(
 }
 
 export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
+	const { t } = useTranslation();
 	const suppliers = usePartsStore((state) => state.suppliers);
 
 	return useMemo(
 		() => [
 			partColumnHelper.accessor("sku", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="SKU" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.sku")}
+					/>
 				),
 				cell: ({ getValue }) => <SkuCell sku={getValue()} />,
-				meta: { label: "SKU" },
+				meta: { label: t("parts.table.headers.sku") },
 			}),
 			partColumnHelper.accessor("name", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Nome" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.name")}
+					/>
 				),
 				cell: ({ getValue }) => <NameCell name={getValue()} />,
-				meta: { label: "Nome" },
+				meta: { label: t("parts.table.headers.name") },
 			}),
 			partColumnHelper.accessor("category", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Categoria" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.category")}
+					/>
 				),
 				cell: ({ getValue }) => <TextCell value={getValue()} />,
 				enableColumnFilter: true,
 				filterFn: multiSelectFilter,
 				meta: {
-					label: "Categoria",
+					label: t("parts.table.headers.category"),
 					variant: "multiSelect",
 					options: CATEGORY_OPTIONS,
 				},
 			}),
 			partColumnHelper.accessor("costPrice", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Preço de custo" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.costPrice")}
+					/>
 				),
 				cell: ({ getValue }) => <PriceCell value={getValue()} />,
-				meta: { label: "Preço de custo" },
+				meta: { label: t("parts.table.headers.costPrice") },
 			}),
 			partColumnHelper.accessor("salePrice", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Preço de venda" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.salePrice")}
+					/>
 				),
 				cell: ({ getValue }) => <PriceCell value={getValue()} />,
-				meta: { label: "Preço de venda" },
+				meta: { label: t("parts.table.headers.salePrice") },
 			}),
 			partColumnHelper.accessor("stock", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Estoque" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.stock")}
+					/>
 				),
 				cell: ({ row }) => (
 					<StockCell
@@ -86,19 +106,25 @@ export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 						stock={row.original.stock}
 					/>
 				),
-				meta: { label: "Estoque" },
+				meta: { label: t("parts.table.headers.stock") },
 			}),
 			partColumnHelper.accessor("minStock", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Estoque mínimo" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.minStock")}
+					/>
 				),
 				cell: ({ getValue }) => <QuantityCell value={getValue()} />,
-				meta: { label: "Estoque mínimo" },
+				meta: { label: t("parts.table.headers.minStock") },
 			}),
 			partColumnHelper.accessor("supplierId", {
 				id: "supplier",
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Fornecedor" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.supplier")}
+					/>
 				),
 				cell: ({ row }) => (
 					<SupplierCell
@@ -113,22 +139,25 @@ export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 				enableColumnFilter: true,
 				filterFn: multiSelectFilter,
 				meta: {
-					label: "Fornecedor",
+					label: t("parts.table.headers.supplier"),
 					variant: "multiSelect",
 					options: suppliers.map((s) => ({ label: s.name, value: s.id })),
 				},
 			}),
 			partColumnHelper.accessor("stockStatus", {
 				header: ({ column }) => (
-					<DataTableColumnHeader column={column} label="Status de estoque" />
+					<DataTableColumnHeader
+						column={column}
+						label={t("parts.table.headers.stockStatus")}
+					/>
 				),
 				enableColumnFilter: true,
 				enableHiding: false,
 				filterFn: multiSelectFilter,
 				meta: {
-					label: "Status de estoque",
+					label: t("parts.table.headers.stockStatus"),
 					variant: "multiSelect",
-					options: STOCK_STATUS_OPTIONS,
+					options: stockStatusOptions(t),
 				},
 			}),
 			partColumnHelper.display({
@@ -137,13 +166,13 @@ export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 					<DataTableColumnHeader
 						className="px-0.5"
 						column={column}
-						label="Editar"
+						label={t("parts.table.headers.actions")}
 					/>
 				),
 				cell: ({ row }) => (
 					<EditCell
 						href={`/parts/${row.original.id}/edit`}
-						label={`Editar ${row.original.name}`}
+						label={t("parts.table.editLabel", { name: row.original.name })}
 						subdomain={subdomain}
 					/>
 				),
@@ -151,6 +180,6 @@ export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 				enableHiding: false,
 			}),
 		],
-		[subdomain, suppliers]
+		[subdomain, suppliers, t]
 	) as ColumnDef<PartTableRow>[];
 }

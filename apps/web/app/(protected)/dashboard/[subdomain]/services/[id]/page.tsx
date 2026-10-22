@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Wrench } from "lucide-react";
 import { notFound, useParams } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -8,6 +9,7 @@ import { useServiceRow } from "@/components/dashboard/parts/store";
 import { ServiceDetails } from "@/components/dashboard/services/service-details";
 
 export default function ServiceDetailsPage() {
+	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
 	const service = useServiceRow(id);
 
@@ -19,7 +21,7 @@ export default function ServiceDetailsPage() {
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Detalhes do serviço e instruções de teste."
+				description={t("services.page.detailsDescription")}
 				Icon={Wrench}
 				title={service.name}
 			/>

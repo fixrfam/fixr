@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Puzzle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { NewPartForm } from "@/components/dashboard/parts/forms/new-part-form";
@@ -8,6 +9,7 @@ import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer
 
 export default function EditPartModal() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
 	const part = usePartsStore((state) =>
 		state.parts.find((item) => item.id === id)
@@ -15,15 +17,15 @@ export default function EditPartModal() {
 
 	return (
 		<ResponsiveDialogDrawer
-			description="Altere os campos abaixo e salve as modificações."
+			description={t("parts.page.editDescription")}
 			icon={<Puzzle />}
-			title="Editar peça"
+			title={t("parts.page.editTitle")}
 		>
 			{part ? (
 				<NewPartForm onSuccess={() => router.back()} part={part} />
 			) : (
 				<p className="text-muted-foreground text-sm">
-					Não encontramos esta peça.
+					{t("parts.page.notFound")}
 				</p>
 			)}
 		</ResponsiveDialogDrawer>

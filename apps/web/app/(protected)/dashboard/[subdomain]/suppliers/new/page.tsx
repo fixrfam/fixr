@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { Package } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
@@ -8,15 +9,16 @@ import { NewSupplierForm } from "@/components/dashboard/suppliers/forms/new-supp
 
 export default function NewSupplierPage() {
 	const router = useRouter();
+	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
 
 	return (
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description="Preencha os campos abaixo para cadastrar um novo fornecedor."
+				description={t("suppliers.page.newDescription")}
 				Icon={Package}
-				title="Cadastrar fornecedor"
+				title={t("suppliers.page.newTitle")}
 			/>
 			<div>
 				<NewSupplierForm

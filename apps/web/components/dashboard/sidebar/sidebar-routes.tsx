@@ -100,7 +100,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "services",
-				label: "Serviços",
+				labelKey: "dashboard.nav.services",
 				href: "/services",
 				type: "route",
 				icon: "Wrench",

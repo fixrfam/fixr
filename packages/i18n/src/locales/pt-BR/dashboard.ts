@@ -26,6 +26,7 @@ export const dashboard: Translated<typeof source> = {
 		estimates: "Orçamentos",
 		suppliers: "Fornecedores",
 		parts: "Peças",
+		services: "Serviços",
 		inventory: "Estoque",
 		support: "Suporte",
 		customers: "Clientes",

@@ -1,3 +1,4 @@
+import { useTranslation } from "@fixr/i18n/react";
 import type { ReactNode } from "react";
 import {
 	DurationCell,
@@ -38,6 +39,8 @@ export function ServiceDetails({
 	service: ServiceTableRow;
 	className?: string;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<div className={cn("space-y-6", className)}>
 			<p className="text-sm">{service.description}</p>
@@ -45,21 +48,23 @@ export function ServiceDetails({
 			<div className="grid grid-cols-2 gap-4 rounded-md border p-4 text-sm">
 				<div className="flex flex-col gap-1">
 					<span className="text-muted-foreground text-xs">
-						Duração estimada
+						{t("services.details.duration")}
 					</span>
 					<span className="font-medium">
 						<DurationCell minutes={service.estimatedDurationMinutes} />
 					</span>
 				</div>
 				<div className="flex flex-col gap-1">
-					<span className="text-muted-foreground text-xs">Preço</span>
+					<span className="text-muted-foreground text-xs">
+						{t("services.details.price")}
+					</span>
 					<span className="font-medium">
 						<PriceCell value={service.price} />
 					</span>
 				</div>
 			</div>
 
-			<Section title="Categorias de aparelho">
+			<Section title={t("services.details.deviceCategories")}>
 				<div className="flex flex-wrap gap-1">
 					{service.deviceCategories.map((category) => (
 						<Badge className="rounded-md" key={category} variant="secondary">
@@ -69,24 +74,24 @@ export function ServiceDetails({
 				</div>
 			</Section>
 
-			<Section title="O que testar após o reparo">
+			<Section title={t("services.details.testInstructions")}>
 				<TopicList
-					empty="Nenhuma instrução de teste cadastrada."
+					empty={t("services.details.noTestInstructions")}
 					topics={service.testInstructions}
 				/>
 			</Section>
 
-			<Section title="Parâmetros de teste">
+			<Section title={t("services.details.testParameters")}>
 				<TopicList
-					empty="Nenhum parâmetro de teste cadastrado."
+					empty={t("services.details.noTestParameters")}
 					topics={service.testParameters}
 				/>
 			</Section>
 
-			<Section title="Peças vinculadas">
+			<Section title={t("services.details.parts")}>
 				{service.parts.length === 0 ? (
 					<p className="text-muted-foreground text-sm">
-						Este serviço não usa peças.
+						{t("services.details.noParts")}
 					</p>
 				) : (
 					<ul className="divide-y rounded-md border text-sm">

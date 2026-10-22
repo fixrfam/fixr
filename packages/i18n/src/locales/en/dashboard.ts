@@ -23,6 +23,7 @@ export const dashboard = {
 		estimates: "Estimates",
 		suppliers: "Suppliers",
 		parts: "Parts",
+		services: "Services",
 		inventory: "Inventory",
 		support: "Support",
 		customers: "Customers",

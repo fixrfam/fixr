@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -18,10 +19,11 @@ import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { usePartRows } from "../store";
 import { usePartColumns } from "./columns";
-import { searchParts } from "./data";
+import { STOCK_STATUS_KEYS, searchParts } from "./data";
 import { TableToolbar } from "./toolbar";
 
 export function PartsTable() {
+	const { t } = useTranslation();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -33,7 +35,10 @@ export function PartsTable() {
 
 	const rows = usePartRows();
 
-	const filteredData = useMemo(() => searchParts(rows, search), [rows, search]);
+	const filteredData = useMemo(
+		() => searchParts(rows, search, (status) => t(STOCK_STATUS_KEYS[status])),
+		[rows, search, t]
+	);
 
 	const table = useReactTable({
 		data: filteredData,
@@ -49,7 +54,7 @@ export function PartsTable() {
 		state: { sorting, columnFilters },
 		initialState: {
 			pagination: { pageIndex: 0, pageSize: 10 },
-			// Only used as the "Status de estoque" filter; shown inside "Estoque"
+			// Only used as the stock status filter; shown inside the stock column
 			columnVisibility: { stockStatus: false },
 		},
 	});
@@ -58,13 +63,13 @@ export function PartsTable() {
 		<div className="space-y-4">
 			<TableToolbar
 				createHref="/parts/new"
-				createLabel="Nova peça"
+				createLabel={t("parts.table.create")}
 				onClear={() => {
 					setSearch("");
 					setColumnFilters([]);
 				}}
 				onSearchChange={setSearch}
-				placeholder="Busque por SKU, nome, categoria, fornecedor, CNPJ ou serviço..."
+				placeholder={t("parts.table.search")}
 				search={search}
 			>
 				<DataTableViewOptions align="end" table={table} />

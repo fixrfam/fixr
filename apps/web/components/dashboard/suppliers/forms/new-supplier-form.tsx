@@ -1,6 +1,7 @@
 "use client";
 
 import { cnpj, phone } from "@fixr/constants/masks";
+import { useTranslation } from "@fixr/i18n/react";
 import { createSupplierSchema } from "@fixr/schemas/suppliers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
@@ -29,6 +30,7 @@ export function NewSupplierForm({
 }: ComponentPropsWithoutRef<"form"> & {
 	onSuccess?: () => void;
 }) {
+	const { t } = useTranslation();
 	const addSupplier = usePartsStore((state) => state.addSupplier);
 
 	const form = useForm<z.infer<typeof createSupplierSchema>>({
@@ -50,7 +52,7 @@ export function NewSupplierForm({
 		//TODO: enviar para a API (com CNPJ e telefone sem máscara) quando a rota de fornecedores existir
 		addSupplier(values);
 
-		toast.success({ text: "Fornecedor cadastrado com sucesso!" });
+		toast.success({ text: t("suppliers.form.created") });
 		onSuccess?.();
 	}
 
@@ -68,10 +70,14 @@ export function NewSupplierForm({
 						render={({ field }) => (
 							<FormItem className="col-span-full">
 								<FormLabel>
-									<Building2 className="inline-block size-3.5" /> Nome
+									<Building2 className="inline-block size-3.5" />{" "}
+									{t("suppliers.form.nameLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="TechParts Distribuidora" {...field} />
+									<Input
+										placeholder={t("suppliers.form.namePlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -83,7 +89,8 @@ export function NewSupplierForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<IdCard className="inline-block size-3.5" /> CNPJ
+									<IdCard className="inline-block size-3.5" />{" "}
+									{t("suppliers.form.cnpjLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
@@ -105,10 +112,14 @@ export function NewSupplierForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<User className="inline-block size-3.5" /> Contato
+									<User className="inline-block size-3.5" />{" "}
+									{t("suppliers.form.contactLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="Nome do responsável" {...field} />
+									<Input
+										placeholder={t("suppliers.form.contactPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -120,7 +131,8 @@ export function NewSupplierForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<PhoneIcon className="inline-block size-3.5" /> Telefone
+									<PhoneIcon className="inline-block size-3.5" />{" "}
+									{t("suppliers.form.phoneLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
@@ -142,10 +154,14 @@ export function NewSupplierForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>
-									<Mail className="inline-block size-3.5" /> Email
+									<Mail className="inline-block size-3.5" />{" "}
+									{t("suppliers.form.emailLabel")}
 								</FormLabel>
 								<FormControl>
-									<Input placeholder="vendas@fornecedor.com.br" {...field} />
+									<Input
+										placeholder={t("suppliers.form.emailPlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -153,7 +169,7 @@ export function NewSupplierForm({
 					/>
 				</div>
 				<Button className="w-full" type="submit">
-					Cadastrar fornecedor <Plus />
+					{t("suppliers.form.submit")} <Plus />
 				</Button>
 			</form>
 		</Form>

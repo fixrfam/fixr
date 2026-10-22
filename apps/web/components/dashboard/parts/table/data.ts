@@ -1,11 +1,12 @@
+import type { StaticTranslationKey } from "@fixr/i18n";
 import type { PartRow, ServiceRow, SupplierRow } from "@fixr/mock";
 
 export type StockStatusId = "in_stock" | "low_stock" | "out_of_stock";
 
-export const STOCK_STATUS_LABELS: Record<StockStatusId, string> = {
-	in_stock: "Em estoque",
-	low_stock: "Estoque baixo",
-	out_of_stock: "Sem estoque",
+export const STOCK_STATUS_KEYS: Record<StockStatusId, StaticTranslationKey> = {
+	in_stock: "parts.stockStatus.in_stock",
+	low_stock: "parts.stockStatus.low_stock",
+	out_of_stock: "parts.stockStatus.out_of_stock",
 };
 
 export interface PartTableRow extends PartRow {
@@ -135,16 +136,18 @@ function matchesSearch(search: string, fields: string[]): boolean {
 	return terms.every((term) => searchable.some((v) => v.includes(term)));
 }
 
+/** `stockStatusLabel` names the status in the reader's language, so it can be searched. */
 export function searchParts(
 	rows: PartTableRow[],
-	search: string
+	search: string,
+	stockStatusLabel: (status: StockStatusId) => string
 ): PartTableRow[] {
 	if (!search.trim()) return rows;
 
 	return rows.filter((row) =>
 		matchesSearch(search, [
 			...partFields(row),
-			STOCK_STATUS_LABELS[row.stockStatus],
+			stockStatusLabel(row.stockStatus),
 			...(row.supplier ? supplierFields(row.supplier) : []),
 			...row.services.flatMap(serviceFields),
 		])

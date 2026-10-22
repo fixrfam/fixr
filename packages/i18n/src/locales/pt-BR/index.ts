@@ -12,9 +12,12 @@ import { emails } from "./emails";
 import { employees } from "./employees";
 import { home } from "./home";
 import { messages } from "./messages";
+import { parts } from "./parts";
 import { permissions } from "./permissions";
 import { roles } from "./roles";
 import { serviceOrders } from "./service-orders";
+import { services } from "./services";
+import { suppliers } from "./suppliers";
 import { validation } from "./validation";
 
 export const ptBR: Translated<typeof en> = {
@@ -30,8 +33,11 @@ export const ptBR: Translated<typeof en> = {
 	employees,
 	home,
 	messages,
+	parts,
 	permissions,
 	roles,
 	serviceOrders,
+	services,
+	suppliers,
 	validation,
 };

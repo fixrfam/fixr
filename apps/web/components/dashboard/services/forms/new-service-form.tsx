@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { type ServiceRow, serviceDeviceCategories } from "@fixr/mock";
 import { createServiceSchema } from "@fixr/schemas/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +54,7 @@ export function NewServiceForm({
 	service?: ServiceRow;
 	onSuccess?: () => void;
 }) {
+	const { t, format } = useTranslation();
 	const parts = usePartsStore((state) => state.parts);
 	const addService = usePartsStore((state) => state.addService);
 	const updateService = usePartsStore((state) => state.updateService);
@@ -80,10 +82,10 @@ export function NewServiceForm({
 
 		if (service) {
 			updateService(service.id, data);
-			toast.success({ text: "Serviço atualizado com sucesso!" });
+			toast.success({ text: t("services.form.updated") });
 		} else {
 			addService(data);
-			toast.success({ text: "Serviço cadastrado com sucesso!" });
+			toast.success({ text: t("services.form.created") });
 		}
 
 		onSuccess?.();
@@ -102,9 +104,12 @@ export function NewServiceForm({
 						name="name"
 						render={({ field }) => (
 							<FormItem className="col-span-full">
-								<FormLabel>Nome</FormLabel>
+								<FormLabel>{t("services.form.nameLabel")}</FormLabel>
 								<FormControl>
-									<Input placeholder="Troca de tela" {...field} />
+									<Input
+										placeholder={t("services.form.namePlaceholder")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -115,10 +120,10 @@ export function NewServiceForm({
 						name="description"
 						render={({ field }) => (
 							<FormItem className="col-span-full">
-								<FormLabel>Descrição</FormLabel>
+								<FormLabel>{t("services.form.descriptionLabel")}</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Descreva o que está incluso no serviço"
+										placeholder={t("services.form.descriptionPlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -131,7 +136,9 @@ export function NewServiceForm({
 						name="deviceCategories"
 						render={({ field }) => (
 							<FormItem className="col-span-full">
-								<FormLabel>Categorias de aparelho</FormLabel>
+								<FormLabel>
+									{t("services.form.deviceCategoriesLabel")}
+								</FormLabel>
 								<div className="flex flex-wrap gap-2">
 									{serviceDeviceCategories.map((category) => {
 										const selected = field.value.includes(category);
@@ -154,7 +161,7 @@ export function NewServiceForm({
 									})}
 								</div>
 								<FormDescription>
-									Em quais tipos de aparelho este serviço é feito.
+									{t("services.form.deviceCategoriesDescription")}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -165,7 +172,7 @@ export function NewServiceForm({
 						name="estimatedDurationMinutes"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Duração estimada (minutos)</FormLabel>
+								<FormLabel>{t("services.form.durationLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={1}
@@ -183,11 +190,11 @@ export function NewServiceForm({
 						name="price"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Preço (R$)</FormLabel>
+								<FormLabel>{t("services.form.priceLabel")}</FormLabel>
 								<FormControl>
 									<Input
 										min={0}
-										placeholder="0,00"
+										placeholder={format.number(0, { minimumFractionDigits: 2 })}
 										step="0.01"
 										{...numberInputProps(field)}
 									/>
@@ -206,7 +213,7 @@ export function NewServiceForm({
 
 							return (
 								<FormItem className="col-span-full">
-									<FormLabel>Peças vinculadas</FormLabel>
+									<FormLabel>{t("services.form.partsLabel")}</FormLabel>
 									<Popover>
 										<PopoverTrigger asChild>
 											<FormControl>
@@ -217,8 +224,10 @@ export function NewServiceForm({
 													variant="outline"
 												>
 													{selected.length > 0
-														? `${selected.length} peça(s) selecionada(s)`
-														: "Selecione as peças usadas no serviço"}
+														? t("services.form.partsSelected", {
+																count: selected.length,
+															})
+														: t("services.form.partsPlaceholder")}
 													<ChevronsUpDown className="size-4 opacity-50" />
 												</Button>
 											</FormControl>
@@ -228,9 +237,13 @@ export function NewServiceForm({
 											className="w-(--radix-popover-trigger-width) p-0"
 										>
 											<Command>
-												<CommandInput placeholder="Busque por nome ou SKU..." />
+												<CommandInput
+													placeholder={t("services.form.partsSearch")}
+												/>
 												<CommandList>
-													<CommandEmpty>Nenhuma peça encontrada.</CommandEmpty>
+													<CommandEmpty>
+														{t("services.form.partsEmpty")}
+													</CommandEmpty>
 													<CommandGroup>
 														{parts.map((part) => (
 															<CommandItem
@@ -272,7 +285,9 @@ export function NewServiceForm({
 												>
 													{part.name}
 													<button
-														aria-label={`Remover ${part.name}`}
+														aria-label={t("services.form.removeItem", {
+															name: part.name,
+														})}
 														onClick={() =>
 															field.onChange(toggle(field.value, part.id))
 														}
@@ -285,7 +300,7 @@ export function NewServiceForm({
 										</div>
 									)}
 									<FormDescription>
-										Opcional. Serviços como diagnóstico não usam peças.
+										{t("services.form.partsDescription")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
@@ -297,15 +312,16 @@ export function NewServiceForm({
 						name="testInstructions"
 						render={({ field }) => (
 							<FormItem className="col-span-full">
-								<FormLabel>O que testar após o reparo</FormLabel>
+								<FormLabel>
+									{t("services.form.testInstructionsLabel")}
+								</FormLabel>
 								<TopicsInput
 									onChange={field.onChange}
-									placeholder="Ex.: Testar o toque em toda a área da tela"
+									placeholder={t("services.form.testInstructionsPlaceholder")}
 									value={field.value}
 								/>
 								<FormDescription>
-									Adicione um tópico por vez. Eles aparecem como lista nos
-									detalhes do serviço.
+									{t("services.form.testInstructionsDescription")}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -316,14 +332,14 @@ export function NewServiceForm({
 						name="testParameters"
 						render={({ field }) => (
 							<FormItem className="col-span-full">
-								<FormLabel>Parâmetros de teste</FormLabel>
+								<FormLabel>{t("services.form.testParametersLabel")}</FormLabel>
 								<TopicsInput
 									onChange={field.onChange}
-									placeholder="Ex.: Temperatura em carga: até 40 °C"
+									placeholder={t("services.form.testParametersPlaceholder")}
 									value={field.value}
 								/>
 								<FormDescription>
-									Valores de referência para considerar o reparo aprovado.
+									{t("services.form.testParametersDescription")}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -336,11 +352,11 @@ export function NewServiceForm({
 						disabled={!form.formState.isDirty}
 						type="submit"
 					>
-						Salvar alterações <Save />
+						{t("common.actions.saveChanges")} <Save />
 					</Button>
 				) : (
 					<Button className="w-full" type="submit">
-						Cadastrar serviço <Plus />
+						{t("services.form.submit")} <Plus />
 					</Button>
 				)}
 			</form>
