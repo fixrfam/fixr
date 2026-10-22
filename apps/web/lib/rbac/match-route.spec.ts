@@ -1,4 +1,4 @@
-import { createAbility, permissions } from "@fixr/permissions";
+import { createAbility, type Permission, permissions } from "@fixr/permissions";
 import { employeeRoles } from "@fixr/schemas/roles";
 import { describe, expect, it } from "vitest";
 import {
@@ -107,7 +107,7 @@ describe("parts, services and suppliers routes", () => {
 		"/dashboard/fixr/services/s1/edit",
 		"/dashboard/fixr/suppliers/new",
 	])("only admins reach %s", (path) => {
-		const permission = getRequiredPermission(path, routeRules)!;
+		const permission = getRequiredPermission(path, routeRules) as Permission;
 		const allowed = employeeRoles.options.filter((role) =>
 			createAbility(role).can(permission)
 		);
