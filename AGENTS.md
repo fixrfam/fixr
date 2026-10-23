@@ -29,8 +29,9 @@ Each app/package with its own local conventions may have its own `CLAUDE.md` —
 
 ## Commands
 
-Run from the repo root unless noted:
+Run from the repo root unless noted. Local scripts run through Turborepo (`turbo.json`, one pane per package, cached); the `*:ci`, `deploy*` and `destroy*` scripts stay on `bun run --filter` because CI, the Alchemy deploy and Coolify call them. Don't move those to turbo or change the apps' `build`/`start` scripts without checking both deploys.
 
+- `bun run setup`: bootstrap local dev: root `.env`, Docker, schema, demo seed (`--reset`, `--no-seed`)
 - `bun run dev` — start server, web, workers in dev mode
 - `bun run dev:admin` — start admin app in dev mode
 - `bun run build` / `build:packages` / `build:apps` / `build:<app>` — build
@@ -41,7 +42,8 @@ Run from the repo root unless noted:
 - `bun run db:migrate` — apply migrations
 - `bun run db:generate` — generate migration SQL from schema changes
 - `bun run db:studio` — Drizzle Studio GUI
-- `bun run test` / `test:ci` — unit tests of every workspace (`test:ci` adds coverage thresholds)
+- `bun run db:seed`: demo data (`packages/db/src/seed`, password `Fixr!Dev123`, refuses non-local DBs)
+- `bun run test` / `test:watch` / `test:ci`: unit tests of every workspace (`test:ci` adds coverage thresholds)
 - `bun run test:integration` — server integration tests (Docker) · `bun run test:e2e` — Playwright e2e (Docker)
 - `bun run lint:ci` — lint without the TTY-only `--elide-lines` flag (what CI runs)
 
@@ -51,7 +53,7 @@ Run from the repo root unless noted:
 - **TypeScript**: strict mode. Run `bun run check-types` after non-trivial changes.
 - **IDs**: use `createId()` from `@paralleldrive/cuid2` for primary keys (`.$defaultFn(() => createId())` in Drizzle schema). Not UUID, not auto-increment.
 - **Workspace imports**: use the `@fixr/<package>` workspace protocol with subpath exports, e.g. `@fixr/db/connection`, `@fixr/db/schema`, `@fixr/schemas/account`, `@fixr/permissions`. Don't deep-import across a package's internal file paths.
-- **Env vars**: always go through `@fixr/env/<app>` (Zod-validated via `@t3-oss/env-core`). Never read `process.env` directly in app code — add the var to the relevant `packages/env/src/<app>.ts` first.
+- **Env vars**: always go through `@fixr/env/<app>` (Zod-validated via `@t3-oss/env-core`). Never read `process.env` directly in app code. Add the var to the relevant `packages/env/src/<app>.ts` and to the root `.env.example`. Local dev uses a single root `.env` (loaded by `packages/env/src/load-root-env.ts`); production envs are injected by CI/Coolify, never from files.
 - **User facing text**: never hardcode copy in a component. Add the key to `packages/i18n/src/locales/en` and `pt-BR`, then render it with `useTranslation()` (client), `getTranslator()` (server components) or `createTranslator(locale)` (API, workers, emails). Schemas emit keys with `i18nMessage(...)`, and the API answers with a `code` that the frontend turns into copy — the backend never sends user facing text. `bun run i18n:scan` lists copy still written inline. See `packages/i18n/README.md`.
 
 ### Server (`apps/server`) module structure

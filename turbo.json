@@ -1,78 +1,29 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "daemon": false,
-  "globalEnv": [
-    "MYSQL_ROOT_PASSWORD",
-    "MYSQL_DATABASE",
-    "MYSQL_USER",
-    "MYSQL_PASSWORD",
-    "REDIS_PASSWORD",
-    "REDIS_URL",
-    "DB_URL",
-    "FRONTEND_URL",
-    "RESEND_KEY",
-    "JWT_SECRET",
-    "COOKIE_ENCRYPTION_SECRET",
-    "COOKIE_DOMAIN",
-    "NODE_PORT",
-    "NEXT_PUBLIC_APP_URL",
-    "NEXT_PUBLIC_API_URL",
-    "NEXT_PUBLIC_DOCS_URL",
-    "NEXT_PUBLIC_LINKTREE_URL",
-    "NEXT_PUBLIC_API_URL",
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    "CLERK_SECRET_KEY",
-    "GOOGLE_AUTH_CLIENT_ID",
-    "GOOGLE_AUTH_CLIENT_SECRET",
-    "GOOGLE_AUTH_REDIRECT_URI",
-    "TURNSTILE_SECRET_KEY",
-    "NEXT_PUBLIC_TURNSTILE_SITE_KEY"
-  ],
+  "envMode": "loose",
+  "agentGuidance": false,
+  "globalDependencies": [".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"]
-    },
-    "build:server": {
-      "dependsOn": ["^build:server"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"]
-    },
-    "build:web": {
-      "dependsOn": ["^build:web"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"]
-    },
-    "build:admin": {
-      "dependsOn": ["^build:admin"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"],
-      "env": ["REDIS_PASSWORD", "FOO"]
-    },
-    "lint:write": {
-      "dependsOn": ["^lint:write"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "outputs": []
     },
-    "generate": {
-      "dependsOn": ["^generate"]
+    "lint": {
+      "outputs": []
     },
-    "migrate": {
-      "dependsOn": ["^generate"]
+    "lint:write": {
+      "cache": false
     },
-    "studio": {
-      "dependsOn": []
+    "test:unit": {
+      "outputs": []
     },
     "dev": {
-      "dependsOn": ["^migrate"],
       "cache": false,
-      "persistent": true,
-      "inputs": ["$TURBO_DEFAULT$", ".env*"]
-    },
-    "start": {
-      "dependsOn": []
+      "persistent": true
     }
   }
 }
