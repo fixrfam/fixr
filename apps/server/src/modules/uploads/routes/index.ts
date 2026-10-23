@@ -24,10 +24,11 @@ export function uploadsRoutes(fastify: FastifyTypedInstance) {
 					return;
 				}
 				await authenticateEmployeeOrApiKey(request, reply);
-				const permission =
-					purpose === "service-orders"
-						? permissions.serviceOrders.update
-						: permissions.devices.update;
+				const permission = {
+					"service-orders": permissions.serviceOrders.update,
+					models: permissions.devices.update,
+					"company-logo": permissions.companies.update,
+				}[purpose];
 				await new Promise<void>((resolve, reject) => {
 					requirePermission(permission)(request, reply, (err) => {
 						if (err) reject(err);

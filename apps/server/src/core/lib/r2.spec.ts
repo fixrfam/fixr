@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	buildAvatarObjectKey,
+	buildCompanyLogoObjectKey,
 	buildModelObjectKey,
 	buildObjectPublicUrl,
 	buildUploadObjectKey,
+	isAllowedCompanyLogoUrl,
 	isAllowedCompanyPhotoUrl,
 	sanitizeUploadFileName,
 } from "./r2";
@@ -92,6 +94,31 @@ describe("public URLs", () => {
 			isAllowedCompanyPhotoUrl(
 				base,
 				"https://evil.test/companies/c1/service-orders/x.jpg",
+				"c1"
+			)
+		).toBe(false);
+	});
+});
+
+describe("company logo", () => {
+	it("uses one deterministic key per company, keeping the extension", () => {
+		expect(
+			buildCompanyLogoObjectKey({ companyId: "c1", fileName: "Minha Logo.SVG" })
+		).toBe("companies/c1/logo.SVG");
+	});
+
+	it("only accepts the company's own logo URL", () => {
+		const base = "https://cdn.test";
+		expect(
+			isAllowedCompanyLogoUrl(base, `${base}/companies/c1/logo.png?v=2`, "c1")
+		).toBe(true);
+		expect(
+			isAllowedCompanyLogoUrl(base, `${base}/companies/c2/logo.png`, "c1")
+		).toBe(false);
+		expect(
+			isAllowedCompanyLogoUrl(
+				base,
+				`${base}/companies/c1/service-orders/x.png`,
 				"c1"
 			)
 		).toBe(false);

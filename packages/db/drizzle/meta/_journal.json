@@ -120,6 +120,13 @@
       "when": 1792788671648,
       "tag": "0016_backfill_client_company",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1792789644458,
+      "tag": "0017_company_profile",
+      "breakpoints": true
     }
   ]
 }
