@@ -1,16 +1,9 @@
 "use client";
 
-import {
-	mockParts,
-	mockServices,
-	mockSuppliers,
-	type PartRow,
-	type ServiceRow,
-	type SupplierRow,
-} from "@fixr/mock";
-import { nanoid } from "nanoid";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { useMemo } from "react";
-import { create } from "zustand";
+import { inventoryApi } from "@/lib/services/inventory";
 import {
 	buildPartRows,
 	buildServiceRows,
@@ -18,72 +11,125 @@ import {
 	type PartsData,
 } from "./table/data";
 
-interface PartsStore extends PartsData {
-	addPart: (part: Omit<PartRow, "id">) => void;
-	updatePart: (id: string, part: Omit<PartRow, "id">) => void;
-	addService: (service: Omit<ServiceRow, "id">) => void;
-	updateService: (id: string, service: Omit<ServiceRow, "id">) => void;
-	addSupplier: (supplier: Omit<SupplierRow, "id">) => void;
+/** Query keys of the company catalog; every mutation refreshes the whole catalog. */
+export const inventoryKeys = {
+	all: (subdomain: string) => ["inventory", subdomain] as const,
+	parts: (subdomain: string) => ["inventory", subdomain, "parts"] as const,
+	services: (subdomain: string) =>
+		["inventory", subdomain, "services"] as const,
+	suppliers: (subdomain: string) =>
+		["inventory", subdomain, "suppliers"] as const,
+};
+
+function useSubdomain() {
+	return useParams<{ subdomain: string }>().subdomain;
 }
 
 /**
- * In-memory stand-in for the parts/services/suppliers API: starts from the
- * mocks and keeps what the forms create or edit until the page is reloaded.
+ * The company's parts, services and suppliers, loaded from the API. The
+ * tables link the three lists together, so they are always loaded together.
  */
-//TODO: trocar por chamadas em lib/services quando as rotas da API existirem
-export const usePartsStore = create<PartsStore>((set) => ({
-	parts: mockParts,
-	services: mockServices,
-	suppliers: mockSuppliers,
-	addPart: (part) =>
-		set((state) => ({ parts: [...state.parts, { ...part, id: nanoid() }] })),
-	updatePart: (id, part) =>
-		set((state) => ({
-			parts: state.parts.map((p) => (p.id === id ? { ...part, id } : p)),
-		})),
-	addService: (service) =>
-		set((state) => ({
-			services: [...state.services, { ...service, id: nanoid() }],
-		})),
-	updateService: (id, service) =>
-		set((state) => ({
-			services: state.services.map((s) =>
-				s.id === id ? { ...service, id } : s
-			),
-		})),
-	addSupplier: (supplier) =>
-		set((state) => ({
-			suppliers: [...state.suppliers, { ...supplier, id: nanoid() }],
-		})),
-}));
-
-function usePartsData(): PartsData {
-	const parts = usePartsStore((state) => state.parts);
-	const services = usePartsStore((state) => state.services);
-	const suppliers = usePartsStore((state) => state.suppliers);
+export function useInventory(): PartsData & { isPending: boolean } {
+	const subdomain = useSubdomain();
+	const parts = useQuery({
+		queryKey: inventoryKeys.parts(subdomain),
+		queryFn: () => inventoryApi.listParts(subdomain),
+	});
+	const services = useQuery({
+		queryKey: inventoryKeys.services(subdomain),
+		queryFn: () => inventoryApi.listServices(subdomain),
+	});
+	const suppliers = useQuery({
+		queryKey: inventoryKeys.suppliers(subdomain),
+		queryFn: () => inventoryApi.listSuppliers(subdomain),
+	});
 
 	return useMemo(
-		() => ({ parts, services, suppliers }),
-		[parts, services, suppliers]
+		() => ({
+			parts: parts.data ?? [],
+			services: services.data ?? [],
+			suppliers: suppliers.data ?? [],
+			isPending: parts.isPending || services.isPending || suppliers.isPending,
+		}),
+		[
+			parts.data,
+			services.data,
+			suppliers.data,
+			parts.isPending,
+			services.isPending,
+			suppliers.isPending,
+		]
 	);
 }
 
 export function usePartRows() {
-	const data = usePartsData();
+	const data = useInventory();
 	return useMemo(() => buildPartRows(data), [data]);
 }
 
 export function useServiceRows() {
-	const data = usePartsData();
+	const data = useInventory();
 	return useMemo(() => buildServiceRows(data), [data]);
 }
 
 export function useSupplierRows() {
-	const data = usePartsData();
+	const data = useInventory();
 	return useMemo(() => buildSupplierRows(data), [data]);
 }
 
 export function useServiceRow(id: string) {
 	const rows = useServiceRows();
 	return useMemo(() => rows.find((row) => row.id === id) ?? null, [rows, id]);
+}
+
+function useInventoryMutation<TVariables, TResult>(
+	mutationFn: (subdomain: string, variables: TVariables) => Promise<TResult>
+) {
+	const subdomain = useSubdomain();
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (variables: TVariables) => mutationFn(subdomain, variables),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: inventoryKeys.all(subdomain) }),
+	});
+}
+
+export function useCreatePart() {
+	return useInventoryMutation(inventoryApi.createPart);
+}
+
+export function useUpdatePart() {
+	return useInventoryMutation(
+		(
+			subdomain,
+			{
+				id,
+				values,
+			}: { id: string; values: Parameters<typeof inventoryApi.updatePart>[2] }
+		) => inventoryApi.updatePart(subdomain, id, values)
+	);
+}
+
+export function useCreateService() {
+	return useInventoryMutation(inventoryApi.createService);
+}
+
+export function useUpdateService() {
+	return useInventoryMutation(
+		(
+			subdomain,
+			{
+				id,
+				values,
+			}: {
+				id: string;
+				values: Parameters<typeof inventoryApi.updateService>[2];
+			}
+		) => inventoryApi.updateService(subdomain, id, values)
+	);
+}
+
+export function useCreateSupplier() {
+	return useInventoryMutation(inventoryApi.createSupplier);
 }

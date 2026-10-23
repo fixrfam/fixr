@@ -1,5 +1,9 @@
 import type { StaticTranslationKey } from "@fixr/i18n";
-import type { PartRow, ServiceRow, SupplierRow } from "@fixr/mock";
+import type {
+	PartRow,
+	ServiceRow,
+	SupplierRow,
+} from "@/lib/services/inventory";
 
 export type StockStatusId = "in_stock" | "low_stock" | "out_of_stock";
 

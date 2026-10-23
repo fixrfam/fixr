@@ -3,16 +3,18 @@ import { mockSuppliers } from "@fixr/mock";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { usePartsStore } from "@/components/dashboard/parts/store";
+import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { toast } from "@/test/mocks";
-import { render } from "@/test/render";
+import { serveInventory } from "@/test/msw/inventory";
+import { renderWithQuery as render } from "@/test/query";
 import { NewSupplierForm } from "./new-supplier-form";
 
 const { t } = createTranslator("pt-BR");
-const initialState = usePartsStore.getState();
+let api: ReturnType<typeof serveInventory>;
 
 beforeEach(() => {
-	usePartsStore.setState(initialState, true);
+	setSessionCookie(fakeJwt());
+	api = serveInventory();
 });
 
 afterEach(() => {
@@ -48,7 +50,7 @@ describe("NewSupplierForm", () => {
 		);
 	});
 
-	it("adds the supplier to the store and reports success", async () => {
+	it("creates the supplier with unmasked CNPJ and phone", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
 		render(<NewSupplierForm onSuccess={onSuccess} />);
@@ -59,13 +61,13 @@ describe("NewSupplierForm", () => {
 		);
 
 		await waitFor(() => expect(onSuccess).toHaveBeenCalled());
-		const { suppliers } = usePartsStore.getState();
+		const { suppliers } = api.catalog;
 		expect(suppliers).toHaveLength(mockSuppliers.length + 1);
 		expect(suppliers.at(-1)).toMatchObject({
 			name: "Peças & Cia",
 			contact: "Ana",
-			cnpj: "11.222.333/0001-81",
-			phone: "(11) 99999-8888",
+			cnpj: "11222333000181",
+			phone: "11999998888",
 			email: "compras@pecas.test",
 		});
 		expect(toast.success).toHaveBeenCalledWith({
@@ -87,8 +89,6 @@ describe("NewSupplierForm", () => {
 			await screen.findByText(t("validation.email.invalid"))
 		).toBeInTheDocument();
 		expect(onSuccess).not.toHaveBeenCalled();
-		expect(usePartsStore.getState().suppliers).toHaveLength(
-			mockSuppliers.length
-		);
+		expect(api.catalog.suppliers).toHaveLength(mockSuppliers.length);
 	});
 });

@@ -9,6 +9,7 @@ import {
 } from "@/components/dashboard/parts/table/cells";
 import type { SupplierTableRow } from "@/components/dashboard/parts/table/data";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+import { formatCnpj, formatPhone } from "@/lib/format";
 
 const supplierColumnHelper = createColumnHelper<SupplierTableRow>();
 
@@ -35,7 +36,9 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 					/>
 				),
 				cell: ({ getValue }) => (
-					<span className="whitespace-nowrap tabular-nums">{getValue()}</span>
+					<span className="whitespace-nowrap tabular-nums">
+						{formatCnpj(getValue())}
+					</span>
 				),
 				meta: { label: t("suppliers.table.headers.cnpj") },
 			}),
@@ -57,7 +60,9 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 					/>
 				),
 				cell: ({ getValue }) => (
-					<span className="whitespace-nowrap tabular-nums">{getValue()}</span>
+					<span className="whitespace-nowrap tabular-nums">
+						{formatPhone(getValue())}
+					</span>
 				),
 				meta: { label: t("suppliers.table.headers.phone") },
 			}),

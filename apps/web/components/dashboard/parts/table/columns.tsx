@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { usePartsStore } from "../store";
+import { useInventory } from "../store";
 import {
 	EditCell,
 	NameCell,
@@ -33,7 +33,7 @@ function multiSelectFilter(
 
 export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 	const { t } = useTranslation();
-	const suppliers = usePartsStore((state) => state.suppliers);
+	const { suppliers } = useInventory();
 
 	return useMemo(
 		() => [
