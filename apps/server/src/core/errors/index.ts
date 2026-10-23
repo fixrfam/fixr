@@ -7,7 +7,10 @@ import { credentialsErrors } from "../../modules/credentials/errors";
 import { employeesErrors } from "../../modules/employees/errors";
 import { makersErrors } from "../../modules/makers/errors";
 import { modelsErrors } from "../../modules/models/errors";
+import { partsErrors } from "../../modules/parts/errors";
 import { serviceOrdersErrors } from "../../modules/service-orders/errors";
+import { servicesErrors } from "../../modules/services/errors";
+import { suppliersErrors } from "../../modules/suppliers/errors";
 import { tokensErrors } from "../../modules/tokens/errors";
 import { uploadsErrors } from "../../modules/uploads/errors";
 import { defineErrors } from "../utils/errors";
@@ -23,6 +26,9 @@ export const errors = defineErrors({
 	...makersErrors,
 	...modelsErrors,
 	...serviceOrdersErrors,
+	...partsErrors,
+	...servicesErrors,
+	...suppliersErrors,
 	...tokensErrors,
 	...uploadsErrors,
 

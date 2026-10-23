@@ -11,7 +11,11 @@ import {
 	modelCategories,
 	modelMakers,
 	models,
+	parts,
 	serviceOrders,
+	serviceParts,
+	services,
+	suppliers,
 	users,
 } from "../schema";
 import {
@@ -19,8 +23,11 @@ import {
 	CLIENTS,
 	COMPANIES,
 	MAKERS,
+	PARTS,
 	SEED_PASSWORD,
 	SERVICE_ORDERS,
+	SERVICES,
+	SUPPLIERS,
 } from "./data";
 
 const args = new Set(process.argv.slice(2));
@@ -83,6 +90,46 @@ async function truncateAll() {
 	await db.execute(sql`SET FOREIGN_KEY_CHECKS = 1`);
 }
 
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/** Suppliers, parts and services of one company (each company gets its own copy). */
+async function seedInventory(tx: Transaction, companyId: string) {
+	const supplierIds = new Map<string, string>();
+	for (const [index, { key, ...supplier }] of SUPPLIERS.entries()) {
+		const supplierId = createId();
+		supplierIds.set(key, supplierId);
+		await tx.insert(suppliers).values({
+			id: supplierId,
+			companyId,
+			cnpj: cnpj(100 + index),
+			...supplier,
+		});
+	}
+
+	const partIds = new Map<string, string>();
+	for (const { key, supplier, ...part } of PARTS) {
+		const partId = createId();
+		partIds.set(key, partId);
+		await tx.insert(parts).values({
+			id: partId,
+			companyId,
+			supplierId: supplierIds.get(supplier) as string,
+			...part,
+		});
+	}
+
+	for (const { parts: partKeys, ...service } of SERVICES) {
+		const serviceId = createId();
+		await tx.insert(services).values({ id: serviceId, companyId, ...service });
+		await tx.insert(serviceParts).values(
+			partKeys.map((key) => ({
+				serviceId,
+				partId: partIds.get(key) as string,
+			}))
+		);
+	}
+}
+
 async function seed() {
 	const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
 	let documentSeq = 1;
@@ -132,6 +179,8 @@ async function seed() {
 				address: company.address,
 				cnpj: cnpj(companyIds.size),
 			});
+
+			await seedInventory(tx, companyId);
 
 			for (const employee of company.employees) {
 				const userId = createId();

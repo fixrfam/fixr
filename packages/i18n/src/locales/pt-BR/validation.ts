@@ -77,6 +77,8 @@ export const validation: Translated<typeof source> = {
 	part: {
 		skuRequired: "O SKU é obrigatório.",
 		skuMax: "O SKU excede {{count}} caracteres.",
+		descriptionMax: "A descrição excede {{count}} caracteres.",
+		categoryMax: "A categoria excede {{count}} caracteres.",
 		categoryRequired: "Selecione a categoria.",
 		supplierRequired: "Selecione o fornecedor.",
 		costPriceRequired: "Informe o preço de custo.",

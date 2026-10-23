@@ -78,6 +78,8 @@ export const validation = {
 	part: {
 		skuRequired: "The SKU is required.",
 		skuMax: "The SKU exceeds {{count}} characters.",
+		descriptionMax: "The description exceeds {{count}} characters.",
+		categoryMax: "The category exceeds {{count}} characters.",
 		categoryRequired: "Pick a category.",
 		supplierRequired: "Pick a supplier.",
 		costPriceRequired: "Enter the cost price.",
