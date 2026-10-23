@@ -3,9 +3,10 @@ import { mockParts, mockServices } from "@fixr/mock";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { usePartsStore } from "@/components/dashboard/parts/store";
+import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { toast } from "@/test/mocks";
-import { render } from "@/test/render";
+import { serveInventory } from "@/test/msw/inventory";
+import { renderWithQuery as render } from "@/test/query";
 import { NewServiceForm } from "./new-service-form";
 
 const { t } = createTranslator("pt-BR");
@@ -19,10 +20,11 @@ async function enter(
 	await user.click(element);
 	await user.paste(text);
 }
-const initialState = usePartsStore.getState();
+let api: ReturnType<typeof serveInventory>;
 
 beforeEach(() => {
-	usePartsStore.setState(initialState, true);
+	setSessionCookie(fakeJwt());
+	api = serveInventory();
 });
 
 afterEach(() => {
@@ -77,7 +79,7 @@ describe("NewServiceForm", () => {
 		await user.click(submitButton());
 
 		await waitFor(() => expect(onSuccess).toHaveBeenCalled());
-		expect(usePartsStore.getState().services.at(-1)).toMatchObject({
+		expect(api.catalog.services.at(-1)).toMatchObject({
 			name: "Troca de alto-falante",
 			deviceCategories: ["Telefonia"],
 			estimatedDurationMinutes: 45,
@@ -116,7 +118,7 @@ describe("NewServiceForm", () => {
 			await screen.findByText(t("validation.service.deviceCategoriesRequired"))
 		).toBeInTheDocument();
 		expect(onSuccess).not.toHaveBeenCalled();
-		expect(usePartsStore.getState().services).toHaveLength(mockServices.length);
+		expect(api.catalog.services).toHaveLength(mockServices.length);
 	});
 
 	describe("editing", () => {
@@ -131,8 +133,9 @@ describe("NewServiceForm", () => {
 			expect(screen.getByLabelText(t("services.form.nameLabel"))).toHaveValue(
 				service.name
 			);
+			// The selected parts show up once the catalog loads from the API.
 			await user.click(
-				screen.getByRole("button", {
+				await screen.findByRole("button", {
 					name: t("services.form.removeItem", { name: firstPart.name }),
 				})
 			);
@@ -141,13 +144,9 @@ describe("NewServiceForm", () => {
 			);
 
 			await waitFor(() => expect(onSuccess).toHaveBeenCalled());
-			const saved = usePartsStore
-				.getState()
-				.services.find((s) => s.id === service.id);
+			const saved = api.catalog.services.find((s) => s.id === service.id);
 			expect(saved?.partIds).toEqual(service.partIds.slice(1));
-			expect(usePartsStore.getState().services).toHaveLength(
-				mockServices.length
-			);
+			expect(api.catalog.services).toHaveLength(mockServices.length);
 			expect(toast.success).toHaveBeenCalledWith({
 				text: t("services.form.updated"),
 			});

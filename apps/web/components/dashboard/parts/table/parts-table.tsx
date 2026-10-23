@@ -17,7 +17,8 @@ import { useMemo, useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { usePartRows } from "../store";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useInventory, usePartRows } from "../store";
 import { usePartColumns } from "./columns";
 import { STOCK_STATUS_KEYS, searchParts } from "./data";
 import { TableToolbar } from "./toolbar";
@@ -34,6 +35,7 @@ export function PartsTable() {
 	const columns = usePartColumns(subdomain);
 
 	const rows = usePartRows();
+	const { isPending } = useInventory();
 
 	const filteredData = useMemo(
 		() => searchParts(rows, search, (status) => t(STOCK_STATUS_KEYS[status])),
@@ -74,9 +76,13 @@ export function PartsTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<DataTable className="w-full" table={table}>
-				<DataTableToolbar showViewOptions={false} table={table} />
-			</DataTable>
+			{isPending ? (
+				<Skeleton className="h-96 w-full rounded-md" />
+			) : (
+				<DataTable className="w-full" table={table}>
+					<DataTableToolbar showViewOptions={false} table={table} />
+				</DataTable>
+			)}
 		</div>
 	);
 }

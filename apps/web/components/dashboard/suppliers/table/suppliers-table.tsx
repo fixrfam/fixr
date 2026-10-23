@@ -9,11 +9,15 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useSupplierRows } from "@/components/dashboard/parts/store";
+import {
+	useInventory,
+	useSupplierRows,
+} from "@/components/dashboard/parts/store";
 import { searchSuppliers } from "@/components/dashboard/parts/table/data";
 import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplierColumns } from "./columns";
 
 export function SuppliersTable() {
@@ -26,6 +30,7 @@ export function SuppliersTable() {
 	const columns = useSupplierColumns();
 
 	const rows = useSupplierRows();
+	const { isPending } = useInventory();
 
 	const filteredData = useMemo(
 		() => searchSuppliers(rows, search),
@@ -57,7 +62,11 @@ export function SuppliersTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<DataTable className="w-full" table={table} />
+			{isPending ? (
+				<Skeleton className="h-96 w-full rounded-md" />
+			) : (
+				<DataTable className="w-full" table={table} />
+			)}
 		</div>
 	);
 }
