@@ -13,6 +13,13 @@ const { dbMock, repo, pagination } = vi.hoisted(() => ({
 		queryDeviceMakerById: vi.fn(),
 		queryDeviceCategoryById: vi.fn(),
 		createWithPhotos: vi.fn(),
+		queryServiceOrderOfCompany: vi.fn(),
+		queryItems: vi.fn(),
+		queryItem: vi.fn(),
+		queryCatalogItem: vi.fn(),
+		insertItem: vi.fn(),
+		updateItem: vi.fn(),
+		deleteItem: vi.fn(),
 	},
 	pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
 }));
@@ -325,5 +332,128 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		await create({ photos: [{ uploadId: "up" }] }).promise;
 
 		expect(repo.createWithPhotos).toHaveBeenCalled();
+	});
+});
+
+describe("ServiceOrdersService items", () => {
+	const serviceOrderId = createId();
+	const item = {
+		id: createId(),
+		serviceOrderId,
+		type: "part" as const,
+		unitPrice: 10.1,
+		quantity: 3,
+	};
+	const base = { userJwt, subdomain: "fixr", serviceOrderId };
+
+	beforeEach(() => {
+		repo.queryServiceOrderOfCompany.mockResolvedValue({ id: serviceOrderId });
+		repo.queryItems.mockResolvedValue([item]);
+	});
+
+	it("lists items with line totals and order totals", async () => {
+		const reply = createFakeReply();
+
+		await ServiceOrdersService.listItems({ ...base, response: asReply(reply) });
+
+		expect(repo.queryServiceOrderOfCompany).toHaveBeenCalledWith(
+			serviceOrderId,
+			companyId
+		);
+		expect(reply.state.body).toMatchObject({
+			data: {
+				items: [{ id: item.id, total: 30.3 }],
+				totals: { parts: 30.3, services: 0, total: 30.3 },
+			},
+		});
+	});
+
+	it("rejects a service order of another company", async () => {
+		repo.queryServiceOrderOfCompany.mockResolvedValue(null);
+
+		await expect(
+			ServiceOrdersService.listItems({
+				...base,
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "service_order_not_found" });
+	});
+
+	it("snapshots the catalog name and price when adding", async () => {
+		const partId = createId();
+		repo.queryCatalogItem.mockResolvedValue({
+			id: partId,
+			name: "Tela",
+			price: 890,
+		});
+
+		await ServiceOrdersService.addItem({
+			...base,
+			data: { type: "part", itemId: partId, quantity: 2 },
+			response: asReply(createFakeReply()),
+		});
+
+		expect(repo.queryCatalogItem).toHaveBeenCalledWith(
+			"part",
+			partId,
+			companyId
+		);
+		expect(repo.insertItem).toHaveBeenCalledWith({
+			serviceOrderId,
+			type: "part",
+			partId,
+			serviceId: null,
+			name: "Tela",
+			quantity: 2,
+			unitPrice: 890,
+		});
+	});
+
+	it("uses the price sent instead of the catalog one", async () => {
+		const serviceId = createId();
+		repo.queryCatalogItem.mockResolvedValue({
+			id: serviceId,
+			name: "Troca",
+			price: 150,
+		});
+
+		await ServiceOrdersService.addItem({
+			...base,
+			data: { type: "service", itemId: serviceId, quantity: 1, unitPrice: 99 },
+			response: asReply(createFakeReply()),
+		});
+
+		expect(repo.insertItem).toHaveBeenCalledWith(
+			expect.objectContaining({ serviceId, partId: null, unitPrice: 99 })
+		);
+	});
+
+	it("rejects a catalog item outside the company", async () => {
+		repo.queryCatalogItem.mockResolvedValue(null);
+
+		await expect(
+			ServiceOrdersService.addItem({
+				...base,
+				data: { type: "part", itemId: createId(), quantity: 1 },
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "service_order_catalog_item_not_found" });
+		expect(repo.insertItem).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["patchItem", { data: { quantity: 2 } }],
+		["deleteItem", {}],
+	] as const)("%s rejects an item of another order", async (method, extra) => {
+		repo.queryItem.mockResolvedValue(null);
+
+		await expect(
+			ServiceOrdersService[method]({
+				...base,
+				itemId: createId(),
+				...(extra as { data: { quantity: number } }),
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "service_order_item_not_found" });
 	});
 });

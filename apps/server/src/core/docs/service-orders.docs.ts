@@ -1,16 +1,22 @@
 import {
 	serviceOrderImageSelectSchema,
+	serviceOrderItemSelectSchema,
 	serviceOrderSelectSchema,
 } from "@fixr/db/schema";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
+	addServiceOrderItemSchema,
 	createServiceOrderMockSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderItemSchema,
+	serviceOrderIdParamsSchema,
+	serviceOrderItemParamsSchema,
 	serviceOrderStatuses,
 } from "@fixr/schemas/service-orders";
 import { paginatedDataSchema } from "@fixr/schemas/utils";
 import type { FastifySchema } from "fastify";
 import { z } from "zod";
+import { companyScopedErrors, notFoundError } from "./responses";
 import { zodResponseSchema } from "./types";
 
 const createServiceOrderResponseDataSchema = serviceOrderSelectSchema.extend({
@@ -171,7 +177,129 @@ Rules:
 	security: [{ JWT: [] }],
 };
 
+const serviceOrderItemsDataSchema = z.object({
+	items: z.array(
+		z.object({ ...serviceOrderItemSelectSchema.shape, total: z.number() })
+	),
+	totals: z.object({
+		parts: z.number(),
+		services: z.number(),
+		total: z.number(),
+	}),
+});
+
+const serviceOrderParams = getCompanyNestedDataSchema.extend(
+	serviceOrderIdParamsSchema.shape
+);
+const serviceOrderItemParams = getCompanyNestedDataSchema.extend(
+	serviceOrderItemParamsSchema.shape
+);
+
+const serviceOrderNotFound = notFoundError(
+	"service_order_not_found",
+	"Service order not found."
+);
+const itemNotFound = notFoundError(
+	"service_order_item_not_found",
+	"Item not found in this service order."
+);
+
+const itemsResponse = (status: 200 | 201, code: string, message: string) =>
+	zodResponseSchema({
+		status,
+		error: null,
+		code,
+		message,
+		data: serviceOrderItemsDataSchema,
+	}).describe(message);
+
+const listServiceOrderItemsSchema: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "List service order items",
+	description: `
+**Parts and services used on a service order**, each with its line total, plus the parts, services and overall totals.
+`,
+	params: serviceOrderParams,
+	response: {
+		200: itemsResponse(
+			200,
+			"list_service_order_items_success",
+			"Service order items retrieved successfully."
+		),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const addServiceOrderItemSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Add an item to a service order",
+	description: `
+**Adds a catalog part or service to the service order.**
+
+The item's name and price are copied from the catalog (\`unitPrice\` overrides the price), so later catalog changes don't alter the order. Answers with the updated item list and totals.
+`,
+	params: serviceOrderParams,
+	body: addServiceOrderItemSchema,
+	response: {
+		201: itemsResponse(
+			201,
+			"add_service_order_item_success",
+			"Item added to the service order."
+		),
+		400: zodResponseSchema({
+			status: 400,
+			error: "Bad Request",
+			code: "service_order_catalog_item_not_found",
+			message: "The part or service does not exist in this company.",
+			data: null,
+		}).describe("The part or service does not exist in this company."),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const patchServiceOrderItemSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Update a service order item",
+	description: "Changes the quantity or the unit price of an item.",
+	params: serviceOrderItemParams,
+	body: patchServiceOrderItemSchema,
+	response: {
+		200: itemsResponse(
+			200,
+			"patch_service_order_item_success",
+			"Service order item updated."
+		),
+		...companyScopedErrors,
+		404: itemNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const deleteServiceOrderItemSchema: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Remove a service order item",
+	params: serviceOrderItemParams,
+	response: {
+		200: itemsResponse(
+			200,
+			"delete_service_order_item_success",
+			"Item removed from the service order."
+		),
+		...companyScopedErrors,
+		404: itemNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
 export const serviceOrdersDocs = {
 	getCompanyServiceOrdersSchema,
 	createServiceOrderSchema: createServiceOrderSchemaDoc,
+	listServiceOrderItemsSchema,
+	addServiceOrderItemSchema: addServiceOrderItemSchemaDoc,
+	patchServiceOrderItemSchema: patchServiceOrderItemSchemaDoc,
+	deleteServiceOrderItemSchema,
 };

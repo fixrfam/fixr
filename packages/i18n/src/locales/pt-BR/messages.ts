@@ -14,6 +14,18 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		service_order_catalog_item_not_found: {
+			title: "Item não encontrado",
+			description: "Esta peça ou serviço não está mais no catálogo.",
+		},
+		service_order_item_not_found: {
+			title: "Item não encontrado",
+			description: "Este item já foi removido da ordem.",
+		},
+		service_order_not_found: {
+			title: "Ordem de serviço não encontrada",
+			description: "Esta ordem de serviço não existe ou foi removida.",
+		},
 		part_sku_conflict: {
 			title: "SKU já cadastrado",
 			description: "Outra peça da sua empresa já usa este SKU.",

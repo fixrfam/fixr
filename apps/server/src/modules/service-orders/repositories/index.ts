@@ -14,16 +14,22 @@ import {
 	employees,
 	modelCategories,
 	modelMakers,
+	parts,
 	serviceOrderImages,
+	serviceOrderItems,
 	serviceOrders,
+	services,
 	uploads,
 } from "@fixr/db/schema";
 import type {
 	createServiceOrderMockSchema,
 	getServiceOrdersQuerySchema,
+	serviceOrderItemTypes,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
+
+export type ServiceOrderItemInsert = typeof serviceOrderItems.$inferInsert;
 
 function endOfDay(date: Date) {
 	const end = new Date(date);
@@ -229,5 +235,78 @@ export class ServiceOrdersRepository {
 
 			return { serviceOrder, photos };
 		});
+	}
+
+	static async queryServiceOrderOfCompany(
+		serviceOrderId: string,
+		companyId: string
+	) {
+		const [serviceOrder] = await db
+			.select({ id: serviceOrders.id })
+			.from(serviceOrders)
+			.where(
+				and(
+					eq(serviceOrders.id, serviceOrderId),
+					eq(serviceOrders.companyId, companyId)
+				)
+			)
+			.limit(1);
+		return serviceOrder ?? null;
+	}
+
+	static async queryItems(serviceOrderId: string) {
+		return await db
+			.select()
+			.from(serviceOrderItems)
+			.where(eq(serviceOrderItems.serviceOrderId, serviceOrderId))
+			.orderBy(serviceOrderItems.createdAt);
+	}
+
+	static async queryItem(serviceOrderId: string, itemId: string) {
+		const [item] = await db
+			.select()
+			.from(serviceOrderItems)
+			.where(
+				and(
+					eq(serviceOrderItems.id, itemId),
+					eq(serviceOrderItems.serviceOrderId, serviceOrderId)
+				)
+			)
+			.limit(1);
+		return item ?? null;
+	}
+
+	/** Name and current sale price of a catalog part or service of the company. */
+	static async queryCatalogItem(
+		type: z.infer<typeof serviceOrderItemTypes>,
+		itemId: string,
+		companyId: string
+	) {
+		const table = type === "part" ? parts : services;
+		const price = type === "part" ? parts.salePrice : services.price;
+		const [item] = await db
+			.select({ id: table.id, name: table.name, price })
+			.from(table)
+			.where(and(eq(table.id, itemId), eq(table.companyId, companyId)))
+			.limit(1);
+		return item ?? null;
+	}
+
+	static async insertItem(values: ServiceOrderItemInsert) {
+		await db.insert(serviceOrderItems).values(values);
+	}
+
+	static async updateItem(
+		itemId: string,
+		values: Partial<ServiceOrderItemInsert>
+	) {
+		await db
+			.update(serviceOrderItems)
+			.set(values)
+			.where(eq(serviceOrderItems.id, itemId));
+	}
+
+	static async deleteItem(itemId: string) {
+		await db.delete(serviceOrderItems).where(eq(serviceOrderItems.id, itemId));
 	}
 }

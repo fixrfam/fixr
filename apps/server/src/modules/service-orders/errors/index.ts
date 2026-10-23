@@ -42,4 +42,19 @@ export const serviceOrdersErrors = defineErrors({
 		message: "The requested page exceeds the total number of pages.",
 		status: 416,
 	},
+	SERVICE_ORDER_NOT_FOUND: {
+		code: "service_order_not_found",
+		message: "Service order not found.",
+		status: 404,
+	},
+	SERVICE_ORDER_ITEM_NOT_FOUND: {
+		code: "service_order_item_not_found",
+		message: "Item not found in this service order.",
+		status: 404,
+	},
+	SERVICE_ORDER_CATALOG_ITEM_NOT_FOUND: {
+		code: "service_order_catalog_item_not_found",
+		message: "The part or service does not exist in this company.",
+		status: 400,
+	},
 });

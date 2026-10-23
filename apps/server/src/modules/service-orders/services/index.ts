@@ -2,12 +2,15 @@ import { asc, db, desc, inArray } from "@fixr/db/connection";
 import { serviceOrders as serviceOrdersTable, uploads } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
+	addServiceOrderItemSchema,
 	createServiceOrderMockSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderItemSchema,
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
+import { itemTotals, lineTotal } from "../../../core/lib/money";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
@@ -213,5 +216,199 @@ export class ServiceOrdersService {
 				},
 			})
 		);
+	}
+
+	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
+	private static resolveCompanyId(
+		userJwt: z.infer<typeof jwtPayload>,
+		subdomain: string
+	) {
+		if (!userJwt.company) {
+			throw new AppError("SERVICE_ORDER_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("SERVICE_ORDER_NOT_ALLOWED");
+		}
+		return userJwt.company.id;
+	}
+
+	private static async assertOwnServiceOrder(
+		serviceOrderId: string,
+		companyId: string
+	) {
+		const serviceOrder =
+			await ServiceOrdersRepository.queryServiceOrderOfCompany(
+				serviceOrderId,
+				companyId
+			);
+		if (!serviceOrder) {
+			throw new AppError("SERVICE_ORDER_NOT_FOUND");
+		}
+	}
+
+	/** The order's items with their line totals, plus subtotals per type and the total. */
+	private static async itemsWithTotals(serviceOrderId: string) {
+		const items = await ServiceOrdersRepository.queryItems(serviceOrderId);
+		return {
+			items: items.map((item) => ({ ...item, total: lineTotal(item) })),
+			totals: itemTotals(items),
+		};
+	}
+
+	private static sendItems(
+		response: FastifyReply,
+		{
+			status,
+			code,
+			message,
+			data,
+		}: {
+			status: 200 | 201;
+			code: string;
+			message: string;
+			data: Awaited<ReturnType<typeof ServiceOrdersService.itemsWithTotals>>;
+		}
+	) {
+		return response
+			.status(status)
+			.send(apiResponse({ status, error: null, code, message, data }));
+	}
+
+	static async listItems({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "list_service_order_items_success",
+			message: "Service order items retrieved successfully.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	/** Add a catalog part or service, snapshotting its name and (by default) its current price. */
+	static async addItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof addServiceOrderItemSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const catalogItem = await ServiceOrdersRepository.queryCatalogItem(
+			data.type,
+			data.itemId,
+			companyId
+		);
+		if (!catalogItem) {
+			throw new AppError("SERVICE_ORDER_CATALOG_ITEM_NOT_FOUND");
+		}
+
+		await ServiceOrdersRepository.insertItem({
+			serviceOrderId,
+			type: data.type,
+			partId: data.type === "part" ? catalogItem.id : null,
+			serviceId: data.type === "service" ? catalogItem.id : null,
+			name: catalogItem.name,
+			quantity: data.quantity,
+			unitPrice: data.unitPrice ?? catalogItem.price,
+		});
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 201,
+			code: "add_service_order_item_success",
+			message: "Item added to the service order.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	static async patchItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		itemId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		itemId: string;
+		data: z.infer<typeof patchServiceOrderItemSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const item = await ServiceOrdersRepository.queryItem(
+			serviceOrderId,
+			itemId
+		);
+		if (!item) {
+			throw new AppError("SERVICE_ORDER_ITEM_NOT_FOUND");
+		}
+
+		if (Object.keys(data).length > 0) {
+			await ServiceOrdersRepository.updateItem(itemId, data);
+		}
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "patch_service_order_item_success",
+			message: "Service order item updated.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	static async deleteItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		itemId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		itemId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const item = await ServiceOrdersRepository.queryItem(
+			serviceOrderId,
+			itemId
+		);
+		if (!item) {
+			throw new AppError("SERVICE_ORDER_ITEM_NOT_FOUND");
+		}
+
+		await ServiceOrdersRepository.deleteItem(itemId);
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "delete_service_order_item_success",
+			message: "Item removed from the service order.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
 	}
 }
