@@ -194,7 +194,11 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 
 	beforeEach(() => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
-		repo.queryClientById.mockResolvedValue({ id: data.clientId });
+		repo.queryClientById.mockResolvedValue({
+			id: data.clientId,
+			companyId,
+			deletedAt: null,
+		});
 		repo.queryDeviceMakerById.mockResolvedValue({ id: data.deviceBrandId });
 		repo.queryDeviceCategoryById.mockResolvedValue({
 			id: data.deviceCategoryId,
@@ -283,6 +287,18 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		repo[method].mockResolvedValue(null);
 
 		await expect(create().promise).rejects.toMatchObject({ code });
+		expect(repo.createWithPhotos).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["another company", { companyId: createId(), deletedAt: null }],
+		["a deleted client", { companyId, deletedAt: new Date() }],
+	])("rejects a client of %s", async (_label, client) => {
+		repo.queryClientById.mockResolvedValue({ id: data.clientId, ...client });
+
+		await expect(create().promise).rejects.toMatchObject({
+			code: "client_not_found",
+		});
 		expect(repo.createWithPhotos).not.toHaveBeenCalled();
 	});
 

@@ -106,6 +106,20 @@
       "when": 1792786295949,
       "tag": "0014_parts_services_suppliers",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1792788663829,
+      "tag": "0015_scope_clients_by_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1792788671648,
+      "tag": "0016_backfill_client_company",
+      "breakpoints": true
     }
   ]
 }

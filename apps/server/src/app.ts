@@ -33,6 +33,7 @@ import { accountRoutes } from "./modules/account/routes";
 import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
+import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
 import { employeesRoutes } from "./modules/employees/routes";
@@ -89,6 +90,10 @@ const OPENAPI_TAGS = [
 	{
 		name: "Employees",
 		description: "Manage company employees.",
+	},
+	{
+		name: "Clients",
+		description: "Manage the company's clients (customers).",
 	},
 	{
 		name: "Service Orders",
@@ -259,6 +264,9 @@ export async function buildApp(
 	await app.register(companiesRoutes, { prefix: "/companies" });
 	await app.register(employeesRoutes, {
 		prefix: "/companies/:subdomain/employees",
+	});
+	await app.register(clientsRoutes, {
+		prefix: "/companies/:subdomain/clients",
 	});
 	await app.register(serviceOrdersRoutes, {
 		prefix: "/companies/:subdomain/service-orders",

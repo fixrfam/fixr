@@ -73,11 +73,46 @@ export const COMPANIES: SeedCompany[] = [
 ];
 
 export const CLIENTS = [
-	{ name: "Carla Souza", email: "carla@cliente.dev", phone: "11987654321" },
-	{ name: "Diego Lima", email: "diego@cliente.dev", phone: "11976543210" },
-	{ name: "Eduarda Rocha", email: "eduarda@cliente.dev", phone: "21965432109" },
-	{ name: "Felipe Alves", email: "felipe@cliente.dev", phone: "21954321098" },
-	{ name: "Helena Costa", email: "helena@cliente.dev", phone: "31943210987" },
+	{
+		name: "Carla Souza",
+		email: "carla@cliente.dev",
+		phone: "11987654321",
+		address: "Rua Augusta, 1500",
+		city: "São Paulo",
+		state: "SP",
+	},
+	{
+		name: "Diego Lima",
+		email: "diego@cliente.dev",
+		phone: "11976543210",
+		address: "Avenida Paulista, 900",
+		city: "São Paulo",
+		state: "SP",
+	},
+	{
+		name: "Eduarda Rocha",
+		email: "eduarda@cliente.dev",
+		phone: "21965432109",
+		address: "Rua Voluntários da Pátria, 45",
+		city: "Rio de Janeiro",
+		state: "RJ",
+	},
+	{
+		name: "Felipe Alves",
+		email: "felipe@cliente.dev",
+		phone: "21954321098",
+		address: "Rua das Laranjeiras, 210",
+		city: "Rio de Janeiro",
+		state: "RJ",
+	},
+	{
+		name: "Helena Costa",
+		email: "helena@cliente.dev",
+		phone: "31943210987",
+		address: "Avenida Afonso Pena, 3000",
+		city: "Belo Horizonte",
+		state: "MG",
+	},
 ];
 
 export const CATEGORIES = [
