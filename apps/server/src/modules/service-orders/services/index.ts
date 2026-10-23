@@ -166,7 +166,8 @@ export class ServiceOrdersService {
 			ServiceOrdersRepository.queryDeviceCategoryById(data.deviceCategoryId),
 		]);
 
-		if (!client) {
+		// Clients are company-scoped: another company's (or a deleted) client doesn't exist here.
+		if (!client || client.companyId !== companyId || client.deletedAt) {
 			throw new AppError("SERVICE_ORDER_CLIENT_NOT_FOUND");
 		}
 		if (!deviceMaker) {

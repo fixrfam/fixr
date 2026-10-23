@@ -17,9 +17,10 @@ import { authedInject, createEmployeeSession } from "../../helpers/auth";
 
 const app = await createTestApp();
 
-async function catalog() {
+/** Client of `companyId` (orders only accept the company's own clients), maker and category. */
+async function catalog(companyId?: string) {
 	const [client, maker, category] = await Promise.all([
-		makeClient({ name: "Maria Cliente" }),
+		makeClient({ name: "Maria Cliente", companyId }),
 		makeMaker(),
 		makeCategory(),
 	]);
@@ -45,7 +46,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const { token, company, employee } = await createEmployeeSession(app, {
 			role: "manager",
 		});
-		const refs = await catalog();
+		const refs = await catalog(company.id);
 
 		const response = await authedInject(app, token, {
 			method: "POST",
@@ -67,7 +68,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const { token, company } = await createEmployeeSession(app, {
 			role: "manager",
 		});
-		const refs = await catalog();
+		const refs = await catalog(company.id);
 
 		const response = await authedInject(app, token, {
 			method: "POST",
@@ -90,7 +91,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const { token, company, employee } = await createEmployeeSession(app, {
 			role: "manager",
 		});
-		const refs = await catalog();
+		const refs = await catalog(company.id);
 		const upload = await makeUpload({
 			companyId: company.id,
 			employeeId: employee.id,
@@ -123,7 +124,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const response = await authedInject(app, token, {
 			method: "POST",
 			url: `/companies/${company.subdomain}/service-orders`,
-			payload: orderBody(await catalog(), {
+			payload: orderBody(await catalog(company.id), {
 				photos: [{ uploadId: foreign.id }],
 			}),
 		});
@@ -145,10 +146,26 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const response = await authedInject(app, token, {
 			method: "POST",
 			url: `/companies/${company.subdomain}/service-orders`,
-			payload: orderBody(await catalog(), { [field]: createId() }),
+			payload: orderBody(await catalog(company.id), { [field]: createId() }),
 		});
 
 		expect(response.statusCode).toBe(404);
+	});
+
+	it("rejects a client of another company", async () => {
+		const { token, company } = await createEmployeeSession(app, {
+			role: "manager",
+		});
+		const foreign = await catalog((await makeCompany()).id);
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url: `/companies/${company.subdomain}/service-orders`,
+			payload: orderBody(foreign),
+		});
+
+		expect(response.statusCode).toBe(404);
+		expect(response.json().code).toBe("client_not_found");
 	});
 
 	it("cannot create orders in another company", async () => {
@@ -168,7 +185,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 describe("GET /companies/:subdomain/service-orders", () => {
 	async function seedOrders(company: TestCompany) {
 		const technician = await makeEmployee({ company, role: "technician" });
-		const refs = await catalog();
+		const refs = await catalog(company.id);
 		const otherCategory = await makeCategory();
 		const base = {
 			companyId: company.id,
