@@ -15,6 +15,7 @@ export const uploadPurposeEnum = mysqlEnum("upload_purpose", [
 	"avatar",
 	"service_order",
 	"model_image",
+	"company_logo",
 ]);
 
 export const uploads = mysqlTable("uploads", {

@@ -17,6 +17,7 @@ export const dashboard = {
 		logs: "Logs",
 		settings: "Settings",
 		profile: "Profile",
+		company: "Company",
 		security: "Security",
 		apiKeys: "API keys",
 		serviceOrders: "Service orders",

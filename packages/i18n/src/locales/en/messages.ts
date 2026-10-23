@@ -15,6 +15,14 @@ export const messages = {
 		},
 	},
 	codes: {
+		update_company_profile_success: {
+			title: "Company updated",
+			description: "Your documents will use the new data.",
+		},
+		company_logo_url_invalid: {
+			title: "Invalid logo",
+			description: "Upload the logo again and save.",
+		},
 		create_api_key_success: {
 			title: "Key created",
 			description: "Copy the secret now, it will not be shown again.",

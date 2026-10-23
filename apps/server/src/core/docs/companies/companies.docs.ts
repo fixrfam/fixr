@@ -2,6 +2,7 @@ import { companySelectSchema } from "@fixr/db/schema";
 import {
 	createCompanySchema,
 	getCompanyBySubdomainSchema as getCompanyBySubdomainParamsSchema,
+	updateCompanyProfileSchema,
 } from "@fixr/schemas/companies";
 import type { FastifySchema } from "fastify";
 import { zodResponseSchema } from "../types";
@@ -61,6 +62,45 @@ const getCompanyBySubdomainSchema: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const updateCompanyProfileSchemaDoc: FastifySchema = {
+	tags: ["Companies"],
+	summary: "Update company profile",
+	description: `
+**Updates the name, address and public contact data of the employee's company.**
+
+These fields appear on the company's documents (e.g. the estimate PDF).
+- Every field is optional; \`null\` or \`""\` clears it (the name can't be cleared).
+- \`logoUrl\` must be the URL returned by \`POST /uploads/company-logo/presign\` for this company.
+- The CNPJ and subdomain can't be changed here.
+`,
+	params: getCompanyBySubdomainParamsSchema,
+	body: updateCompanyProfileSchema,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "update_company_profile_success",
+			message: "Company profile updated successfully.",
+			data: companySelectSchema,
+		}).describe("Company profile updated successfully."),
+		400: zodResponseSchema({
+			status: 400,
+			error: "Bad Request",
+			code: "company_logo_url_invalid",
+			message: "The logo must be uploaded through the company logo upload.",
+			data: null,
+		}).describe("The logo URL was not issued for this company."),
+		403: zodResponseSchema({
+			status: 403,
+			error: "Forbidden",
+			code: "not_allowed",
+			message: "You are not authorized to access this company.",
+			data: null,
+		}).describe("You are not allowed to access this company."),
+	},
+	security: [{ JWT: [] }],
+};
+
 const createCompanySchemaDoc: FastifySchema = {
 	tags: ["Companies"],
 	summary: "Create a new company",
@@ -104,4 +144,5 @@ export const companiesDocs = {
 	getUserCompanySchema,
 	getCompanyByIdSchema: getCompanyBySubdomainSchema,
 	createCompanySchema: createCompanySchemaDoc,
+	updateCompanyProfileSchema: updateCompanyProfileSchemaDoc,
 };

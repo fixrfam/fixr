@@ -14,6 +14,14 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		update_company_profile_success: {
+			title: "Empresa atualizada",
+			description: "Seus documentos vão usar os novos dados.",
+		},
+		company_logo_url_invalid: {
+			title: "Logo inválido",
+			description: "Envie o logo novamente e salve.",
+		},
 		create_api_key_success: {
 			title: "Chave criada",
 			description: "Copie o segredo agora, ele não será exibido novamente.",

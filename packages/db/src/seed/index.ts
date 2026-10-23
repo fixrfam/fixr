@@ -228,6 +228,9 @@ async function seed() {
 				name: company.name,
 				subdomain: company.subdomain,
 				address: company.address,
+				email: company.email,
+				phone: company.phone,
+				website: company.website,
 				cnpj: cnpj(companyIds.size),
 			});
 

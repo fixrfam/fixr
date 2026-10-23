@@ -6,9 +6,13 @@ import type { Locale } from "@fixr/i18n";
 import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import { emailDisplayName } from "@fixr/mail/services";
 import type { jwtPayload } from "@fixr/schemas/auth";
-import type { createCompanySchema } from "@fixr/schemas/companies";
+import type {
+	createCompanySchema,
+	updateCompanyProfileSchema,
+} from "@fixr/schemas/companies";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import { isAllowedCompanyLogoUrl } from "../../../config/r2";
 import { redis } from "../../../config/redis";
 import { AppError } from "../../../core/lib/app-error";
 import { apiResponse } from "../../../core/lib/response";
@@ -157,6 +161,65 @@ export class CompaniesService {
 				code: "company_create_success",
 				message: "Company created successfully.",
 				data: null,
+			})
+		);
+	}
+
+	/**
+	 * @description Update the profile shown on the company's documents. `null`
+	 * or `""` clears a field; the logo must come from the company's own logo upload.
+	 */
+	static async updateCompanyProfile({
+		subdomain,
+		userJwt,
+		data,
+		response,
+	}: {
+		subdomain: string;
+		userJwt: z.infer<typeof jwtPayload>;
+		data: z.infer<typeof updateCompanyProfileSchema>;
+		response: FastifyReply;
+	}) {
+		if (!userJwt.company || subdomain !== userJwt.company.subdomain) {
+			throw new AppError("COMPANY_NOT_ALLOWED");
+		}
+
+		const companyId = userJwt.company.id;
+		const values: Record<string, string | null> = {};
+
+		for (const [key, value] of Object.entries(data)) {
+			// The name is required: an empty value leaves it unchanged.
+			const skip = value === undefined || (key === "name" && !value);
+			if (!skip) {
+				values[key] = value === "" ? null : value;
+			}
+		}
+
+		if (values.phone) {
+			values.phone = unmask.phone(values.phone) ?? null;
+		}
+
+		if (values.logoUrl && !isAllowedCompanyLogoUrl(values.logoUrl, companyId)) {
+			throw new AppError("COMPANY_LOGO_URL_INVALID");
+		}
+
+		if (Object.keys(values).length > 0) {
+			await CompaniesRepository.updateCompanyProfile(companyId, values);
+		}
+
+		const company = await CompaniesRepository.queryCompanyById(companyId);
+
+		if (!company) {
+			throw new AppError("COMPANY_NOT_FOUND");
+		}
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "update_company_profile_success",
+				message: "Company profile updated successfully.",
+				data: companySelectSchema.parse(company),
 			})
 		);
 	}

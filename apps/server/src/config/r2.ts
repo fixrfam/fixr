@@ -3,11 +3,13 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@fixr/env/server";
 import {
 	buildObjectPublicUrl as _buildObjectPublicUrl,
+	isAllowedCompanyLogoUrl as _isAllowedCompanyLogoUrl,
 	isAllowedCompanyPhotoUrl as _isAllowedCompanyPhotoUrl,
 } from "../core/lib/r2";
 
 export {
 	buildAvatarObjectKey,
+	buildCompanyLogoObjectKey,
 	buildModelObjectKey,
 	buildUploadObjectKey,
 	sanitizeUploadFileName,
@@ -50,6 +52,10 @@ export function buildObjectPublicUrl(key: string) {
 
 export function isAllowedCompanyPhotoUrl(url: string, companyId: string) {
 	return _isAllowedCompanyPhotoUrl(r2PublicBaseUrl, url, companyId);
+}
+
+export function isAllowedCompanyLogoUrl(url: string, companyId: string) {
+	return _isAllowedCompanyLogoUrl(r2PublicBaseUrl, url, companyId);
 }
 
 /**

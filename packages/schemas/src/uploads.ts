@@ -4,7 +4,12 @@ import { z } from "zod";
 export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_AVATAR_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
-export const uploadPurpose = z.enum(["avatar", "service-orders", "models"]);
+export const uploadPurpose = z.enum([
+	"avatar",
+	"service-orders",
+	"models",
+	"company-logo",
+]);
 
 export const presignParamsSchema = z.object({
 	purpose: uploadPurpose,

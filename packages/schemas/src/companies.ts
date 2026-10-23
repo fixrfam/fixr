@@ -61,3 +61,38 @@ export const getCompanyNestedDataSchema = z.object({
 				"Subdomain can only contain lowercase letters (a-z), numbers (0-9), and hyphens (-), but cannot start or end with a hyphen",
 		}),
 });
+
+const invalidFormat = i18nMessage("validation.generic.invalidFormat");
+const PHONE_DIGITS_REGEX = /^\d{10,11}$/;
+const NON_DIGITS_REGEX = /\D/g;
+
+/** Optional text field: an empty string clears the stored value. */
+const clearable = <T extends z.ZodType>(schema: T) =>
+	schema.nullable().optional().or(z.literal(""));
+
+/**
+ * @description Body schema for updating the company profile shown on documents.
+ * Every field is optional; `null` or `""` clears it. The CNPJ and subdomain can't change.
+ */
+export const updateCompanyProfileSchema = z.object({
+	name: createCompanySchema.shape.name.optional().or(z.literal("")),
+	address: createCompanySchema.shape.address,
+	email: clearable(
+		z
+			.string()
+			.max(255)
+			.email({ message: i18nMessage("validation.email.invalid") })
+	),
+	phone: clearable(
+		z
+			.string()
+			.refine(
+				(value) => PHONE_DIGITS_REGEX.test(value.replace(NON_DIGITS_REGEX, "")),
+				{
+					message: i18nMessage("validation.phone.incomplete"),
+				}
+			)
+	),
+	website: clearable(z.string().max(255).url({ message: invalidFormat })),
+	logoUrl: clearable(z.string().max(500).url({ message: invalidFormat })),
+});

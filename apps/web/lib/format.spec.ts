@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate } from "./format";
+import { formatCnpj, formatDate, formatPhone } from "./format";
 
 describe("formatDate", () => {
 	it("formats Date, ISO string and timestamp inputs", () => {
@@ -23,5 +23,27 @@ describe("formatDate", () => {
 		["an invalid date", "not a date"],
 	])("returns an empty string for %s", (_label, value) => {
 		expect(formatDate(value)).toBe("");
+	});
+});
+
+describe("formatPhone", () => {
+	it("formats mobile and landline digits", () => {
+		expect(formatPhone("11987654321")).toBe("(11) 98765-4321");
+		expect(formatPhone("1134567890")).toBe("(11) 3456-7890");
+	});
+
+	it("passes other values through", () => {
+		expect(formatPhone("123")).toBe("123");
+		expect(formatPhone(null)).toBe("");
+	});
+});
+
+describe("formatCnpj", () => {
+	it("formats 14 digits", () => {
+		expect(formatCnpj("12345678000190")).toBe("12.345.678/0001-90");
+	});
+
+	it("passes other values through", () => {
+		expect(formatCnpj("123")).toBe("123");
 	});
 });
