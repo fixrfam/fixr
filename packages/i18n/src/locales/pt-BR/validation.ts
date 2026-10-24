@@ -115,6 +115,13 @@ export const validation: Translated<typeof source> = {
 		deviceCategoriesRequired: "Selecione ao menos uma categoria de aparelho.",
 		topicMax: "O tópico excede {{count}} caracteres.",
 	},
+	estimate: {
+		serviceOrderInvalid: "Escolha uma ordem de serviço.",
+		discountRequired: "Informe o desconto.",
+		discountMin: "O desconto não pode ser negativo.",
+		discountMax: "O desconto não pode passar de 100%.",
+		notesMax: "As observações excedem {{count}} caracteres.",
+	},
 	supplier: {
 		cnpjRequired: "O CNPJ é obrigatório.",
 		contactRequired: "O nome do contato é obrigatório.",

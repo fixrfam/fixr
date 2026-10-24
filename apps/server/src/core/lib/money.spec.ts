@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { itemTotals, lineTotal } from "./money";
+import { estimateTotals, itemTotals, lineTotal } from "./money";
 
 describe("lineTotal", () => {
 	it("multiplies in cents", () => {
@@ -21,5 +21,31 @@ describe("itemTotals", () => {
 
 	it("is zero for no items", () => {
 		expect(itemTotals([])).toEqual({ parts: 0, services: 0, total: 0 });
+	});
+});
+
+describe("estimateTotals", () => {
+	it("applies the discount on the subtotal, rounded to cents", () => {
+		expect(
+			estimateTotals(
+				[
+					{ type: "part", unitPrice: 890.5, quantity: 1 },
+					{ type: "service", unitPrice: 150, quantity: 1 },
+				],
+				10
+			)
+		).toEqual({
+			parts: 890.5,
+			services: 150,
+			subtotal: 1040.5,
+			discount: 104.05,
+			total: 936.45,
+		});
+	});
+
+	it("rounds a fractional cent discount", () => {
+		expect(
+			estimateTotals([{ type: "part", unitPrice: 0.99, quantity: 1 }], 12.5)
+		).toMatchObject({ discount: 0.12, total: 0.87 });
 	});
 });

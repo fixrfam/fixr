@@ -37,6 +37,7 @@ import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
 import { employeesRoutes } from "./modules/employees/routes";
+import { estimatesRoutes } from "./modules/estimates/routes";
 import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
@@ -98,6 +99,11 @@ const OPENAPI_TAGS = [
 	{
 		name: "Service Orders",
 		description: "Manage company service orders.",
+	},
+	{
+		name: "Estimates",
+		description:
+			"Estimates (orçamentos) built from service orders, with PDF generation.",
 	},
 	{
 		name: "Parts",
@@ -286,6 +292,9 @@ export async function buildApp(
 	});
 	await app.register(modelsRoutes, {
 		prefix: "/companies/:subdomain/models",
+	});
+	await app.register(estimatesRoutes, {
+		prefix: "/companies/:subdomain/estimates",
 	});
 	await app.register(partsRoutes, {
 		prefix: "/companies/:subdomain/parts",
