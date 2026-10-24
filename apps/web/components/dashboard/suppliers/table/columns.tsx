@@ -1,11 +1,11 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { CopyableValue } from "@/components/dashboard/copyable-value";
 import {
 	ContactCell,
 	NameCell,
 	QuantityCell,
-	TextCell,
 } from "@/components/dashboard/parts/table/cells";
 import type { SupplierTableRow } from "@/components/dashboard/parts/table/data";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
@@ -36,9 +36,10 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 					/>
 				),
 				cell: ({ getValue }) => (
-					<span className="whitespace-nowrap tabular-nums">
-						{formatCnpj(getValue())}
-					</span>
+					<CopyableValue
+						label={t("suppliers.table.headers.cnpj")}
+						value={formatCnpj(getValue())}
+					/>
 				),
 				meta: { label: t("suppliers.table.headers.cnpj") },
 			}),
@@ -60,9 +61,10 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 					/>
 				),
 				cell: ({ getValue }) => (
-					<span className="whitespace-nowrap tabular-nums">
-						{formatPhone(getValue())}
-					</span>
+					<CopyableValue
+						label={t("suppliers.table.headers.phone")}
+						value={formatPhone(getValue())}
+					/>
 				),
 				meta: { label: t("suppliers.table.headers.phone") },
 			}),
@@ -73,7 +75,13 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 						label={t("suppliers.table.headers.email")}
 					/>
 				),
-				cell: ({ getValue }) => <TextCell value={getValue()} />,
+				cell: ({ getValue }) => (
+					<CopyableValue
+						className="text-2xs"
+						label={t("suppliers.table.headers.email")}
+						value={getValue()}
+					/>
+				),
 				meta: { label: t("suppliers.table.headers.email") },
 			}),
 			supplierColumnHelper.accessor((row) => row.parts.length, {
