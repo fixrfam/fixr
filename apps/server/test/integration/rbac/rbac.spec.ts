@@ -181,6 +181,11 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	},
 	"PATCH /companies/:subdomain/clients/:clientId": {},
 	"PATCH /companies/:subdomain": {},
+	"POST /companies/:subdomain/estimates": { serviceOrderId: createId() },
+	"PATCH /companies/:subdomain/estimates/:estimateId": {},
+	"PATCH /companies/:subdomain/estimates/:estimateId/status": {
+		status: "sent",
+	},
 	"POST /companies/:subdomain/service-orders/:serviceOrderId/items": {
 		type: "part",
 		itemId: createId(),

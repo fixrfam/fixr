@@ -1,11 +1,12 @@
 "use client";
 
-import { useTranslation } from "@fixr/i18n/react";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { createAbility, permissions } from "@fixr/permissions";
+import { toast } from "@pheralb/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Minus, Plus, Trash2 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { HandCoins, Loader2, Minus, Plus, Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useInventory } from "@/components/dashboard/parts/store";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/hooks/use-session";
+import { estimatesApi } from "@/lib/services/estimates";
 import {
 	type ServiceOrderItem,
 	type ServiceOrderItems as ServiceOrderItemsData,
@@ -51,9 +53,9 @@ export function ServiceOrderItems({
 	const { t, format } = useTranslation();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const { session } = useSession();
-	const canEdit = createAbility(session?.company?.role ?? "guest").can(
-		permissions.serviceOrders.update
-	);
+	const ability = createAbility(session?.company?.role ?? "guest");
+	const canEdit = ability.can(permissions.serviceOrders.update);
+	const canEstimate = ability.can(permissions.estimates.create);
 	const queryClient = useQueryClient();
 	const toastError = useApiErrorToast();
 	const queryKey = ["service-order-items", subdomain, serviceOrderId];
@@ -158,7 +160,52 @@ export function ServiceOrderItems({
 					<dd className="tabular-nums">{format.currency(data.totals.total)}</dd>
 				</div>
 			</dl>
+
+			{canEstimate && data.items.length > 0 ? (
+				<CreateEstimateButton serviceOrderId={serviceOrderId} />
+			) : null}
 		</div>
+	);
+}
+
+/** Turn the order's current items into a draft estimate and go to the estimates list. */
+function CreateEstimateButton({ serviceOrderId }: { serviceOrderId: string }) {
+	const { t } = useTranslation();
+	const message = useMessage();
+	const router = useRouter();
+	const { subdomain } = useParams<{ subdomain: string }>();
+	const toastError = useApiErrorToast();
+
+	const create = useMutation({
+		mutationFn: () => estimatesApi.create(subdomain, { serviceOrderId }),
+		onSuccess: () => {
+			const feedback = message("create_estimate_success", "success");
+			toast.success({
+				text: feedback.title,
+				description: feedback.description,
+			});
+			router.push(`/dashboard/${subdomain}/estimates`);
+		},
+		onError: toastError,
+	});
+
+	return (
+		<Button
+			className="w-full"
+			disabled={create.isPending}
+			onClick={() => create.mutate()}
+			size="sm"
+			type="button"
+		>
+			{create.isPending ? (
+				<Loader2 className="size-4 animate-spin" />
+			) : (
+				<HandCoins className="size-4" />
+			)}
+			{create.isPending
+				? t("estimates.actions.creating")
+				: t("estimates.actions.create")}
+		</Button>
 	);
 }
 

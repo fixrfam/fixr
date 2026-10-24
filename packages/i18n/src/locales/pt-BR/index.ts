@@ -11,6 +11,7 @@ import { dashboard } from "./dashboard";
 import { dataTable } from "./data-table";
 import { emails } from "./emails";
 import { employees } from "./employees";
+import { estimates } from "./estimates";
 import { home } from "./home";
 import { messages } from "./messages";
 import { parts } from "./parts";
@@ -33,6 +34,7 @@ export const ptBR: Translated<typeof en> = {
 	dataTable,
 	emails,
 	employees,
+	estimates,
 	home,
 	messages,
 	parts,

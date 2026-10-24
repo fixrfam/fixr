@@ -39,3 +39,24 @@ export function itemTotals(
 		total: fromCents(parts + services),
 	};
 }
+
+/**
+ * Totals of an estimate: item subtotals, the discount (a percentage of the
+ * subtotal, rounded to cents) and the amount due.
+ */
+export function estimateTotals(
+	items: { type: "part" | "service"; unitPrice: number; quantity: number }[],
+	discountPercentage: number
+) {
+	const totals = itemTotals(items);
+	const subtotal = toCents(totals.total);
+	const discount = Math.round((subtotal * discountPercentage) / 100);
+
+	return {
+		parts: totals.parts,
+		services: totals.services,
+		subtotal: fromCents(subtotal),
+		discount: fromCents(discount),
+		total: fromCents(subtotal - discount),
+	};
+}

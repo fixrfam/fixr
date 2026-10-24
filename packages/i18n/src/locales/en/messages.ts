@@ -15,6 +15,38 @@ export const messages = {
 		},
 	},
 	codes: {
+		create_estimate_success: {
+			title: "Estimate created",
+			description: "It was saved as a draft. Open the PDF to review it.",
+		},
+		update_estimate_status_success: {
+			title: "Estimate updated",
+			description: "The status was changed.",
+		},
+		delete_estimate_success: {
+			title: "Estimate deleted",
+			description: "The draft was removed.",
+		},
+		estimate_service_order_empty: {
+			title: "Nothing to estimate",
+			description: "Add parts or services to the service order first.",
+		},
+		estimate_service_order_not_found: {
+			title: "Service order not found",
+			description: "This service order does not exist in your company.",
+		},
+		estimate_not_editable: {
+			title: "Estimate locked",
+			description: "Only drafts can be changed or deleted.",
+		},
+		estimate_invalid_transition: {
+			title: "Status not allowed",
+			description: "The estimate can't move to this status now.",
+		},
+		estimate_not_found: {
+			title: "Estimate not found",
+			description: "This estimate does not exist or was removed.",
+		},
 		service_order_catalog_item_not_found: {
 			title: "Item not found",
 			description: "This part or service is no longer in the catalog.",

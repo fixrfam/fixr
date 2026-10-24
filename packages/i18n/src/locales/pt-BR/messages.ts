@@ -14,6 +14,38 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		create_estimate_success: {
+			title: "Orçamento gerado",
+			description: "Ele foi salvo como rascunho. Abra o PDF para conferir.",
+		},
+		update_estimate_status_success: {
+			title: "Orçamento atualizado",
+			description: "O status foi alterado.",
+		},
+		delete_estimate_success: {
+			title: "Orçamento excluído",
+			description: "O rascunho foi removido.",
+		},
+		estimate_service_order_empty: {
+			title: "Nada para orçar",
+			description: "Adicione peças ou serviços à ordem de serviço primeiro.",
+		},
+		estimate_service_order_not_found: {
+			title: "Ordem de serviço não encontrada",
+			description: "Esta ordem de serviço não existe na sua empresa.",
+		},
+		estimate_not_editable: {
+			title: "Orçamento bloqueado",
+			description: "Só rascunhos podem ser alterados ou excluídos.",
+		},
+		estimate_invalid_transition: {
+			title: "Status não permitido",
+			description: "O orçamento não pode ir para este status agora.",
+		},
+		estimate_not_found: {
+			title: "Orçamento não encontrado",
+			description: "Este orçamento não existe ou foi removido.",
+		},
 		service_order_catalog_item_not_found: {
 			title: "Item não encontrado",
 			description: "Esta peça ou serviço não está mais no catálogo.",
