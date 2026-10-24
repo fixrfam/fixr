@@ -1,6 +1,6 @@
 import { parseI18nMessage } from "@fixr/i18n";
 import { describe, expect, it } from "vitest";
-import { createPartSchema } from "./parts";
+import { createPartSchema, patchPartSchema } from "./parts";
 import { issuePaths } from "./test-utils";
 
 const validPart = {
@@ -110,5 +110,25 @@ describe("createPartSchema", () => {
 				null
 			);
 		}
+	});
+});
+
+describe("patchPartSchema", () => {
+	it("accepts a partial update", () => {
+		expect(patchPartSchema.safeParse({ stock: 3 }).success).toBe(true);
+	});
+
+	it("only checks the price rule when both prices are sent", () => {
+		expect(patchPartSchema.safeParse({ salePrice: 10 }).success).toBe(true);
+		expect(patchPartSchema.safeParse({ costPrice: 999 }).success).toBe(true);
+		expect(
+			patchPartSchema.safeParse({ costPrice: 100, salePrice: 150 }).success
+		).toBe(true);
+	});
+
+	it("rejects a sale price below the cost when both are sent", () => {
+		expect(
+			issuePaths(patchPartSchema, { costPrice: 100, salePrice: 50 })
+		).toEqual(["salePrice"]);
 	});
 });
