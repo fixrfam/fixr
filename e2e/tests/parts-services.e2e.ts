@@ -14,9 +14,9 @@ test.describe("parts (admin)", () => {
 		await page.getByRole("link", { name: /Nova peça/ }).click();
 		await page.getByLabel("SKU").fill("BAT-E2E-001");
 		await page.getByLabel("Nome").fill("Bateria E2E");
-		await page.getByRole("combobox").first().click();
-		await page.getByRole("option", { name: "Baterias" }).click();
-		await page.getByRole("combobox").nth(1).click();
+		await page.getByRole("button", { name: "Baterias", exact: true }).click();
+		// The supplier picker is the form's only combobox.
+		await page.getByRole("combobox").click();
 		await page.getByRole("option").first().click();
 		await page.getByLabel("Preço de custo (R$)").fill("80");
 		await page.getByLabel("Preço de venda (R$)").fill("150");
