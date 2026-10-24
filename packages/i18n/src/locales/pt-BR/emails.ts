@@ -19,6 +19,17 @@ export const emails: Translated<typeof source> = {
 			"Altere a senha padrão no painel de conta após o primeiro acesso.",
 		footer: "Se você não reconhece essa empresa, por favor, ignore este email.",
 	},
+	estimate: {
+		subject: "Orçamento #{{number}} da {{company}}",
+		preview: "A {{company}} enviou o orçamento #{{number}}.",
+		greeting: "Olá, <i>{{name}}</i>!",
+		heading: "A <b>{{company}}</b> te enviou um orçamento.",
+		body: "O orçamento <b>#{{number}}</b> do seu <b>{{device}}</b> ficou em <b>{{total}}</b>. O PDF está em anexo.",
+		instructions:
+			"Abra o orçamento para conferir os itens e <b>aprovar ou recusar</b>. Ele é válido até <b>{{date}}</b>.",
+		cta: "Ver orçamento",
+		footer: "Se você não pediu este orçamento, por favor, ignore este email.",
+	},
 	verification: {
 		subject: "Confirme seu email, @{{name}}!",
 		preview: "{{name}}, confirme seu email!",

@@ -4,8 +4,11 @@ import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
 	createEstimateSchema,
 	estimateIdParamsSchema,
+	estimateTokenParamsSchema,
 	getEstimatesQuerySchema,
 	patchEstimateSchema,
+	rejectEstimateSchema,
+	sendEstimateSchema,
 	updateEstimateStatusSchema,
 } from "@fixr/schemas/estimates";
 import type { FastifyRequest } from "fastify";
@@ -146,6 +149,25 @@ export function estimatesRoutes(fastify: FastifyTypedInstance) {
 		})
 	);
 
+	fastify.post(
+		"/:estimateId/send",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.estimates.sendToCustomer),
+			],
+			schema: estimatesDocs.sendEstimateSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			await EstimatesController.sendEstimate({
+				...estimateRequest(request),
+				email: sendEstimateSchema.parse(request.body ?? {}).email,
+				locale: requestLocale(request),
+				response,
+			});
+		})
+	);
+
 	fastify.delete(
 		"/:estimateId",
 		{
@@ -158,6 +180,58 @@ export function estimatesRoutes(fastify: FastifyTypedInstance) {
 		withErrorHandler(async (request, response) => {
 			await EstimatesController.deleteEstimate({
 				...estimateRequest(request),
+				response,
+			});
+		})
+	);
+}
+
+/**
+ * @description Public estimate link routes. The token from the email is the
+ * credential, so these routes have no authentication on purpose.
+ */
+export function estimateLinksRoutes(fastify: FastifyTypedInstance) {
+	fastify.get(
+		"/:token",
+		{ schema: estimatesDocs.getPublicEstimateSchema },
+		withErrorHandler(async (request, response) => {
+			await EstimatesController.getPublicEstimate({
+				token: estimateTokenParamsSchema.parse(request.params).token,
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/:token/pdf",
+		{ schema: estimatesDocs.getPublicEstimatePdfSchema },
+		withErrorHandler(async (request, response) => {
+			await EstimatesController.getPublicEstimatePdf({
+				token: estimateTokenParamsSchema.parse(request.params).token,
+				locale: requestLocale(request),
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:token/approve",
+		{ schema: estimatesDocs.approvePublicEstimateSchema },
+		withErrorHandler(async (request, response) => {
+			await EstimatesController.approvePublicEstimate({
+				token: estimateTokenParamsSchema.parse(request.params).token,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:token/reject",
+		{ schema: estimatesDocs.rejectPublicEstimateSchema },
+		withErrorHandler(async (request, response) => {
+			await EstimatesController.rejectPublicEstimate({
+				token: estimateTokenParamsSchema.parse(request.params).token,
+				data: rejectEstimateSchema.parse(request.body ?? {}),
 				response,
 			});
 		})

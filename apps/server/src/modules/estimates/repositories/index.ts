@@ -21,6 +21,19 @@ import {
 import type { getEstimatesQuerySchema } from "@fixr/schemas/estimates";
 import type { z } from "zod";
 
+type ServiceOrderStatus = (typeof serviceOrders.$inferSelect)["status"];
+
+/**
+ * Service order statuses that come before the client's answer. Sending,
+ * approving or rejecting an estimate only moves orders still in one of these,
+ * so an order already being fixed or delivered is never pushed back.
+ */
+const BEFORE_APPROVAL: ServiceOrderStatus[] = [
+	"pending",
+	"diagnosing",
+	"waiting_approval",
+];
+
 export type EstimateInsert = typeof estimates.$inferInsert;
 export type EstimateItemRow = typeof estimateItems.$inferSelect;
 
@@ -36,6 +49,10 @@ export const estimatesListSelect = {
 	discountPercentage: estimates.discountPercentage,
 	validUntil: estimates.validUntil,
 	notes: estimates.notes,
+	sentTo: estimates.sentTo,
+	sentAt: estimates.sentAt,
+	respondedAt: estimates.respondedAt,
+	rejectionReason: estimates.rejectionReason,
 	createdAt: estimates.createdAt,
 	updatedAt: estimates.updatedAt,
 	clientName: clients.name,
@@ -181,6 +198,90 @@ export class EstimatesRepository {
 		values: Partial<EstimateInsert>
 	) {
 		await db.update(estimates).set(values).where(eq(estimates.id, estimateId));
+	}
+
+	/** Estimate behind a public link, with the company it belongs to. */
+	static async queryByTokenHash(tokenHash: string) {
+		const [estimate] = await db
+			.select({ ...estimatesListSelect, companyId: estimates.companyId })
+			.from(estimates)
+			.leftJoin(clients, eq(clients.id, estimates.clientId))
+			.where(eq(estimates.publicTokenHash, tokenHash))
+			.limit(1);
+		return estimate ?? null;
+	}
+
+	/**
+	 * Mark the estimate as sent with a new link (replacing any previous one) and
+	 * move its service order to "waiting approval". Without a link, the estimate
+	 * was delivered outside the app and only the staff can record the answer.
+	 */
+	static async markSent(
+		estimate: { id: string; serviceOrderId: string },
+		values: { publicTokenHash: string | null; sentTo: string | null }
+	) {
+		await db.transaction(async (tx) => {
+			await tx
+				.update(estimates)
+				.set({
+					...values,
+					status: "sent",
+					sentAt: new Date(),
+					respondedAt: null,
+					rejectionReason: null,
+				})
+				.where(eq(estimates.id, estimate.id));
+
+			await tx
+				.update(serviceOrders)
+				.set({ status: "waiting_approval" })
+				.where(
+					and(
+						eq(serviceOrders.id, estimate.serviceOrderId),
+						inArray(serviceOrders.status, BEFORE_APPROVAL)
+					)
+				);
+		});
+	}
+
+	/**
+	 * Record the client's answer. Only a sent estimate can be answered, checked
+	 * in the update itself so two answers at the same time can't both win.
+	 * Approving also moves the service order to "approved".
+	 *
+	 * @returns whether the answer was recorded
+	 */
+	static async recordAnswer(
+		estimate: { id: string; serviceOrderId: string },
+		answer:
+			| { status: "approved" }
+			| { status: "rejected"; rejectionReason: string | null }
+	) {
+		return await db.transaction(async (tx) => {
+			const [result] = await tx
+				.update(estimates)
+				.set({ ...answer, respondedAt: new Date() })
+				.where(
+					and(eq(estimates.id, estimate.id), eq(estimates.status, "sent"))
+				);
+
+			if (result.affectedRows === 0) {
+				return false;
+			}
+
+			if (answer.status === "approved") {
+				await tx
+					.update(serviceOrders)
+					.set({ status: "approved" })
+					.where(
+						and(
+							eq(serviceOrders.id, estimate.serviceOrderId),
+							inArray(serviceOrders.status, BEFORE_APPROVAL)
+						)
+					);
+			}
+			return true;
+		});
 	}
 
 	static async deleteEstimate(estimateId: string) {

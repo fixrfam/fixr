@@ -16,6 +16,7 @@ export const routeRules: RouteRule[] = [
 
 	{ path: "/", public: true },
 	{ path: "/downtime", public: true },
+	{ path: "/estimate/:token", public: true },
 
 	{
 		path: "/dashboard/:subdomain/home",

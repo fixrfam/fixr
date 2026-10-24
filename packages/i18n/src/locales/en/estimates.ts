@@ -24,6 +24,8 @@ export const estimates = {
 		creating: "Creating estimate...",
 		openPdf: "Open PDF",
 		send: "Mark as sent",
+		sendToClient: "Send to client",
+		resendToClient: "Send again",
 		approve: "Mark as approved",
 		reject: "Mark as rejected",
 		reopen: "Back to draft",
@@ -35,6 +37,42 @@ export const estimates = {
 		sent: "Sent",
 		approved: "Approved",
 		rejected: "Rejected",
+	},
+	sendDialog: {
+		title: "Send estimate #{{number}}",
+		description:
+			"The client gets an email with the PDF and a link to approve or reject it. Sending again replaces the previous link.",
+		email: "Client email",
+		emailPlaceholder: "client@email.com",
+		submit: "Send",
+		sending: "Sending...",
+		cancel: "Cancel",
+	},
+	public: {
+		title: "Estimate #{{number}}",
+		issuedBy: "Issued by {{company}}",
+		validUntil: "Valid until {{date}}",
+		device: "Device",
+		items: "Items",
+		notes: "Notes",
+		downloadPdf: "Download PDF",
+		approve: "Approve estimate",
+		reject: "Reject",
+		rejectTitle: "Reject estimate #{{number}}",
+		rejectDescription:
+			"Tell the shop why, if you want. This helps them prepare a new proposal.",
+		reasonLabel: "Reason (optional)",
+		reasonPlaceholder: "The price is above what I expected...",
+		confirmReject: "Reject estimate",
+		cancel: "Cancel",
+		approved:
+			"You approved this estimate on {{date}}. The shop will contact you.",
+		rejected: "You rejected this estimate on {{date}}.",
+		expired:
+			"This estimate expired on {{date}}. Contact the shop for a new one.",
+		invalidTitle: "Estimate not available",
+		invalidDescription:
+			"This link is invalid or was replaced by a newer one. Check the latest email from the shop.",
 	},
 	pdf: {
 		title: "Estimate",

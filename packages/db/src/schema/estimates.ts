@@ -32,6 +32,9 @@ export const estimateStatusEnum = mysqlEnum("estimate_status", [
  * `number` is sequential per company and is what the client sees. The items
  * are copied from the service order when the estimate is created, so the
  * estimate never changes after it is sent.
+ *
+ * Sending it to the client issues a public link. Only the SHA-256 of the link
+ * token is stored, and sending again replaces it, so older links stop working.
  */
 export const estimates = mysqlTable(
 	"estimates",
@@ -58,6 +61,11 @@ export const estimates = mysqlTable(
 		discountPercentage: percentage("discount_percentage").notNull().default(0),
 		validUntil: timestamp("valid_until").notNull(),
 		notes: text("notes"),
+		publicTokenHash: varchar("public_token_hash", { length: 64 }).unique(),
+		sentTo: varchar("sent_to", { length: 255 }),
+		sentAt: timestamp("sent_at"),
+		respondedAt: timestamp("responded_at"),
+		rejectionReason: text("rejection_reason"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -96,6 +104,8 @@ export const estimateItems = mysqlTable("estimate_items", {
 export const estimateSelectSchema = createSelectSchema(estimates, {
 	discountPercentage: z.number(),
 	validUntil: z.coerce.date(),
+	sentAt: z.coerce.date().nullable(),
+	respondedAt: z.coerce.date().nullable(),
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 });

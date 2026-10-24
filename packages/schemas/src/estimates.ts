@@ -54,3 +54,32 @@ export const getEstimatesQuerySchema = getPaginatedDataSchema.extend({
 export const estimateIdParamsSchema = z.object({
 	estimateId: z.string().cuid2(),
 });
+
+/**
+ * @description Body schema for sending an estimate to the client. `email`
+ * (empty or missing) defaults to the client's email and is required when the
+ * client has none.
+ */
+export const sendEstimateSchema = z.object({
+	email: z
+		.string()
+		.trim()
+		.max(255, i18nMessage("validation.email.invalid"))
+		.email({ message: i18nMessage("validation.email.invalid") })
+		.optional()
+		.or(z.literal("")),
+});
+
+/** @description Body schema for the client rejecting an estimate from the public link */
+export const rejectEstimateSchema = z.object({
+	reason: z
+		.string()
+		.trim()
+		.max(500, i18nMessage("validation.estimate.reasonMax", { count: 500 }))
+		.optional(),
+});
+
+/** @description Params schema for the public estimate link routes */
+export const estimateTokenParamsSchema = z.object({
+	token: z.string().min(32).max(64),
+});

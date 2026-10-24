@@ -37,6 +37,26 @@ export const estimatesErrors = defineErrors({
 		message: "The estimate can't move to this status from its current one.",
 		status: 409,
 	},
+	ESTIMATE_NO_RECIPIENT: {
+		code: "estimate_no_recipient",
+		message: "The client has no email. Send the estimate to an email address.",
+		status: 400,
+	},
+	ESTIMATE_EXPIRED: {
+		code: "estimate_expired",
+		message: "The estimate's validity date has passed.",
+		status: 410,
+	},
+	ESTIMATE_LINK_INVALID: {
+		code: "estimate_link_invalid",
+		message: "This estimate link is invalid or was replaced.",
+		status: 404,
+	},
+	ESTIMATE_ALREADY_ANSWERED: {
+		code: "estimate_already_answered",
+		message: "The estimate was already approved or rejected.",
+		status: 409,
+	},
 	ESTIMATE_PAGE_OUT_OF_BOUNDS: {
 		code: "page_out_of_bounds",
 		message: "The requested page exceeds the total number of pages.",

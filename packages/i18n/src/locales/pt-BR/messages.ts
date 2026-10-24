@@ -42,6 +42,38 @@ export const messages: Translated<typeof source> = {
 			title: "Status não permitido",
 			description: "O orçamento não pode ir para este status agora.",
 		},
+		send_estimate_success: {
+			title: "Orçamento enviado",
+			description:
+				"O cliente vai receber um email com o PDF e o link de aprovação.",
+		},
+		estimate_no_recipient: {
+			title: "Sem email para envio",
+			description:
+				"O cliente não tem email. Informe um para enviar o orçamento.",
+		},
+		estimate_expired: {
+			title: "Orçamento vencido",
+			description:
+				"A validade já passou. Volte para rascunho e atualize a data.",
+		},
+		estimate_link_invalid: {
+			title: "Link indisponível",
+			description:
+				"Este link de orçamento é inválido ou foi substituído por um mais novo.",
+		},
+		estimate_already_answered: {
+			title: "Orçamento já respondido",
+			description: "Este orçamento já foi aprovado ou recusado.",
+		},
+		approve_estimate_success: {
+			title: "Orçamento aprovado",
+			description: "Obrigado! A assistência foi avisada.",
+		},
+		reject_estimate_success: {
+			title: "Orçamento recusado",
+			description: "Obrigado pela resposta. A assistência foi avisada.",
+		},
 		estimate_not_found: {
 			title: "Orçamento não encontrado",
 			description: "Este orçamento não existe ou foi removido.",
