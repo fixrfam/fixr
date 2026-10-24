@@ -11,7 +11,7 @@ export const services = {
 		notFound: "We couldn't find this service.",
 	},
 	table: {
-		search: "Search by service, description, category, part or supplier...",
+		search: "Search by name or description...",
 		create: "New service",
 		noCategory: "No category",
 		noParts: "No parts",

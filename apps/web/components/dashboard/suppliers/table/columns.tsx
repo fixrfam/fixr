@@ -9,6 +9,7 @@ import {
 } from "@/components/dashboard/parts/table/cells";
 import type { SupplierTableRow } from "@/components/dashboard/parts/table/data";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCnpj, formatPhone } from "@/lib/format";
 
 const supplierColumnHelper = createColumnHelper<SupplierTableRow>();
@@ -84,15 +85,22 @@ export function useSupplierColumns(): ColumnDef<SupplierTableRow>[] {
 				),
 				meta: { label: t("suppliers.table.headers.email") },
 			}),
-			supplierColumnHelper.accessor((row) => row.parts.length, {
-				id: "partsCount",
+			supplierColumnHelper.accessor("partsCount", {
 				header: ({ column }) => (
 					<DataTableColumnHeader
 						column={column}
 						label={t("suppliers.table.headers.partsCount")}
 					/>
 				),
-				cell: ({ getValue }) => <QuantityCell value={getValue()} />,
+				cell: ({ getValue }) => {
+					const value = getValue();
+					// Counted per row, after the page itself loads.
+					return value === undefined ? (
+						<Skeleton className="h-5 w-8" />
+					) : (
+						<QuantityCell value={value} />
+					);
+				},
 				meta: { label: t("suppliers.table.headers.partsCount") },
 			}),
 		],

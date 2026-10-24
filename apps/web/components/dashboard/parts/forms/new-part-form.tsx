@@ -6,7 +6,7 @@ import { createPartSchema } from "@fixr/schemas/parts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
 import { Check, ChevronsUpDown, Loader2, Plus, Save } from "lucide-react";
-import type { ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithoutRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -34,10 +34,16 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { formatCnpj } from "@/lib/format";
 import type { PartRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
-import { useCreatePart, useInventory, useUpdatePart } from "../store";
+import {
+	PICKER_PAGE_SIZE,
+	useCreatePart,
+	useSuppliersPage,
+	useUpdatePart,
+} from "../store";
 import { useApiErrorToast } from "./api-feedback";
 import { numberInputProps } from "./number-input";
 
@@ -77,6 +83,30 @@ function MarginHint({
 	);
 }
 
+/**
+ * Suppliers matching the picker's search, plus the chosen one, which may not
+ * be among the results of the current search.
+ */
+function useSupplierPicker(initial?: { id: string; name: string }) {
+	const [search, setSearch] = useState("");
+	const onSearchChange = useDebouncedCallback(setSearch, 250);
+	const [picked, setPicked] = useState(initial);
+	const query = useSuppliersPage({
+		page: 1,
+		perPage: PICKER_PAGE_SIZE,
+		query: search,
+		sort: "name",
+	});
+
+	return {
+		suppliers: query.data?.records ?? [],
+		loading: query.isFetching,
+		onSearchChange,
+		picked,
+		pick: (supplier: { id: string; name: string }) => setPicked(supplier),
+	};
+}
+
 export function NewPartForm({
 	part,
 	onSuccess,
@@ -88,7 +118,8 @@ export function NewPartForm({
 	onSuccess?: () => void;
 }) {
 	const { t, format } = useTranslation();
-	const { suppliers } = useInventory();
+	const supplierPicker = useSupplierPicker(part?.supplier);
+	const suppliers = supplierPicker.suppliers;
 	const createPart = useCreatePart();
 	const updatePart = useUpdatePart();
 	const toastError = useApiErrorToast();
@@ -240,10 +271,9 @@ export function NewPartForm({
 						name="supplierId"
 						render={({ field }) => {
 							const selected =
-								suppliers.find((supplier) => supplier.id === field.value) ??
-								(part?.supplier?.id === field.value
-									? part.supplier
-									: undefined);
+								supplierPicker.picked?.id === field.value
+									? supplierPicker.picked
+									: undefined;
 
 							return (
 								<FormItem className="col-span-full">
@@ -270,23 +300,26 @@ export function NewPartForm({
 											align="start"
 											className="w-(--radix-popover-trigger-width) p-0"
 										>
-											<Command>
+											{/* The API searches; the list shows what it answers. */}
+											<Command shouldFilter={false}>
 												<CommandInput
+													onValueChange={supplierPicker.onSearchChange}
 													placeholder={t("parts.form.supplierSearch")}
 												/>
 												<CommandList>
 													<CommandEmpty>
-														{t("parts.form.supplierEmpty")}
+														{supplierPicker.loading
+															? t("dataTable.filters.loading")
+															: t("parts.form.supplierEmpty")}
 													</CommandEmpty>
 													<CommandGroup>
 														{suppliers.map((supplier) => (
 															<CommandItem
 																key={supplier.id}
-																keywords={[
-																	supplier.cnpj,
-																	formatCnpj(supplier.cnpj),
-																]}
-																onSelect={() => field.onChange(supplier.id)}
+																onSelect={() => {
+																	supplierPicker.pick(supplier);
+																	field.onChange(supplier.id);
+																}}
 																value={supplier.name}
 															>
 																<Check

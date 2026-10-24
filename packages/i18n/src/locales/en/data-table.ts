@@ -12,6 +12,12 @@ export const dataTable = {
 		next: "Go to next page",
 		last: "Go to last page",
 	},
+	catalogSort: {
+		label: "Sort by",
+		name: "Name (A to Z)",
+		newer: "Newest first",
+		older: "Oldest first",
+	},
 	columnHeader: {
 		asc: "Ascending",
 		desc: "Descending",
@@ -44,6 +50,7 @@ export const dataTable = {
 		pickDate: "Pick a date",
 		pickDateShort: "Pick date...",
 		pickDateRange: "Pick a date range",
+		loading: "Loading...",
 		noResults: "No results found.",
 		noFields: "No fields found.",
 		noOptions: "No options found.",

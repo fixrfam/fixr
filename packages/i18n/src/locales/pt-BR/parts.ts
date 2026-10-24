@@ -17,7 +17,8 @@ export const parts: Translated<typeof source> = {
 		out_of_stock: "Sem estoque",
 	},
 	table: {
-		search: "Busque por SKU, nome, categoria, fornecedor, CNPJ ou serviço...",
+		search: "Busque por nome ou SKU...",
+		lowStockFilter: "Estoque baixo",
 		create: "Nova peça",
 		noSupplier: "Sem fornecedor",
 		editLabel: "Editar {{name}}",

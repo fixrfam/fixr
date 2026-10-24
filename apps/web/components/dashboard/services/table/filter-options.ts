@@ -1,9 +1,5 @@
 import { serviceDeviceCategories } from "@fixr/mock";
-
-interface FilterOption {
-	label: string;
-	value: string;
-}
+import type { FilterOption } from "@/components/dashboard/parts/table/catalog-filters";
 
 export const DEVICE_CATEGORY_OPTIONS: FilterOption[] =
 	serviceDeviceCategories.map((category) => ({

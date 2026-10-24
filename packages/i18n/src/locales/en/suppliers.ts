@@ -6,7 +6,7 @@ export const suppliers = {
 		newDescription: "Fill in the fields below to register a new supplier.",
 	},
 	table: {
-		search: "Search by supplier, CNPJ, contact, phone, email or part...",
+		search: "Search by name, CNPJ or contact...",
 		create: "New supplier",
 		headers: {
 			name: "Name",

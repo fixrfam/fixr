@@ -14,7 +14,8 @@ export const parts = {
 		out_of_stock: "Out of stock",
 	},
 	table: {
-		search: "Search by SKU, name, category, supplier, CNPJ or service...",
+		search: "Search by name or SKU...",
+		lowStockFilter: "Low stock",
 		create: "New part",
 		noSupplier: "No supplier",
 		editLabel: "Edit {{name}}",
