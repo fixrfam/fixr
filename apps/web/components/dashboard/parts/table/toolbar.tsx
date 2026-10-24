@@ -11,6 +11,8 @@ interface TableToolbarProps {
 	placeholder: string;
 	createHref: string;
 	createLabel: string;
+	/** Hides the create button for roles that can't create this resource. */
+	canCreate?: boolean;
 	onSearchChange: (value: string) => void;
 	onClear: () => void;
 	children?: ReactNode;
@@ -21,6 +23,7 @@ export function TableToolbar({
 	placeholder,
 	createHref,
 	createLabel,
+	canCreate = true,
 	onSearchChange,
 	onClear,
 	children,
@@ -45,11 +48,13 @@ export function TableToolbar({
 			</div>
 			<div className="flex items-center justify-start gap-4">
 				{children}
-				<Button asChild className="shrink-0">
-					<DashLink href={createHref} prefetch subdomain={params.subdomain}>
-						{createLabel} <Plus className="size-3.5" />
-					</DashLink>
-				</Button>
+				{canCreate && (
+					<Button asChild className="shrink-0">
+						<DashLink href={createHref} prefetch subdomain={params.subdomain}>
+							{createLabel} <Plus className="size-3.5" />
+						</DashLink>
+					</Button>
+				)}
 			</div>
 		</div>
 	);

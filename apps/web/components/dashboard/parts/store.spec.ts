@@ -1,11 +1,14 @@
 import { mockParts, mockServices, mockSuppliers } from "@fixr/mock";
+import type { EmployeeRole } from "@fixr/permissions";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
+import { SessionProvider } from "@/lib/hooks/use-session";
 import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import "@/test/mocks";
 import { serveInventory } from "@/test/msw/inventory";
+import { employeeSession } from "@/test/session";
 import {
 	useCreatePart,
 	useInventory,
@@ -14,12 +17,23 @@ import {
 	useSupplierRows,
 } from "./store";
 
-function wrapper({ children }: { children: ReactNode }) {
-	const client = new QueryClient({
-		defaultOptions: { queries: { retry: false } },
-	});
-	return createElement(QueryClientProvider, { client }, children);
+function wrapperFor(role: EmployeeRole) {
+	return function Wrapper({ children }: { children: ReactNode }) {
+		const client = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		return createElement(
+			QueryClientProvider,
+			{ client },
+			createElement(SessionProvider, {
+				children,
+				session: employeeSession(role),
+			})
+		);
+	};
 }
+
+const wrapper = wrapperFor("admin");
 
 beforeEach(() => {
 	setSessionCookie(fakeJwt());
@@ -42,6 +56,25 @@ describe("useInventory", () => {
 		expect(result.current.isPending).toBe(true);
 		await waitFor(() => expect(result.current.isPending).toBe(false));
 		expect(result.current.parts).toHaveLength(150);
+	});
+});
+
+describe("catalog access by role", () => {
+	it("skips the suppliers for a technician and keeps the embedded name", async () => {
+		const part = mockParts[0]!;
+		const { reads } = serveInventory("fixr", {
+			parts: [{ ...part, supplier: { id: part.supplierId, name: "Embedded" } }],
+			services: [],
+			suppliers: [...mockSuppliers],
+		});
+
+		const { result } = renderHook(() => usePartRows(), {
+			wrapper: wrapperFor("technician"),
+		});
+
+		await waitFor(() => expect(result.current).toHaveLength(1));
+		expect(result.current[0]?.supplier?.name).toBe("Embedded");
+		expect(reads).not.toContain("/companies/fixr/suppliers");
 	});
 });
 

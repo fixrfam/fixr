@@ -34,7 +34,7 @@ const cnpjConflict = conflictError(
 );
 
 const listSuppliersSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Suppliers"],
 	summary: "List suppliers",
 	description: `
 **Retrieves the company's suppliers (paginated)**
@@ -59,7 +59,7 @@ const listSuppliersSchema: FastifySchema = {
 };
 
 const getSupplierSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Suppliers"],
 	summary: "Get supplier",
 	params: supplierParams,
 	response: {
@@ -77,7 +77,7 @@ const getSupplierSchema: FastifySchema = {
 };
 
 const createSupplierSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Suppliers"],
 	summary: "Create supplier",
 	description: `
 **Creates a supplier for the authenticated company**
@@ -101,7 +101,7 @@ The CNPJ is stored with digits only and must be unique within the company.
 };
 
 const patchSupplierSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Suppliers"],
 	summary: "Update supplier",
 	params: supplierParams,
 	body: patchSupplierSchema,
@@ -121,7 +121,7 @@ const patchSupplierSchemaDoc: FastifySchema = {
 };
 
 const deleteSupplierSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Suppliers"],
 	summary: "Delete supplier",
 	description: `
 **Deletes a supplier.** Refused with \`409 supplier_in_use\` while parts still reference it.

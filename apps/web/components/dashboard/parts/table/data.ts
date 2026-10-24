@@ -13,7 +13,7 @@ export const STOCK_STATUS_KEYS: Record<StockStatusId, StaticTranslationKey> = {
 	out_of_stock: "parts.stockStatus.out_of_stock",
 };
 
-export interface PartTableRow extends PartRow {
+export interface PartTableRow extends Omit<PartRow, "supplier"> {
 	supplier: SupplierRow | null;
 	services: ServiceRow[];
 	stockStatus: StockStatusId;
@@ -41,6 +41,14 @@ export interface PartsData {
 	suppliers: SupplierRow[];
 }
 
+/** Contact fields of a supplier the caller can't list (only the name is embedded in the part). */
+const UNKNOWN_SUPPLIER_DETAILS = {
+	cnpj: "",
+	contact: "",
+	phone: "",
+	email: "",
+};
+
 function unique<T>(items: T[]): T[] {
 	return Array.from(new Set(items));
 }
@@ -54,7 +62,11 @@ export function buildPartRows({
 
 	return parts.map((part) => ({
 		...part,
-		supplier: suppliersById.get(part.supplierId) ?? null,
+		supplier:
+			suppliersById.get(part.supplierId) ??
+			(part.supplier
+				? { ...part.supplier, ...UNKNOWN_SUPPLIER_DETAILS }
+				: null),
 		services: services.filter((s) => s.partIds.includes(part.id)),
 		stockStatus: getStockStatus(part),
 	}));
@@ -120,7 +132,9 @@ function supplierFields(supplier: SupplierRow): string[] {
 	];
 }
 
-function partFields(part: PartRow): string[] {
+function partFields(
+	part: Pick<PartRow, "sku" | "name" | "category">
+): string[] {
 	return [part.sku, part.name, part.category];
 }
 

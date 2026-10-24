@@ -109,6 +109,10 @@ export const messages = {
 			title: "Service order not found",
 			description: "This service order does not exist or was removed.",
 		},
+		part_stock_insufficient: {
+			title: "Not enough stock",
+			description: "The adjustment would leave the stock below zero.",
+		},
 		part_sku_conflict: {
 			title: "SKU already registered",
 			description: "Another part of your company already uses this SKU.",
