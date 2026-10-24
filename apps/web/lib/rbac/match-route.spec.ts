@@ -101,18 +101,24 @@ describe("parts, services and suppliers routes", () => {
 	});
 
 	it.each([
-		"/dashboard/fixr/parts",
-		"/dashboard/fixr/parts/new",
-		"/dashboard/fixr/services",
-		"/dashboard/fixr/services/s1/edit",
-		"/dashboard/fixr/suppliers/new",
-	])("only admins reach %s", (path) => {
+		[
+			"/dashboard/fixr/parts",
+			["technician", "warehouse", "financial", "manager", "admin"],
+		],
+		["/dashboard/fixr/parts/new", ["warehouse", "manager", "admin"]],
+		[
+			"/dashboard/fixr/services",
+			["technician", "warehouse", "financial", "manager", "admin"],
+		],
+		["/dashboard/fixr/services/s1/edit", ["manager", "admin"]],
+		["/dashboard/fixr/suppliers/new", ["warehouse", "manager", "admin"]],
+	])("%s is reached by %j", (path, roles) => {
 		const permission = getRequiredPermission(path, routeRules) as Permission;
 		const allowed = employeeRoles.options.filter((role) =>
 			createAbility(role).can(permission)
 		);
 
-		expect(allowed).toEqual(["admin"]);
+		expect(allowed).toEqual(roles);
 	});
 });
 

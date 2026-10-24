@@ -156,11 +156,20 @@ describe("NewPartForm", () => {
 			const user = userEvent.setup();
 			render(<NewPartForm part={part} />);
 
-			await user.clear(label("parts.form.stockLabel"));
+			await user.clear(label("parts.form.minStockLabel"));
 
-			expect(label("parts.form.stockLabel")).toHaveValue(null);
+			expect(label("parts.form.minStockLabel")).toHaveValue(null);
 			expect(
-				await screen.findByText(t("validation.part.stockRequired"))
+				await screen.findByText(t("validation.part.minStockRequired"))
+			).toBeInTheDocument();
+		});
+
+		it("locks the stock, which only changes through an adjustment", () => {
+			render(<NewPartForm part={part} />);
+
+			expect(label("parts.form.stockLabel")).toBeDisabled();
+			expect(
+				screen.getByText(t("parts.form.stockLockedDescription"))
 			).toBeInTheDocument();
 		});
 
@@ -175,9 +184,9 @@ describe("NewPartForm", () => {
 			expect(label("parts.form.skuLabel")).toHaveValue(part.sku);
 			expect(save).toBeDisabled();
 
-			const stock = label("parts.form.stockLabel");
-			await user.clear(stock);
-			await user.type(stock, "42");
+			const minStock = label("parts.form.minStockLabel");
+			await user.clear(minStock);
+			await user.type(minStock, "42");
 			await user.click(save);
 
 			await waitFor(() => expect(onSuccess).toHaveBeenCalled());
@@ -185,9 +194,10 @@ describe("NewPartForm", () => {
 				expect.objectContaining({
 					method: "PATCH",
 					path: `/companies/fixr/parts/${part.id}`,
-					body: expect.objectContaining({ sku: part.sku, stock: 42 }),
+					body: expect.objectContaining({ sku: part.sku, minStock: 42 }),
 				}),
 			]);
+			expect(api.writes[0]?.body).not.toHaveProperty("stock");
 			expect(toast.success).toHaveBeenCalledWith({
 				text: t("parts.form.updated"),
 			});

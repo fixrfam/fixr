@@ -1,5 +1,6 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
+	adjustPartStockSchema,
 	createPartSchema,
 	getPartsQuerySchema,
 	patchPartSchema,
@@ -48,6 +49,16 @@ export class PartsController {
 		response: FastifyReply;
 	}) {
 		return PartsService.patchPart(params);
+	}
+
+	static adjustStock(params: {
+		userJwt: UserJwt;
+		subdomain: string;
+		partId: string;
+		data: z.infer<typeof adjustPartStockSchema>;
+		response: FastifyReply;
+	}) {
+		return PartsService.adjustStock(params);
 	}
 
 	static deletePart(params: {

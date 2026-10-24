@@ -155,7 +155,7 @@ describe("authenticateApiKey", () => {
 
 		const response = await call({ "x-api-key": key.token });
 
-		expect(response.json().permissions).toContain(permissions.inventory.update);
+		expect(response.json().permissions).toContain(permissions.inventory.adjust);
 		expect(response.json().canCreateModels).toBe(false);
 	});
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	getCoreRowModel,
 	getPaginationRowModel,
@@ -10,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import {
+	useCatalogAbility,
 	useInventory,
 	useSupplierRows,
 } from "@/components/dashboard/parts/store";
@@ -22,6 +24,7 @@ import { useSupplierColumns } from "./columns";
 
 export function SuppliersTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -53,6 +56,7 @@ export function SuppliersTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.suppliers.create)}
 				createHref="/suppliers/new"
 				createLabel={t("suppliers.table.create")}
 				onClear={() => setSearch("")}
