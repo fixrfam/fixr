@@ -3,10 +3,20 @@ export const company = {
 		title: "Company",
 		description: "Data shown on your estimates and other documents.",
 	},
+	sections: {
+		identity: {
+			title: "Identity",
+			description: "How your shop shows up to clients.",
+		},
+		contact: {
+			title: "Contact",
+			description: "Where clients find and reach you.",
+		},
+	},
 	logo: {
 		title: "Logo",
-		description:
-			"Printed on the header of your documents. PNG, JPG or WebP up to 5 MB.",
+		description: "Printed on the header of your estimates.",
+		pickHint: "Drag an image or click to pick one",
 		upload: "Upload logo",
 		replace: "Replace logo",
 		remove: "Remove",
@@ -16,8 +26,8 @@ export const company = {
 		stepCrop: "Adjust how your logo is framed.",
 		stepUploading: "Saving...",
 		saving: "Uploading your logo...",
-		dropzoneTitle: "Drag your logo here or click to pick one",
-		dropzoneHint: "PNG, JPG or WebP. Up to 5MB.",
+		dropzoneTitle: "Upload your logo",
+		dropzoneHint: "Drag it here or click to pick one",
 		uploaded: "Logo ready. Save the changes to apply it.",
 		uploadError: "Could not upload the logo.",
 	},
@@ -44,5 +54,7 @@ export const company = {
 			"Optional. Your shop's website or social media page, shown on estimates and in the client portal.",
 		websitePlaceholder: "https://yourshop.com",
 		save: "Save changes",
+		discard: "Discard",
+		saveHint: "Only administrators can change these details.",
 	},
 } as const;

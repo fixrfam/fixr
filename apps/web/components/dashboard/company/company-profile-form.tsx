@@ -8,22 +8,16 @@ import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import {
-	Building2,
-	Globe,
-	IdCard,
-	ImageUp,
-	Loader2,
-	type LucideIcon,
-	Mail,
-	MapPin,
-	PhoneIcon,
-	Trash2,
-} from "lucide-react";
-import { useState } from "react";
+import { ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
-import { ImageUploadDialog } from "@/components/image-upload-dialog";
+import {
+	dropTargetProps,
+	ImageDropzone,
+	ImageUploadDialog,
+	useImagePicker,
+} from "@/components/image-upload-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -43,21 +37,107 @@ import {
 	updateCompanyProfile,
 	uploadCompanyLogo,
 } from "@/lib/services/company";
+import { cn } from "@/lib/utils";
 
 type FormValues = z.input<typeof updateCompanyProfileSchema>;
 
 /** Layout shared by the form and its skeleton, so loading never shifts it. */
 const LAYOUT = {
-	root: "grid gap-10 lg:grid-cols-[16rem_1fr]",
-	logo: "space-y-3",
+	root: "flex flex-col gap-10",
+	section: "space-y-5",
+	identity: "grid gap-6 md:grid-cols-[15rem_1fr]",
 	fields: "space-y-6",
 	pair: "grid gap-6 md:grid-cols-2",
-	preview:
-		"flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40",
+	logoFrame: "aspect-video w-full rounded-xl",
+	footer: "flex items-center justify-between gap-4",
 } as const;
 
 /** Logos are cropped to the same 16:9 frame the preview shows. */
 const LOGO_CROP = { shape: "rectangle", aspectRatio: 16 / 9 } as const;
+
+/** Section header: title plus a one line explanation. */
+function SectionHeader({
+	title,
+	description,
+}: {
+	title: string;
+	description: string;
+}) {
+	return (
+		<div className="space-y-1">
+			<h2 className="font-semibold text-xl tracking-tight">{title}</h2>
+			<p className="text-muted-foreground text-sm">{description}</p>
+		</div>
+	);
+}
+
+/** Current logo with replace and remove actions on hover (always shown on touch screens). */
+function LogoPreview({
+	url,
+	onPick,
+	onRemove,
+}: {
+	url: string;
+	onPick: (file: File) => void;
+	onRemove: () => void;
+}) {
+	const { t } = useTranslation();
+	const picker = useImagePicker(onPick);
+
+	return (
+		<div
+			className={cn(
+				"group relative overflow-hidden border bg-muted/30",
+				LAYOUT.logoFrame,
+				picker.isDragging && "border-primary border-dashed"
+			)}
+			{...dropTargetProps(picker)}
+		>
+			<input {...picker.getInputProps()} className="sr-only" tabIndex={-1} />
+			<img
+				alt={t("company.logo.alt")}
+				className="size-full object-contain p-4"
+				height={135}
+				src={url}
+				width={240}
+			/>
+			<div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+				<Button
+					onClick={picker.openFileDialog}
+					size="sm"
+					type="button"
+					variant="outline"
+				>
+					<RefreshCw className="size-4" />
+					{t("company.logo.replace")}
+				</Button>
+				<Button onClick={onRemove} size="sm" type="button" variant="secondary">
+					<Trash2 className="size-4" />
+					{t("company.logo.remove")}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+/** A field label with the description under the control, like `FormItem`. */
+function StaticField({
+	label,
+	description,
+	children,
+}: {
+	label: string;
+	description: string;
+	children: ReactNode;
+}) {
+	return (
+		<div className="grid gap-2">
+			<Label>{label}</Label>
+			{children}
+			<p className="text-2xs text-muted-foreground">{description}</p>
+		</div>
+	);
+}
 
 export function CompanyProfileForm({ company }: { company: Company }) {
 	const { t } = useTranslation();
@@ -65,7 +145,7 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 	const queryClient = useQueryClient();
 	const phoneMask = useMaskito({ options: { mask: phone } });
 	const [saving, setSaving] = useState(false);
-	const [logoDialogOpen, setLogoDialogOpen] = useState(false);
+	const [pickedLogo, setPickedLogo] = useState<File | null>(null);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(updateCompanyProfileSchema),
@@ -81,10 +161,6 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 	});
 
 	const logoUrl = form.watch("logoUrl");
-
-	const uploadLabel = logoUrl
-		? t("company.logo.replace")
-		: t("company.logo.upload");
 
 	function showError(error: unknown) {
 		const code =
@@ -115,296 +191,296 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 	return (
 		<Form {...form}>
 			<form className={LAYOUT.root} onSubmit={form.handleSubmit(onSubmit)}>
-				<div className={LAYOUT.logo}>
-					<div>
-						<h3 className="font-medium text-sm">{t("company.logo.title")}</h3>
-						<p className="text-muted-foreground text-xs">
-							{t("company.logo.description")}
-						</p>
-					</div>
-					<div className={LAYOUT.preview}>
-						{logoUrl ? (
-							<img
-								alt={t("company.logo.alt")}
-								className="max-h-full max-w-full object-contain p-3"
-								height={144}
-								src={logoUrl}
-								width={256}
-							/>
-						) : (
-							<Building2 className="size-10 text-muted-foreground" />
-						)}
-					</div>
-					<div className="flex gap-2">
-						<Button
-							className="flex-1"
-							onClick={() => setLogoDialogOpen(true)}
-							size="sm"
-							type="button"
-							variant="outline"
+				<section className={LAYOUT.section}>
+					<SectionHeader
+						description={t("company.sections.identity.description")}
+						title={t("company.sections.identity.title")}
+					/>
+					<div className={LAYOUT.identity}>
+						<StaticField
+							description={t("company.logo.description")}
+							label={t("company.logo.title")}
 						>
-							<ImageUp className="size-4" />
-							{uploadLabel}
-						</Button>
-						{logoUrl ? (
-							<Button
-								onClick={() =>
-									form.setValue("logoUrl", "", { shouldDirty: true })
-								}
-								size="sm"
-								type="button"
-								variant="ghost"
-							>
-								<Trash2 className="size-4" />
-								{t("company.logo.remove")}
-							</Button>
-						) : null}
+							{logoUrl ? (
+								<LogoPreview
+									onPick={setPickedLogo}
+									onRemove={() =>
+										form.setValue("logoUrl", "", { shouldDirty: true })
+									}
+									url={logoUrl}
+								/>
+							) : (
+								<ImageDropzone
+									className={LAYOUT.logoFrame}
+									compact
+									hint={t("company.logo.pickHint")}
+									onPick={setPickedLogo}
+									title={t("company.logo.upload")}
+								/>
+							)}
+						</StaticField>
+						<div className={LAYOUT.fields}>
+							<FormField
+								control={form.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>{t("company.form.name")}</FormLabel>
+										<FormControl>
+											<Input {...field} value={field.value ?? ""} />
+										</FormControl>
+										<FormDescription>
+											{t("company.form.nameDescription")}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormItem>
+								<FormLabel>{t("company.form.cnpj")}</FormLabel>
+								<Input disabled value={formatCnpj(company.cnpj)} />
+								<FormDescription>
+									{t("company.form.cnpjDescription")}
+								</FormDescription>
+							</FormItem>
+						</div>
 					</div>
-					<ImageUploadDialog
-						copy={{
-							title: t("company.logo.dialogTitle"),
-							stepSelect: t("company.logo.stepSelect"),
-							stepCrop: t("company.logo.stepCrop"),
-							stepUploading: t("company.logo.stepUploading"),
-							saving: t("company.logo.saving"),
-							dropzoneTitle: t("company.logo.dropzoneTitle"),
-							dropzoneHint: t("company.logo.dropzoneHint"),
-							alt: t("company.logo.alt"),
-							success: t("company.logo.uploaded"),
-							error: t("company.logo.uploadError"),
-						}}
-						crop={LOGO_CROP}
-						icon={<ImageUp />}
-						onOpenChange={setLogoDialogOpen}
-						onUploaded={(url) =>
-							form.setValue("logoUrl", url, { shouldDirty: true })
-						}
-						open={logoDialogOpen}
-						upload={uploadCompanyLogo}
-					/>
-				</div>
+				</section>
 
-				<div className={LAYOUT.fields}>
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Building2 className="inline-block size-3.5" />{" "}
-									{t("company.form.name")}
-								</FormLabel>
-								<FormControl>
-									<Input {...field} value={field.value ?? ""} />
-								</FormControl>
-								<FormDescription>
-									{t("company.form.nameDescription")}
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
+				<section className={LAYOUT.section}>
+					<SectionHeader
+						description={t("company.sections.contact.description")}
+						title={t("company.sections.contact.title")}
 					/>
-					<FormItem>
-						<FormLabel>
-							<IdCard className="inline-block size-3.5" />{" "}
-							{t("company.form.cnpj")}
-						</FormLabel>
-						<Input disabled value={formatCnpj(company.cnpj)} />
-						<FormDescription>
-							{t("company.form.cnpjDescription")}
-						</FormDescription>
-					</FormItem>
-					<FormField
-						control={form.control}
-						name="address"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<MapPin className="inline-block size-3.5" />{" "}
-									{t("company.form.address")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("company.form.addressPlaceholder")}
-										{...field}
-										value={field.value ?? ""}
-									/>
-								</FormControl>
-								<FormDescription>
-									{t("company.form.addressDescription")}
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<div className={LAYOUT.pair}>
+					<div className={LAYOUT.fields}>
 						<FormField
 							control={form.control}
-							name="email"
+							name="address"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										<Mail className="inline-block size-3.5" />{" "}
-										{t("company.form.email")}
-									</FormLabel>
+									<FormLabel>{t("company.form.address")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder={t("company.form.emailPlaceholder")}
-											type="email"
+											placeholder={t("company.form.addressPlaceholder")}
 											{...field}
 											value={field.value ?? ""}
 										/>
 									</FormControl>
 									<FormDescription>
-										{t("company.form.emailDescription")}
+										{t("company.form.addressDescription")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
+						<div className={LAYOUT.pair}>
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>{t("company.form.email")}</FormLabel>
+										<FormControl>
+											<Input
+												placeholder={t("company.form.emailPlaceholder")}
+												type="email"
+												{...field}
+												value={field.value ?? ""}
+											/>
+										</FormControl>
+										<FormDescription>
+											{t("company.form.emailDescription")}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="phone"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>{t("company.form.phone")}</FormLabel>
+										<FormControl>
+											<Input
+												{...field}
+												onInput={(e) =>
+													form.setValue("phone", e.currentTarget.value, {
+														shouldDirty: true,
+													})
+												}
+												ref={phoneMask}
+												value={field.value ?? ""}
+											/>
+										</FormControl>
+										<FormDescription>
+											{t("company.form.phoneDescription")}
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 						<FormField
 							control={form.control}
-							name="phone"
+							name="website"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>
-										<PhoneIcon className="inline-block size-3.5" />{" "}
-										{t("company.form.phone")}
-									</FormLabel>
+									<FormLabel>{t("company.form.website")}</FormLabel>
 									<FormControl>
 										<Input
+											placeholder={t("company.form.websitePlaceholder")}
+											type="url"
 											{...field}
-											onInput={(e) =>
-												form.setValue("phone", e.currentTarget.value, {
-													shouldDirty: true,
-												})
-											}
-											ref={phoneMask}
 											value={field.value ?? ""}
 										/>
 									</FormControl>
 									<FormDescription>
-										{t("company.form.phoneDescription")}
+										{t("company.form.websiteDescription")}
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 					</div>
-					<FormField
-						control={form.control}
-						name="website"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Globe className="inline-block size-3.5" />{" "}
-									{t("company.form.website")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("company.form.websitePlaceholder")}
-										type="url"
-										{...field}
-										value={field.value ?? ""}
-									/>
-								</FormControl>
-								<FormDescription>
-									{t("company.form.websiteDescription")}
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<div className="flex justify-end">
-						<Button disabled={saving || !form.formState.isDirty} type="submit">
-							{saving ? <Loader2 className="size-4 animate-spin" /> : null}
-							{t("company.form.save")}
-						</Button>
+					<div className={LAYOUT.footer}>
+						<p className="text-muted-foreground text-sm">
+							{t("company.form.saveHint")}
+						</p>
+						<div className="flex items-center gap-2">
+							{form.formState.isDirty ? (
+								<Button
+									disabled={saving}
+									onClick={() => form.reset()}
+									type="button"
+									variant="ghost"
+								>
+									{t("company.form.discard")}
+								</Button>
+							) : null}
+							<Button
+								disabled={saving || !form.formState.isDirty}
+								type="submit"
+							>
+								{saving ? <Loader2 className="size-4 animate-spin" /> : null}
+								{t("company.form.save")}
+							</Button>
+						</div>
 					</div>
-				</div>
+				</section>
 			</form>
+			<ImageUploadDialog
+				copy={{
+					title: t("company.logo.dialogTitle"),
+					stepSelect: t("company.logo.stepSelect"),
+					stepCrop: t("company.logo.stepCrop"),
+					stepUploading: t("company.logo.stepUploading"),
+					saving: t("company.logo.saving"),
+					dropzoneTitle: t("company.logo.dropzoneTitle"),
+					dropzoneHint: t("company.logo.dropzoneHint"),
+					alt: t("company.logo.alt"),
+					success: t("company.logo.uploaded"),
+					error: t("company.logo.uploadError"),
+				}}
+				crop={LOGO_CROP}
+				file={pickedLogo}
+				icon={<ImageUp />}
+				onOpenChange={(open) => {
+					if (!open) {
+						setPickedLogo(null);
+					}
+				}}
+				onUploaded={(url) =>
+					form.setValue("logoUrl", url, { shouldDirty: true })
+				}
+				open={pickedLogo !== null}
+				upload={uploadCompanyLogo}
+			/>
 		</Form>
 	);
 }
 
 /** A field of the skeleton: the real label and description around a placeholder input. */
 function FieldSkeleton({
-	Icon,
 	label,
 	description,
 }: {
-	Icon: LucideIcon;
 	label: string;
 	description: string;
 }) {
 	return (
-		<div className="grid gap-2">
-			<Label>
-				<Icon className="inline-block size-3.5" /> {label}
-			</Label>
+		<StaticField description={description} label={label}>
 			<Skeleton className="h-9 w-full" />
-			<p className="text-2xs text-muted-foreground">{description}</p>
-		</div>
+		</StaticField>
 	);
 }
 
 /**
- * Loading state with the exact layout of `CompanyProfileForm`. Labels and
- * descriptions don't depend on the company, so they render for real and only
- * the values are placeholders.
+ * Loading state with the exact layout of `CompanyProfileForm`. Titles, labels
+ * and descriptions don't depend on the company, so they render for real and
+ * only the values are placeholders.
  */
 export function CompanyProfileFormSkeleton() {
 	const { t } = useTranslation();
 
 	return (
 		<div aria-busy="true" className={LAYOUT.root}>
-			<div className={LAYOUT.logo}>
-				<div>
-					<h3 className="font-medium text-sm">{t("company.logo.title")}</h3>
-					<p className="text-muted-foreground text-xs">
-						{t("company.logo.description")}
+			<section className={LAYOUT.section}>
+				<SectionHeader
+					description={t("company.sections.identity.description")}
+					title={t("company.sections.identity.title")}
+				/>
+				<div className={LAYOUT.identity}>
+					<StaticField
+						description={t("company.logo.description")}
+						label={t("company.logo.title")}
+					>
+						<Skeleton className={LAYOUT.logoFrame} />
+					</StaticField>
+					<div className={LAYOUT.fields}>
+						<FieldSkeleton
+							description={t("company.form.nameDescription")}
+							label={t("company.form.name")}
+						/>
+						<FieldSkeleton
+							description={t("company.form.cnpjDescription")}
+							label={t("company.form.cnpj")}
+						/>
+					</div>
+				</div>
+			</section>
+			<section className={LAYOUT.section}>
+				<SectionHeader
+					description={t("company.sections.contact.description")}
+					title={t("company.sections.contact.title")}
+				/>
+				<div className={LAYOUT.fields}>
+					<FieldSkeleton
+						description={t("company.form.addressDescription")}
+						label={t("company.form.address")}
+					/>
+					<div className={LAYOUT.pair}>
+						<FieldSkeleton
+							description={t("company.form.emailDescription")}
+							label={t("company.form.email")}
+						/>
+						<FieldSkeleton
+							description={t("company.form.phoneDescription")}
+							label={t("company.form.phone")}
+						/>
+					</div>
+					<FieldSkeleton
+						description={t("company.form.websiteDescription")}
+						label={t("company.form.website")}
+					/>
+				</div>
+				<div className={LAYOUT.footer}>
+					<p className="text-muted-foreground text-sm">
+						{t("company.form.saveHint")}
 					</p>
-				</div>
-				<Skeleton className="aspect-video w-full rounded-md" />
-				<Skeleton className="h-7.5 w-full" />
-			</div>
-			<div className={LAYOUT.fields}>
-				<FieldSkeleton
-					description={t("company.form.nameDescription")}
-					Icon={Building2}
-					label={t("company.form.name")}
-				/>
-				<FieldSkeleton
-					description={t("company.form.cnpjDescription")}
-					Icon={IdCard}
-					label={t("company.form.cnpj")}
-				/>
-				<FieldSkeleton
-					description={t("company.form.addressDescription")}
-					Icon={MapPin}
-					label={t("company.form.address")}
-				/>
-				<div className={LAYOUT.pair}>
-					<FieldSkeleton
-						description={t("company.form.emailDescription")}
-						Icon={Mail}
-						label={t("company.form.email")}
-					/>
-					<FieldSkeleton
-						description={t("company.form.phoneDescription")}
-						Icon={PhoneIcon}
-						label={t("company.form.phone")}
-					/>
-				</div>
-				<FieldSkeleton
-					description={t("company.form.websiteDescription")}
-					Icon={Globe}
-					label={t("company.form.website")}
-				/>
-				<div className="flex justify-end">
 					<Skeleton className="h-8.5 w-36" />
 				</div>
-			</div>
+			</section>
 		</div>
 	);
 }

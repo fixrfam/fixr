@@ -30,12 +30,16 @@ const company: Company = {
 	createdAt: new Date(),
 };
 
-function renderForm() {
-	render(
+function renderFormWithContainer() {
+	return render(
 		<QueryClientProvider client={new QueryClient()}>
 			<CompanyProfileForm company={company} />
 		</QueryClientProvider>
 	);
+}
+
+function renderForm() {
+	renderFormWithContainer();
 }
 
 beforeEach(() => {
@@ -126,18 +130,51 @@ describe("CompanyProfileForm", () => {
 		}
 	});
 
-	it("opens the crop dialog to upload a logo", async () => {
+	it("crops a picked logo before uploading it", async () => {
+		const user = userEvent.setup();
+		const { container } = renderFormWithContainer();
+		const input =
+			container.querySelector<HTMLInputElement>('input[type="file"]')!;
+
+		await user.upload(
+			input,
+			new File(["logo"], "logo.png", { type: "image/png" })
+		);
+
+		expect(
+			await screen.findByText("Ajuste o enquadramento do seu logo.")
+		).toBeInTheDocument();
+	});
+
+	it("refuses a logo over 5 MB", async () => {
+		const user = userEvent.setup();
+		const { container } = renderFormWithContainer();
+		const input =
+			container.querySelector<HTMLInputElement>('input[type="file"]')!;
+		const big = new File(["x"], "logo.png", { type: "image/png" });
+		Object.defineProperty(big, "size", { value: 6 * 1024 * 1024 });
+
+		await user.upload(input, big);
+
+		expect(toast.error).toHaveBeenCalledWith({
+			text: "A imagem deve ter no máximo 5 MB.",
+		});
+		expect(
+			screen.queryByText("Ajuste o enquadramento do seu logo.")
+		).not.toBeInTheDocument();
+	});
+
+	it("discards unsaved changes", async () => {
 		const user = userEvent.setup();
 		renderForm();
 
-		await user.click(screen.getByRole("button", { name: "Enviar logo" }));
+		await user.type(screen.getByLabelText("Site"), "https://alfa.dev");
+		await user.click(screen.getByRole("button", { name: "Descartar" }));
 
+		expect(screen.getByLabelText("Site")).toHaveValue("");
 		expect(
-			await screen.findByText("Arraste seu logo aqui ou clique para escolher")
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Escolha uma imagem do seu logo.")
-		).toBeInTheDocument();
+			screen.queryByRole("button", { name: "Descartar" })
+		).not.toBeInTheDocument();
 	});
 });
 

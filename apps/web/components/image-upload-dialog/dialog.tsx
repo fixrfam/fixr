@@ -2,7 +2,13 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
-import { type ReactNode, useCallback, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import type { CropperAreaData } from "@/components/ui/cropper";
 import {
 	Dialog,
@@ -48,6 +54,8 @@ interface ImageUploadDialogProps {
 	/** Stores the cropped WebP image and resolves with its public URL. */
 	upload: (image: Blob, fileName: string) => Promise<string>;
 	onUploaded: (url: string) => void;
+	/** Already picked image (e.g. dropped on the page): opens on the crop step. */
+	file?: File | null;
 }
 
 /**
@@ -62,6 +70,7 @@ export function ImageUploadDialog({
 	crop,
 	upload,
 	onUploaded,
+	file,
 }: ImageUploadDialogProps) {
 	const { t } = useTranslation();
 	const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -79,19 +88,25 @@ export function ImageUploadDialog({
 		croppedAreaRef.current = null;
 	}, []);
 
-	const handleFileSelect = useCallback((files: File[]) => {
-		const file = files[0];
-		if (!file) return;
-
-		setFileName(file.name);
+	const handleFileSelect = useCallback((picked: File) => {
+		setFileName(picked.name);
 
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			setImageUrl(e.target?.result as string);
 			setStep("crop");
 		};
-		reader.readAsDataURL(file);
+		reader.readAsDataURL(picked);
 	}, []);
+
+	useEffect(() => {
+		if (open && file) {
+			handleFileSelect(file);
+		}
+		if (!open) {
+			reset();
+		}
+	}, [open, file, handleFileSelect, reset]);
 
 	const handleCropAreaChange = useCallback(
 		(_croppedArea: CropperAreaData, croppedAreaPixels: CropperAreaData) => {
@@ -112,12 +127,11 @@ export function ImageUploadDialog({
 			onUploaded(url);
 			toast.success({ text: copy.success });
 			onOpenChange(false);
-			reset();
 		} catch {
 			toast.error({ text: copy.error });
 			setStep("crop");
 		}
-	}, [imageUrl, fileName, upload, onUploaded, onOpenChange, reset, copy]);
+	}, [imageUrl, fileName, upload, onUploaded, onOpenChange, copy]);
 
 	const descriptions: Record<Step, string> = {
 		select: copy.stepSelect,

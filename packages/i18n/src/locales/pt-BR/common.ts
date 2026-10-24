@@ -76,4 +76,11 @@ export const common: Translated<typeof source> = {
 		password: "Senha",
 		optional: "opcional",
 	},
+	upload: {
+		tooLarge: "A imagem deve ter no máximo 5 MB.",
+		invalidType: "Escolha uma imagem PNG, JPG ou WebP.",
+		tooMany: "Escolha uma única imagem.",
+		formats: "PNG, JPG ou WebP de até 5 MB",
+		browse: "Procurar arquivos",
+	},
 } as const;
