@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 		queryCompanyByCnpj: vi.fn(),
 		queryUserByEmail: vi.fn(),
 		createOrgWithAdmin: vi.fn(),
+		updateCompanyProfile: vi.fn(),
 	},
 	queueEmail: vi.fn(),
 }));
@@ -32,6 +33,10 @@ const company = {
 	name: "Fixr",
 	cnpj: "11222333000181",
 	address: null,
+	email: null,
+	phone: null,
+	website: null,
+	logoUrl: null,
 	subdomain: "fixr",
 	createdAt: new Date(),
 };
@@ -203,5 +208,60 @@ describe("CompaniesService.createCompany", () => {
 		expect(
 			mocks.CompaniesRepository.queryCompanyBySubdomain
 		).toHaveBeenCalledWith("nova-sp");
+	});
+});
+
+describe("CompaniesService.updateCompanyProfile", () => {
+	const update = (
+		data: Record<string, unknown>,
+		jwtValue: unknown = jwt(),
+		reply = createFakeReply()
+	) =>
+		CompaniesService.updateCompanyProfile({
+			subdomain: "fixr",
+			userJwt: jwtValue as never,
+			data,
+			response: asReply(reply),
+		});
+
+	it("rejects another company's subdomain", async () => {
+		await expect(
+			update({ name: "X" }, jwt({ subdomain: "other" }))
+		).rejects.toMatchObject({ code: "not_allowed" });
+		expect(
+			mocks.CompaniesRepository.updateCompanyProfile
+		).not.toHaveBeenCalled();
+	});
+
+	it("clears empty fields, keeps the name and stores the phone as digits", async () => {
+		mocks.CompaniesRepository.queryCompanyById.mockResolvedValue(company);
+
+		await update({ name: "", website: "", phone: "(11) 3456-7890" });
+
+		expect(mocks.CompaniesRepository.updateCompanyProfile).toHaveBeenCalledWith(
+			company.id,
+			{ website: null, phone: "1134567890" }
+		);
+	});
+
+	it("rejects a logo URL outside the company's logo key", async () => {
+		await expect(
+			update({ logoUrl: "https://evil.test/logo.png" })
+		).rejects.toMatchObject({ code: "company_logo_url_invalid" });
+	});
+
+	it("returns the updated company", async () => {
+		mocks.CompaniesRepository.queryCompanyById.mockResolvedValue({
+			...company,
+			email: "contato@fixr.dev",
+		});
+		const reply = createFakeReply();
+
+		await update({ email: "contato@fixr.dev" }, jwt(), reply);
+
+		expect(reply.state.body).toMatchObject({
+			code: "update_company_profile_success",
+			data: { email: "contato@fixr.dev" },
+		});
 	});
 });

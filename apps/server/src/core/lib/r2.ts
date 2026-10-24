@@ -89,3 +89,31 @@ export function buildAvatarObjectKey({
 
 	return `users/${userId}/avatar.${ext}`;
 }
+
+/**
+ * Build the R2 object key for a company logo
+ * Uses a deterministic key so each upload overwrites the previous logo
+ */
+export function buildCompanyLogoObjectKey({
+	companyId,
+	fileName,
+}: {
+	companyId: string;
+	fileName: string;
+}): string {
+	const safeName = sanitizeUploadFileName(fileName);
+	const ext = safeName.includes(".") ? safeName.split(".").pop() : "png";
+
+	return `companies/${companyId}/logo.${ext}`;
+}
+
+/**
+ * Check if a logo URL was issued by the company's own logo upload
+ */
+export function isAllowedCompanyLogoUrl(
+	publicBaseUrl: string,
+	url: string,
+	companyId: string
+): boolean {
+	return url.startsWith(`${publicBaseUrl}/companies/${companyId}/logo.`);
+}

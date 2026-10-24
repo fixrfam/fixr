@@ -147,3 +147,94 @@ describe("POST /companies (admin panel)", () => {
 		expect(response.statusCode).toBe(401);
 	});
 });
+
+describe("PATCH /companies/:subdomain", () => {
+	it("updates the profile and clears fields sent empty", async () => {
+		const { token, company } = await createEmployeeSession(app, {
+			role: "admin",
+		});
+		const url = `/companies/${company.subdomain}`;
+
+		const first = await authedInject(app, token, {
+			method: "PATCH",
+			url,
+			payload: {
+				name: "Assistência Nova",
+				email: "contato@nova.dev",
+				phone: "(11) 3456-7890",
+				website: "https://nova.dev",
+				logoUrl: `https://cdn.test.local/companies/${company.id}/logo.png?v=1`,
+			},
+		});
+		const second = await authedInject(app, token, {
+			method: "PATCH",
+			url,
+			payload: { website: "", name: "" },
+		});
+
+		expect(first.statusCode).toBe(200);
+		expect(first.json().data).toMatchObject({
+			name: "Assistência Nova",
+			phone: "1134567890",
+			website: "https://nova.dev",
+		});
+		expect(second.json().data).toMatchObject({
+			name: "Assistência Nova",
+			website: null,
+			email: "contato@nova.dev",
+		});
+	});
+
+	it("refuses a logo that was not uploaded for this company", async () => {
+		const { token, company } = await createEmployeeSession(app, {
+			role: "admin",
+		});
+		const other = await makeCompany();
+
+		const response = await authedInject(app, token, {
+			method: "PATCH",
+			url: `/companies/${company.subdomain}`,
+			payload: {
+				logoUrl: `https://cdn.test.local/companies/${other.id}/logo.png`,
+			},
+		});
+
+		expect(response.statusCode).toBe(400);
+		expect(response.json().code).toBe("company_logo_url_invalid");
+	});
+
+	it("refuses another company's subdomain", async () => {
+		const { token } = await createEmployeeSession(app, { role: "admin" });
+		const other = await makeCompany();
+
+		const response = await authedInject(app, token, {
+			method: "PATCH",
+			url: `/companies/${other.subdomain}`,
+			payload: { name: "Hijack" },
+		});
+		const [stored] = await db
+			.select()
+			.from(companies)
+			.where(eq(companies.id, other.id));
+
+		expect(response.statusCode).toBe(403);
+		expect(stored?.name).toBe(other.name);
+	});
+
+	it("serves the new name after a cached read", async () => {
+		const { token, company } = await createEmployeeSession(app, {
+			role: "admin",
+		});
+		const url = `/companies/${company.subdomain}`;
+
+		await authedInject(app, token, { method: "GET", url });
+		await authedInject(app, token, {
+			method: "PATCH",
+			url,
+			payload: { name: "Renomeada" },
+		});
+		const after = await authedInject(app, token, { method: "GET", url });
+
+		expect(after.json().data.name).toBe("Renomeada");
+	});
+});

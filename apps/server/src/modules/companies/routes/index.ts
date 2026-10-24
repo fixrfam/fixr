@@ -3,6 +3,7 @@ import type { userJWT } from "@fixr/schemas/auth";
 import {
 	createCompanySchema,
 	getCompanyBySubdomainSchema,
+	updateCompanyProfileSchema,
 } from "@fixr/schemas/companies";
 import type { z } from "zod";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
@@ -50,6 +51,31 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 			await CompaniesController.getCompanyBySubdomain({
 				subdomain: params.subdomain,
 				userJwt,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:subdomain",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.companies.update),
+			],
+			schema: companiesDocs.updateCompanyProfileSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = await getCompanyBySubdomainSchema.parseAsync(
+				request.params
+			);
+			const data = updateCompanyProfileSchema.parse(request.body);
+
+			await CompaniesController.updateCompanyProfile({
+				subdomain,
+				userJwt,
+				data,
 				response,
 			});
 		})

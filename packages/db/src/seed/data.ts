@@ -23,6 +23,9 @@ interface SeedCompany {
 	name: string;
 	subdomain: string;
 	address: string;
+	email: string;
+	phone: string;
+	website: string;
 	employees: SeedEmployee[];
 }
 
@@ -31,6 +34,9 @@ export const COMPANIES: SeedCompany[] = [
 		name: "Assistência Alfa",
 		subdomain: "alfa",
 		address: "Rua das Flores, 123, São Paulo - SP",
+		email: "contato@alfa.dev",
+		phone: "1134567890",
+		website: "https://alfa.dev",
 		employees: [
 			{ role: "admin", name: "Ana Admin", email: "admin@alfa.dev" },
 			{ role: "manager", name: "Marcos Gerente", email: "manager@alfa.dev" },
@@ -61,6 +67,9 @@ export const COMPANIES: SeedCompany[] = [
 		name: "Assistência Beta",
 		subdomain: "beta",
 		address: "Av. Brasil, 456, Rio de Janeiro - RJ",
+		email: "contato@beta.dev",
+		phone: "2133334444",
+		website: "https://beta.dev",
 		employees: [
 			{ role: "admin", name: "Bruno Admin", email: "admin@beta.dev" },
 			{

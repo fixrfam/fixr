@@ -43,6 +43,14 @@ export const sidebarSections: readonly SidebarSection[] = [
 						permission: permissions.companies.read,
 					},
 					{
+						id: "company",
+						labelKey: "dashboard.nav.company",
+						href: "/settings/company",
+						type: "route",
+						icon: "Building2",
+						permission: permissions.companies.update,
+					},
+					{
 						id: "security",
 						labelKey: "dashboard.nav.security",
 						href: "/settings/security",
