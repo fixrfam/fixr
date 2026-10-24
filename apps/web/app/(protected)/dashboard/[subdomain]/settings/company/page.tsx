@@ -8,14 +8,14 @@ import {
 	CompanyProfileFormSkeleton,
 } from "@/components/dashboard/company/company-profile-form";
 import { Heading } from "@/components/dashboard/heading";
-import { getCompany } from "@/lib/services/company";
+import { companyQueryKey, getCompany } from "@/lib/services/company";
 
 export default function CompanySettingsPage() {
 	const { t } = useTranslation();
 	const { subdomain } = useParams<{ subdomain: string }>();
 
 	const { data: company, isPending } = useQuery({
-		queryKey: ["company", subdomain],
+		queryKey: companyQueryKey(subdomain),
 		queryFn: () => getCompany(subdomain),
 	});
 

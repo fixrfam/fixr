@@ -9,7 +9,8 @@ export const company: Translated<typeof source> = {
 	sections: {
 		identity: {
 			title: "Identidade",
-			description: "Como a sua assistência aparece para os clientes.",
+			description:
+				"Como a sua assistência aparece para os clientes e para a equipe.",
 		},
 		contact: {
 			title: "Contato",
@@ -18,7 +19,8 @@ export const company: Translated<typeof source> = {
 	},
 	logo: {
 		title: "Logo",
-		description: "Aparece no cabeçalho dos seus orçamentos.",
+		description:
+			"Aparece na barra lateral do painel para toda a equipe e no cabeçalho dos seus orçamentos.",
 		pickHint: "Arraste uma imagem ou clique para escolher",
 		upload: "Enviar logo",
 		replace: "Trocar logo",
@@ -50,6 +52,7 @@ export const company: Translated<typeof source> = {
 			"Onde os clientes falam com a assistência. Aparece nos orçamentos e no portal do cliente.",
 		emailPlaceholder: "contato@suaassistencia.com.br",
 		phone: "Telefone",
+		phonePlaceholder: "(11) 3456-7890",
 		phoneDescription:
 			"Telefone de contato que aparece nos orçamentos e no portal do cliente.",
 		website: "Site",

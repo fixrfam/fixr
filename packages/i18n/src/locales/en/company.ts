@@ -6,7 +6,7 @@ export const company = {
 	sections: {
 		identity: {
 			title: "Identity",
-			description: "How your shop shows up to clients.",
+			description: "How your shop shows up to clients and your team.",
 		},
 		contact: {
 			title: "Contact",
@@ -15,7 +15,8 @@ export const company = {
 	},
 	logo: {
 		title: "Logo",
-		description: "Printed on the header of your estimates.",
+		description:
+			"Shown in the dashboard sidebar for the whole team and printed on the header of your estimates.",
 		pickHint: "Drag an image or click to pick one",
 		upload: "Upload logo",
 		replace: "Replace logo",
@@ -47,6 +48,7 @@ export const company = {
 			"Where clients can reach the shop. Shown on estimates and in the client portal.",
 		emailPlaceholder: "contact@yourshop.com",
 		phone: "Phone",
+		phonePlaceholder: "(11) 3456-7890",
 		phoneDescription:
 			"Contact number shown on estimates and in the client portal.",
 		website: "Website",

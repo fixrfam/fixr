@@ -34,6 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCnpj, formatPhone } from "@/lib/format";
 import {
 	type Company,
+	companyQueryKey,
 	updateCompanyProfile,
 	uploadCompanyLogo,
 } from "@/lib/services/company";
@@ -184,7 +185,9 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 
 		const feedback = message(response.data.code, "success");
 		toast.success({ text: feedback.title, description: feedback.description });
-		queryClient.invalidateQueries({ queryKey: ["company", company.subdomain] });
+		queryClient.invalidateQueries({
+			queryKey: companyQueryKey(company.subdomain),
+		});
 		form.reset(values);
 	}
 
@@ -303,6 +306,8 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 										<FormLabel>{t("company.form.phone")}</FormLabel>
 										<FormControl>
 											<Input
+												inputMode="tel"
+												placeholder={t("company.form.phonePlaceholder")}
 												{...field}
 												onInput={(e) =>
 													form.setValue("phone", e.currentTarget.value, {

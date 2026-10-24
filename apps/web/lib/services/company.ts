@@ -14,6 +14,10 @@ interface PresignedUpload {
 	expiresIn: number;
 }
 
+/** React Query key of a company's profile, shared by the settings page and the sidebar. */
+export const companyQueryKey = (subdomain: string) =>
+	["company", subdomain] as const;
+
 export async function getCompany(subdomain: string) {
 	const { data, error } = await tryCatch(
 		axios.get<ApiResponse<Company>>(`/companies/${subdomain}`)
