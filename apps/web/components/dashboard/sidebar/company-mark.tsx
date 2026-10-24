@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { useQuery } from "@tanstack/react-query";
 import { Avatar } from "@/components/account/profile-avatar";
-import { companyQueryKey, getCompany } from "@/lib/services/company";
+import { useCompany } from "@/lib/hooks/use-company";
 
 /**
  * The company's logo (16:9, as cropped in the settings) or, without one, the
@@ -18,12 +17,7 @@ export function CompanyMark({
 	subdomain: string;
 }) {
 	const { t } = useTranslation();
-	const { data: company } = useQuery({
-		queryKey: companyQueryKey(subdomain),
-		queryFn: () => getCompany(subdomain),
-		staleTime: 5 * 60 * 1000,
-		enabled: Boolean(subdomain),
-	});
+	const { data: company } = useCompany(subdomain);
 
 	if (company?.logoUrl) {
 		return (

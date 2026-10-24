@@ -11,6 +11,7 @@ import { Logo } from "@/components/svg/logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSidebarStore } from "@/lib/hooks/stores/use-sidebar-store";
+import { useCompany } from "@/lib/hooks/use-company";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { AccountPopover } from "../account-popover";
@@ -25,6 +26,8 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 
 	const ability = createAbility(session.company?.role ?? "guest");
+	// Name and logo can be edited in the settings; the session keeps the sign in values.
+	const { data: company } = useCompany(session.company?.subdomain);
 
 	function filterItem(item: SidebarItem): SidebarItem | null {
 		if (item.type === "route") {
@@ -78,7 +81,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 							/>
 							<div>
 								<p className="font-medium text-2xs tracking-tight">
-									{session.company?.name}
+									{company?.name ?? session.company?.name}
 								</p>
 								<p className="text-muted-foreground text-xs tracking-tight">
 									{t("dashboard.sidebar.myCompany")}
