@@ -1,8 +1,10 @@
 "use client";
 
+import { createAbility, permissions } from "@fixr/permissions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
+import { useSession } from "@/lib/hooks/use-session";
 import { inventoryApi } from "@/lib/services/inventory";
 import {
 	buildPartRows,
@@ -25,12 +27,20 @@ function useSubdomain() {
 	return useParams<{ subdomain: string }>().subdomain;
 }
 
+/** The caller's ability, from the session role (same approach as the sidebar). */
+export function useCatalogAbility() {
+	const { session } = useSession();
+	return createAbility(session?.company?.role ?? "guest");
+}
+
 /**
  * The company's parts, services and suppliers, loaded from the API. The
  * tables link the three lists together, so they are always loaded together.
  */
 export function useInventory(): PartsData & { isPending: boolean } {
 	const subdomain = useSubdomain();
+	// Technicians read the catalog without suppliers; parts embed the supplier name.
+	const canReadSuppliers = useCatalogAbility().can(permissions.suppliers.read);
 	const parts = useQuery({
 		queryKey: inventoryKeys.parts(subdomain),
 		queryFn: () => inventoryApi.listParts(subdomain),
@@ -42,6 +52,7 @@ export function useInventory(): PartsData & { isPending: boolean } {
 	const suppliers = useQuery({
 		queryKey: inventoryKeys.suppliers(subdomain),
 		queryFn: () => inventoryApi.listSuppliers(subdomain),
+		enabled: canReadSuppliers,
 	});
 
 	return useMemo(
@@ -49,7 +60,10 @@ export function useInventory(): PartsData & { isPending: boolean } {
 			parts: parts.data ?? [],
 			services: services.data ?? [],
 			suppliers: suppliers.data ?? [],
-			isPending: parts.isPending || services.isPending || suppliers.isPending,
+			isPending:
+				parts.isPending ||
+				services.isPending ||
+				(canReadSuppliers && suppliers.isPending),
 		}),
 		[
 			parts.data,
@@ -58,6 +72,7 @@ export function useInventory(): PartsData & { isPending: boolean } {
 			parts.isPending,
 			services.isPending,
 			suppliers.isPending,
+			canReadSuppliers,
 		]
 	);
 }
@@ -108,6 +123,13 @@ export function useUpdatePart() {
 				values,
 			}: { id: string; values: Parameters<typeof inventoryApi.updatePart>[2] }
 		) => inventoryApi.updatePart(subdomain, id, values)
+	);
+}
+
+export function useAdjustPartStock() {
+	return useInventoryMutation(
+		(subdomain, { id, delta }: { id: string; delta: number }) =>
+			inventoryApi.adjustPartStock(subdomain, id, delta)
 	);
 }
 
