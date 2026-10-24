@@ -36,4 +36,9 @@ export const companiesErrors = defineErrors({
 		message: "Subdomain is already taken.",
 		status: 409,
 	},
+	COMPANY_LOGO_URL_INVALID: {
+		code: "company_logo_url_invalid",
+		message: "The logo must be uploaded through the company logo upload.",
+		status: 400,
+	},
 });

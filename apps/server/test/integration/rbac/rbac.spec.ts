@@ -170,6 +170,17 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },
 	"POST /companies/:subdomain/models/:modelId/images": { uploadId: "x" },
+	"POST /companies/:subdomain/clients": {
+		name: "Cliente",
+		email: "cliente@fixr.test",
+		cpf: "52998224725",
+		phone: "11999999999",
+		address: "Rua A, 1",
+		state: "SP",
+		city: "São Paulo",
+	},
+	"PATCH /companies/:subdomain/clients/:clientId": {},
+	"PATCH /companies/:subdomain": {},
 	"POST /companies/:subdomain/suppliers": {
 		name: "Fornecedor",
 		cnpj: "11222333000181",
@@ -293,6 +304,11 @@ describe("POST /uploads/:purpose/presign (custom guard)", () => {
 				roleAbilities[role].includes("serviceOrders:update"),
 			] as const,
 			["models", role, roleAbilities[role].includes("devices:update")] as const,
+			[
+				"company-logo",
+				role,
+				roleAbilities[role].includes("companies:update"),
+			] as const,
 		])
 	)("%s as %s allowed=%s", async (purpose, role, allowed) => {
 		const { token } = await createEmployeeSession(app, { role });

@@ -130,6 +130,57 @@ async function seedInventory(tx: Transaction, companyId: string) {
 	}
 }
 
+/**
+ * Customers are company-scoped: a person served by two shops has one record
+ * in each, all linked to the same client login. Returns ids keyed by
+ * `company:clientIndex`.
+ */
+async function seedClients(
+	tx: Transaction,
+	{
+		companyIds,
+		passwordHash,
+		cpfs,
+	}: { companyIds: Map<string, string>; passwordHash: string; cpfs: string[] }
+) {
+	const userIds: string[] = [];
+	for (const client of CLIENTS) {
+		const userId = createId();
+		userIds.push(userId);
+		await tx.insert(users).values({
+			id: userId,
+			email: client.email,
+			passwordHash,
+			verified: true,
+		});
+	}
+
+	const clientIds = new Map<string, string>();
+	for (const order of SERVICE_ORDERS) {
+		const key = `${order.company}:${order.client}`;
+		if (clientIds.has(key)) {
+			continue;
+		}
+		const client = CLIENTS[order.client];
+		const clientId = createId();
+		clientIds.set(key, clientId);
+		await tx.insert(clients).values({
+			id: clientId,
+			companyId: companyIds.get(order.company) as string,
+			name: client.name,
+			email: client.email,
+			phone: client.phone,
+			cpf: cpfs[order.client],
+			address: client.address,
+			city: client.city,
+			state: client.state,
+			userId: userIds[order.client],
+		});
+	}
+
+	return clientIds;
+}
+
 async function seed() {
 	const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
 	let documentSeq = 1;
@@ -177,6 +228,9 @@ async function seed() {
 				name: company.name,
 				subdomain: company.subdomain,
 				address: company.address,
+				email: company.email,
+				phone: company.phone,
+				website: company.website,
 				cnpj: cnpj(companyIds.size),
 			});
 
@@ -203,32 +257,18 @@ async function seed() {
 			}
 		}
 
-		const clientIds: string[] = [];
-		for (const client of CLIENTS) {
-			const userId = createId();
-			const clientId = createId();
-			clientIds.push(clientId);
-			await tx.insert(users).values({
-				id: userId,
-				email: client.email,
-				passwordHash,
-				verified: true,
-			});
-			await tx.insert(clients).values({
-				id: clientId,
-				name: client.name,
-				phone: client.phone,
-				cpf: cpf(documentSeq++),
-				userId,
-			});
-		}
+		const clientIds = await seedClients(tx, {
+			companyIds,
+			passwordHash,
+			cpfs: CLIENTS.map(() => cpf(documentSeq++)),
+		});
 
 		for (const [index, order] of SERVICE_ORDERS.entries()) {
 			const category = modelCategory.get(`${order.maker}:${order.model}`);
 			const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
 			await tx.insert(serviceOrders).values({
 				companyId: companyIds.get(order.company) as string,
-				clientId: clientIds[order.client],
+				clientId: clientIds.get(`${order.company}:${order.client}`) as string,
 				employeeId: employeeIds.get(order.technician) as string,
 				deviceMakerId: makerIds.get(order.maker) as string,
 				deviceCategoryId: categoryIds.get(category as string) as string,

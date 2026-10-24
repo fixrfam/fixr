@@ -6,6 +6,7 @@ import type { uploadPurpose } from "@fixr/schemas/uploads";
 import type { z } from "zod";
 import {
 	buildAvatarObjectKey,
+	buildCompanyLogoObjectKey,
 	buildModelObjectKey,
 	buildObjectPublicUrl,
 	buildUploadObjectKey,
@@ -26,16 +27,22 @@ const KEY_BUILDERS: Record<
 		buildUploadObjectKey({ companyId: companyId!, fileName }),
 	models: ({ companyId, fileName }) =>
 		buildModelObjectKey({ companyId: companyId!, fileName }),
+	"company-logo": ({ companyId, fileName }) =>
+		buildCompanyLogoObjectKey({ companyId: companyId!, fileName }),
 };
 
 const PURPOSE_TO_DB: Record<
 	ApiPurpose,
-	"avatar" | "service_order" | "model_image"
+	"avatar" | "service_order" | "model_image" | "company_logo"
 > = {
 	avatar: "avatar",
 	"service-orders": "service_order",
 	models: "model_image",
+	"company-logo": "company_logo",
 };
+
+/** Purposes with a fixed object key: the URL gets a version so caches pick up the new file. */
+const OVERWRITTEN_PURPOSES = new Set<ApiPurpose>(["avatar", "company-logo"]);
 
 export class UploadsRepository {
 	static async createPresignedUpload({
@@ -57,7 +64,7 @@ export class UploadsRepository {
 	}) {
 		const buildKey = KEY_BUILDERS[purpose];
 		const key = buildKey({ userId, companyId, fileName });
-		const url = `${buildObjectPublicUrl(key)}${purpose === "avatar" ? `?v=${Date.now()}` : ""}`;
+		const url = `${buildObjectPublicUrl(key)}${OVERWRITTEN_PURPOSES.has(purpose) ? `?v=${Date.now()}` : ""}`;
 
 		const command = new PutObjectCommand({
 			Bucket: r2Bucket,

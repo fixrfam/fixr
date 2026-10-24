@@ -15,6 +15,7 @@ const SUCCESS_CODES: Record<z.infer<typeof uploadPurpose>, string> = {
 	avatar: "create_avatar_presign_success",
 	"service-orders": "create_upload_presign_success",
 	models: "create_model_image_presign_success",
+	"company-logo": "create_company_logo_presign_success",
 };
 
 export class UploadsService {
@@ -31,7 +32,10 @@ export class UploadsService {
 		companyId?: string;
 		response: FastifyReply;
 	}) {
-		if (purpose === "avatar" && data.size > MAX_AVATAR_UPLOAD_SIZE_BYTES) {
+		if (
+			(purpose === "avatar" || purpose === "company-logo") &&
+			data.size > MAX_AVATAR_UPLOAD_SIZE_BYTES
+		) {
 			throw new AppError("UPLOAD_SIZE_EXCEEDED");
 		}
 

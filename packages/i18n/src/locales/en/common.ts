@@ -73,4 +73,11 @@ export const common = {
 		password: "Password",
 		optional: "optional",
 	},
+	upload: {
+		tooLarge: "The image must be at most 5 MB.",
+		invalidType: "Pick a PNG, JPG or WebP image.",
+		tooMany: "Pick a single image.",
+		formats: "PNG, JPG or WebP up to 5 MB",
+		browse: "Browse files",
+	},
 } as const;

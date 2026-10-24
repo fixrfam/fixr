@@ -1,4 +1,4 @@
-export { makeClient } from "./client";
+export { makeClient, makeCustomer } from "./client";
 export { makeCompany, type TestCompany } from "./company";
 export {
 	makeCategory,

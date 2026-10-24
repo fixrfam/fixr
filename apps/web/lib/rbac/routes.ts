@@ -137,6 +137,10 @@ export const routeRules: RouteRule[] = [
 	},
 
 	{
+		path: "/dashboard/:subdomain/settings/company",
+		permission: permissions.companies.update,
+	},
+	{
 		path: "/dashboard/:subdomain/settings",
 		permission: permissions.settings.read,
 	},
