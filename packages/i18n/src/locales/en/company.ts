@@ -6,11 +6,11 @@ export const company = {
 	sections: {
 		identity: {
 			title: "Identity",
-			description: "How your shop shows up to clients and your team.",
+			description: "How your shop shows up to customers and your team.",
 		},
 		contact: {
 			title: "Contact",
-			description: "Where clients find and reach you.",
+			description: "Where customers find and reach you.",
 		},
 	},
 	logo: {
@@ -35,25 +35,25 @@ export const company = {
 	form: {
 		name: "Business name",
 		nameDescription:
-			"Shown at the top of your estimates, in the emails sent to clients and in the client portal.",
+			"Shown at the top of your estimates, in the emails sent to customers and in the customer portal.",
 		cnpj: "CNPJ",
 		cnpjDescription:
 			"Printed on your estimates. It was set when the company was registered and can't be changed.",
 		address: "Address",
 		addressDescription:
-			"Where clients drop off and pick up their devices. Shown on estimates and in the client portal.",
+			"Where customers drop off and pick up their devices. Shown on estimates and in the customer portal.",
 		addressPlaceholder: "Street, number, city - state",
 		email: "Contact e-mail",
 		emailDescription:
-			"Where clients can reach the shop. Shown on estimates and in the client portal.",
+			"Where customers can reach the shop. Shown on estimates and in the customer portal.",
 		emailPlaceholder: "contact@yourshop.com",
 		phone: "Phone",
 		phonePlaceholder: "(11) 3456-7890",
 		phoneDescription:
-			"Contact number shown on estimates and in the client portal.",
+			"Contact number shown on estimates and in the customer portal.",
 		website: "Website",
 		websiteDescription:
-			"Optional. Your shop's website or social media page, shown on estimates and in the client portal.",
+			"Optional. Your shop's website or social media page, shown on estimates and in the customer portal.",
 		websitePlaceholder: "https://yourshop.com",
 		save: "Save changes",
 		discard: "Discard",
