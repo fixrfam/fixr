@@ -170,6 +170,37 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },
 	"POST /companies/:subdomain/models/:modelId/images": { uploadId: "x" },
+	"POST /companies/:subdomain/suppliers": {
+		name: "Fornecedor",
+		cnpj: "11222333000181",
+		contact: "Contato",
+		phone: "11999999999",
+		email: "fornecedor@fixr.test",
+	},
+	"PATCH /companies/:subdomain/suppliers/:supplierId": {},
+	"POST /companies/:subdomain/parts": {
+		sku: "SKU-1",
+		name: "Bateria",
+		category: "Baterias",
+		costPrice: 10,
+		salePrice: 20,
+		stock: 1,
+		minStock: 0,
+		supplierId: createId(),
+	},
+	"PATCH /companies/:subdomain/parts/:partId": {},
+	"POST /companies/:subdomain/parts/:partId/stock-adjustments": { delta: 1 },
+	"POST /companies/:subdomain/services": {
+		name: "Troca de bateria",
+		description: "Substituição da bateria",
+		estimatedDurationMinutes: 30,
+		price: 80,
+		partIds: [],
+		deviceCategories: ["Telefonia"],
+		testInstructions: [],
+		testParameters: [],
+	},
+	"PATCH /companies/:subdomain/services/:serviceId": {},
 };
 
 const roles = Object.keys(roleAbilities) as EmployeeRole[];

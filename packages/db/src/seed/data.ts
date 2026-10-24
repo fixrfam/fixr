@@ -258,3 +258,104 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 		daysAgo: 5,
 	},
 ];
+
+/** Inventory seeded for every company: suppliers, the parts they sell and the services that use them. */
+export const SUPPLIERS = [
+	{
+		key: "techparts",
+		name: "TechParts Distribuidora",
+		contact: "Renata Albuquerque",
+		phone: "1134567890",
+		email: "vendas@techparts.com.br",
+	},
+	{
+		key: "cellfix",
+		name: "CellFix Importados",
+		contact: "Marcos Tavares",
+		phone: "11987654321",
+		email: "comercial@cellfix.com.br",
+	},
+];
+
+export const PARTS = [
+	{
+		key: "screen-ip13",
+		sku: "TEL-IP13-OLED",
+		name: "Tela OLED iPhone 13",
+		category: "Telas e displays",
+		costPrice: 480,
+		salePrice: 890,
+		stock: 6,
+		minStock: 3,
+		supplier: "cellfix",
+	},
+	{
+		key: "screen-s22",
+		sku: "TEL-S22-AMOLED",
+		name: "Tela AMOLED Galaxy S22",
+		category: "Telas e displays",
+		costPrice: 620,
+		salePrice: 1090,
+		stock: 2,
+		minStock: 3,
+		supplier: "cellfix",
+	},
+	{
+		key: "battery-ip11",
+		sku: "BAT-IP11",
+		name: "Bateria iPhone 11",
+		category: "Baterias",
+		costPrice: 90,
+		salePrice: 220,
+		stock: 12,
+		minStock: 4,
+		supplier: "techparts",
+	},
+	{
+		key: "usbc-connector",
+		sku: "CON-USBC-GEN",
+		name: "Conector de carga USB-C",
+		category: "Conectores",
+		costPrice: 15,
+		salePrice: 60,
+		stock: 30,
+		minStock: 10,
+		supplier: "techparts",
+	},
+];
+
+export const SERVICES = [
+	{
+		name: "Troca de tela",
+		description: "Substituição do display e teste de toque, brilho e sensores.",
+		estimatedDurationMinutes: 60,
+		price: 150,
+		parts: ["screen-ip13", "screen-s22"],
+		deviceCategories: ["Telefonia"],
+		testInstructions: [
+			"Testar o toque em toda a área da tela",
+			"Verificar brilho mínimo e máximo",
+		],
+		testParameters: ["Teste de toque: grade completa sem falhas"],
+	},
+	{
+		name: "Troca de bateria",
+		description: "Substituição da bateria e calibração do indicador de carga.",
+		estimatedDurationMinutes: 40,
+		price: 90,
+		parts: ["battery-ip11"],
+		deviceCategories: ["Telefonia"],
+		testInstructions: ["Carregar até 100% e conferir o ciclo"],
+		testParameters: ["Saúde da bateria acima de 95%"],
+	},
+	{
+		name: "Troca de conector de carga",
+		description: "Substituição do conector USB-C e limpeza da placa.",
+		estimatedDurationMinutes: 50,
+		price: 80,
+		parts: ["usbc-connector"],
+		deviceCategories: ["Telefonia", "Acessórios"],
+		testInstructions: ["Testar carga rápida e transferência de dados"],
+		testParameters: [],
+	},
+];

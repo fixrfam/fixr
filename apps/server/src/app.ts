@@ -39,7 +39,10 @@ import { employeesRoutes } from "./modules/employees/routes";
 import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
+import { partsRoutes } from "./modules/parts/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
+import { servicesRoutes } from "./modules/services/routes";
+import { suppliersRoutes } from "./modules/suppliers/routes";
 import { uploadsRoutes } from "./modules/uploads/routes";
 
 const envToLogger = {
@@ -90,6 +93,18 @@ const OPENAPI_TAGS = [
 	{
 		name: "Service Orders",
 		description: "Manage company service orders.",
+	},
+	{
+		name: "Parts",
+		description: "Company parts catalog: pricing, stock and minimum stock.",
+	},
+	{
+		name: "Services",
+		description: "Repair services the company offers and the parts they use.",
+	},
+	{
+		name: "Suppliers",
+		description: "Suppliers the company buys parts from.",
 	},
 	{
 		name: "Uploads",
@@ -263,6 +278,15 @@ export async function buildApp(
 	});
 	await app.register(modelsRoutes, {
 		prefix: "/companies/:subdomain/models",
+	});
+	await app.register(partsRoutes, {
+		prefix: "/companies/:subdomain/parts",
+	});
+	await app.register(servicesRoutes, {
+		prefix: "/companies/:subdomain/services",
+	});
+	await app.register(suppliersRoutes, {
+		prefix: "/companies/:subdomain/suppliers",
 	});
 	await app.register(apiKeysRoutes, {
 		prefix: "/companies/:subdomain/api-keys",

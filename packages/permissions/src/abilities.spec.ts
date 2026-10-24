@@ -24,12 +24,21 @@ const EXPECTED_ABILITIES: Record<EmployeeRole, readonly Permission[]> = {
 		"serviceOrders:update",
 		"serviceOrders:changeStatus",
 		"devices:read",
+		"parts:read",
+		"services:read",
 	],
 	warehouse: [
 		...basePermissions,
 		"inventory:read",
-		"inventory:update",
+		"inventory:adjust",
 		"devices:read",
+		"parts:read",
+		"parts:create",
+		"parts:update",
+		"services:read",
+		"suppliers:read",
+		"suppliers:create",
+		"suppliers:update",
 	],
 	financial: [
 		...basePermissions,
@@ -39,6 +48,9 @@ const EXPECTED_ABILITIES: Record<EmployeeRole, readonly Permission[]> = {
 		"estimates:delete",
 		"estimates:sendToCustomer",
 		"devices:read",
+		"parts:read",
+		"services:read",
+		"suppliers:read",
 	],
 	manager: [
 		...basePermissions,
@@ -50,6 +62,16 @@ const EXPECTED_ABILITIES: Record<EmployeeRole, readonly Permission[]> = {
 		"customers:create",
 		"customers:update",
 		"inventory:read",
+		"inventory:adjust",
+		"parts:read",
+		"parts:create",
+		"parts:update",
+		"services:read",
+		"services:create",
+		"services:update",
+		"suppliers:read",
+		"suppliers:create",
+		"suppliers:update",
 		"estimates:read",
 		"estimates:create",
 		"estimates:update",
@@ -84,9 +106,6 @@ const EXPECTED_ABILITIES: Record<EmployeeRole, readonly Permission[]> = {
 		"estimates:delete",
 		"estimates:sendToCustomer",
 		"inventory:read",
-		"inventory:create",
-		"inventory:update",
-		"inventory:delete",
 		"inventory:adjust",
 		"suppliers:read",
 		"suppliers:create",
@@ -200,10 +219,36 @@ describe("scope separation", () => {
 		}
 	});
 
-	it("financial cannot update inventory", () => {
-		expect(
-			createAbility("financial").cannot(permissions.inventory.update)
-		).toBe(true);
+	it("financial reads the catalog but cannot change it or the stock", () => {
+		const financial = createAbility("financial");
+
+		expect(financial.can(permissions.parts.read)).toBe(true);
+		expect(financial.can(permissions.services.read)).toBe(true);
+		expect(financial.cannot(permissions.parts.update)).toBe(true);
+		expect(financial.cannot(permissions.services.update)).toBe(true);
+		expect(financial.cannot(permissions.inventory.adjust)).toBe(true);
+	});
+
+	it("only admin deletes parts, services and suppliers", () => {
+		for (const role of roles) {
+			const ability = createAbility(role);
+			for (const permission of [
+				permissions.parts.delete,
+				permissions.services.delete,
+				permissions.suppliers.delete,
+			]) {
+				expect(ability.can(permission), `${role} ${permission}`).toBe(
+					role === "admin"
+				);
+			}
+		}
+	});
+
+	it("warehouse does not price services", () => {
+		const warehouse = createAbility("warehouse");
+
+		expect(warehouse.cannot(permissions.services.create)).toBe(true);
+		expect(warehouse.cannot(permissions.services.update)).toBe(true);
 	});
 
 	it("manager cannot update or delete employees", () => {

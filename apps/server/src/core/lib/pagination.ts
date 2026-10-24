@@ -110,3 +110,46 @@ export async function getPaginatedCount({
 	const [amount] = await query;
 	return amount.count;
 }
+
+/**
+ * Pagination block for a paginated response.
+ *
+ * Returns `null` when `page` is past the last page so the caller can throw its
+ * module's `*_PAGE_OUT_OF_BOUNDS` error. An empty result is always page 1 of 0.
+ */
+export function paginationMeta({
+	page,
+	perPage,
+	totalRecords,
+	recordsOnPage,
+}: {
+	page: number;
+	perPage: number;
+	totalRecords: number;
+	recordsOnPage: number;
+}) {
+	if (totalRecords === 0) {
+		return {
+			total_records: 0,
+			total_pages: 0,
+			current_page: 1,
+			next_page: null,
+			prev_page: null,
+		};
+	}
+
+	const totalPages = Math.ceil(totalRecords / perPage);
+
+	if (page > totalPages) {
+		return null;
+	}
+
+	return {
+		total_records: totalRecords,
+		total_pages: totalPages,
+		current_page: page,
+		next_page:
+			perPage * (page - 1) + recordsOnPage < totalRecords ? page + 1 : null,
+		prev_page: page > 1 ? page - 1 : null,
+	};
+}

@@ -46,7 +46,9 @@ vi.mock("@fixr/db/connection", () => ({
 	getTableColumns: () => ({ id: "table.id" }),
 }));
 
-const { getPaginatedCount, getPaginatedRecords } = await import("./pagination");
+const { getPaginatedCount, getPaginatedRecords, paginationMeta } = await import(
+	"./pagination"
+);
 
 const methods = () => builder.calls.map(([method]) => method);
 
@@ -170,5 +172,63 @@ describe("getPaginatedCount", () => {
 
 		expect(builder.calls).toContainEqual(["leftJoin", ["t", "o"]]);
 		expect(builder.calls).toContainEqual(["where", ["W"]]);
+	});
+});
+
+describe("paginationMeta", () => {
+	it("reports an empty result as page 1 of 0", () => {
+		expect(
+			paginationMeta({
+				page: 3,
+				perPage: 10,
+				totalRecords: 0,
+				recordsOnPage: 0,
+			})
+		).toEqual({
+			total_records: 0,
+			total_pages: 0,
+			current_page: 1,
+			next_page: null,
+			prev_page: null,
+		});
+	});
+
+	it("points to the neighbour pages in the middle of the list", () => {
+		expect(
+			paginationMeta({
+				page: 2,
+				perPage: 10,
+				totalRecords: 25,
+				recordsOnPage: 10,
+			})
+		).toEqual({
+			total_records: 25,
+			total_pages: 3,
+			current_page: 2,
+			next_page: 3,
+			prev_page: 1,
+		});
+	});
+
+	it("has no next page on the last page", () => {
+		expect(
+			paginationMeta({
+				page: 3,
+				perPage: 10,
+				totalRecords: 25,
+				recordsOnPage: 5,
+			})
+		).toMatchObject({ next_page: null, prev_page: 2 });
+	});
+
+	it("returns null past the last page", () => {
+		expect(
+			paginationMeta({
+				page: 4,
+				perPage: 10,
+				totalRecords: 25,
+				recordsOnPage: 0,
+			})
+		).toBeNull();
 	});
 });
