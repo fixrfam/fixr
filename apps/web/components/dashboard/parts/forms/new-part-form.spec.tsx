@@ -37,13 +37,15 @@ afterEach(() => {
 const label = (key: Parameters<typeof t>[0]) =>
 	screen.getByLabelText(t(key as never));
 
-async function pick(
+/** Picks the supplier; its option also shows the CNPJ, so match the start. */
+async function pickSupplier(
 	user: ReturnType<typeof userEvent.setup>,
-	comboboxIndex: number,
-	option: string
+	name: string
 ) {
-	await user.click(screen.getAllByRole("combobox")[comboboxIndex]!);
-	await user.click(await screen.findByRole("option", { name: option }));
+	await user.click(screen.getByRole("combobox"));
+	await user.click(
+		await screen.findByRole("option", { name: new RegExp(`^${name}`) })
+	);
 }
 
 async function fill(
@@ -52,8 +54,8 @@ async function fill(
 ) {
 	await enter(user, label("parts.form.skuLabel"), "BAT-TEST");
 	await enter(user, label("parts.form.nameLabel"), "Bateria de teste");
-	await pick(user, 0, "Baterias");
-	await pick(user, 1, mockSuppliers[0]!.name);
+	await user.click(screen.getByRole("button", { name: "Baterias" }));
+	await pickSupplier(user, mockSuppliers[0]!.name);
 	await enter(user, label("parts.form.costPriceLabel"), costPrice);
 	await enter(user, label("parts.form.salePriceLabel"), salePrice);
 	await enter(user, label("parts.form.stockLabel"), "3");

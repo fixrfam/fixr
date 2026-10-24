@@ -29,7 +29,9 @@ export interface SupplierTableRow extends SupplierRow {
 	services: ServiceRow[];
 }
 
-export function getStockStatus(part: PartRow): StockStatusId {
+export function getStockStatus(
+	part: Pick<PartRow, "stock" | "minStock">
+): StockStatusId {
 	if (part.stock <= 0) return "out_of_stock";
 	if (part.stock <= part.minStock) return "low_stock";
 	return "in_stock";
