@@ -127,6 +127,13 @@
       "when": 1792789644458,
       "tag": "0017_company_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1792881763103,
+      "tag": "0018_tidb_json_defaults",
+      "breakpoints": true
     }
   ]
 }

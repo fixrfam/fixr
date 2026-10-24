@@ -9,6 +9,7 @@
     "./admin": "./src/admin.ts",
     "./mail": "./src/mail.ts",
     "./db": "./src/db.ts",
+    "./catalog": "./src/catalog.ts",
     "./workers": "./src/workers.ts"
   },
   "dependencies": {

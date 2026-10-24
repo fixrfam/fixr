@@ -243,9 +243,65 @@ describe("models", () => {
 		const combined = await list(`query=galaxy&makerId=${apple.id}`);
 		expect(combined.records).toEqual([]);
 
+		// Each word may match a different field: the brand and the model name.
+		const brandAndName = await list("query=samsung%20s24");
+		expect(brandAndName.records.map((m: { name: string }) => m.name)).toEqual([
+			"Galaxy S24",
+		]);
+
+		// LIKE wildcards are matched literally.
+		const wildcard = await list("query=%25");
+		expect(wildcard.records).toEqual([]);
+
 		const paged = await list("perPage=2&sort=name");
 		expect(paged.records).toHaveLength(2);
 		expect(paged.pagination).toMatchObject({ total_pages: 2, next_page: 2 });
+	});
+
+	it("orders by release date and flags the company's own models", async () => {
+		const { token, company } = await managerSession();
+		const maker = await makeMaker({ name: "Motorola" });
+		await makeModel({
+			makerId: maker.id,
+			companyId: null,
+			name: "Moto G 2019",
+			released: "2019-03",
+		});
+		await makeModel({
+			makerId: maker.id,
+			companyId: null,
+			name: "Moto G 2024",
+			released: "2024-01-15",
+		});
+		await makeModel({
+			makerId: maker.id,
+			companyId: company.id,
+			name: "Moto Custom",
+		});
+
+		const list = async (sort: string) =>
+			(
+				await authedInject(app, token, {
+					method: "GET",
+					url: `/companies/${company.subdomain}/models?page=1&sort=${sort}`,
+				})
+			).json().data.records as { name: string; isCustom: boolean }[];
+
+		expect((await list("newer")).map((m) => m.name)).toEqual([
+			"Moto G 2024",
+			"Moto G 2019",
+			"Moto Custom",
+		]);
+		expect((await list("older")).map((m) => m.name)).toEqual([
+			"Moto G 2019",
+			"Moto G 2024",
+			"Moto Custom",
+		]);
+		expect((await list("name")).map((m) => [m.name, m.isCustom])).toEqual([
+			["Moto Custom", true],
+			["Moto G 2019", false],
+			["Moto G 2024", false],
+		]);
 	});
 
 	it("does not read another company's model by slug", async () => {

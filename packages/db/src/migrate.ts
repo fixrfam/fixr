@@ -8,9 +8,10 @@ import mysql from "mysql2/promise";
 const dbUrl = env.DB_URL.replace("postgres:5432", "localhost:5432");
 
 (async () => {
-	console.log("Connecting to database:", dbUrl);
-
 	const url = new URL(dbUrl);
+
+	// Host and database only: the URL carries the password.
+	console.log("Connecting to database:", `${url.host}${url.pathname}`);
 
 	const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
 

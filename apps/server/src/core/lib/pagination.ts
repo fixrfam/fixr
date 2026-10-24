@@ -30,7 +30,8 @@ export async function getPaginatedRecords<T = unknown>({
 	select?: T;
 	where?: SQL;
 	joins?: Join[];
-	order: SQL;
+	/** One column, or several to break ties in order. */
+	order: SQL | SQL[];
 }) {
 	const tableRef = table as MySqlTable;
 	const baseQuery = db
@@ -64,7 +65,10 @@ export async function getPaginatedRecords<T = unknown>({
 		}
 	}
 
-	const query = baseQuery.orderBy(order).limit(take).offset(skip);
+	const query = baseQuery
+		.orderBy(...[order].flat())
+		.limit(take)
+		.offset(skip);
 
 	return (await query) as unknown[];
 }
