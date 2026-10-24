@@ -7,10 +7,13 @@ import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { TextAnimate } from "@/components/magicui/text-animate";
 import { Button } from "@/components/ui/button";
+import { dashboardHref } from "@/lib/auth/utils";
+import { useSession } from "@/lib/hooks/use-session";
 import { AppPreview } from "./app-preview";
 
 export default function Hero() {
 	const { t } = useTranslation();
+	const { session } = useSession();
 
 	return (
 		<section className="relative z-10 flex w-full max-w-7xl flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10">
@@ -69,8 +72,12 @@ export default function Hero() {
 						</TextAnimate>
 						<div className="flex gap-4">
 							<BlurFade delay={0.3 * 2} inView>
-								<Link href="/auth/login">
-									<Button className="font-light">{t("home.hero.cta")}</Button>
+								<Link href={session ? dashboardHref(session) : "/auth/login"}>
+									<Button className="font-light">
+										{session
+											? t("common.auth.goToDashboard")
+											: t("home.hero.cta")}
+									</Button>
 								</Link>
 							</BlurFade>
 							<BlurFade delay={0.3 * 2 + 0.15} inView>

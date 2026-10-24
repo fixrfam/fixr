@@ -60,6 +60,8 @@ export const common = {
 		login: "Log in",
 		logout: "Log out",
 		register: "Sign up",
+		goToDashboard: "Go to dashboard",
+		signedInAs: "Signed in as {{name}}",
 	},
 	logo: {
 		fixr: "Fixr logo",

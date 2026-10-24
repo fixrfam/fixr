@@ -2,18 +2,23 @@
 
 import { env } from "@fixr/env/web";
 import { useTranslation } from "@fixr/i18n/react";
-import { ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { Avatar } from "@/components/account/profile-avatar";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
 import { TextLogo } from "@/components/svg/text-logo";
 import { Button } from "@/components/ui/button";
+import { dashboardHref } from "@/lib/auth/utils";
 import { useScrollPosition } from "@/lib/hooks/use-scroll-position";
+import { useSession } from "@/lib/hooks/use-session";
 import { cn } from "@/lib/utils";
 
 export default function Header() {
 	const { t } = useTranslation();
 	const { hasScrolled } = useScrollPosition();
+	const { session } = useSession();
+	const name = session?.displayName || session?.email;
 
 	return (
 		<header
@@ -52,9 +57,28 @@ export default function Header() {
 							<ExternalLink className="inline-block h-3.5 w-3.5" />
 						</Button>
 					</Link>
-					<Link href="/auth/login" prefetch>
-						<Button size="sm">{t("common.auth.login")}</Button>
-					</Link>
+					{session ? (
+						<Link
+							className="flex items-center gap-2"
+							href={dashboardHref(session)}
+							prefetch
+							title={t("common.auth.signedInAs", { name: name ?? "" })}
+						>
+							<Avatar
+								className="size-8!"
+								fallbackHash={session.id}
+								src={session.avatarUrl}
+							/>
+							<Button size="sm">
+								{t("common.auth.goToDashboard")}
+								<ArrowRight className="size-4" />
+							</Button>
+						</Link>
+					) : (
+						<Link href="/auth/login" prefetch>
+							<Button size="sm">{t("common.auth.login")}</Button>
+						</Link>
+					)}
 					<LanguageToggle size={"sm"} />
 					<ModeToggle size={"sm"} />
 				</div>

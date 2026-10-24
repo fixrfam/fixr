@@ -63,6 +63,8 @@ export const common: Translated<typeof source> = {
 		login: "Entrar",
 		logout: "Sair",
 		register: "Criar conta",
+		goToDashboard: "Ir para o painel",
+		signedInAs: "Conectado como {{name}}",
 	},
 	logo: {
 		fixr: "Logo do Fixr",
