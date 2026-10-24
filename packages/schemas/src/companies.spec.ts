@@ -3,6 +3,7 @@ import {
 	createCompanySchema,
 	getCompanyBySubdomainSchema,
 	getCompanyNestedDataSchema,
+	updateCompanyProfileSchema,
 } from "./companies";
 import { issuePaths } from "./test-utils";
 
@@ -78,5 +79,51 @@ describe.each([
 		["whitespace", " fixr"],
 	])("rejects %s", (_label, value) => {
 		expect(parse(value)).toBe(false);
+	});
+});
+
+describe("updateCompanyProfileSchema", () => {
+	it("accepts a full profile", () => {
+		expect(
+			updateCompanyProfileSchema.safeParse({
+				name: "Fixr Assistência",
+				email: "contato@fixr.test",
+				phone: "(11) 98765-4321",
+				website: "https://fixr.test",
+				logoUrl: "https://cdn.fixr.test/logo.png",
+			}).success
+		).toBe(true);
+	});
+
+	it("clears fields with an empty string or null", () => {
+		expect(
+			updateCompanyProfileSchema.safeParse({
+				name: "",
+				email: "",
+				phone: null,
+				website: "",
+				logoUrl: null,
+			}).success
+		).toBe(true);
+	});
+
+	it("accepts landlines and mobiles, with or without the mask", () => {
+		expect(
+			updateCompanyProfileSchema.safeParse({ phone: "1134567890" }).success
+		).toBe(true);
+		expect(
+			updateCompanyProfileSchema.safeParse({ phone: "(11) 3456-7890" }).success
+		).toBe(true);
+	});
+
+	it.each([
+		["phone", "11 9876"],
+		["email", "not-an-email"],
+		["website", "fixr"],
+		["logoUrl", "logo.png"],
+	])("rejects an invalid %s", (field, value) => {
+		expect(issuePaths(updateCompanyProfileSchema, { [field]: value })).toEqual([
+			field,
+		]);
 	});
 });
