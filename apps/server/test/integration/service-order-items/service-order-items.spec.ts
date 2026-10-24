@@ -65,24 +65,26 @@ describe("service order items", () => {
 		});
 
 		expect(response.statusCode).toBe(201);
+		// Both items can land in the same second, so their order is not asserted.
+		expect(response.json().data.items).toHaveLength(2);
 		expect(response.json().data).toMatchObject({
-			items: [
-				{
+			items: expect.arrayContaining([
+				expect.objectContaining({
 					type: "part",
 					partId: part.id,
 					name: "Tela OLED",
 					quantity: 2,
 					unitPrice: 890.5,
 					total: 1781,
-				},
-				{
+				}),
+				expect.objectContaining({
 					type: "service",
 					serviceId: service.id,
 					quantity: 1,
 					unitPrice: 120,
 					total: 120,
-				},
-			],
+				}),
+			]),
 			totals: { parts: 1781, services: 120, total: 1901 },
 		});
 	});

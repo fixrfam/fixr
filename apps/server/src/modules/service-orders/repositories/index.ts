@@ -259,7 +259,9 @@ export class ServiceOrdersRepository {
 			.select()
 			.from(serviceOrderItems)
 			.where(eq(serviceOrderItems.serviceOrderId, serviceOrderId))
-			.orderBy(serviceOrderItems.createdAt);
+			// `created_at` has second precision: the id keeps items added in the
+			// same second in a stable (if arbitrary) order.
+			.orderBy(serviceOrderItems.createdAt, serviceOrderItems.id);
 	}
 
 	static async queryItem(serviceOrderId: string, itemId: string) {
