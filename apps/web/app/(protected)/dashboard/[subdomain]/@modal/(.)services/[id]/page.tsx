@@ -6,11 +6,23 @@ import { useParams } from "next/navigation";
 import { useServiceRow } from "@/components/dashboard/parts/store";
 import { ServiceDetails } from "@/components/dashboard/services/service-details";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServiceDetailsModal() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
-	const service = useServiceRow(id);
+	const { service, isPending } = useServiceRow(id);
+
+	let body = (
+		<p className="text-muted-foreground text-sm">
+			{t("services.page.notFound")}
+		</p>
+	);
+	if (isPending) {
+		body = <Skeleton className="h-64 w-full" />;
+	} else if (service) {
+		body = <ServiceDetails service={service} />;
+	}
 
 	return (
 		<ResponsiveDialogDrawer
@@ -18,13 +30,7 @@ export default function ServiceDetailsModal() {
 			icon={<Wrench />}
 			title={service?.name ?? t("services.page.notFoundTitle")}
 		>
-			{service ? (
-				<ServiceDetails service={service} />
-			) : (
-				<p className="text-muted-foreground text-sm">
-					{t("services.page.notFound")}
-				</p>
-			)}
+			{body}
 		</ResponsiveDialogDrawer>
 	);
 }

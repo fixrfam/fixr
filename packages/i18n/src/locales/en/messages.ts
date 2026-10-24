@@ -15,6 +15,46 @@ export const messages = {
 		},
 	},
 	codes: {
+		part_stock_insufficient: {
+			title: "Not enough stock",
+			description: "The adjustment would leave the stock below zero.",
+		},
+		part_sku_conflict: {
+			title: "SKU already registered",
+			description: "Another part of your company already uses this SKU.",
+		},
+		part_supplier_not_found: {
+			title: "Supplier not found",
+			description: "Pick a supplier registered in your company.",
+		},
+		part_sale_price_below_cost: {
+			title: "Sale price below cost",
+			description: "The sale price must be at least the cost price.",
+		},
+		part_not_found: {
+			title: "Part not found",
+			description: "This part does not exist or was removed.",
+		},
+		service_part_not_found: {
+			title: "Part not found",
+			description: "One of the selected parts no longer exists.",
+		},
+		service_not_found: {
+			title: "Service not found",
+			description: "This service does not exist or was removed.",
+		},
+		supplier_cnpj_conflict: {
+			title: "CNPJ already registered",
+			description: "Your company already has a supplier with this CNPJ.",
+		},
+		supplier_in_use: {
+			title: "Supplier in use",
+			description: "Move or remove its parts before deleting the supplier.",
+		},
+		supplier_not_found: {
+			title: "Supplier not found",
+			description: "This supplier does not exist or was removed.",
+		},
 		update_company_profile_success: {
 			title: "Company updated",
 			description: "Your documents will use the new data.",

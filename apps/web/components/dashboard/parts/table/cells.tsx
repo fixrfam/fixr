@@ -3,6 +3,7 @@ import { ExternalLink, Pencil } from "lucide-react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatCnpj } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { STOCK_STATUS_KEYS, type StockStatusId } from "./data";
 
@@ -14,7 +15,7 @@ function formatDuration(minutes: number) {
 	return `${hours}h ${rest}min`;
 }
 
-const STOCK_STATUS_STYLES: Record<StockStatusId, string> = {
+export const STOCK_STATUS_STYLES: Record<StockStatusId, string> = {
 	in_stock:
 		"border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
 	low_stock:
@@ -110,7 +111,11 @@ export function SupplierCell({ name, cnpj }: { name?: string; cnpj?: string }) {
 	return (
 		<div className="flex flex-col">
 			<span className="font-medium">{name}</span>
-			{cnpj && <span className="text-muted-foreground text-xs">{cnpj}</span>}
+			{cnpj && (
+				<span className="text-muted-foreground text-xs">
+					{formatCnpj(cnpj)}
+				</span>
+			)}
 		</div>
 	);
 }

@@ -73,6 +73,11 @@ export const common = {
 		password: "Password",
 		optional: "optional",
 	},
+	clipboard: {
+		copy: "Copy {{label}}",
+		copied: "{{label}} copied",
+		failed: "We couldn't copy it. Select the text and copy it manually.",
+	},
 	upload: {
 		tooLarge: "The image must be at most 5 MB.",
 		invalidType: "Pick a PNG, JPG or WebP image.",

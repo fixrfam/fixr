@@ -11,6 +11,12 @@ export const dataTable: Translated<typeof source> = {
 		next: "Ir para próxima página",
 		last: "Ir para última página",
 	},
+	catalogSort: {
+		label: "Ordenar por",
+		name: "Nome (A a Z)",
+		newer: "Mais recentes",
+		older: "Mais antigos",
+	},
 	columnHeader: {
 		asc: "Crescente",
 		desc: "Decrescente",
@@ -43,6 +49,7 @@ export const dataTable: Translated<typeof source> = {
 		pickDate: "Selecione uma data",
 		pickDateShort: "Selecione a data...",
 		pickDateRange: "Selecione um intervalo de datas",
+		loading: "Carregando...",
 		noResults: "Nenhum resultado encontrado.",
 		noFields: "Nenhum campo encontrado.",
 		noOptions: "Nenhuma opção encontrada.",

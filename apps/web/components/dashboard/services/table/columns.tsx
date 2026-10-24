@@ -1,10 +1,8 @@
 import { useTranslation } from "@fixr/i18n/react";
-import {
-	type ColumnDef,
-	createColumnHelper,
-	type Row,
-} from "@tanstack/react-table";
+import { permissions } from "@fixr/permissions";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
 	DurationCell,
 	EditCell,
@@ -14,23 +12,15 @@ import {
 } from "@/components/dashboard/parts/table/cells";
 import type { ServiceTableRow } from "@/components/dashboard/parts/table/data";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { DEVICE_CATEGORY_OPTIONS } from "./filter-options";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const serviceColumnHelper = createColumnHelper<ServiceTableRow>();
-
-function deviceCategoriesFilter(
-	row: Row<ServiceTableRow>,
-	_columnId: string,
-	filterValue: string[]
-) {
-	if (!filterValue?.length) return true;
-	return row.original.deviceCategories.some((c) => filterValue.includes(c));
-}
 
 export function useServiceColumns(
 	subdomain: string
 ): ColumnDef<ServiceTableRow>[] {
 	const { t } = useTranslation();
+	const canEdit = useCatalogAbility().can(permissions.services.update);
 
 	return useMemo(
 		() => [
@@ -72,18 +62,7 @@ export function useServiceColumns(
 						}))}
 					/>
 				),
-				sortingFn: (a, b) =>
-					a.original.deviceCategories
-						.join(", ")
-						.localeCompare(b.original.deviceCategories.join(", ")),
-				enableColumnFilter: true,
-				filterFn: deviceCategoriesFilter,
-				getUniqueValues: (row) => row.deviceCategories,
-				meta: {
-					label: t("services.table.headers.categories"),
-					variant: "multiSelect",
-					options: DEVICE_CATEGORY_OPTIONS,
-				},
+				meta: { label: t("services.table.headers.categories") },
 			}),
 			serviceColumnHelper.accessor("estimatedDurationMinutes", {
 				header: ({ column }) => (
@@ -105,7 +84,7 @@ export function useServiceColumns(
 				cell: ({ getValue }) => <PriceCell value={getValue()} />,
 				meta: { label: t("services.table.headers.price") },
 			}),
-			serviceColumnHelper.accessor((row) => row.parts.length, {
+			serviceColumnHelper.accessor((row) => row.partIds.length, {
 				id: "parts",
 				header: ({ column }) => (
 					<DataTableColumnHeader
@@ -113,37 +92,47 @@ export function useServiceColumns(
 						label={t("services.table.headers.parts")}
 					/>
 				),
-				cell: ({ row }) => (
-					<LinkedItemsCell
-						emptyLabel={t("services.table.noParts")}
-						items={row.original.parts.map((part) => ({
-							id: part.id,
-							label: part.name,
-						}))}
-					/>
-				),
+				cell: ({ row }) =>
+					// Part names load per part, after the page itself.
+					row.original.partsPending ? (
+						<Skeleton className="h-5 w-24" />
+					) : (
+						<LinkedItemsCell
+							emptyLabel={t("services.table.noParts")}
+							items={row.original.parts.map((part) => ({
+								id: part.id,
+								label: part.name,
+							}))}
+						/>
+					),
 				meta: { label: t("services.table.headers.parts") },
 			}),
-			serviceColumnHelper.display({
-				id: "actions",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						className="px-0.5"
-						column={column}
-						label={t("services.table.headers.actions")}
-					/>
-				),
-				cell: ({ row }) => (
-					<EditCell
-						href={`/services/${row.original.id}/edit`}
-						label={t("services.table.editLabel", { name: row.original.name })}
-						subdomain={subdomain}
-					/>
-				),
-				enableSorting: false,
-				enableHiding: false,
-			}),
+			...(canEdit
+				? [
+						serviceColumnHelper.display({
+							id: "actions",
+							header: ({ column }) => (
+								<DataTableColumnHeader
+									className="px-0.5"
+									column={column}
+									label={t("services.table.headers.actions")}
+								/>
+							),
+							cell: ({ row }) => (
+								<EditCell
+									href={`/services/${row.original.id}/edit`}
+									label={t("services.table.editLabel", {
+										name: row.original.name,
+									})}
+									subdomain={subdomain}
+								/>
+							),
+							enableSorting: false,
+							enableHiding: false,
+						}),
+					]
+				: []),
 		],
-		[subdomain, t]
+		[subdomain, t, canEdit]
 	) as ColumnDef<ServiceTableRow>[];
 }

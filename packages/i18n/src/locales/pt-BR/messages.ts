@@ -14,6 +14,46 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		part_stock_insufficient: {
+			title: "Estoque insuficiente",
+			description: "O ajuste deixaria o estoque abaixo de zero.",
+		},
+		part_sku_conflict: {
+			title: "SKU já cadastrado",
+			description: "Outra peça da sua empresa já usa este SKU.",
+		},
+		part_supplier_not_found: {
+			title: "Fornecedor não encontrado",
+			description: "Escolha um fornecedor cadastrado na sua empresa.",
+		},
+		part_sale_price_below_cost: {
+			title: "Preço de venda abaixo do custo",
+			description: "O preço de venda deve ser pelo menos o preço de custo.",
+		},
+		part_not_found: {
+			title: "Peça não encontrada",
+			description: "Esta peça não existe ou foi removida.",
+		},
+		service_part_not_found: {
+			title: "Peça não encontrada",
+			description: "Uma das peças selecionadas não existe mais.",
+		},
+		service_not_found: {
+			title: "Serviço não encontrado",
+			description: "Este serviço não existe ou foi removido.",
+		},
+		supplier_cnpj_conflict: {
+			title: "CNPJ já cadastrado",
+			description: "Sua empresa já tem um fornecedor com este CNPJ.",
+		},
+		supplier_in_use: {
+			title: "Fornecedor em uso",
+			description: "Mova ou remova as peças dele antes de excluir.",
+		},
+		supplier_not_found: {
+			title: "Fornecedor não encontrado",
+			description: "Este fornecedor não existe ou foi removido.",
+		},
 		update_company_profile_success: {
 			title: "Empresa atualizada",
 			description: "Seus documentos vão usar os novos dados.",
