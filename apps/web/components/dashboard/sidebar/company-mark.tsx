@@ -5,8 +5,8 @@ import { Avatar } from "@/components/account/profile-avatar";
 import { useCompany } from "@/lib/hooks/use-company";
 
 /**
- * The company's logo (16:9, as cropped in the settings) or, without one, the
- * generated square avatar. Shares the settings page query, so a saved logo
+ * The company's logo (square, as cropped in the settings) or, without one,
+ * the generated square avatar. Shares the settings page query, so a saved logo
  * shows up here right away.
  */
 export function CompanyMark({
@@ -21,13 +21,13 @@ export function CompanyMark({
 
 	if (company?.logoUrl) {
 		return (
-			<div className="flex aspect-video h-9 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted/30">
+			<div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted/30">
 				<img
 					alt={t("company.logo.alt")}
-					className="size-full object-contain p-0.5"
+					className="size-full object-contain"
 					height={36}
 					src={company.logoUrl}
-					width={64}
+					width={36}
 				/>
 			</div>
 		);

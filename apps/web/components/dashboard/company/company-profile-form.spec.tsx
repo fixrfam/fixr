@@ -146,6 +146,47 @@ describe("CompanyProfileForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("saves a removed logo right away, without the save button", async () => {
+		const user = userEvent.setup();
+		let body: unknown;
+		server.use(
+			http.patch(apiUrl("/companies/fixr"), async ({ request }) => {
+				body = await request.json();
+				return HttpResponse.json(
+					envelope(
+						{ ...company, logoUrl: null },
+						{
+							code: "update_company_profile_success",
+						}
+					)
+				);
+			})
+		);
+		render(
+			<QueryClientProvider client={new QueryClient()}>
+				<CompanyProfileForm
+					company={{
+						...company,
+						logoUrl: "https://cdn.test/companies/x/logo.webp?v=1",
+					}}
+				/>
+			</QueryClientProvider>
+		);
+
+		await user.click(screen.getByRole("button", { name: "Remover" }));
+
+		await waitFor(() =>
+			expect(toast.success).toHaveBeenCalledWith({ text: "Logo removido." })
+		);
+		expect(body).toEqual({ logoUrl: "" });
+		expect(
+			screen.queryByRole("button", { name: "Remover" })
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Salvar alterações" })
+		).toBeDisabled();
+	});
+
 	it("refuses a logo over 5 MB", async () => {
 		const user = userEvent.setup();
 		const { container } = renderFormWithContainer();

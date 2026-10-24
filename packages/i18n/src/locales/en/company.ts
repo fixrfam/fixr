@@ -29,7 +29,8 @@ export const company = {
 		saving: "Uploading your logo...",
 		dropzoneTitle: "Upload your logo",
 		dropzoneHint: "Drag it here or click to pick one",
-		uploaded: "Logo ready. Save the changes to apply it.",
+		uploaded: "Logo updated.",
+		removed: "Logo removed.",
 		uploadError: "Could not upload the logo.",
 	},
 	form: {

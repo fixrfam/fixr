@@ -33,7 +33,8 @@ export const company: Translated<typeof source> = {
 		saving: "Enviando seu logo...",
 		dropzoneTitle: "Envie seu logo",
 		dropzoneHint: "Arraste aqui ou clique para escolher",
-		uploaded: "Logo pronto. Salve as alterações para aplicar.",
+		uploaded: "Logo atualizado.",
+		removed: "Logo removido.",
 		uploadError: "Não foi possível enviar o logo.",
 	},
 	form: {

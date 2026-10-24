@@ -9,7 +9,7 @@ import { toast } from "@pheralb/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import {
@@ -49,12 +49,12 @@ const LAYOUT = {
 	identity: "grid gap-6 md:grid-cols-[15rem_1fr]",
 	fields: "space-y-6",
 	pair: "grid gap-6 md:grid-cols-2",
-	logoFrame: "aspect-video w-full rounded-xl",
+	logoFrame: "aspect-square w-full max-w-60 rounded-xl",
 	footer: "flex items-center justify-between gap-4",
 } as const;
 
-/** Logos are cropped to the same 16:9 frame the preview shows. */
-const LOGO_CROP = { shape: "rectangle", aspectRatio: 16 / 9 } as const;
+/** Logos are cropped square, like the preview and the sidebar mark. */
+const LOGO_CROP = { shape: "rectangle", aspectRatio: 1 } as const;
 
 /** Section header: title plus a one line explanation. */
 function SectionHeader({
@@ -98,7 +98,7 @@ function LogoPreview({
 			<img
 				alt={t("company.logo.alt")}
 				className="size-full object-contain p-4"
-				height={135}
+				height={240}
 				src={url}
 				width={240}
 			/>
@@ -161,6 +161,11 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 		mode: "onBlur",
 	});
 
+	// The logo has no input of its own; registering it lets `resetField` update
+	// both its value and its saved default.
+	useEffect(() => {
+		form.register("logoUrl");
+	}, [form]);
 	const logoUrl = form.watch("logoUrl");
 
 	function showError(error: unknown) {
@@ -191,6 +196,38 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 		form.reset(values);
 	}
 
+	/**
+	 * The logo is saved as soon as it changes, apart from the other fields, so
+	 * the sidebar and the estimates pick it up without a second step.
+	 */
+	async function saveLogo(url: string) {
+		const { error } = await updateCompanyProfile(company.subdomain, {
+			logoUrl: url,
+		});
+		if (error) {
+			throw error;
+		}
+		form.resetField("logoUrl", { defaultValue: url });
+		await queryClient.invalidateQueries({
+			queryKey: companyQueryKey(company.subdomain),
+		});
+	}
+
+	async function uploadAndSaveLogo(image: Blob, fileName: string) {
+		const url = await uploadCompanyLogo(image, fileName);
+		await saveLogo(url);
+		return url;
+	}
+
+	async function removeLogo() {
+		try {
+			await saveLogo("");
+			toast.success({ text: t("company.logo.removed") });
+		} catch (error) {
+			showError(error);
+		}
+	}
+
 	return (
 		<Form {...form}>
 			<form className={LAYOUT.root} onSubmit={form.handleSubmit(onSubmit)}>
@@ -207,9 +244,7 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 							{logoUrl ? (
 								<LogoPreview
 									onPick={setPickedLogo}
-									onRemove={() =>
-										form.setValue("logoUrl", "", { shouldDirty: true })
-									}
+									onRemove={removeLogo}
 									url={logoUrl}
 								/>
 							) : (
@@ -395,11 +430,10 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 						setPickedLogo(null);
 					}
 				}}
-				onUploaded={(url) =>
-					form.setValue("logoUrl", url, { shouldDirty: true })
-				}
+				// The upload already saved it (see `uploadAndSaveLogo`).
+				onUploaded={() => undefined}
 				open={pickedLogo !== null}
-				upload={uploadCompanyLogo}
+				upload={uploadAndSaveLogo}
 			/>
 		</Form>
 	);

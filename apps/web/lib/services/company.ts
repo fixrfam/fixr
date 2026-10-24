@@ -43,6 +43,9 @@ const EXTENSION_PATTERN = /\.[^.]+$/;
  * Upload a cropped logo (WebP) straight to R2 through a presigned URL and
  * return its public URL. The profile only changes once that URL is saved with
  * `updateCompanyProfile`.
+ *
+ * The object key is the same for every upload of a company, so the URL gets a
+ * version: without it, browsers keep showing the previous logo.
  */
 export async function uploadCompanyLogo(image: Blob, fileName: string) {
 	const presign = await axios.post<ApiResponse<PresignedUpload>>(
@@ -64,5 +67,5 @@ export async function uploadCompanyLogo(image: Blob, fileName: string) {
 		throw new Error(`Logo upload failed with status ${upload.status}`);
 	}
 
-	return url;
+	return `${url}?v=${Date.now()}`;
 }
