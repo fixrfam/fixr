@@ -1,6 +1,7 @@
 import { parts } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
+	adjustPartStockSchema,
 	createPartSchema,
 	getPartsQuerySchema,
 	patchPartSchema,
@@ -233,6 +234,40 @@ export class PartsService {
 				error: null,
 				code: "patch_part_success",
 				message: "Part updated successfully.",
+				data: part,
+			})
+		);
+	}
+
+	static async adjustStock({
+		userJwt,
+		subdomain,
+		partId,
+		data,
+		response,
+	}: {
+		userJwt: UserJwt;
+		subdomain: string;
+		partId: string;
+		data: z.infer<typeof adjustPartStockSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = PartsService.resolveCompanyId(userJwt, subdomain);
+		await PartsService.queryOwnPart(partId, companyId);
+
+		const adjusted = await PartsRepository.adjustStock(partId, data.delta);
+		if (!adjusted) {
+			throw new AppError("PART_STOCK_INSUFFICIENT");
+		}
+
+		const part = await PartsRepository.queryPartById(partId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "adjust_part_stock_success",
+				message: "Part stock adjusted successfully.",
 				data: part,
 			})
 		);

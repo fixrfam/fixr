@@ -77,7 +77,7 @@ describe("<Can>", () => {
 		});
 
 		expect(result.current.isLoading).toBe(false);
-		expect(result.current.can(permissions.inventory.update)).toBe(true);
+		expect(result.current.can(permissions.inventory.adjust)).toBe(true);
 		expect(result.current.cannot(permissions.serviceOrders.read)).toBe(true);
 	});
 });
