@@ -52,9 +52,11 @@ export const createPartSchema = partBaseSchema.refine(
 /**
  * @description Body schema for partially updating a part. The price rule only
  * runs when both prices are sent; the service checks it against the stored
- * values otherwise.
+ * values otherwise. Stock is left out: it only changes through a stock
+ * adjustment, which has its own permission.
  */
 export const patchPartSchema = partBaseSchema
+	.omit({ stock: true })
 	.partial()
 	.refine(
 		(data) =>
@@ -63,6 +65,17 @@ export const patchPartSchema = partBaseSchema
 			data.salePrice >= data.costPrice,
 		salePriceBelowCost
 	);
+
+/** @description Body schema for adjusting a part's stock by a signed amount */
+export const adjustPartStockSchema = z.object({
+	delta: z
+		.number({ error: i18nMessage("validation.part.stockDeltaRequired") })
+		.int(i18nMessage("validation.part.stockDeltaInteger"))
+		.refine(
+			(delta) => delta !== 0,
+			i18nMessage("validation.part.stockDeltaZero")
+		),
+});
 
 /** @description Query schema for listing parts: pagination, search (name/SKU) and filters */
 export const getPartsQuerySchema = getPaginatedDataSchema.extend({

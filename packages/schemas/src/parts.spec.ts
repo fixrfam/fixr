@@ -1,6 +1,10 @@
 import { parseI18nMessage } from "@fixr/i18n";
 import { describe, expect, it } from "vitest";
-import { createPartSchema, patchPartSchema } from "./parts";
+import {
+	adjustPartStockSchema,
+	createPartSchema,
+	patchPartSchema,
+} from "./parts";
 import { issuePaths } from "./test-utils";
 
 const validPart = {
@@ -115,7 +119,13 @@ describe("createPartSchema", () => {
 
 describe("patchPartSchema", () => {
 	it("accepts a partial update", () => {
-		expect(patchPartSchema.safeParse({ stock: 3 }).success).toBe(true);
+		expect(patchPartSchema.safeParse({ minStock: 3 }).success).toBe(true);
+	});
+
+	it("drops the stock, which only changes through an adjustment", () => {
+		expect(patchPartSchema.parse({ name: "Screen", stock: 3 })).toEqual({
+			name: "Screen",
+		});
 	});
 
 	it("only checks the price rule when both prices are sent", () => {
@@ -130,5 +140,24 @@ describe("patchPartSchema", () => {
 		expect(
 			issuePaths(patchPartSchema, { costPrice: 100, salePrice: 50 })
 		).toEqual(["salePrice"]);
+	});
+});
+
+describe("adjustPartStockSchema", () => {
+	it.each([5, -2])("accepts a whole delta of %i", (delta) => {
+		expect(adjustPartStockSchema.safeParse({ delta }).success).toBe(true);
+	});
+
+	it.each([0, 1.5, "3", undefined])("rejects a delta of %s", (delta) => {
+		expect(issuePaths(adjustPartStockSchema, { delta })).toEqual(["delta"]);
+	});
+
+	it("only reports translation keys the catalog knows", () => {
+		for (const delta of [0, 1.5, undefined]) {
+			const result = adjustPartStockSchema.safeParse({ delta });
+			for (const issue of result.error?.issues ?? []) {
+				expect(parseI18nMessage(issue.message)).not.toBe(null);
+			}
+		}
 	});
 });

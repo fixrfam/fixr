@@ -2,6 +2,7 @@ import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
+	adjustPartStockSchema,
 	createPartSchema,
 	getPartsQuerySchema,
 	partIdParamsSchema,
@@ -102,6 +103,31 @@ export function partsRoutes(fastify: FastifyTypedInstance) {
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
 			await PartsController.patchPart({
+				userJwt,
+				subdomain,
+				partId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:partId/stock-adjustments",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.inventory.adjust),
+			],
+			schema: partsDocs.adjustPartStockSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { partId } = partIdParamsSchema.parse(request.params);
+			const data = adjustPartStockSchema.parse(request.body);
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+
+			await PartsController.adjustStock({
 				userJwt,
 				subdomain,
 				partId,
