@@ -1,22 +1,21 @@
 "use client";
 
-import { useTranslation } from "@fixr/i18n/react";
 import { Camera } from "lucide-react";
 import { FileUpload, FileUploadDropzone } from "@/components/ui/file-upload";
 
 /**
- * Step that lets the user pick an image file for their avatar.
+ * Step that lets the user pick an image file.
  *
  * Accepts images up to 5 MB (PNG, JPG, WebP) and fires
  * `onFileSelected` with the chosen file.
  */
 interface SelectStepProps {
 	onFileSelected: (files: File[]) => void;
+	title: string;
+	hint: string;
 }
 
-export function SelectStep({ onFileSelected }: SelectStepProps) {
-	const { t } = useTranslation();
-
+export function SelectStep({ onFileSelected, title, hint }: SelectStepProps) {
 	return (
 		<FileUpload
 			accept="image/*"
@@ -27,12 +26,8 @@ export function SelectStep({ onFileSelected }: SelectStepProps) {
 			<FileUploadDropzone className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-12 text-center transition-colors hover:border-primary/50 [&_svg]:size-10 [&_svg]:text-muted-foreground">
 				<Camera />
 				<div className="flex flex-col gap-1">
-					<p className="font-medium text-sm">
-						{t("account.avatar.dropzoneTitle")}
-					</p>
-					<p className="text-muted-foreground text-xs">
-						{t("account.avatar.dropzoneHint")}
-					</p>
+					<p className="font-medium text-sm">{title}</p>
+					<p className="text-muted-foreground text-xs">{hint}</p>
 				</div>
 			</FileUploadDropzone>
 		</FileUpload>

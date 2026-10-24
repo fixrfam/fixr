@@ -9,7 +9,13 @@ import { toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
 import { render } from "@/test/render";
-import { CompanyProfileForm } from "./company-profile-form";
+import {
+	CompanyProfileForm,
+	CompanyProfileFormSkeleton,
+} from "./company-profile-form";
+
+// jsdom has no matchMedia: the logo dialog renders its desktop version.
+vi.mock("@/lib/hooks/use-media-query", () => ({ useMediaQuery: () => true }));
 
 const company: Company = {
 	id: "ckx1y2z3a4b5c6d7e8f9g0h2",
@@ -103,5 +109,56 @@ describe("CompanyProfileForm", () => {
 				expect.objectContaining({ text: "Logo inválido" })
 			)
 		);
+	});
+
+	it("explains every field", () => {
+		renderForm();
+
+		for (const description of [
+			"Aparece no topo dos orçamentos, nos e-mails enviados aos clientes e no portal do cliente.",
+			"Sai nos seus orçamentos. Foi definido no cadastro da empresa e não pode ser alterado.",
+			"Onde os clientes deixam e retiram os aparelhos. Aparece nos orçamentos e no portal do cliente.",
+			"Onde os clientes falam com a assistência. Aparece nos orçamentos e no portal do cliente.",
+			"Telefone de contato que aparece nos orçamentos e no portal do cliente.",
+			"Opcional. Site ou rede social da assistência, exibido nos orçamentos e no portal do cliente.",
+		]) {
+			expect(screen.getByText(description)).toBeInTheDocument();
+		}
+	});
+
+	it("opens the crop dialog to upload a logo", async () => {
+		const user = userEvent.setup();
+		renderForm();
+
+		await user.click(screen.getByRole("button", { name: "Enviar logo" }));
+
+		expect(
+			await screen.findByText("Arraste seu logo aqui ou clique para escolher")
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Escolha uma imagem do seu logo.")
+		).toBeInTheDocument();
+	});
+});
+
+describe("CompanyProfileFormSkeleton", () => {
+	it("keeps the form's labels and descriptions while loading", () => {
+		render(<CompanyProfileFormSkeleton />);
+
+		for (const label of [
+			"Razão social",
+			"CNPJ",
+			"Endereço",
+			"E-mail de contato",
+			"Telefone",
+			"Site",
+		]) {
+			expect(screen.getByText(label)).toBeInTheDocument();
+		}
+		expect(
+			screen.getByText(
+				"Telefone de contato que aparece nos orçamentos e no portal do cliente."
+			)
+		).toBeInTheDocument();
 	});
 });

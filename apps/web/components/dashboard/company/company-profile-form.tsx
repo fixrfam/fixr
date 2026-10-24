@@ -3,7 +3,6 @@
 import { phone } from "@fixr/constants/masks";
 import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { updateCompanyProfileSchema } from "@fixr/schemas/companies";
-import { MAX_AVATAR_UPLOAD_SIZE_BYTES } from "@fixr/schemas/uploads";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
@@ -15,14 +14,16 @@ import {
 	IdCard,
 	ImageUp,
 	Loader2,
+	type LucideIcon,
 	Mail,
 	MapPin,
 	PhoneIcon,
 	Trash2,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { ImageUploadDialog } from "@/components/image-upload-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -34,6 +35,8 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatCnpj, formatPhone } from "@/lib/format";
 import {
 	type Company,
@@ -43,16 +46,26 @@ import {
 
 type FormValues = z.input<typeof updateCompanyProfileSchema>;
 
-const LOGO_TYPES = "image/png,image/jpeg,image/webp";
+/** Layout shared by the form and its skeleton, so loading never shifts it. */
+const LAYOUT = {
+	root: "grid gap-10 lg:grid-cols-[16rem_1fr]",
+	logo: "space-y-3",
+	fields: "space-y-6",
+	pair: "grid gap-6 md:grid-cols-2",
+	preview:
+		"flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40",
+} as const;
+
+/** Logos are cropped to the same 16:9 frame the preview shows. */
+const LOGO_CROP = { shape: "rectangle", aspectRatio: 16 / 9 } as const;
 
 export function CompanyProfileForm({ company }: { company: Company }) {
 	const { t } = useTranslation();
 	const message = useMessage();
 	const queryClient = useQueryClient();
 	const phoneMask = useMaskito({ options: { mask: phone } });
-	const fileInput = useRef<HTMLInputElement>(null);
 	const [saving, setSaving] = useState(false);
-	const [uploading, setUploading] = useState(false);
+	const [logoDialogOpen, setLogoDialogOpen] = useState(false);
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(updateCompanyProfileSchema),
@@ -69,38 +82,15 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 
 	const logoUrl = form.watch("logoUrl");
 
-	let uploadLabel = t("company.logo.upload");
-	if (uploading) {
-		uploadLabel = t("company.logo.uploading");
-	} else if (logoUrl) {
-		uploadLabel = t("company.logo.replace");
-	}
+	const uploadLabel = logoUrl
+		? t("company.logo.replace")
+		: t("company.logo.upload");
 
 	function showError(error: unknown) {
 		const code =
 			error instanceof AxiosError ? error.response?.data?.code : undefined;
 		const feedback = message(code, "error");
 		toast.error({ text: feedback.title, description: feedback.description });
-	}
-
-	async function onLogoSelected(file: File | undefined) {
-		if (!file) {
-			return;
-		}
-		if (file.size > MAX_AVATAR_UPLOAD_SIZE_BYTES) {
-			toast.error({ text: t("company.logo.tooLarge") });
-			return;
-		}
-
-		setUploading(true);
-		const { data: url, error } = await uploadCompanyLogo(file);
-		setUploading(false);
-
-		if (error) {
-			showError(error);
-			return;
-		}
-		form.setValue("logoUrl", url, { shouldDirty: true });
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -124,18 +114,15 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 
 	return (
 		<Form {...form}>
-			<form
-				className="grid gap-10 lg:grid-cols-[16rem_1fr]"
-				onSubmit={form.handleSubmit(onSubmit)}
-			>
-				<div className="space-y-3">
+			<form className={LAYOUT.root} onSubmit={form.handleSubmit(onSubmit)}>
+				<div className={LAYOUT.logo}>
 					<div>
 						<h3 className="font-medium text-sm">{t("company.logo.title")}</h3>
 						<p className="text-muted-foreground text-xs">
 							{t("company.logo.description")}
 						</p>
 					</div>
-					<div className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border bg-muted/40">
+					<div className={LAYOUT.preview}>
 						{logoUrl ? (
 							<img
 								alt={t("company.logo.alt")}
@@ -148,27 +135,15 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 							<Building2 className="size-10 text-muted-foreground" />
 						)}
 					</div>
-					<input
-						accept={LOGO_TYPES}
-						className="hidden"
-						onChange={(e) => onLogoSelected(e.currentTarget.files?.[0])}
-						ref={fileInput}
-						type="file"
-					/>
 					<div className="flex gap-2">
 						<Button
 							className="flex-1"
-							disabled={uploading}
-							onClick={() => fileInput.current?.click()}
+							onClick={() => setLogoDialogOpen(true)}
 							size="sm"
 							type="button"
 							variant="outline"
 						>
-							{uploading ? (
-								<Loader2 className="size-4 animate-spin" />
-							) : (
-								<ImageUp className="size-4" />
-							)}
+							<ImageUp className="size-4" />
 							{uploadLabel}
 						</Button>
 						{logoUrl ? (
@@ -185,9 +160,31 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 							</Button>
 						) : null}
 					</div>
+					<ImageUploadDialog
+						copy={{
+							title: t("company.logo.dialogTitle"),
+							stepSelect: t("company.logo.stepSelect"),
+							stepCrop: t("company.logo.stepCrop"),
+							stepUploading: t("company.logo.stepUploading"),
+							saving: t("company.logo.saving"),
+							dropzoneTitle: t("company.logo.dropzoneTitle"),
+							dropzoneHint: t("company.logo.dropzoneHint"),
+							alt: t("company.logo.alt"),
+							success: t("company.logo.uploaded"),
+							error: t("company.logo.uploadError"),
+						}}
+						crop={LOGO_CROP}
+						icon={<ImageUp />}
+						onOpenChange={setLogoDialogOpen}
+						onUploaded={(url) =>
+							form.setValue("logoUrl", url, { shouldDirty: true })
+						}
+						open={logoDialogOpen}
+						upload={uploadCompanyLogo}
+					/>
 				</div>
 
-				<div className="space-y-6">
+				<div className={LAYOUT.fields}>
 					<FormField
 						control={form.control}
 						name="name"
@@ -200,6 +197,9 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 								<FormControl>
 									<Input {...field} value={field.value ?? ""} />
 								</FormControl>
+								<FormDescription>
+									{t("company.form.nameDescription")}
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -230,11 +230,14 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 										value={field.value ?? ""}
 									/>
 								</FormControl>
+								<FormDescription>
+									{t("company.form.addressDescription")}
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
 					/>
-					<div className="grid gap-6 md:grid-cols-2">
+					<div className={LAYOUT.pair}>
 						<FormField
 							control={form.control}
 							name="email"
@@ -252,6 +255,9 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 											value={field.value ?? ""}
 										/>
 									</FormControl>
+									<FormDescription>
+										{t("company.form.emailDescription")}
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -277,6 +283,9 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 											value={field.value ?? ""}
 										/>
 									</FormControl>
+									<FormDescription>
+										{t("company.form.phoneDescription")}
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -299,6 +308,9 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 										value={field.value ?? ""}
 									/>
 								</FormControl>
+								<FormDescription>
+									{t("company.form.websiteDescription")}
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -312,5 +324,87 @@ export function CompanyProfileForm({ company }: { company: Company }) {
 				</div>
 			</form>
 		</Form>
+	);
+}
+
+/** A field of the skeleton: the real label and description around a placeholder input. */
+function FieldSkeleton({
+	Icon,
+	label,
+	description,
+}: {
+	Icon: LucideIcon;
+	label: string;
+	description: string;
+}) {
+	return (
+		<div className="grid gap-2">
+			<Label>
+				<Icon className="inline-block size-3.5" /> {label}
+			</Label>
+			<Skeleton className="h-9 w-full" />
+			<p className="text-2xs text-muted-foreground">{description}</p>
+		</div>
+	);
+}
+
+/**
+ * Loading state with the exact layout of `CompanyProfileForm`. Labels and
+ * descriptions don't depend on the company, so they render for real and only
+ * the values are placeholders.
+ */
+export function CompanyProfileFormSkeleton() {
+	const { t } = useTranslation();
+
+	return (
+		<div aria-busy="true" className={LAYOUT.root}>
+			<div className={LAYOUT.logo}>
+				<div>
+					<h3 className="font-medium text-sm">{t("company.logo.title")}</h3>
+					<p className="text-muted-foreground text-xs">
+						{t("company.logo.description")}
+					</p>
+				</div>
+				<Skeleton className="aspect-video w-full rounded-md" />
+				<Skeleton className="h-7.5 w-full" />
+			</div>
+			<div className={LAYOUT.fields}>
+				<FieldSkeleton
+					description={t("company.form.nameDescription")}
+					Icon={Building2}
+					label={t("company.form.name")}
+				/>
+				<FieldSkeleton
+					description={t("company.form.cnpjDescription")}
+					Icon={IdCard}
+					label={t("company.form.cnpj")}
+				/>
+				<FieldSkeleton
+					description={t("company.form.addressDescription")}
+					Icon={MapPin}
+					label={t("company.form.address")}
+				/>
+				<div className={LAYOUT.pair}>
+					<FieldSkeleton
+						description={t("company.form.emailDescription")}
+						Icon={Mail}
+						label={t("company.form.email")}
+					/>
+					<FieldSkeleton
+						description={t("company.form.phoneDescription")}
+						Icon={PhoneIcon}
+						label={t("company.form.phone")}
+					/>
+				</div>
+				<FieldSkeleton
+					description={t("company.form.websiteDescription")}
+					Icon={Globe}
+					label={t("company.form.website")}
+				/>
+				<div className="flex justify-end">
+					<Skeleton className="h-8.5 w-36" />
+				</div>
+			</div>
+		</div>
 	);
 }
