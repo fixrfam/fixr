@@ -77,7 +77,9 @@ export function NewPartForm({
 	async function onSubmit(values: z.infer<typeof createPartSchema>) {
 		try {
 			if (part) {
-				await updatePart.mutateAsync({ id: part.id, values });
+				// The stock only changes through a stock adjustment.
+				const { stock: _stock, ...changes } = values;
+				await updatePart.mutateAsync({ id: part.id, values: changes });
 				toast.success({ text: t("parts.form.updated") });
 			} else {
 				await createPart.mutateAsync(values);
@@ -225,12 +227,18 @@ export function NewPartForm({
 								<FormLabel>{t("parts.form.stockLabel")}</FormLabel>
 								<FormControl>
 									<Input
+										disabled={Boolean(part)}
 										min={0}
 										placeholder="0"
 										step="1"
 										{...numberInputProps(field)}
 									/>
 								</FormControl>
+								{part && (
+									<FormDescription>
+										{t("parts.form.stockLockedDescription")}
+									</FormDescription>
+								)}
 								<FormMessage />
 							</FormItem>
 						)}

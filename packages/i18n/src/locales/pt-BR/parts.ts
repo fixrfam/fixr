@@ -31,7 +31,7 @@ export const parts: Translated<typeof source> = {
 			minStock: "Estoque mínimo",
 			supplier: "Fornecedor",
 			stockStatus: "Status de estoque",
-			actions: "Editar",
+			actions: "Ações",
 		},
 	},
 	form: {
@@ -52,5 +52,18 @@ export const parts: Translated<typeof source> = {
 		submit: "Cadastrar peça",
 		created: "Peça cadastrada com sucesso!",
 		updated: "Peça atualizada com sucesso!",
+		stockLockedDescription:
+			"Altere o estoque pelo Ajustar estoque na lista de peças.",
+	},
+	stockAdjustment: {
+		trigger: "Ajustar estoque",
+		triggerLabel: "Ajustar o estoque de {{name}}",
+		title: "Ajustar estoque",
+		description: "Adicione ou remova unidades de {{name}}.",
+		deltaLabel: "Unidades",
+		deltaDescription: "Use um número negativo para remover unidades.",
+		preview: "O estoque vai de {{current}} para {{next}}.",
+		submit: "Salvar ajuste",
+		success: "Estoque ajustado!",
 	},
 };

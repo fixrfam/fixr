@@ -20,6 +20,8 @@ export interface PartRow {
 	stock: number;
 	minStock: number;
 	supplierId: string;
+	/** Summary the API embeds, so the supplier shows even without `suppliers:read`. */
+	supplier?: { id: string; name: string };
 }
 
 export interface ServiceRow {
@@ -89,6 +91,13 @@ export const inventoryApi = {
 		values: z.input<typeof patchPartSchema>
 	) =>
 		send<PartRow>(axios.patch(`/companies/${subdomain}/parts/${id}`, values)),
+	/** Add `delta` units to the stock (negative removes). */
+	adjustPartStock: (subdomain: string, id: string, delta: number) =>
+		send<PartRow>(
+			axios.post(`/companies/${subdomain}/parts/${id}/stock-adjustments`, {
+				delta,
+			})
+		),
 
 	createService: (
 		subdomain: string,

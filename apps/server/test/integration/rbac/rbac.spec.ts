@@ -206,6 +206,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		supplierId: createId(),
 	},
 	"PATCH /companies/:subdomain/parts/:partId": {},
+	"POST /companies/:subdomain/parts/:partId/stock-adjustments": { delta: 1 },
 	"POST /companies/:subdomain/services": {
 		name: "Troca de bateria",
 		description: "Substituição da bateria",

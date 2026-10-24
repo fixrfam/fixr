@@ -32,6 +32,11 @@ export const partsErrors = defineErrors({
 		message: "The sale price must be greater than or equal to the cost price.",
 		status: 400,
 	},
+	PART_STOCK_INSUFFICIENT: {
+		code: "part_stock_insufficient",
+		message: "The adjustment would leave the stock below zero.",
+		status: 409,
+	},
 	PART_PAGE_OUT_OF_BOUNDS: {
 		code: "page_out_of_bounds",
 		message: "The requested page exceeds the total number of pages.",

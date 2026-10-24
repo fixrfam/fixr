@@ -49,6 +49,8 @@ export function serveInventory(
 	}
 ) {
 	const writes: { method: string; path: string; body: unknown }[] = [];
+	/** Path of every list the dashboard fetched. */
+	const reads: string[] = [];
 	const base = `/companies/${subdomain}`;
 
 	async function record(request: Request) {
@@ -62,15 +64,18 @@ export function serveInventory(
 	}
 
 	server.use(
-		http.get(apiUrl(`${base}/parts`), ({ request }) =>
-			page(catalog.parts, request)
-		),
-		http.get(apiUrl(`${base}/services`), ({ request }) =>
-			page(catalog.services, request)
-		),
-		http.get(apiUrl(`${base}/suppliers`), ({ request }) =>
-			page(catalog.suppliers, request)
-		),
+		http.get(apiUrl(`${base}/parts`), ({ request }) => {
+			reads.push(new URL(request.url).pathname);
+			return page(catalog.parts, request);
+		}),
+		http.get(apiUrl(`${base}/services`), ({ request }) => {
+			reads.push(new URL(request.url).pathname);
+			return page(catalog.services, request);
+		}),
+		http.get(apiUrl(`${base}/suppliers`), ({ request }) => {
+			reads.push(new URL(request.url).pathname);
+			return page(catalog.suppliers, request);
+		}),
 		http.post(apiUrl(`${base}/parts`), async ({ request }) => {
 			const part = { ...(await record(request)), id: `part-${writes.length}` };
 			catalog.parts.push(part as PartRow);
@@ -85,6 +90,21 @@ export function serveInventory(
 			);
 			return HttpResponse.json(envelope({ id: params.id, ...values }));
 		}),
+		http.post(
+			apiUrl(`${base}/parts/:id/stock-adjustments`),
+			async ({ request, params }) => {
+				const { delta } = (await record(request)) as { delta: number };
+				const part = catalog.parts.find((p) => p.id === params.id);
+				if (!part || part.stock + delta < 0) {
+					return HttpResponse.json(
+						{ status: 409, code: "part_stock_insufficient" },
+						{ status: 409 }
+					);
+				}
+				part.stock += delta;
+				return HttpResponse.json(envelope(part));
+			}
+		),
 		http.post(apiUrl(`${base}/services`), async ({ request }) => {
 			const service = {
 				...(await record(request)),
@@ -114,5 +134,5 @@ export function serveInventory(
 		})
 	);
 
-	return { catalog, writes };
+	return { catalog, writes, reads };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -15,6 +16,7 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import {
+	useCatalogAbility,
 	useInventory,
 	useServiceRows,
 } from "@/components/dashboard/parts/store";
@@ -28,6 +30,7 @@ import { useServiceColumns } from "./columns";
 
 export function ServicesTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const router = useRouter();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const [search, setSearch] = useState("");
@@ -73,6 +76,7 @@ export function ServicesTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.services.create)}
 				createHref="/services/new"
 				createLabel={t("services.table.create")}
 				onClear={() => {
