@@ -14,6 +14,10 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		part_stock_insufficient: {
+			title: "Estoque insuficiente",
+			description: "O ajuste deixaria o estoque abaixo de zero.",
+		},
 		part_sku_conflict: {
 			title: "SKU já cadastrado",
 			description: "Outra peça da sua empresa já usa este SKU.",

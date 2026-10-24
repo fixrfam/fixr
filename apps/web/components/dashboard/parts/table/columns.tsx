@@ -1,4 +1,5 @@
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnDef,
 	createColumnHelper,
@@ -6,7 +7,8 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { useInventory } from "../store";
+import { AdjustStockDialog } from "../forms/adjust-stock-dialog";
+import { useCatalogAbility, useInventory } from "../store";
 import {
 	EditCell,
 	NameCell,
@@ -34,6 +36,9 @@ function multiSelectFilter(
 export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 	const { t } = useTranslation();
 	const { suppliers } = useInventory();
+	const ability = useCatalogAbility();
+	const canEdit = ability.can(permissions.parts.update);
+	const canAdjust = ability.can(permissions.inventory.adjust);
 
 	return useMemo(
 		() => [
@@ -160,26 +165,38 @@ export function usePartColumns(subdomain: string): ColumnDef<PartTableRow>[] {
 					options: stockStatusOptions(t),
 				},
 			}),
-			partColumnHelper.display({
-				id: "actions",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						className="px-0.5"
-						column={column}
-						label={t("parts.table.headers.actions")}
-					/>
-				),
-				cell: ({ row }) => (
-					<EditCell
-						href={`/parts/${row.original.id}/edit`}
-						label={t("parts.table.editLabel", { name: row.original.name })}
-						subdomain={subdomain}
-					/>
-				),
-				enableSorting: false,
-				enableHiding: false,
-			}),
+			// Shown only to roles with at least one of the row actions.
+			...(canEdit || canAdjust
+				? [
+						partColumnHelper.display({
+							id: "actions",
+							header: ({ column }) => (
+								<DataTableColumnHeader
+									className="px-0.5"
+									column={column}
+									label={t("parts.table.headers.actions")}
+								/>
+							),
+							cell: ({ row }) => (
+								<div className="flex items-center gap-2">
+									{canAdjust && <AdjustStockDialog part={row.original} />}
+									{canEdit && (
+										<EditCell
+											href={`/parts/${row.original.id}/edit`}
+											label={t("parts.table.editLabel", {
+												name: row.original.name,
+											})}
+											subdomain={subdomain}
+										/>
+									)}
+								</div>
+							),
+							enableSorting: false,
+							enableHiding: false,
+						}),
+					]
+				: []),
 		],
-		[subdomain, suppliers, t]
+		[subdomain, suppliers, t, canEdit, canAdjust]
 	) as ColumnDef<PartTableRow>[];
 }

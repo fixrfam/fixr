@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -18,13 +19,14 @@ import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useInventory, usePartRows } from "../store";
+import { useCatalogAbility, useInventory, usePartRows } from "../store";
 import { usePartColumns } from "./columns";
 import { STOCK_STATUS_KEYS, searchParts } from "./data";
 import { TableToolbar } from "./toolbar";
 
 export function PartsTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -64,6 +66,7 @@ export function PartsTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.parts.create)}
 				createHref="/parts/new"
 				createLabel={t("parts.table.create")}
 				onClear={() => {

@@ -28,7 +28,7 @@ export const parts = {
 			minStock: "Minimum stock",
 			supplier: "Supplier",
 			stockStatus: "Stock status",
-			actions: "Edit",
+			actions: "Actions",
 		},
 	},
 	form: {
@@ -49,5 +49,18 @@ export const parts = {
 		submit: "Register part",
 		created: "Part registered successfully!",
 		updated: "Part updated successfully!",
+		stockLockedDescription:
+			"Change the stock with Adjust stock in the parts list.",
+	},
+	stockAdjustment: {
+		trigger: "Adjust stock",
+		triggerLabel: "Adjust the stock of {{name}}",
+		title: "Adjust stock",
+		description: "Add or remove units of {{name}}.",
+		deltaLabel: "Units",
+		deltaDescription: "Use a negative number to remove units.",
+		preview: "Stock goes from {{current}} to {{next}}.",
+		submit: "Save adjustment",
+		success: "Stock adjusted!",
 	},
 } as const;
