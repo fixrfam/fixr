@@ -4,10 +4,12 @@ import {
 	db,
 	desc,
 	eq,
+	gte,
 	like,
 	lte,
 	or,
 	type SQL,
+	sql,
 } from "@fixr/db/connection";
 import { parts, suppliers } from "@fixr/db/schema";
 import type { getPartsQuerySchema } from "@fixr/schemas/parts";
@@ -121,6 +123,20 @@ export class PartsRepository {
 	@InvalidateCache({ patterns: ["parts:*", "services:*"] })
 	static async updatePart(partId: string, values: Partial<PartInsert>) {
 		await db.update(parts).set(values).where(eq(parts.id, partId));
+	}
+
+	/**
+	 * Add `delta` (negative to remove) to the stock in one statement, so
+	 * concurrent adjustments can't overwrite each other. Returns `false` when
+	 * the result would be negative and nothing was changed.
+	 */
+	@InvalidateCache({ patterns: ["parts:*", "services:*"] })
+	static async adjustStock(partId: string, delta: number) {
+		const [result] = await db
+			.update(parts)
+			.set({ stock: sql`${parts.stock} + ${delta}` })
+			.where(and(eq(parts.id, partId), gte(sql`${parts.stock} + ${delta}`, 0)));
+		return result.affectedRows > 0;
 	}
 
 	@InvalidateCache({ patterns: ["parts:*", "services:*"] })
