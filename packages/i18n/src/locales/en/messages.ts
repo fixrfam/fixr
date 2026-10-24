@@ -46,11 +46,11 @@ export const messages = {
 		send_estimate_success: {
 			title: "Estimate sent",
 			description:
-				"The client will get an email with the PDF and the approval link.",
+				"The customer will get an email with the PDF and the approval link.",
 		},
 		estimate_no_recipient: {
 			title: "No email to send to",
-			description: "The client has no email. Enter one to send the estimate.",
+			description: "The customer has no email. Enter one to send the estimate.",
 		},
 		estimate_expired: {
 			title: "Estimate expired",
@@ -87,11 +87,11 @@ export const messages = {
 		},
 		send_portal_access_success: {
 			title: "Access sent",
-			description: "The client will get an email with the portal link.",
+			description: "The customer will get an email with the portal link.",
 		},
-		portal_client_no_email: {
+		portal_customer_no_email: {
 			title: "No email",
-			description: "Add the client's email before sending portal access.",
+			description: "Add the customer's email before sending portal access.",
 		},
 		estimate_not_found: {
 			title: "Estimate not found",
@@ -299,7 +299,7 @@ export const messages = {
 		gacc_user_not_found: {
 			title: "Could not access your account",
 			description:
-				"The email linked to your Google account is not registered as an employee or client of any company.",
+				"The email linked to your Google account is not registered as an employee or customer of any company.",
 		},
 		gacc_email_not_verified: {
 			title: "Email not verified",

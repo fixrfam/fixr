@@ -66,7 +66,7 @@ export const validation = {
 		itemQuantityMax: "The quantity can't exceed {{count}}.",
 		itemPriceRequired: "Enter the price.",
 		itemPriceMin: "The price can't be negative.",
-		clientInvalid: "Invalid client.",
+		customerInvalid: "Invalid customer.",
 		brandInvalid: "Invalid device brand.",
 		categoryInvalid: "Invalid device category.",
 		assigneeInvalid: "Invalid assignee.",

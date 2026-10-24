@@ -10,9 +10,9 @@ import {
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { clients } from "./clients";
 import { money, percentage } from "./columns";
 import { companies } from "./companies";
+import { customers } from "./customers";
 import { employees } from "./employees";
 import { parts } from "./parts";
 import { serviceOrderItemTypeEnum } from "./service-order-items";
@@ -27,13 +27,13 @@ export const estimateStatusEnum = mysqlEnum("estimate_status", [
 ]);
 
 /**
- * A priced proposal for a service order, sent to the client for approval.
+ * A priced proposal for a service order, sent to the customer for approval.
  *
- * `number` is sequential per company and is what the client sees. The items
+ * `number` is sequential per company and is what the customer sees. The items
  * are copied from the service order when the estimate is created, so the
  * estimate never changes after it is sent.
  *
- * Sending it to the client issues a public link. Only the SHA-256 of the link
+ * Sending it to the customer issues a public link. Only the SHA-256 of the link
  * token is stored, and sending again replaces it, so older links stop working.
  */
 export const estimates = mysqlTable(
@@ -48,8 +48,8 @@ export const estimates = mysqlTable(
 		serviceOrderId: varchar("service_order_id", { length: 25 })
 			.references(() => serviceOrders.id, { onDelete: "cascade" })
 			.notNull(),
-		clientId: varchar("client_id", { length: 25 }).references(
-			() => clients.id,
+		customerId: varchar("customer_id", { length: 25 }).references(
+			() => customers.id,
 			{ onDelete: "set null" }
 		),
 		createdBy: varchar("created_by", { length: 25 }).references(

@@ -91,7 +91,7 @@ describe("email senders", () => {
 		await emails.sendEstimateEmail({
 			to: "maria@fixr.test",
 			appName: "Fixr",
-			clientName: "Maria",
+			customerName: "Maria",
 			companyName: "Central",
 			number: "0042",
 			device: "Galaxy S21",
@@ -119,7 +119,7 @@ describe("email senders", () => {
 		await emails.sendPortalAccessEmail({
 			to: "maria@fixr.test",
 			appName: "Fixr",
-			clientName: "Maria",
+			customerName: "Maria",
 			companyName,
 			ctaUrl: "https://fixr.test/portal/tok3n",
 			locale: "pt-BR",

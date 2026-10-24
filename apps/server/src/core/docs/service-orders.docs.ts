@@ -25,7 +25,7 @@ const createServiceOrderResponseDataSchema = serviceOrderSelectSchema.extend({
 
 const serviceOrderListRecordSchema = z.object({
 	...serviceOrderSelectSchema.shape,
-	client: z.object({
+	customer: z.object({
 		id: z.string(),
 		name: z.string(),
 	}),
@@ -54,7 +54,7 @@ Optional filters (query string):
 - \`employeeId\`: responsible employee (cuid2)
 - \`status\`: one of: ${serviceOrderStatuses.options.join(", ")}
 - \`dateFrom\` / \`dateTo\`: filter by \`created_at\` (inclusive; ISO date or datetime)
-- \`query\`: search in device model, reported defect, or client name
+- \`query\`: search in device model, reported defect, or customer name
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`): pagination (see API pagination docs)
 `,
 	params: getCompanyNestedDataSchema,
@@ -153,8 +153,8 @@ Rules:
 				zodResponseSchema({
 					status: 404,
 					error: "Not Found",
-					code: "client_not_found",
-					message: "Client not found.",
+					code: "customer_not_found",
+					message: "Customer not found.",
 					data: null,
 				}),
 				zodResponseSchema({

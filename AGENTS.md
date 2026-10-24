@@ -8,7 +8,7 @@ Fixr is a service-order management platform for electronics repair shops (see `R
 
 ```
 apps/
- ├─ web/      Next.js — client/technician-facing app, JWT auth
+ ├─ web/      Next.js — customer/technician-facing app, JWT auth
  ├─ admin/    Next.js — internal admin panel, Clerk auth
  ├─ server/   Fastify REST API — business logic, DB access
  └─ workers/  BullMQ job processors (email, etc.)

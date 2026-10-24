@@ -2,7 +2,7 @@
 
 import { cpf, phone, unmask } from "@fixr/constants/masks";
 import { useTranslation } from "@fixr/i18n/react";
-import { createClientSchema } from "@fixr/schemas/clients";
+import { createCustomerSchema } from "@fixr/schemas/customers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-export function NewClientForm({
+export function NewCustomerForm({
 	onCustomerCreated,
 	cols = 1,
 	className,
@@ -43,8 +43,8 @@ export function NewClientForm({
 	const { t } = useTranslation();
 	const [loading, setLoading] = useState(false);
 
-	const form = useForm<z.infer<typeof createClientSchema>>({
-		resolver: zodResolver(createClientSchema),
+	const form = useForm<z.infer<typeof createCustomerSchema>>({
+		resolver: zodResolver(createCustomerSchema),
 		defaultValues: {
 			name: "",
 			email: "",
@@ -62,7 +62,7 @@ export function NewClientForm({
 	const phoneMask = useMaskito({ options: { mask: phone } });
 	const altPhoneMask = useMaskito({ options: { mask: phone } });
 
-	function onSubmit(values: z.infer<typeof createClientSchema>) {
+	function onSubmit(values: z.infer<typeof createCustomerSchema>) {
 		setLoading(true);
 
 		const formattedData = {
@@ -76,13 +76,13 @@ export function NewClientForm({
 
 		try {
 			toast.success({
-				text: t("clients.form.success"),
+				text: t("customers.form.success"),
 			});
 
 			onCustomerCreated(formattedData.cpf);
 		} catch {
 			toast.error({
-				text: t("clients.form.error"),
+				text: t("customers.form.error"),
 			});
 		} finally {
 			setLoading(false);
@@ -109,11 +109,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<User className="inline-block size-3.5" />{" "}
-									{t("clients.form.nameLabel")}
+									{t("customers.form.nameLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.namePlaceholder")}
+										placeholder={t("customers.form.namePlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -128,11 +128,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<Mail className="inline-block size-3.5" />{" "}
-									{t("clients.form.emailLabel")}
+									{t("customers.form.emailLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.emailPlaceholder")}
+										placeholder={t("customers.form.emailPlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -147,11 +147,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<PhoneIcon className="inline-block size-3.5" />{" "}
-									{t("clients.form.phoneLabel")}
+									{t("customers.form.phoneLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.phonePlaceholder")}
+										placeholder={t("customers.form.phonePlaceholder")}
 										{...field}
 										onInput={(e) =>
 											form.setValue("phone", e.currentTarget.value)
@@ -170,11 +170,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<Smartphone className="inline-block size-3.5" />{" "}
-									{t("clients.form.alternativePhoneLabel")}
+									{t("customers.form.alternativePhoneLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.phonePlaceholder")}
+										placeholder={t("customers.form.phonePlaceholder")}
 										{...field}
 										onInput={(e) =>
 											form.setValue("alternativePhone", e.currentTarget.value)
@@ -193,11 +193,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<IdCard className="inline-block size-3.5" />{" "}
-									{t("clients.form.documentLabel")}
+									{t("customers.form.documentLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.documentPlaceholder")}
+										placeholder={t("customers.form.documentPlaceholder")}
 										{...field}
 										onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
 										ref={cpfMask}
@@ -214,11 +214,11 @@ export function NewClientForm({
 							<FormItem className="col-span-full">
 								<FormLabel>
 									<MapPin className="inline-block size-3.5" />{" "}
-									{t("clients.form.addressLabel")}
+									{t("customers.form.addressLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.addressPlaceholder")}
+										placeholder={t("customers.form.addressPlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -233,11 +233,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<Building className="inline-block size-3.5" />{" "}
-									{t("clients.form.stateLabel")}
+									{t("customers.form.stateLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.statePlaceholder")}
+										placeholder={t("customers.form.statePlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -252,11 +252,11 @@ export function NewClientForm({
 							<FormItem>
 								<FormLabel>
 									<Building className="inline-block size-3.5" />{" "}
-									{t("clients.form.cityLabel")}
+									{t("customers.form.cityLabel")}
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder={t("clients.form.cityPlaceholder")}
+										placeholder={t("customers.form.cityPlaceholder")}
 										{...field}
 									/>
 								</FormControl>
@@ -266,7 +266,7 @@ export function NewClientForm({
 					/>
 				</div>
 				<Button className="mt-4 w-full" disabled={loading} type="submit">
-					{t("clients.form.submit")}{" "}
+					{t("customers.form.submit")}{" "}
 					{loading ? <Loader2 className="animate-spin" /> : <User />}
 				</Button>
 			</form>

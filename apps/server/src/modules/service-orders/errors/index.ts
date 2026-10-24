@@ -16,9 +16,9 @@ export const serviceOrdersErrors = defineErrors({
 		message: "Employee profile not found for this account.",
 		status: 403,
 	},
-	SERVICE_ORDER_CLIENT_NOT_FOUND: {
-		code: "client_not_found",
-		message: "Client not found.",
+	SERVICE_ORDER_CUSTOMER_NOT_FOUND: {
+		code: "customer_not_found",
+		message: "Customer not found.",
 		status: 404,
 	},
 	SERVICE_ORDER_DEVICE_BRAND_NOT_FOUND: {

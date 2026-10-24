@@ -100,11 +100,27 @@ describe("loginUserSchema", () => {
 });
 
 describe("jwtPayload / userJWT", () => {
+	it("reads a token issued as a client as a customer", () => {
+		const parsed = jwtPayload.parse({
+			...basePayload(),
+			profileType: "client",
+			company: undefined,
+		});
+
+		expect(parsed.profileType).toBe("customer");
+	});
+
+	it("rejects an unknown profile type", () => {
+		expect(
+			issuePaths(jwtPayload, { ...basePayload(), profileType: "admin" })
+		).toEqual(["profileType"]);
+	});
+
 	it("accepts an employee payload with company.role", () => {
 		expect(jwtPayload.safeParse(basePayload()).success).toBe(true);
 	});
 
-	it("accepts a payload without company (client accounts)", () => {
+	it("accepts a payload without company (customer accounts)", () => {
 		const { company: _company, ...payload } = basePayload();
 
 		expect(jwtPayload.safeParse(payload).success).toBe(true);

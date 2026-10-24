@@ -1,7 +1,11 @@
 import { db, eq } from "@fixr/db/connection";
 import { oneTimeTokens } from "@fixr/db/schema";
 import { describe, expect, it } from "vitest";
-import { makeClient, makeCompany, makeEmployee } from "../../factories";
+import {
+	makeCompany,
+	makeCustomerAccount,
+	makeEmployee,
+} from "../../factories";
 import { createTestApp } from "../../helpers/app";
 import { authedInject, signSession } from "../../helpers/auth";
 
@@ -25,7 +29,7 @@ async function resetTokenFor(email: string) {
 
 describe("password reset flow", () => {
 	it("request -> token in DB -> confirm -> old password fails, new one works", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 
 		const requested = await app.inject({
 			method: "POST",
@@ -60,7 +64,7 @@ describe("password reset flow", () => {
 	});
 
 	it("the reset token is single-use (enforced in the database)", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		await app.inject({
 			method: "POST",
 			url: "/credentials/password/reset",
@@ -82,7 +86,7 @@ describe("password reset flow", () => {
 	});
 
 	it("rejects a second request while a reset is pending", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const request = () =>
 			app.inject({
 				method: "POST",
@@ -130,7 +134,7 @@ describe("PUT /credentials/password", () => {
 	});
 
 	it("requires the current password", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const token = signSession(app, { id: user.id, email: user.email });
 
 		const response = await authedInject(app, token, {

@@ -9,7 +9,7 @@ export interface LayoutState {
 /** Default card arrangement when no saved layout exists yet. */
 export const defaultLayout: LayoutState = {
 	left: ["device", "lifecycle", "parts"],
-	right: ["summary", "technician", "client", "images"],
+	right: ["summary", "technician", "customer", "images"],
 };
 
 /**

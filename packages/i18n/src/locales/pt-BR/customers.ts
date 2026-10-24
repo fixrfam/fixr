@@ -1,7 +1,7 @@
 import type { Translated } from "../../types";
-import type { clients as source } from "../en/clients";
+import type { customers as source } from "../en/customers";
 
-export const clients: Translated<typeof source> = {
+export const customers: Translated<typeof source> = {
 	form: {
 		nameLabel: "Nome",
 		namePlaceholder: "João da Silva",

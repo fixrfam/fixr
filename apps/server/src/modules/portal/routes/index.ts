@@ -29,12 +29,12 @@ function identity(request: FastifyRequest) {
 	if (!request.portal) {
 		throw new AppError("PORTAL_UNAUTHORIZED");
 	}
-	const { cpf, email, clientId } = request.portal;
-	return { cpf, email, clientId };
+	const { cpf, email, customerId } = request.portal;
+	return { cpf, email, customerId };
 }
 
 /**
- * @description Client portal routes. Session routes are public (the emailed
+ * @description Customer portal routes. Session routes are public (the emailed
  * token is the credential); the rest require the portal session cookie.
  */
 export function portalRoutes(fastify: FastifyTypedInstance) {
@@ -172,10 +172,10 @@ export function portalRoutes(fastify: FastifyTypedInstance) {
 	);
 }
 
-/** @description Shop-side portal routes, under `/companies/:subdomain/clients`. */
-export function clientPortalAccessRoutes(fastify: FastifyTypedInstance) {
+/** @description Shop-side portal routes, under `/companies/:subdomain/customers`. */
+export function customerPortalAccessRoutes(fastify: FastifyTypedInstance) {
 	fastify.post(
-		"/:clientId/portal-access",
+		"/:customerId/portal-access",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
@@ -185,13 +185,13 @@ export function clientPortalAccessRoutes(fastify: FastifyTypedInstance) {
 		},
 		withErrorHandler(async (request, response) => {
 			const params = getCompanyNestedDataSchema
-				.extend({ clientId: z.string() })
+				.extend({ customerId: z.string() })
 				.parse(request.params);
 
 			await PortalController.sendAccess({
 				userJwt: request.user as z.infer<typeof userJWT>,
 				subdomain: params.subdomain,
-				clientId: params.clientId,
+				customerId: params.customerId,
 				locale: requestLocale(request),
 				response,
 			});

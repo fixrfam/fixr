@@ -2,7 +2,7 @@ import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 import { getPaginatedDataSchema } from "./utils";
 
-/** @description Lifecycle of an estimate: drafted, sent to the client, then approved or rejected */
+/** @description Lifecycle of an estimate: drafted, sent to the customer, then approved or rejected */
 export const estimateStatuses = z.enum([
 	"draft",
 	"sent",
@@ -44,7 +44,7 @@ export const updateEstimateStatusSchema = z.object({
 	status: estimateStatuses,
 });
 
-/** @description Query schema for listing estimates: pagination, search (number or client) and filters */
+/** @description Query schema for listing estimates: pagination, search (number or customer) and filters */
 export const getEstimatesQuerySchema = getPaginatedDataSchema.extend({
 	status: estimateStatuses.optional(),
 	serviceOrderId: z.string().cuid2().optional(),
@@ -56,9 +56,9 @@ export const estimateIdParamsSchema = z.object({
 });
 
 /**
- * @description Body schema for sending an estimate to the client. `email`
- * (empty or missing) defaults to the client's email and is required when the
- * client has none.
+ * @description Body schema for sending an estimate to the customer. `email`
+ * (empty or missing) defaults to the customer's email and is required when the
+ * customer has none.
  */
 export const sendEstimateSchema = z.object({
 	email: z
@@ -70,7 +70,7 @@ export const sendEstimateSchema = z.object({
 		.or(z.literal("")),
 });
 
-/** @description Body schema for the client rejecting an estimate from the public link */
+/** @description Body schema for the customer rejecting an estimate from the public link */
 export const rejectEstimateSchema = z.object({
 	reason: z
 		.string()

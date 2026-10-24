@@ -13,7 +13,7 @@ import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import {
 	ActionsCell,
 	CategoryCell,
-	ClientCell,
+	CustomerCell,
 	DeviceCell,
 	IssueCell,
 	OrderNumberCell,
@@ -60,22 +60,22 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				),
 				meta: { label: t("serviceOrders.table.columns.order") },
 			}),
-			columnHelper.accessor((row) => row.client.name, {
-				id: "client",
+			columnHelper.accessor((row) => row.customer.name, {
+				id: "customer",
 				header: ({ column }) => (
 					<DataTableColumnHeader
 						column={column}
-						label={t("serviceOrders.table.columns.client")}
+						label={t("serviceOrders.table.columns.customer")}
 					/>
 				),
 				cell: ({ row }) => (
-					<ClientCell
-						cpf={row.original.client.cpf}
-						name={row.original.client.name}
-						phone={row.original.client.phone}
+					<CustomerCell
+						cpf={row.original.customer.cpf}
+						name={row.original.customer.name}
+						phone={row.original.customer.phone}
 					/>
 				),
-				meta: { label: t("serviceOrders.table.columns.client") },
+				meta: { label: t("serviceOrders.table.columns.customer") },
 			}),
 			columnHelper.accessor((row) => `${row.mark} ${row.model}`.trim(), {
 				id: "device",

@@ -64,7 +64,7 @@ const unauthorized = () =>
 	);
 
 describe("PortalHome", () => {
-	it("lists the client's service orders across shops", async () => {
+	it("lists the customer's service orders across shops", async () => {
 		server.use(
 			http.get(apiUrl("/portal/service-orders"), () =>
 				HttpResponse.json(

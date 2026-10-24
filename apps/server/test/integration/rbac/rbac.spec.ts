@@ -92,27 +92,27 @@ const AUTH_ONLY_ROUTES = new Map([
 	],
 	[
 		"GET /portal/me",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 	[
 		"GET /portal/service-orders",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 	[
 		"GET /portal/service-orders/:serviceOrderId",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 	[
 		"GET /portal/estimates/:estimateId/pdf",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 	[
 		"POST /portal/estimates/:estimateId/approve",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 	[
 		"POST /portal/estimates/:estimateId/reject",
-		"client portal session: the client only sees their own service orders",
+		"customer portal session: the customer only sees their own service orders",
 	],
 ]);
 
@@ -193,7 +193,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		email: "novo@fixr.test",
 	},
 	"POST /companies/:subdomain/service-orders": {
-		clientId: createId(),
+		customerId: createId(),
 		deviceBrandId: createId(),
 		deviceCategoryId: createId(),
 		deviceModel: "iPhone",
@@ -203,7 +203,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },
 	"POST /companies/:subdomain/models/:modelId/images": { uploadId: "x" },
-	"POST /companies/:subdomain/clients": {
+	"POST /companies/:subdomain/customers": {
 		name: "Cliente",
 		email: "cliente@fixr.test",
 		cpf: "52998224725",
@@ -212,8 +212,8 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		state: "SP",
 		city: "São Paulo",
 	},
-	"PATCH /companies/:subdomain/clients/:clientId": {},
-	"POST /companies/:subdomain/clients/:clientId/portal-access": {},
+	"PATCH /companies/:subdomain/customers/:customerId": {},
+	"POST /companies/:subdomain/customers/:customerId/portal-access": {},
 	"PATCH /companies/:subdomain": {},
 	"POST /companies/:subdomain/estimates": { serviceOrderId: createId() },
 	"PATCH /companies/:subdomain/estimates/:estimateId": {},

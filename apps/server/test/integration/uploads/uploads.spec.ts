@@ -1,7 +1,7 @@
 import { db } from "@fixr/db/connection";
 import { uploads } from "@fixr/db/schema";
 import { describe, expect, it } from "vitest";
-import { makeClient } from "../../factories";
+import { makeCustomerAccount } from "../../factories";
 import { createTestApp } from "../../helpers/app";
 import {
 	authedInject,
@@ -48,7 +48,7 @@ describe("POST /uploads/:purpose/presign", () => {
 	});
 
 	it("presigns an avatar for any signed-in user, without company scope", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const token = signSession(app, { id: user.id, email: user.email });
 
 		const response = await authedInject(app, token, {

@@ -48,9 +48,9 @@ export function ServiceOrdersTable({ subdomain }: Props) {
 		return mockServiceOrders.filter((row) => {
 			const searchable = [
 				row.orderNumber,
-				row.client.name,
-				row.client.phone,
-				row.client.cpf,
+				row.customer.name,
+				row.customer.phone,
+				row.customer.cpf,
 				row.mark,
 				row.model,
 				row.category,

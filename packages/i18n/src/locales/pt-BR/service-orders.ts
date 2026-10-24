@@ -67,8 +67,8 @@ export const serviceOrders: Translated<typeof source> = {
 		deviceDescription: "Dados técnicos, data de recebimento e defeito.",
 		technicianTitle: "Dados do técnico",
 		technicianDescription: "Responsável atribuído e observações internas.",
-		clientTitle: "Dados do cliente",
-		clientDescription: "Informações de contato e identificação.",
+		customerTitle: "Dados do cliente",
+		customerDescription: "Informações de contato e identificação.",
 		lifecycleTitle: "Ciclo de vida",
 		lifecycleDescription: "Progresso da OS por fases e registros recentes.",
 		imagesTitle: "Imagens do aparelho",
@@ -98,7 +98,7 @@ export const serviceOrders: Translated<typeof source> = {
 		noHistory: "Sem histórico",
 		columns: {
 			order: "Ordem",
-			client: "Cliente",
+			customer: "Cliente",
 			device: "Aparelho",
 			category: "Categoria",
 			technician: "Técnico",
@@ -118,11 +118,11 @@ export const serviceOrders: Translated<typeof source> = {
 		empty: "Nenhuma imagem registrada.",
 	},
 	form: {
-		clientDocumentLabel: "CPF do cliente",
-		clientDocumentPlaceholder: "123.456.789-00",
-		newClient: "Cadastrar novo",
-		newClientTitle: "Novo cliente",
-		newClientDescription:
+		customerDocumentLabel: "CPF do cliente",
+		customerDocumentPlaceholder: "123.456.789-00",
+		newCustomer: "Cadastrar novo",
+		newCustomerTitle: "Novo cliente",
+		newCustomerDescription:
 			"Cadastre um novo cliente preenchendo os campos abaixo.",
 		issueLabel: "Defeito relatado pelo cliente",
 		issuePlaceholder: "Descreva o defeito relatado pelo cliente",

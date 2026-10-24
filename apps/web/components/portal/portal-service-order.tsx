@@ -146,7 +146,7 @@ function EstimateCard({
 	);
 }
 
-/** One service order as the client sees it, with its estimates to answer. */
+/** One service order as the customer sees it, with its estimates to answer. */
 export function PortalServiceOrder({ id }: { id: string }) {
 	const { t, format } = useTranslation();
 	const queryClient = useQueryClient();

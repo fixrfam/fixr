@@ -90,7 +90,7 @@ export const messages: Translated<typeof source> = {
 			title: "Acesso enviado",
 			description: "O cliente vai receber um email com o link do portal.",
 		},
-		portal_client_no_email: {
+		portal_customer_no_email: {
 			title: "Sem email",
 			description:
 				"Cadastre o email do cliente antes de enviar o acesso ao portal.",

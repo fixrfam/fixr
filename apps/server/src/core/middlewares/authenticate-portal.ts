@@ -9,7 +9,7 @@ import { hashOpaqueToken } from "../lib/opaque-token";
 
 declare module "fastify" {
 	interface FastifyRequest {
-		/** Present only on client portal routes, after `authenticatePortal`. */
+		/** Present only on customer portal routes, after `authenticatePortal`. */
 		portal?: PortalIdentity & { sessionId: string };
 	}
 }
@@ -17,7 +17,7 @@ declare module "fastify" {
 export const PORTAL_SESSION_COOKIE = cookieKey("portalSession");
 
 /**
- * Client portal session (opened from an emailed link). It is a separate
+ * Customer portal session (opened from an emailed link). It is a separate
  * opaque cookie, never a JWT, so it can't be mistaken for an employee session.
  */
 export const authenticatePortal = async (
@@ -40,6 +40,6 @@ export const authenticatePortal = async (
 		sessionId: session.id,
 		cpf: session.cpf,
 		email: session.email,
-		clientId: session.clientId,
+		customerId: session.customerId,
 	};
 };

@@ -10,7 +10,7 @@ import {
 	type SQL,
 } from "@fixr/db/connection";
 import {
-	clients,
+	customers,
 	employees,
 	modelCategories,
 	modelMakers,
@@ -40,7 +40,7 @@ function endOfDay(date: Date) {
 export const serviceOrdersListSelect = {
 	id: serviceOrders.id,
 	companyId: serviceOrders.companyId,
-	clientId: serviceOrders.clientId,
+	customerId: serviceOrders.customerId,
 	employeeId: serviceOrders.employeeId,
 	deviceMakerId: serviceOrders.deviceMakerId,
 	deviceCategoryId: serviceOrders.deviceCategoryId,
@@ -51,7 +51,7 @@ export const serviceOrdersListSelect = {
 	status: serviceOrders.status,
 	createdAt: serviceOrders.createdAt,
 	updatedAt: serviceOrders.updatedAt,
-	client: { id: clients.id, name: clients.name },
+	customer: { id: customers.id, name: customers.name },
 	employee: { id: employees.id, name: employees.name },
 	deviceCategory: { id: modelCategories.id, name: modelCategories.name },
 	deviceMaker: { id: modelMakers.id, name: modelMakers.name },
@@ -60,8 +60,8 @@ export const serviceOrdersListSelect = {
 export const serviceOrdersListJoins = [
 	{
 		type: "inner" as const,
-		table: clients,
-		on: eq(clients.id, serviceOrders.clientId),
+		table: customers,
+		on: eq(customers.id, serviceOrders.customerId),
 	},
 	{
 		type: "inner" as const,
@@ -91,14 +91,14 @@ export class ServiceOrdersRepository {
 		return employee ?? null;
 	}
 
-	@Cached({ ttl: 3600, key: "service-orders:client" })
-	static async queryClientById(clientId: string) {
-		const [client] = await db
+	@Cached({ ttl: 3600, key: "service-orders:customer" })
+	static async queryCustomerById(customerId: string) {
+		const [customer] = await db
 			.select()
-			.from(clients)
-			.where(eq(clients.id, clientId))
+			.from(customers)
+			.where(eq(customers.id, customerId))
 			.limit(1);
-		return client ?? null;
+		return customer ?? null;
 	}
 
 	@Cached({ ttl: 3600, key: "service-orders:device-maker" })
@@ -157,7 +157,7 @@ export class ServiceOrdersRepository {
 				or(
 					like(serviceOrders.deviceModel, `%${filters.query}%`),
 					like(serviceOrders.reportedDefect, `%${filters.query}%`),
-					like(clients.name, `%${filters.query}%`)
+					like(customers.name, `%${filters.query}%`)
 				)!
 			);
 		}
@@ -180,7 +180,7 @@ export class ServiceOrdersRepository {
 				.insert(serviceOrders)
 				.values({
 					companyId,
-					clientId: data.clientId,
+					customerId: data.customerId,
 					employeeId,
 					deviceMakerId: data.deviceBrandId,
 					deviceCategoryId: data.deviceCategoryId,

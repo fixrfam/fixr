@@ -33,9 +33,9 @@ import { accountRoutes } from "./modules/account/routes";
 import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
-import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
+import { customersRoutes } from "./modules/customers/routes";
 import { employeesRoutes } from "./modules/employees/routes";
 import {
 	estimateLinksRoutes,
@@ -46,7 +46,7 @@ import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
 import { partsRoutes } from "./modules/parts/routes";
 import {
-	clientPortalAccessRoutes,
+	customerPortalAccessRoutes,
 	portalRoutes,
 } from "./modules/portal/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
@@ -100,8 +100,8 @@ const OPENAPI_TAGS = [
 		description: "Manage company employees.",
 	},
 	{
-		name: "Clients",
-		description: "Manage the company's clients (customers).",
+		name: "Customers",
+		description: "Manage the company's customers (customers).",
 	},
 	{
 		name: "Service Orders",
@@ -113,9 +113,9 @@ const OPENAPI_TAGS = [
 			"Estimates (orçamentos) built from service orders, with PDF generation.",
 	},
 	{
-		name: "Client portal",
+		name: "Customer portal",
 		description:
-			"Passwordless area where clients follow their service orders, opened from emailed links.",
+			"Passwordless area where customers follow their service orders, opened from emailed links.",
 	},
 	{
 		name: "Parts",
@@ -290,8 +290,8 @@ export async function buildApp(
 	await app.register(employeesRoutes, {
 		prefix: "/companies/:subdomain/employees",
 	});
-	await app.register(clientsRoutes, {
-		prefix: "/companies/:subdomain/clients",
+	await app.register(customersRoutes, {
+		prefix: "/companies/:subdomain/customers",
 	});
 	await app.register(serviceOrdersRoutes, {
 		prefix: "/companies/:subdomain/service-orders",
@@ -307,8 +307,8 @@ export async function buildApp(
 	});
 	await app.register(estimateLinksRoutes, { prefix: "/estimate-links" });
 	await app.register(portalRoutes, { prefix: "/portal" });
-	await app.register(clientPortalAccessRoutes, {
-		prefix: "/companies/:subdomain/clients",
+	await app.register(customerPortalAccessRoutes, {
+		prefix: "/companies/:subdomain/customers",
 	});
 	await app.register(estimatesRoutes, {
 		prefix: "/companies/:subdomain/estimates",

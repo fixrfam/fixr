@@ -2,7 +2,7 @@ import { LOCALE_COOKIE } from "@fixr/i18n";
 import { createEmailQueue } from "@fixr/mail/queue";
 import { afterAll, describe, expect, it } from "vitest";
 import { redis } from "@/src/config/redis";
-import { makeClient } from "../../factories";
+import { makeCustomerAccount } from "../../factories";
 import { createTestApp } from "../../helpers/app";
 import { authedInject, createEmployeeSession } from "../../helpers/auth";
 
@@ -37,7 +37,7 @@ async function requestPasswordReset(
 
 describe("email locale", () => {
 	it("writes the password reset in the language the browser asks for", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 
 		const response = await requestPasswordReset(user.email, {
 			headers: { "accept-language": "pt-BR,pt;q=0.9,en;q=0.8" },
@@ -53,7 +53,7 @@ describe("email locale", () => {
 	});
 
 	it("prefers the language the user picked over the browser's", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 
 		await requestPasswordReset(user.email, {
 			headers: { "accept-language": "pt-BR" },
@@ -65,7 +65,7 @@ describe("email locale", () => {
 	});
 
 	it("falls back to English without any hint", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 
 		await requestPasswordReset(user.email, {});
 

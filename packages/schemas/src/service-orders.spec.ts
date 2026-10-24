@@ -8,7 +8,7 @@ import {
 import { issuePaths } from "./test-utils";
 
 const validOrder = () => ({
-	clientId: createId(),
+	customerId: createId(),
 	deviceBrandId: createId(),
 	deviceCategoryId: createId(),
 	deviceModel: "iPhone 12",
@@ -37,7 +37,7 @@ describe("createServiceOrderMockSchema", () => {
 	});
 
 	it.each([
-		"clientId",
+		"customerId",
 		"deviceBrandId",
 		"deviceCategoryId",
 		"deviceModel",
@@ -53,9 +53,9 @@ describe("createServiceOrderMockSchema", () => {
 		expect(
 			issuePaths(createServiceOrderMockSchema, {
 				...validOrder(),
-				clientId: "Not-A-Cuid",
+				customerId: "Not-A-Cuid",
 			})
-		).toEqual(["clientId"]);
+		).toEqual(["customerId"]);
 	});
 
 	it("does not accept a status from the caller", () => {

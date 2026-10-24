@@ -23,7 +23,7 @@ export interface Estimate {
 	respondedAt: string | null;
 	rejectionReason: string | null;
 	createdAt: string;
-	client: { id: string; name: string } | null;
+	customer: { id: string; name: string } | null;
 	totals: EstimateTotals;
 }
 
@@ -35,7 +35,7 @@ export interface EstimateTotals {
 	total: number;
 }
 
-/** What the client sees through the link sent by email. */
+/** What the customer sees through the link sent by email. */
 export interface PublicEstimate {
 	number: number;
 	status: EstimateStatus;
@@ -53,7 +53,7 @@ export interface PublicEstimate {
 		website: string | null;
 		logoUrl: string | null;
 	};
-	client: { name: string } | null;
+	customer: { name: string } | null;
 	device: { maker: string; model: string; reportedDefect: string };
 	items: {
 		type: "part" | "service";
@@ -83,7 +83,7 @@ export const estimatesApi = {
 		data<Estimate>(axios.post(base(subdomain), values)),
 	updateStatus: (subdomain: string, id: string, status: EstimateStatus) =>
 		data<Estimate>(axios.patch(`${base(subdomain)}/${id}/status`, { status })),
-	/** Email the estimate to the client (with the approval link). */
+	/** Email the estimate to the customer (with the approval link). */
 	send: (
 		subdomain: string,
 		id: string,

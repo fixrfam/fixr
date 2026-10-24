@@ -1,7 +1,7 @@
 import { PublicEstimate } from "@/components/estimates/public-estimate";
 import QueryClientWrapper from "@/lib/query-client";
 
-/** Page the client opens from the estimate email to approve or reject it. */
+/** Page the customer opens from the estimate email to approve or reject it. */
 export default async function EstimateLinkPage(props: {
 	params: Promise<{ token: string }>;
 }) {

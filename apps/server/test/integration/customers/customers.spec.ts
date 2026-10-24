@@ -1,5 +1,5 @@
 import { db, eq } from "@fixr/db/connection";
-import { clients } from "@fixr/db/schema";
+import { customers } from "@fixr/db/schema";
 import { describe, expect, it } from "vitest";
 import {
 	makeCategory,
@@ -17,7 +17,7 @@ async function managerSession() {
 	return await createEmployeeSession(app, { role: "manager" });
 }
 
-const clientBody = {
+const customerBody = {
 	name: "Maria Oliveira",
 	email: "maria@cliente.com",
 	cpf: "529.982.247-25",
@@ -27,14 +27,14 @@ const clientBody = {
 	city: "São Paulo",
 };
 
-describe("POST /companies/:subdomain/clients", () => {
-	it("creates a client with digits-only documents and phones", async () => {
+describe("POST /companies/:subdomain/customers", () => {
+	it("creates a customer with digits-only documents and phones", async () => {
 		const { token, company } = await managerSession();
 
 		const response = await authedInject(app, token, {
 			method: "POST",
-			url: `/companies/${company.subdomain}/clients`,
-			payload: clientBody,
+			url: `/companies/${company.subdomain}/customers`,
+			payload: customerBody,
 		});
 
 		expect(response.statusCode).toBe(201);
@@ -53,12 +53,12 @@ describe("POST /companies/:subdomain/clients", () => {
 
 		const response = await authedInject(app, token, {
 			method: "POST",
-			url: `/companies/${company.subdomain}/clients`,
-			payload: clientBody,
+			url: `/companies/${company.subdomain}/customers`,
+			payload: customerBody,
 		});
 
 		expect(response.statusCode).toBe(409);
-		expect(response.json().code).toBe("client_cpf_conflict");
+		expect(response.json().code).toBe("customer_cpf_conflict");
 	});
 
 	it("allows the same CPF in another company", async () => {
@@ -68,14 +68,14 @@ describe("POST /companies/:subdomain/clients", () => {
 
 		const response = await authedInject(app, token, {
 			method: "POST",
-			url: `/companies/${company.subdomain}/clients`,
-			payload: clientBody,
+			url: `/companies/${company.subdomain}/customers`,
+			payload: customerBody,
 		});
 
 		expect(response.statusCode).toBe(201);
 	});
 
-	it("restores a deleted client with the same CPF", async () => {
+	it("restores a deleted customer with the same CPF", async () => {
 		const { token, company } = await managerSession();
 		const deleted = await makeCustomer({
 			companyId: company.id,
@@ -85,8 +85,8 @@ describe("POST /companies/:subdomain/clients", () => {
 
 		const response = await authedInject(app, token, {
 			method: "POST",
-			url: `/companies/${company.subdomain}/clients`,
-			payload: clientBody,
+			url: `/companies/${company.subdomain}/customers`,
+			payload: customerBody,
 		});
 
 		expect(response.statusCode).toBe(201);
@@ -102,17 +102,17 @@ describe("POST /companies/:subdomain/clients", () => {
 
 		const response = await authedInject(app, token, {
 			method: "POST",
-			url: `/companies/${company.subdomain}/clients`,
-			payload: { ...clientBody, phone: "1234" },
+			url: `/companies/${company.subdomain}/customers`,
+			payload: { ...customerBody, phone: "1234" },
 		});
 
 		expect(response.statusCode).toBe(400);
-		expect(response.json().code).toBe("client_phone_invalid");
+		expect(response.json().code).toBe("customer_phone_invalid");
 	});
 });
 
-describe("GET /companies/:subdomain/clients", () => {
-	it("lists only active clients of the company, with search", async () => {
+describe("GET /companies/:subdomain/customers", () => {
+	it("lists only active customers of the company, with search", async () => {
 		const { token, company } = await managerSession();
 		const other = await makeCompany();
 		await makeCustomer({ companyId: company.id, name: "Ana Paula" });
@@ -126,11 +126,11 @@ describe("GET /companies/:subdomain/clients", () => {
 
 		const all = await authedInject(app, token, {
 			method: "GET",
-			url: `/companies/${company.subdomain}/clients?page=1&sort=name`,
+			url: `/companies/${company.subdomain}/customers?page=1&sort=name`,
 		});
 		const search = await authedInject(app, token, {
 			method: "GET",
-			url: `/companies/${company.subdomain}/clients?page=1&query=Ana`,
+			url: `/companies/${company.subdomain}/customers?page=1&query=Ana`,
 		});
 
 		expect(
@@ -140,14 +140,14 @@ describe("GET /companies/:subdomain/clients", () => {
 	});
 });
 
-describe("GET /companies/:subdomain/clients/:clientId", () => {
-	it("returns the client with their service orders in the company", async () => {
+describe("GET /companies/:subdomain/customers/:customerId", () => {
+	it("returns the customer with their service orders in the company", async () => {
 		const { token, company, employee } = await managerSession();
 		const customer = await makeCustomer({ companyId: company.id });
 		const [maker, category] = await Promise.all([makeMaker(), makeCategory()]);
 		await makeServiceOrder({
 			companyId: company.id,
-			clientId: customer.id,
+			customerId: customer.id,
 			employeeId: employee.id,
 			deviceMakerId: maker.id,
 			deviceCategoryId: category.id,
@@ -156,7 +156,7 @@ describe("GET /companies/:subdomain/clients/:clientId", () => {
 
 		const response = await authedInject(app, token, {
 			method: "GET",
-			url: `/companies/${company.subdomain}/clients/${customer.id}`,
+			url: `/companies/${company.subdomain}/customers/${customer.id}`,
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -166,29 +166,29 @@ describe("GET /companies/:subdomain/clients/:clientId", () => {
 		});
 	});
 
-	it("hides another company's client", async () => {
+	it("hides another company's customer", async () => {
 		const { token, company } = await managerSession();
 		const other = await makeCompany();
 		const foreign = await makeCustomer({ companyId: other.id });
 
 		const response = await authedInject(app, token, {
 			method: "GET",
-			url: `/companies/${company.subdomain}/clients/${foreign.id}`,
+			url: `/companies/${company.subdomain}/customers/${foreign.id}`,
 		});
 
 		expect(response.statusCode).toBe(404);
-		expect(response.json().code).toBe("client_not_found");
+		expect(response.json().code).toBe("customer_not_found");
 	});
 });
 
-describe("PATCH and DELETE /companies/:subdomain/clients/:clientId", () => {
-	it("updates the client", async () => {
+describe("PATCH and DELETE /companies/:subdomain/customers/:customerId", () => {
+	it("updates the customer", async () => {
 		const { token, company } = await managerSession();
 		const customer = await makeCustomer({ companyId: company.id });
 
 		const response = await authedInject(app, token, {
 			method: "PATCH",
-			url: `/companies/${company.subdomain}/clients/${customer.id}`,
+			url: `/companies/${company.subdomain}/customers/${customer.id}`,
 			payload: { city: "Campinas", alternativePhone: "(19) 3333-4444" },
 		});
 
@@ -198,14 +198,14 @@ describe("PATCH and DELETE /companies/:subdomain/clients/:clientId", () => {
 		});
 	});
 
-	it("refuses taking another client's CPF", async () => {
+	it("refuses taking another customer's CPF", async () => {
 		const { token, company } = await managerSession();
 		const first = await makeCustomer({ companyId: company.id });
 		const second = await makeCustomer({ companyId: company.id });
 
 		const response = await authedInject(app, token, {
 			method: "PATCH",
-			url: `/companies/${company.subdomain}/clients/${second.id}`,
+			url: `/companies/${company.subdomain}/customers/${second.id}`,
 			payload: { cpf: first.cpf },
 		});
 
@@ -219,14 +219,14 @@ describe("PATCH and DELETE /companies/:subdomain/clients/:clientId", () => {
 			company,
 		});
 		const customer = await makeCustomer({ companyId: company.id });
-		const url = `/companies/${company.subdomain}/clients/${customer.id}`;
+		const url = `/companies/${company.subdomain}/customers/${customer.id}`;
 
 		const deleted = await authedInject(app, token, { method: "DELETE", url });
 		const after = await authedInject(app, token, { method: "GET", url });
 		const [row] = await db
 			.select()
-			.from(clients)
-			.where(eq(clients.id, customer.id));
+			.from(customers)
+			.where(eq(customers.id, customer.id));
 
 		expect(deleted.statusCode).toBe(200);
 		expect(after.statusCode).toBe(404);

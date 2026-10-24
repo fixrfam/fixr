@@ -58,12 +58,12 @@ function isExpired(estimate: { validUntil: Date }) {
 }
 
 function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
-	const { clientName, ...estimate } = row;
+	const { customerName, ...estimate } = row;
 	return {
 		...estimate,
-		client:
-			estimate.clientId && clientName
-				? { id: estimate.clientId, name: clientName }
+		customer:
+			estimate.customerId && customerName
+				? { id: estimate.customerId, name: customerName }
 				: null,
 		totals: estimateTotals(items, estimate.discountPercentage),
 	};
@@ -240,7 +240,7 @@ export class EstimatesService {
 			{
 				companyId,
 				serviceOrderId: serviceOrder.id,
-				clientId: serviceOrder.clientId,
+				customerId: serviceOrder.customerId,
 				createdBy: employee?.id ?? null,
 				discountPercentage: data.discountPercentage ?? 0,
 				validUntil:
@@ -351,7 +351,7 @@ export class EstimatesService {
 
 	/**
 	 * Staff-side status change. It has the same effects on the service order as
-	 * the client's link, and going back to draft disables the link.
+	 * the customer's link, and going back to draft disables the link.
 	 */
 	private static async applyStatus(
 		estimate: EstimateRow,
@@ -385,7 +385,7 @@ export class EstimatesService {
 	}
 
 	/**
-	 * Email the estimate to the client with the PDF attached and a public link
+	 * Email the estimate to the customer with the PDF attached and a public link
 	 * to approve or reject it. Sending again issues a new link and the previous
 	 * one stops working.
 	 */
@@ -421,10 +421,10 @@ export class EstimatesService {
 			throw new AppError("ESTIMATE_EXPIRED");
 		}
 
-		const { pdf, fileName, detail, context, client } =
+		const { pdf, fileName, detail, context, customer } =
 			await EstimatesService.buildPdf(estimateId, companyId, locale);
 
-		const recipient = email || client?.email;
+		const recipient = email || customer?.email;
 		if (!recipient) {
 			throw new AppError("ESTIMATE_NO_RECIPIENT");
 		}
@@ -442,7 +442,7 @@ export class EstimatesService {
 				to: recipient,
 				appName: APP_NAME,
 				locale,
-				clientName: client?.name ?? recipient,
+				customerName: customer?.name ?? recipient,
 				companyName: context.company.name,
 				number: String(detail.number).padStart(4, "0"),
 				device: `${context.device.maker} ${context.device.model}`,
@@ -458,7 +458,7 @@ export class EstimatesService {
 				status: 200,
 				error: null,
 				code: "send_estimate_success",
-				message: "Estimate sent to the client.",
+				message: "Estimate sent to the customer.",
 				data: await EstimatesService.detail(estimateId, companyId),
 			})
 		);
@@ -475,7 +475,7 @@ export class EstimatesService {
 		return estimate;
 	}
 
-	/** What the client sees on the public page: no internal ids or staff data. */
+	/** What the customer sees on the public page: no internal ids or staff data. */
 	private static async publicView(estimate: EstimateRow) {
 		const [items, context] = await Promise.all([
 			EstimatesRepository.queryItemsByEstimateIds([estimate.id]),
@@ -503,7 +503,7 @@ export class EstimatesService {
 				website: context.company.website,
 				logoUrl: context.company.logoUrl,
 			},
-			client: record.client ? { name: record.client.name } : null,
+			customer: record.customer ? { name: record.customer.name } : null,
 			device: context.device,
 			items: record.items.map((item) => ({
 				type: item.type,
@@ -559,7 +559,7 @@ export class EstimatesService {
 			.send(pdf);
 	}
 
-	/** The client approves or rejects the estimate from the public link. */
+	/** The customer approves or rejects the estimate from the public link. */
 	static async answerEstimate({
 		token,
 		answer,
@@ -640,10 +640,10 @@ export class EstimatesService {
 	/** Render the estimate PDF of a company (also used by the email flow). */
 	static async buildPdf(estimateId: string, companyId: string, locale: Locale) {
 		const estimate = await EstimatesService.detail(estimateId, companyId);
-		const [context, client] = await Promise.all([
+		const [context, customer] = await Promise.all([
 			EstimatesRepository.queryPdfContext(estimateId),
-			estimate.clientId
-				? EstimatesRepository.queryClient(estimate.clientId)
+			estimate.customerId
+				? EstimatesRepository.queryCustomer(estimate.customerId)
 				: Promise.resolve(null),
 		]);
 		if (!context) {
@@ -659,7 +659,7 @@ export class EstimatesService {
 				discountPercentage: estimate.discountPercentage,
 				notes: estimate.notes,
 				company: { ...company, logo: await fetchLogo(logoUrl) },
-				client,
+				customer,
 				device: context.device,
 				items: estimate.items,
 				totals: estimate.totals,
@@ -671,7 +671,7 @@ export class EstimatesService {
 			number: String(estimate.number).padStart(4, "0"),
 		});
 
-		return { pdf, fileName, detail: estimate, context, client };
+		return { pdf, fileName, detail: estimate, context, customer };
 	}
 
 	static async getEstimatePdf({

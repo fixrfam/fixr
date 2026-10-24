@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createClientSchema } from "./clients";
+import { createCustomerSchema } from "./customers";
 import { issuePaths } from "./test-utils";
 
-const validClient = {
+const validCustomer = {
 	name: "Maria",
 	email: "maria@fixr.test",
 	cpf: "52998224725",
@@ -12,9 +12,9 @@ const validClient = {
 	city: "São Paulo",
 };
 
-describe("createClientSchema", () => {
-	it("accepts a valid client", () => {
-		expect(createClientSchema.safeParse(validClient).success).toBe(true);
+describe("createCustomerSchema", () => {
+	it("accepts a valid customer", () => {
+		expect(createCustomerSchema.safeParse(validCustomer).success).toBe(true);
 	});
 
 	it.each([
@@ -26,19 +26,19 @@ describe("createClientSchema", () => {
 		"city",
 	])("rejects an empty %s", (field) => {
 		expect(
-			issuePaths(createClientSchema, { ...validClient, [field]: "" })
+			issuePaths(createCustomerSchema, { ...validCustomer, [field]: "" })
 		).toContain(field);
 	});
 
 	it("requires cpf (check digits are only validated in production)", () => {
-		const { cpf: _cpf, ...input } = validClient;
+		const { cpf: _cpf, ...input } = validCustomer;
 
-		expect(issuePaths(createClientSchema, input)).toEqual(["cpf"]);
+		expect(issuePaths(createCustomerSchema, input)).toEqual(["cpf"]);
 	});
 
 	it("limits state to a 2-letter UF", () => {
 		expect(
-			issuePaths(createClientSchema, { ...validClient, state: "SPX" })
+			issuePaths(createCustomerSchema, { ...validCustomer, state: "SPX" })
 		).toEqual(["state"]);
 	});
 });

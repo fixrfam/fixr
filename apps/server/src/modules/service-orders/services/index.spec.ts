@@ -9,7 +9,7 @@ const { dbMock, repo, pagination } = vi.hoisted(() => ({
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		queryEmployeeByUserId: vi.fn(),
-		queryClientById: vi.fn(),
+		queryCustomerById: vi.fn(),
 		queryDeviceMakerById: vi.fn(),
 		queryDeviceCategoryById: vi.fn(),
 		createWithPhotos: vi.fn(),
@@ -120,7 +120,7 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 		});
 	});
 
-	it("only joins on the count query when searching (the search spans the client name)", async () => {
+	it("only joins on the count query when searching (the search spans the customer name)", async () => {
 		await list().promise;
 		expect(pagination.getPaginatedCount).toHaveBeenLastCalledWith(
 			expect.objectContaining({ joins: undefined })
@@ -190,7 +190,7 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 
 describe("ServiceOrdersService.createServiceOrder", () => {
 	const data = {
-		clientId: createId(),
+		customerId: createId(),
 		deviceBrandId: createId(),
 		deviceCategoryId: createId(),
 		deviceModel: "iPhone 12",
@@ -201,8 +201,8 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 
 	beforeEach(() => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
-		repo.queryClientById.mockResolvedValue({
-			id: data.clientId,
+		repo.queryCustomerById.mockResolvedValue({
+			id: data.customerId,
 			companyId,
 			deletedAt: null,
 		});
@@ -287,7 +287,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 	});
 
 	it.each([
-		["client", "queryClientById", "client_not_found"],
+		["customer", "queryCustomerById", "customer_not_found"],
 		["device maker", "queryDeviceMakerById", "device_brand_not_found"],
 		["device category", "queryDeviceCategoryById", "device_category_not_found"],
 	] as const)("rejects an unknown %s", async (_label, method, code) => {
@@ -299,12 +299,15 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 
 	it.each([
 		["another company", { companyId: createId(), deletedAt: null }],
-		["a deleted client", { companyId, deletedAt: new Date() }],
-	])("rejects a client of %s", async (_label, client) => {
-		repo.queryClientById.mockResolvedValue({ id: data.clientId, ...client });
+		["a deleted customer", { companyId, deletedAt: new Date() }],
+	])("rejects a customer of %s", async (_label, customer) => {
+		repo.queryCustomerById.mockResolvedValue({
+			id: data.customerId,
+			...customer,
+		});
 
 		await expect(create().promise).rejects.toMatchObject({
-			code: "client_not_found",
+			code: "customer_not_found",
 		});
 		expect(repo.createWithPhotos).not.toHaveBeenCalled();
 	});

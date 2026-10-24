@@ -15,7 +15,7 @@ export interface EstimatePdfData {
 		/** Logo image bytes, or null to print the Fixr logo. */
 		logo: Buffer | null;
 	};
-	client: {
+	customer: {
 		name: string;
 		cpf: string;
 		email: string | null;

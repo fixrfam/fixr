@@ -44,7 +44,7 @@ describe("authenticatePortal", () => {
 			id: "s1",
 			cpf: "52998224725",
 			email: "maria@fixr.test",
-			clientId: "c1",
+			customerId: "c1",
 		});
 		const req = request({ [PORTAL_SESSION_COOKIE]: "tok" });
 
@@ -57,7 +57,7 @@ describe("authenticatePortal", () => {
 			sessionId: "s1",
 			cpf: "52998224725",
 			email: "maria@fixr.test",
-			clientId: "c1",
+			customerId: "c1",
 		});
 	});
 });

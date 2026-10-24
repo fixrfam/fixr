@@ -11,8 +11,8 @@ import {
 	sql,
 } from "@fixr/db/connection";
 import {
-	clients,
 	companies,
+	customers,
 	estimates,
 	modelMakers,
 	portalLinks,
@@ -25,24 +25,24 @@ import {
 export interface PortalIdentity {
 	cpf: string;
 	email: string;
-	/** Client record the access was issued for, always in scope. */
-	clientId: string | null;
+	/** Customer record the access was issued for, always in scope. */
+	customerId: string | null;
 }
 
-/** @description Data access layer for the client portal */
+/** @description Data access layer for the customer portal */
 export class PortalRepository {
 	static async insertLink(values: typeof portalLinks.$inferInsert) {
 		await db.insert(portalLinks).values(values);
 	}
 
-	/** Revoke the links a shop sent to one of its clients. */
-	static async revokeShopLinks(clientId: string, companyId: string) {
+	/** Revoke the links a shop sent to one of its customers. */
+	static async revokeShopLinks(customerId: string, companyId: string) {
 		await db
 			.update(portalLinks)
 			.set({ revokedAt: new Date() })
 			.where(
 				and(
-					eq(portalLinks.clientId, clientId),
+					eq(portalLinks.customerId, customerId),
 					eq(portalLinks.companyId, companyId),
 					isNull(portalLinks.revokedAt)
 				)
@@ -78,7 +78,7 @@ export class PortalRepository {
 				id: portalSessions.id,
 				cpf: portalSessions.cpf,
 				email: portalSessions.email,
-				clientId: portalSessions.clientId,
+				customerId: portalSessions.customerId,
 			})
 			.from(portalSessions)
 			.leftJoin(portalLinks, eq(portalLinks.id, portalSessions.portalLinkId))
@@ -99,58 +99,61 @@ export class PortalRepository {
 			.where(eq(portalSessions.tokenHash, tokenHash));
 	}
 
-	/** Client records (any shop) registered with this email. */
-	static async queryClientsByEmail(email: string) {
+	/** Customer records (any shop) registered with this email. */
+	static async queryCustomersByEmail(email: string) {
 		return await db
-			.select({ id: clients.id, cpf: clients.cpf, name: clients.name })
-			.from(clients)
+			.select({ id: customers.id, cpf: customers.cpf, name: customers.name })
+			.from(customers)
 			.where(
-				and(sql`LOWER(${clients.email}) = ${email}`, isNull(clients.deletedAt))
+				and(
+					sql`LOWER(${customers.email}) = ${email}`,
+					isNull(customers.deletedAt)
+				)
 			)
-			.orderBy(desc(clients.createdAt));
+			.orderBy(desc(customers.createdAt));
 	}
 
-	static async queryClient(clientId: string) {
-		const [client] = await db
+	static async queryCustomer(customerId: string) {
+		const [customer] = await db
 			.select({
-				id: clients.id,
-				companyId: clients.companyId,
-				cpf: clients.cpf,
-				name: clients.name,
-				email: clients.email,
-				deletedAt: clients.deletedAt,
+				id: customers.id,
+				companyId: customers.companyId,
+				cpf: customers.cpf,
+				name: customers.name,
+				email: customers.email,
+				deletedAt: customers.deletedAt,
 			})
-			.from(clients)
-			.where(eq(clients.id, clientId))
+			.from(customers)
+			.where(eq(customers.id, customerId))
 			.limit(1);
-		return client ?? null;
+		return customer ?? null;
 	}
 
 	/**
-	 * Client records the identity can see: same CPF and same email in any shop,
+	 * Customer records the identity can see: same CPF and same email in any shop,
 	 * plus the record the access was issued for. Deleted records are hidden.
 	 */
-	static async queryScopeClients(identity: PortalIdentity) {
+	static async queryScopeCustomers(identity: PortalIdentity) {
 		const sameIdentity = and(
-			eq(clients.cpf, identity.cpf),
-			sql`LOWER(${clients.email}) = ${identity.email}`
+			eq(customers.cpf, identity.cpf),
+			sql`LOWER(${customers.email}) = ${identity.email}`
 		);
 		return await db
-			.select({ id: clients.id, name: clients.name })
-			.from(clients)
+			.select({ id: customers.id, name: customers.name })
+			.from(customers)
 			.where(
 				and(
-					isNull(clients.deletedAt),
-					identity.clientId
-						? or(sameIdentity, eq(clients.id, identity.clientId))
+					isNull(customers.deletedAt),
+					identity.customerId
+						? or(sameIdentity, eq(customers.id, identity.customerId))
 						: sameIdentity
 				)
 			)
-			.orderBy(desc(clients.updatedAt));
+			.orderBy(desc(customers.updatedAt));
 	}
 
-	static async queryServiceOrders(clientIds: string[]) {
-		if (clientIds.length === 0) {
+	static async queryServiceOrders(customerIds: string[]) {
+		if (customerIds.length === 0) {
 			return [];
 		}
 		return await db
@@ -171,12 +174,15 @@ export class PortalRepository {
 			.from(serviceOrders)
 			.innerJoin(companies, eq(companies.id, serviceOrders.companyId))
 			.innerJoin(modelMakers, eq(modelMakers.id, serviceOrders.deviceMakerId))
-			.where(inArray(serviceOrders.clientId, clientIds))
+			.where(inArray(serviceOrders.customerId, customerIds))
 			.orderBy(desc(serviceOrders.createdAt));
 	}
 
-	static async queryServiceOrder(serviceOrderId: string, clientIds: string[]) {
-		if (clientIds.length === 0) {
+	static async queryServiceOrder(
+		serviceOrderId: string,
+		customerIds: string[]
+	) {
+		if (customerIds.length === 0) {
 			return null;
 		}
 		const [serviceOrder] = await db
@@ -204,7 +210,7 @@ export class PortalRepository {
 			.where(
 				and(
 					eq(serviceOrders.id, serviceOrderId),
-					inArray(serviceOrders.clientId, clientIds)
+					inArray(serviceOrders.customerId, customerIds)
 				)
 			)
 			.limit(1);
@@ -224,7 +230,7 @@ export class PortalRepository {
 			.orderBy(serviceOrderItems.createdAt);
 	}
 
-	/** Estimates the client was sent (drafts stay internal to the shop). */
+	/** Estimates the customer was sent (drafts stay internal to the shop). */
 	static async queryServiceOrderEstimates(serviceOrderId: string) {
 		return await db
 			.select({
@@ -247,8 +253,8 @@ export class PortalRepository {
 	}
 
 	/** An estimate of a service order in scope, unless it is still a draft. */
-	static async queryEstimate(estimateId: string, clientIds: string[]) {
-		if (clientIds.length === 0) {
+	static async queryEstimate(estimateId: string, customerIds: string[]) {
+		if (customerIds.length === 0) {
 			return null;
 		}
 		const [estimate] = await db
@@ -265,7 +271,7 @@ export class PortalRepository {
 				and(
 					eq(estimates.id, estimateId),
 					ne(estimates.status, "draft"),
-					inArray(serviceOrders.clientId, clientIds)
+					inArray(serviceOrders.customerId, customerIds)
 				)
 			)
 			.limit(1);

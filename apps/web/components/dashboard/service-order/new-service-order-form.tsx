@@ -46,7 +46,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { NewClientForm } from "../clients/new-client-form";
+import { NewCustomerForm } from "../customers/new-customer-form";
 
 /** Developer-facing: this never reaches the screen, only the console. */
 const IMAGE_READ_ERROR = "Failed to read the image file";
@@ -179,12 +179,12 @@ export function NewServiceOrderForm({
 							render={({ field }) => (
 								<FormItem className="grow">
 									<FormLabel>
-										{t("serviceOrders.form.clientDocumentLabel")}
+										{t("serviceOrders.form.customerDocumentLabel")}
 									</FormLabel>
 									<FormControl>
 										<Input
 											placeholder={t(
-												"serviceOrders.form.clientDocumentPlaceholder"
+												"serviceOrders.form.customerDocumentPlaceholder"
 											)}
 											{...field}
 											onInput={(e) =>
@@ -202,20 +202,20 @@ export function NewServiceOrderForm({
 					<Sheet>
 						<SheetTrigger asChild className="mt-5.5">
 							<Button className="shrink-0" type="button">
-								{t("serviceOrders.form.newClient")}{" "}
+								{t("serviceOrders.form.newCustomer")}{" "}
 								<UserPlus className="size-4" />
 							</Button>
 						</SheetTrigger>
 						<SheetContent>
 							<SheetHeader>
 								<SheetTitle>
-									{t("serviceOrders.form.newClientTitle")}
+									{t("serviceOrders.form.newCustomerTitle")}
 								</SheetTitle>
 								<SheetDescription>
-									{t("serviceOrders.form.newClientDescription")}
+									{t("serviceOrders.form.newCustomerDescription")}
 								</SheetDescription>
 							</SheetHeader>
-							<NewClientForm
+							<NewCustomerForm
 								className="px-4"
 								onCustomerCreated={handleCustomerCreated}
 							/>

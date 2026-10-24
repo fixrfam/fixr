@@ -1,5 +1,5 @@
-export { makeClient, makeCustomer } from "./client";
 export { makeCompany, type TestCompany } from "./company";
+export { makeCustomer, makeCustomerAccount } from "./customer";
 export {
 	makeCategory,
 	makeMaker,

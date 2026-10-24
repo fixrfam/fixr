@@ -17,7 +17,7 @@ const data: EstimatePdfData = {
 		website: "https://alfa.dev",
 		logo: null,
 	},
-	client: {
+	customer: {
 		name: "Maria Oliveira",
 		cpf: "52998224725",
 		email: "maria@cliente.com",
@@ -59,8 +59,8 @@ describe("renderEstimatePdf", () => {
 		).toBeGreaterThan(1);
 	});
 
-	it("renders without a client", async () => {
-		const pdf = await renderEstimatePdf({ ...data, client: null }, "pt-BR");
+	it("renders without a customer", async () => {
+		const pdf = await renderEstimatePdf({ ...data, customer: null }, "pt-BR");
 
 		expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
 	});
