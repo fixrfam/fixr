@@ -12,7 +12,7 @@ import { useRedirectWithoutSession } from "./use-portal-session";
 
 export const portalServiceOrdersKey = ["portal", "service-orders"];
 
-/** Every service order of the client, in any shop. */
+/** Every service order of the customer, in any shop. */
 export function PortalHome() {
 	const { t, format } = useTranslation();
 	const { data, isPending, error } = useQuery({

@@ -81,7 +81,7 @@ export const COMPANIES: SeedCompany[] = [
 	},
 ];
 
-export const CLIENTS = [
+export const CUSTOMERS = [
 	{
 		name: "Carla Souza",
 		email: "carla@cliente.dev",
@@ -187,7 +187,7 @@ type OrderStatus =
 
 interface SeedOrder {
 	company: string;
-	client: number;
+	customer: number;
 	technician: string;
 	maker: string;
 	model: string;
@@ -197,11 +197,11 @@ interface SeedOrder {
 	daysAgo: number;
 }
 
-/** `client` is an index into {@link CLIENTS}, `technician` an employee email. */
+/** `customer` is an index into {@link CUSTOMERS}, `technician` an employee email. */
 export const SERVICE_ORDERS: SeedOrder[] = [
 	{
 		company: "alfa",
-		client: 0,
+		customer: 0,
 		technician: "technician@alfa.dev",
 		maker: "apple",
 		model: "iPhone 13",
@@ -211,7 +211,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 1,
+		customer: 1,
 		technician: "technician@alfa.dev",
 		maker: "samsung",
 		model: "Galaxy S23",
@@ -221,7 +221,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 2,
+		customer: 2,
 		technician: "technician2@alfa.dev",
 		maker: "motorola",
 		model: "Moto G84",
@@ -232,7 +232,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 3,
+		customer: 3,
 		technician: "technician@alfa.dev",
 		maker: "apple",
 		model: "MacBook Air M2",
@@ -242,7 +242,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 4,
+		customer: 4,
 		technician: "technician2@alfa.dev",
 		maker: "xiaomi",
 		model: "Redmi Note 13",
@@ -252,7 +252,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 0,
+		customer: 0,
 		technician: "technician@alfa.dev",
 		maker: "samsung",
 		model: "Galaxy Tab S9",
@@ -262,7 +262,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 1,
+		customer: 1,
 		technician: "technician2@alfa.dev",
 		maker: "lenovo",
 		model: "IdeaPad 3",
@@ -273,7 +273,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "alfa",
-		client: 2,
+		customer: 2,
 		technician: "technician@alfa.dev",
 		maker: "apple",
 		model: "iPhone 15 Pro",
@@ -283,7 +283,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "beta",
-		client: 3,
+		customer: 3,
 		technician: "technician@beta.dev",
 		maker: "motorola",
 		model: "Edge 40",
@@ -293,7 +293,7 @@ export const SERVICE_ORDERS: SeedOrder[] = [
 	},
 	{
 		company: "beta",
-		client: 4,
+		customer: 4,
 		technician: "technician@beta.dev",
 		maker: "xiaomi",
 		model: "Poco X6",

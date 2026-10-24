@@ -57,7 +57,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			"summary",
 			"device",
 			"technician",
-			"client",
+			"customer",
 			"lifecycle",
 			"parts",
 			"images",

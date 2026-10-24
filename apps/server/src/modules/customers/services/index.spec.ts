@@ -6,22 +6,22 @@ const { repo, pagination } = vi.hoisted(() => ({
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		buildOrder: vi.fn(() => "ORDER"),
-		queryClientById: vi.fn(),
-		queryClientByCpf: vi.fn(),
+		queryCustomerById: vi.fn(),
+		queryCustomerByCpf: vi.fn(),
 		queryRecentServiceOrders: vi.fn(),
-		insertClient: vi.fn(),
-		updateClient: vi.fn(),
+		insertCustomer: vi.fn(),
+		updateCustomer: vi.fn(),
 	},
 	pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
 }));
 
-vi.mock("../repositories", () => ({ ClientsRepository: repo }));
+vi.mock("../repositories", () => ({ CustomersRepository: repo }));
 vi.mock("../../../core/lib/pagination", async (importOriginal) => ({
 	...(await importOriginal<object>()),
 	...pagination,
 }));
 
-const { ClientsService } = await import(".");
+const { CustomersService } = await import(".");
 
 const companyId = createId();
 const userJwt = {
@@ -38,7 +38,7 @@ const userJwt = {
 		role: "manager" as const,
 	},
 };
-const client = {
+const customer = {
 	id: createId(),
 	companyId,
 	cpf: "52998224725",
@@ -55,7 +55,7 @@ const body = {
 };
 
 const create = (data = body) =>
-	ClientsService.createClient({
+	CustomersService.createCustomer({
 		userJwt,
 		subdomain: "fixr",
 		data,
@@ -66,15 +66,15 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
-describe("ClientsService.createClient", () => {
+describe("CustomersService.createCustomer", () => {
 	it("normalizes documents, phones and state before inserting", async () => {
-		repo.queryClientByCpf.mockResolvedValue(null);
-		repo.insertClient.mockResolvedValue(client.id);
-		repo.queryClientById.mockResolvedValue(client);
+		repo.queryCustomerByCpf.mockResolvedValue(null);
+		repo.insertCustomer.mockResolvedValue(customer.id);
+		repo.queryCustomerById.mockResolvedValue(customer);
 
 		await create();
 
-		expect(repo.insertClient).toHaveBeenCalledWith(
+		expect(repo.insertCustomer).toHaveBeenCalledWith(
 			expect.objectContaining({
 				companyId,
 				cpf: "52998224725",
@@ -84,100 +84,103 @@ describe("ClientsService.createClient", () => {
 		);
 	});
 
-	it("refuses an active client with the same CPF", async () => {
-		repo.queryClientByCpf.mockResolvedValue({ id: client.id, deletedAt: null });
+	it("refuses an active customer with the same CPF", async () => {
+		repo.queryCustomerByCpf.mockResolvedValue({
+			id: customer.id,
+			deletedAt: null,
+		});
 
 		await expect(create()).rejects.toMatchObject({
-			code: "client_cpf_conflict",
+			code: "customer_cpf_conflict",
 		});
 	});
 
-	it("restores a deleted client with the same CPF", async () => {
-		repo.queryClientByCpf.mockResolvedValue({
-			id: client.id,
+	it("restores a deleted customer with the same CPF", async () => {
+		repo.queryCustomerByCpf.mockResolvedValue({
+			id: customer.id,
 			deletedAt: new Date(),
 		});
-		repo.queryClientById.mockResolvedValue(client);
+		repo.queryCustomerById.mockResolvedValue(customer);
 
 		await create();
 
-		expect(repo.insertClient).not.toHaveBeenCalled();
-		expect(repo.updateClient).toHaveBeenCalledWith(
-			client.id,
+		expect(repo.insertCustomer).not.toHaveBeenCalled();
+		expect(repo.updateCustomer).toHaveBeenCalledWith(
+			customer.id,
 			expect.objectContaining({ deletedAt: null, alternativePhone: null })
 		);
 	});
 
 	it("rejects a phone that is not 10 or 11 digits", async () => {
 		await expect(create({ ...body, phone: "123" })).rejects.toMatchObject({
-			code: "client_phone_invalid",
+			code: "customer_phone_invalid",
 		});
 	});
 });
 
-describe("ClientsService.getClient", () => {
+describe("CustomersService.getCustomer", () => {
 	it.each([
-		["another company", { ...client, companyId: createId() }],
-		["a deleted client", { ...client, deletedAt: new Date() }],
+		["another company", { ...customer, companyId: createId() }],
+		["a deleted customer", { ...customer, deletedAt: new Date() }],
 	])("reports %s as not found", async (_label, stored) => {
-		repo.queryClientById.mockResolvedValue(stored);
+		repo.queryCustomerById.mockResolvedValue(stored);
 
 		await expect(
-			ClientsService.getClient({
+			CustomersService.getCustomer({
 				userJwt,
 				subdomain: "fixr",
-				clientId: client.id,
+				customerId: customer.id,
 				response: asReply(createFakeReply()),
 			})
-		).rejects.toMatchObject({ code: "client_not_found" });
+		).rejects.toMatchObject({ code: "customer_not_found" });
 	});
 
 	it("includes the recent service orders of the company", async () => {
-		repo.queryClientById.mockResolvedValue(client);
+		repo.queryCustomerById.mockResolvedValue(customer);
 		repo.queryRecentServiceOrders.mockResolvedValue([{ id: "so" }]);
 		const reply = createFakeReply();
 
-		await ClientsService.getClient({
+		await CustomersService.getCustomer({
 			userJwt,
 			subdomain: "fixr",
-			clientId: client.id,
+			customerId: customer.id,
 			response: asReply(reply),
 		});
 
 		expect(repo.queryRecentServiceOrders).toHaveBeenCalledWith(
-			client.id,
+			customer.id,
 			companyId
 		);
 		expect(reply.state.body).toMatchObject({
-			data: { id: client.id, serviceOrders: [{ id: "so" }] },
+			data: { id: customer.id, serviceOrders: [{ id: "so" }] },
 		});
 	});
 });
 
-describe("ClientsService.deleteClient", () => {
-	it("marks the client as deleted instead of removing it", async () => {
-		repo.queryClientById.mockResolvedValue(client);
+describe("CustomersService.deleteCustomer", () => {
+	it("marks the customer as deleted instead of removing it", async () => {
+		repo.queryCustomerById.mockResolvedValue(customer);
 
-		await ClientsService.deleteClient({
+		await CustomersService.deleteCustomer({
 			userJwt,
 			subdomain: "fixr",
-			clientId: client.id,
+			customerId: customer.id,
 			response: asReply(createFakeReply()),
 		});
 
-		expect(repo.updateClient).toHaveBeenCalledWith(client.id, {
+		expect(repo.updateCustomer).toHaveBeenCalledWith(customer.id, {
 			deletedAt: expect.any(Date),
 		});
 	});
 });
 
-describe("ClientsService.listClients", () => {
+describe("CustomersService.listCustomers", () => {
 	it("throws past the last page", async () => {
 		pagination.getPaginatedRecords.mockResolvedValue([]);
 		pagination.getPaginatedCount.mockResolvedValue(2);
 
 		await expect(
-			ClientsService.listClients({
+			CustomersService.listCustomers({
 				userJwt,
 				subdomain: "fixr",
 				page: 3,

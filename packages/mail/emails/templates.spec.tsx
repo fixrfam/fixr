@@ -87,7 +87,7 @@ describe("invite email", () => {
 
 describe("estimate email", () => {
 	const props = {
-		clientName: "Maria",
+		customerName: "Maria",
 		companyName: "Assistência Central",
 		number: "0042",
 		device: "Galaxy S21",
@@ -108,7 +108,7 @@ describe("estimate email", () => {
 	it("escapes values that carry markup", async () => {
 		const html = await renderEstimate({
 			...props,
-			clientName: "<script>x</script>",
+			customerName: "<script>x</script>",
 		});
 
 		expect(html).not.toContain("<script>x</script>");
@@ -123,7 +123,7 @@ describe("estimate email", () => {
 
 describe("portal access email", () => {
 	const props = {
-		clientName: "Maria",
+		customerName: "Maria",
 		companyName: "Assistência Central",
 		ctaUrl: "https://fixr.test/portal/tok3n",
 	};

@@ -24,17 +24,17 @@ import React from "react";
 import { FixrHeader } from "../components/fixr-header";
 
 export interface EmailProps {
-	clientName: string;
-	/** Shop that sent the access; null when the client asked for the link. */
+	customerName: string;
+	/** Shop that sent the access; null when the customer asked for the link. */
 	companyName: string | null;
-	/** Portal entry link (the client's account). */
+	/** Portal entry link (the customer's account). */
 	ctaUrl: string;
 	/** Language of the recipient. Defaults to the app's default locale. */
 	locale?: Locale;
 }
 
 export const PortalAccess = ({
-	clientName,
+	customerName,
 	ctaUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
@@ -64,7 +64,9 @@ export const PortalAccess = ({
 						<Text
 							className="my-0 text-lg tracking-tight"
 							dangerouslySetInnerHTML={{
-								__html: t("emails.portalAccess.greeting", { name: clientName }),
+								__html: t("emails.portalAccess.greeting", {
+									name: customerName,
+								}),
 							}}
 						/>
 						<Heading className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:mb-[32px] md:text-3xl">
@@ -95,7 +97,7 @@ export const PortalAccess = ({
 };
 
 PortalAccess.PreviewProps = {
-	clientName: "Maria",
+	customerName: "Maria",
 	companyName: "Central Assistência",
 	ctaUrl: "http://localhost:3000/portal/token",
 	locale: "pt-BR",

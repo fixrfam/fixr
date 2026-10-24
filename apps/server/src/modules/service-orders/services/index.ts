@@ -163,15 +163,15 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
 		}
 
-		const [client, deviceMaker, deviceCategory] = await Promise.all([
-			ServiceOrdersRepository.queryClientById(data.clientId),
+		const [customer, deviceMaker, deviceCategory] = await Promise.all([
+			ServiceOrdersRepository.queryCustomerById(data.customerId),
 			ServiceOrdersRepository.queryDeviceMakerById(data.deviceBrandId),
 			ServiceOrdersRepository.queryDeviceCategoryById(data.deviceCategoryId),
 		]);
 
-		// Clients are company-scoped: another company's (or a deleted) client doesn't exist here.
-		if (!client || client.companyId !== companyId || client.deletedAt) {
-			throw new AppError("SERVICE_ORDER_CLIENT_NOT_FOUND");
+		// Customers are company-scoped: another company's (or a deleted) customer doesn't exist here.
+		if (!customer || customer.companyId !== companyId || customer.deletedAt) {
+			throw new AppError("SERVICE_ORDER_CUSTOMER_NOT_FOUND");
 		}
 		if (!deviceMaker) {
 			throw new AppError("SERVICE_ORDER_DEVICE_BRAND_NOT_FOUND");

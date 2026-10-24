@@ -27,7 +27,7 @@ export function OrderNumberCell({
 	);
 }
 
-export function ClientCell({
+export function CustomerCell({
 	name,
 	phone,
 	cpf,

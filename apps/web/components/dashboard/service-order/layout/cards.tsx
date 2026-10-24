@@ -108,24 +108,24 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
-		client: (
+		customer: (
 			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.clientDescription")}
+				description={t("serviceOrders.cards.customerDescription")}
 				icon={FileUser}
-				title={t("serviceOrders.cards.clientTitle")}
+				title={t("serviceOrders.cards.customerTitle")}
 			>
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.name")}
-						value={order.client.name}
+						value={order.customer.name}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.document")}
-						value={order.client.cpf}
+						value={order.customer.cpf}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.phone")}
-						value={order.client.phone}
+						value={order.customer.phone}
 					/>
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>

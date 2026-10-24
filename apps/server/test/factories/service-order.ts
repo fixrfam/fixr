@@ -7,7 +7,7 @@ import { nextSeq } from "./sequence";
 
 export async function makeServiceOrder(input: {
 	companyId: string;
-	clientId: string;
+	customerId: string;
 	employeeId: string;
 	deviceMakerId: string;
 	deviceCategoryId: string;
@@ -18,7 +18,7 @@ export async function makeServiceOrder(input: {
 	const serviceOrder = {
 		id: createId(),
 		companyId: input.companyId,
-		clientId: input.clientId,
+		customerId: input.customerId,
 		employeeId: input.employeeId,
 		deviceMakerId: input.deviceMakerId,
 		deviceCategoryId: input.deviceCategoryId,

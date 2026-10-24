@@ -26,22 +26,22 @@ let seq = 0;
 const uniqueCpf = () =>
 	`${Date.now() % 1e9}${String(seq++).padStart(2, "0")}`.slice(-11);
 
-/** A shop (manager) with a client and one service order of that client. */
-async function shopWithOrder(client: { cpf: string; email: string | null }) {
+/** A shop (manager) with a customer and one service order of that customer. */
+async function shopWithOrder(person: { cpf: string; email: string | null }) {
 	const session = await createEmployeeSession(app, { role: "manager" });
 	const [customer, maker, category] = await Promise.all([
 		makeCustomer({
 			companyId: session.company.id,
 			name: "Maria Oliveira",
-			cpf: client.cpf,
-			email: client.email,
+			cpf: person.cpf,
+			email: person.email,
 		}),
 		makeMaker({ name: "Apple" }),
 		makeCategory(),
 	]);
 	const serviceOrder = await makeServiceOrder({
 		companyId: session.company.id,
-		clientId: customer.id,
+		customerId: customer.id,
 		employeeId: session.employee.id,
 		deviceMakerId: maker.id,
 		deviceCategoryId: category.id,
@@ -55,7 +55,7 @@ type Shop = Awaited<ReturnType<typeof shopWithOrder>>;
 function sendAccess(shop: Shop) {
 	return authedInject(app, shop.token, {
 		method: "POST",
-		url: `/companies/${shop.company.subdomain}/clients/${shop.customer.id}/portal-access`,
+		url: `/companies/${shop.company.subdomain}/customers/${shop.customer.id}/portal-access`,
 	});
 }
 
@@ -119,16 +119,16 @@ describe("shop sends portal access", () => {
 		});
 	});
 
-	it("needs the client's email", async () => {
+	it("needs the customer's email", async () => {
 		const shop = await shopWithOrder({ cpf: uniqueCpf(), email: null });
 
 		const response = await sendAccess(shop);
 
 		expect(response.statusCode).toBe(400);
-		expect(response.json().code).toBe("portal_client_no_email");
+		expect(response.json().code).toBe("portal_customer_no_email");
 	});
 
-	it("does not send access to another company's client", async () => {
+	it("does not send access to another company's customer", async () => {
 		const shop = await shopWithOrder({
 			cpf: uniqueCpf(),
 			email: `x-${seq}@fixr.test`,
@@ -137,7 +137,7 @@ describe("shop sends portal access", () => {
 
 		const response = await authedInject(app, outsider.token, {
 			method: "POST",
-			url: `/companies/${outsider.company.subdomain}/clients/${shop.customer.id}/portal-access`,
+			url: `/companies/${outsider.company.subdomain}/customers/${shop.customer.id}/portal-access`,
 		});
 
 		expect(response.statusCode).toBe(404);
@@ -165,7 +165,7 @@ describe("shop sends portal access", () => {
 	});
 });
 
-describe("client portal", () => {
+describe("customer portal", () => {
 	it("refuses requests without a session", async () => {
 		const response = await app.inject({ url: "/portal/service-orders" });
 		const forged = await portal(
@@ -239,7 +239,7 @@ describe("client portal", () => {
 		expect(JSON.stringify(response.json())).not.toContain("cliente difícil");
 	});
 
-	it("hides service orders outside the client's scope", async () => {
+	it("hides service orders outside the customer's scope", async () => {
 		const shop = await shopWithOrder({
 			cpf: uniqueCpf(),
 			email: `scope-${seq}@fixr.test`,
@@ -397,7 +397,7 @@ describe("portal entry from an estimate link", () => {
 	});
 });
 
-describe("client asks for a link", () => {
+describe("customer asks for a link", () => {
 	it("answers the same for unknown and known emails, and emails the known one", async () => {
 		const shop = await shopWithOrder({
 			cpf: uniqueCpf(),

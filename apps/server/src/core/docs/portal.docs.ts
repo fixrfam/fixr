@@ -11,7 +11,7 @@ import { z } from "zod";
 import { companyScopedErrors, conflictError, notFoundError } from "./responses";
 import { zodResponseSchema } from "./types";
 
-const TAG = "Client portal";
+const TAG = "Customer portal";
 
 const unauthorized = zodResponseSchema({
 	status: 401,
@@ -117,9 +117,9 @@ const openFromPortalLinkSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Open a portal session from a portal link",
 	description: `
-**Public: the client opens the link from the portal access email.**
+**Public: the customer opens the link from the portal access email.**
 
-Sets an httpOnly portal session cookie (30 days). The link is the client's account: there is no password. The session sees the service orders of every client record (any shop) with the link's CPF **and** email, plus the record the link was issued for.
+Sets an httpOnly portal session cookie (30 days). The link is the customer's account: there is no password. The session sees the service orders of every customer record (any shop) with the link's CPF **and** email, plus the record the link was issued for.
 `,
 	body: portalTokenSchema,
 	response: {
@@ -132,9 +132,9 @@ const openFromEstimateLinkSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Open a portal session from an estimate link",
 	description: `
-**Public: the client goes from an estimate link to the portal.**
+**Public: the customer goes from an estimate link to the portal.**
 
-The estimate email proves the client reads the address it was sent to, so that email (with the client's CPF) becomes the session's identity.
+The estimate email proves the customer reads the address it was sent to, so that email (with the customer's CPF) becomes the session's identity.
 `,
 	body: portalTokenSchema,
 	response: {
@@ -156,7 +156,7 @@ const requestAccessSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Ask for a portal link",
 	description: `
-**Public, Turnstile-protected: the client asks for a new link by email.**
+**Public, Turnstile-protected: the customer asks for a new link by email.**
 
 A link is emailed for each CPF registered with this email, in any shop. The answer is always \`202\`, whether or not the email exists.
 `,
@@ -173,7 +173,7 @@ A link is emailed for each CPF registered with this email, in any shop. The answ
 const meSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Portal profile",
-	description: "Name and email of the signed-in client.",
+	description: "Name and email of the signed-in customer.",
 	response: {
 		200: zodResponseSchema({
 			status: 200,
@@ -188,9 +188,9 @@ const meSchema: FastifySchema = {
 
 const listServiceOrdersSchema: FastifySchema = {
 	tags: [TAG],
-	summary: "List the client's service orders",
+	summary: "List the customer's service orders",
 	description:
-		"Service orders of every shop the client is registered at (same CPF and email), newest first. `pendingEstimate` flags an estimate waiting for the client's answer.",
+		"Service orders of every shop the customer is registered at (same CPF and email), newest first. `pendingEstimate` flags an estimate waiting for the customer's answer.",
 	response: {
 		200: zodResponseSchema({
 			status: 200,
@@ -205,9 +205,9 @@ const listServiceOrdersSchema: FastifySchema = {
 
 const getServiceOrderSchema: FastifySchema = {
 	tags: [TAG],
-	summary: "Get one of the client's service orders",
+	summary: "Get one of the customer's service orders",
 	description:
-		"Device, status, the shop's contact data, parts and services, and the estimates the client was sent (drafts stay internal). Internal notes are never exposed.",
+		"Device, status, the shop's contact data, parts and services, and the estimates the customer was sent (drafts stay internal). Internal notes are never exposed.",
 	params: portalServiceOrderParamsSchema,
 	response: {
 		200: detailResponse(
@@ -244,7 +244,7 @@ const getEstimatePdfSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Download an estimate PDF",
 	description:
-		"PDF of an estimate the client was sent (`application/pdf`, inline).",
+		"PDF of an estimate the customer was sent (`application/pdf`, inline).",
 	params: portalEstimateParamsSchema,
 	response: { 401: unauthorized, 404: estimateNotFound },
 };
@@ -276,28 +276,28 @@ const rejectEstimateSchemaDoc: FastifySchema = {
 
 const sendAccessSchema: FastifySchema = {
 	tags: [TAG],
-	summary: "Send portal access to a client",
+	summary: "Send portal access to a customer",
 	description: `
-**The shop emails a portal link to one of its clients.**
+**The shop emails a portal link to one of its customers.**
 
-Requires the client to have an email (\`400 portal_client_no_email\`). The shop's previous links for this client are revoked, ending the sessions opened from them.
+Requires the customer to have an email (\`400 portal_customer_no_email\`). The shop's previous links for this customer are revoked, ending the sessions opened from them.
 `,
-	params: getCompanyNestedDataSchema.extend({ clientId: z.string() }),
+	params: getCompanyNestedDataSchema.extend({ customerId: z.string() }),
 	response: {
 		200: empty(
 			200,
 			"send_portal_access_success",
-			"Portal access sent to the client."
+			"Portal access sent to the customer."
 		),
 		400: zodResponseSchema({
 			status: 400,
 			error: "Bad Request",
-			code: "portal_client_no_email",
-			message: "The client has no email to send the portal access to.",
+			code: "portal_customer_no_email",
+			message: "The customer has no email to send the portal access to.",
 			data: null,
-		}).describe("The client has no email."),
+		}).describe("The customer has no email."),
 		...companyScopedErrors,
-		404: notFoundError("client_not_found", "Client not found."),
+		404: notFoundError("customer_not_found", "Customer not found."),
 	},
 	security: [{ JWT: [] }],
 };

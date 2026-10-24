@@ -39,7 +39,7 @@ function sessionCookieOptions(expires: Date) {
 	};
 }
 
-/** @description Business logic for the client portal */
+/** @description Business logic for the customer portal */
 export class PortalService {
 	/** Sign the browser in with the identity of a link and set the cookie. */
 	private static async openSession(
@@ -53,7 +53,7 @@ export class PortalService {
 			portalLinkId: identity.portalLinkId,
 			cpf: identity.cpf,
 			email: identity.email,
-			clientId: identity.clientId,
+			customerId: identity.customerId,
 			expiresAt,
 		});
 
@@ -71,7 +71,7 @@ export class PortalService {
 			);
 	}
 
-	/** Open a session from a portal link (the client's account). */
+	/** Open a session from a portal link (the customer's account). */
 	static async openFromPortalLink({
 		token,
 		response,
@@ -88,7 +88,7 @@ export class PortalService {
 		return PortalService.openSession(response, {
 			cpf: link.cpf,
 			email: link.email,
-			clientId: link.clientId,
+			customerId: link.customerId,
 			portalLinkId: link.id,
 		});
 	}
@@ -107,17 +107,17 @@ export class PortalService {
 		const estimate = await EstimatesRepository.queryByTokenHash(
 			hashOpaqueToken(token)
 		);
-		const client = estimate?.clientId
-			? await PortalRepository.queryClient(estimate.clientId)
+		const customer = estimate?.customerId
+			? await PortalRepository.queryCustomer(estimate.customerId)
 			: null;
-		if (!(estimate?.sentTo && client) || client.deletedAt) {
+		if (!(estimate?.sentTo && customer) || customer.deletedAt) {
 			throw new AppError("PORTAL_LINK_INVALID");
 		}
 
 		return PortalService.openSession(response, {
-			cpf: client.cpf,
+			cpf: customer.cpf,
 			email: normalizeEmail(estimate.sentTo),
-			clientId: client.id,
+			customerId: customer.id,
 			portalLinkId: null,
 		});
 	}
@@ -150,7 +150,7 @@ export class PortalService {
 	/**
 	 * Email a new portal link to whoever is registered with this email, one per
 	 * CPF. The answer is the same whether or not the email exists, so the route
-	 * can't be used to find out who is a client.
+	 * can't be used to find out who is a customer.
 	 */
 	static async requestAccess({
 		email,
@@ -162,7 +162,7 @@ export class PortalService {
 		response: FastifyReply;
 	}) {
 		const normalized = normalizeEmail(email);
-		const records = await PortalRepository.queryClientsByEmail(normalized);
+		const records = await PortalRepository.queryCustomersByEmail(normalized);
 
 		const byCpf = new Map<string, string>();
 		for (const record of records) {
@@ -185,7 +185,7 @@ export class PortalService {
 					to: normalized,
 					appName: APP_NAME,
 					locale,
-					clientName: name,
+					customerName: name,
 					companyName: null,
 					ctaUrl: portalUrl(token),
 				},
@@ -204,19 +204,19 @@ export class PortalService {
 	}
 
 	/**
-	 * A shop emails portal access to one of its clients. The shop's previous
-	 * links for that client stop working (and the sessions opened from them).
+	 * A shop emails portal access to one of its customers. The shop's previous
+	 * links for that customer stop working (and the sessions opened from them).
 	 */
 	static async sendAccess({
 		userJwt,
 		subdomain,
-		clientId,
+		customerId,
 		locale,
 		response,
 	}: {
 		userJwt: UserJwt;
 		subdomain: string;
-		clientId: string;
+		customerId: string;
 		locale: Locale;
 		response: FastifyReply;
 	}) {
@@ -228,23 +228,23 @@ export class PortalService {
 		}
 		const companyId = userJwt.company.id;
 
-		const client = await PortalRepository.queryClient(clientId);
-		if (!client || client.companyId !== companyId || client.deletedAt) {
-			throw new AppError("PORTAL_CLIENT_NOT_FOUND");
+		const customer = await PortalRepository.queryCustomer(customerId);
+		if (!customer || customer.companyId !== companyId || customer.deletedAt) {
+			throw new AppError("PORTAL_CUSTOMER_NOT_FOUND");
 		}
-		if (!client.email) {
-			throw new AppError("PORTAL_CLIENT_NO_EMAIL");
+		if (!customer.email) {
+			throw new AppError("PORTAL_CUSTOMER_NO_EMAIL");
 		}
 
-		const email = normalizeEmail(client.email);
+		const email = normalizeEmail(customer.email);
 		const token = generateOpaqueToken();
-		await PortalRepository.revokeShopLinks(client.id, companyId);
+		await PortalRepository.revokeShopLinks(customer.id, companyId);
 		await PortalRepository.insertLink({
 			tokenHash: hashOpaqueToken(token),
-			cpf: client.cpf,
+			cpf: customer.cpf,
 			email,
 			companyId,
-			clientId: client.id,
+			customerId: customer.id,
 		});
 		await queueEmail(createEmailQueue(redis), {
 			job: "sendPortalAccessEmail",
@@ -252,7 +252,7 @@ export class PortalService {
 				to: email,
 				appName: APP_NAME,
 				locale,
-				clientName: client.name,
+				customerName: customer.name,
 				companyName: userJwt.company.name,
 				ctaUrl: portalUrl(token),
 			},
@@ -263,15 +263,15 @@ export class PortalService {
 				status: 200,
 				error: null,
 				code: "send_portal_access_success",
-				message: "Portal access sent to the client.",
+				message: "Portal access sent to the customer.",
 				data: null,
 			})
 		);
 	}
 
 	private static async scope(identity: PortalIdentity) {
-		const clients = await PortalRepository.queryScopeClients(identity);
-		return { clients, clientIds: clients.map((client) => client.id) };
+		const customers = await PortalRepository.queryScopeCustomers(identity);
+		return { customers, customerIds: customers.map((customer) => customer.id) };
 	}
 
 	static async me({
@@ -281,7 +281,7 @@ export class PortalService {
 		identity: PortalIdentity;
 		response: FastifyReply;
 	}) {
-		const { clients } = await PortalService.scope(identity);
+		const { customers } = await PortalService.scope(identity);
 
 		return response.status(200).send(
 			apiResponse({
@@ -289,7 +289,7 @@ export class PortalService {
 				error: null,
 				code: "portal_me_success",
 				message: "Portal profile retrieved.",
-				data: { name: clients[0]?.name ?? null, email: identity.email },
+				data: { name: customers[0]?.name ?? null, email: identity.email },
 			})
 		);
 	}
@@ -301,8 +301,8 @@ export class PortalService {
 		identity: PortalIdentity;
 		response: FastifyReply;
 	}) {
-		const { clientIds } = await PortalService.scope(identity);
-		const rows = await PortalRepository.queryServiceOrders(clientIds);
+		const { customerIds } = await PortalService.scope(identity);
+		const rows = await PortalRepository.queryServiceOrders(customerIds);
 
 		return response.status(200).send(
 			apiResponse({
@@ -320,11 +320,11 @@ export class PortalService {
 
 	private static async serviceOrderDetail(
 		serviceOrderId: string,
-		clientIds: string[]
+		customerIds: string[]
 	) {
 		const serviceOrder = await PortalRepository.queryServiceOrder(
 			serviceOrderId,
-			clientIds
+			customerIds
 		);
 		if (!serviceOrder) {
 			throw new AppError("PORTAL_SERVICE_ORDER_NOT_FOUND");
@@ -363,7 +363,7 @@ export class PortalService {
 		serviceOrderId: string;
 		response: FastifyReply;
 	}) {
-		const { clientIds } = await PortalService.scope(identity);
+		const { customerIds } = await PortalService.scope(identity);
 
 		return response.status(200).send(
 			apiResponse({
@@ -371,7 +371,10 @@ export class PortalService {
 				error: null,
 				code: "portal_service_order_success",
 				message: "Service order retrieved.",
-				data: await PortalService.serviceOrderDetail(serviceOrderId, clientIds),
+				data: await PortalService.serviceOrderDetail(
+					serviceOrderId,
+					customerIds
+				),
 			})
 		);
 	}
@@ -380,15 +383,15 @@ export class PortalService {
 		identity: PortalIdentity,
 		estimateId: string
 	) {
-		const { clientIds } = await PortalService.scope(identity);
+		const { customerIds } = await PortalService.scope(identity);
 		const estimate = await PortalRepository.queryEstimate(
 			estimateId,
-			clientIds
+			customerIds
 		);
 		if (!estimate) {
 			throw new AppError("PORTAL_ESTIMATE_NOT_FOUND");
 		}
-		return { estimate, clientIds };
+		return { estimate, customerIds };
 	}
 
 	static async getEstimatePdf({
@@ -416,7 +419,7 @@ export class PortalService {
 			.send(pdf);
 	}
 
-	/** The client answers an estimate from the portal (same rules as the link). */
+	/** The customer answers an estimate from the portal (same rules as the link). */
 	static async answerEstimate({
 		identity,
 		estimateId,
@@ -428,7 +431,7 @@ export class PortalService {
 		answer: { status: "approved" } | { status: "rejected"; reason?: string };
 		response: FastifyReply;
 	}) {
-		const { estimate, clientIds } = await PortalService.ownEstimate(
+		const { estimate, customerIds } = await PortalService.ownEstimate(
 			identity,
 			estimateId
 		);
@@ -460,7 +463,7 @@ export class PortalService {
 				message: "Answer recorded.",
 				data: await PortalService.serviceOrderDetail(
 					estimate.serviceOrderId,
-					clientIds
+					customerIds
 				),
 			})
 		);

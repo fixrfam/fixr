@@ -2,9 +2,9 @@ import { account } from "./account";
 import { admin } from "./admin";
 import { apiKeys } from "./api-keys";
 import { auth } from "./auth";
-import { clients } from "./clients";
 import { common } from "./common";
 import { company } from "./company";
+import { customers } from "./customers";
 import { dashboard } from "./dashboard";
 import { dataTable } from "./data-table";
 import { emails } from "./emails";
@@ -27,7 +27,7 @@ export const en = {
 	admin,
 	apiKeys,
 	auth,
-	clients,
+	customers,
 	common,
 	company,
 	dashboard,

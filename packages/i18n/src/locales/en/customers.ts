@@ -1,4 +1,4 @@
-export const clients = {
+export const customers = {
 	form: {
 		nameLabel: "Name",
 		namePlaceholder: "John Smith",
@@ -16,7 +16,7 @@ export const clients = {
 		cityLabel: "City",
 		cityPlaceholder: "City",
 		submit: "Finish registration",
-		success: "Client registered!",
-		error: "Could not register the client",
+		success: "Customer registered!",
+		error: "Could not register the customer",
 	},
 } as const;

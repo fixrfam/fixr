@@ -3,7 +3,7 @@ export type CardId =
 	| "summary"
 	| "device"
 	| "technician"
-	| "client"
+	| "customer"
 	| "lifecycle"
 	| "parts"
 	| "images";

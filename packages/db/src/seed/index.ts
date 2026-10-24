@@ -5,8 +5,8 @@ import chalk from "chalk";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../connection";
 import {
-	clients,
 	companies,
+	customers,
 	employees,
 	modelCategories,
 	modelMakers,
@@ -20,8 +20,8 @@ import {
 } from "../schema";
 import {
 	CATEGORIES,
-	CLIENTS,
 	COMPANIES,
+	CUSTOMERS,
 	MAKERS,
 	PARTS,
 	SEED_PASSWORD,
@@ -132,10 +132,10 @@ async function seedInventory(tx: Transaction, companyId: string) {
 
 /**
  * Customers are company-scoped: a person served by two shops has one record
- * in each, all linked to the same client login. Returns ids keyed by
- * `company:clientIndex`.
+ * in each, all linked to the same customer login. Returns ids keyed by
+ * `company:customerIndex`.
  */
-async function seedClients(
+async function seedCustomers(
 	tx: Transaction,
 	{
 		companyIds,
@@ -144,41 +144,41 @@ async function seedClients(
 	}: { companyIds: Map<string, string>; passwordHash: string; cpfs: string[] }
 ) {
 	const userIds: string[] = [];
-	for (const client of CLIENTS) {
+	for (const customer of CUSTOMERS) {
 		const userId = createId();
 		userIds.push(userId);
 		await tx.insert(users).values({
 			id: userId,
-			email: client.email,
+			email: customer.email,
 			passwordHash,
 			verified: true,
 		});
 	}
 
-	const clientIds = new Map<string, string>();
+	const customerIds = new Map<string, string>();
 	for (const order of SERVICE_ORDERS) {
-		const key = `${order.company}:${order.client}`;
-		if (clientIds.has(key)) {
+		const key = `${order.company}:${order.customer}`;
+		if (customerIds.has(key)) {
 			continue;
 		}
-		const client = CLIENTS[order.client];
-		const clientId = createId();
-		clientIds.set(key, clientId);
-		await tx.insert(clients).values({
-			id: clientId,
+		const customer = CUSTOMERS[order.customer];
+		const customerId = createId();
+		customerIds.set(key, customerId);
+		await tx.insert(customers).values({
+			id: customerId,
 			companyId: companyIds.get(order.company) as string,
-			name: client.name,
-			email: client.email,
-			phone: client.phone,
-			cpf: cpfs[order.client],
-			address: client.address,
-			city: client.city,
-			state: client.state,
-			userId: userIds[order.client],
+			name: customer.name,
+			email: customer.email,
+			phone: customer.phone,
+			cpf: cpfs[order.customer],
+			address: customer.address,
+			city: customer.city,
+			state: customer.state,
+			userId: userIds[order.customer],
 		});
 	}
 
-	return clientIds;
+	return customerIds;
 }
 
 async function seed() {
@@ -257,10 +257,10 @@ async function seed() {
 			}
 		}
 
-		const clientIds = await seedClients(tx, {
+		const customerIds = await seedCustomers(tx, {
 			companyIds,
 			passwordHash,
-			cpfs: CLIENTS.map(() => cpf(documentSeq++)),
+			cpfs: CUSTOMERS.map(() => cpf(documentSeq++)),
 		});
 
 		for (const [index, order] of SERVICE_ORDERS.entries()) {
@@ -268,7 +268,9 @@ async function seed() {
 			const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
 			await tx.insert(serviceOrders).values({
 				companyId: companyIds.get(order.company) as string,
-				clientId: clientIds.get(`${order.company}:${order.client}`) as string,
+				customerId: customerIds.get(
+					`${order.company}:${order.customer}`
+				) as string,
 				employeeId: employeeIds.get(order.technician) as string,
 				deviceMakerId: makerIds.get(order.maker) as string,
 				deviceCategoryId: categoryIds.get(category as string) as string,
@@ -293,9 +295,9 @@ function printCredentials() {
 			console.log(`    ${employee.role.padEnd(11)} ${employee.email}`);
 		}
 	}
-	console.log(chalk.bold("  Clients"));
-	for (const client of CLIENTS) {
-		console.log(`    ${"client".padEnd(11)} ${client.email}`);
+	console.log(chalk.bold("  Customers"));
+	for (const customer of CUSTOMERS) {
+		console.log(`    ${"customer".padEnd(11)} ${customer.email}`);
 	}
 	console.log("");
 }

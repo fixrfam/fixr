@@ -65,7 +65,7 @@ export const validation: Translated<typeof source> = {
 		itemQuantityMax: "A quantidade não pode passar de {{count}}.",
 		itemPriceRequired: "Informe o preço.",
 		itemPriceMin: "O preço não pode ser negativo.",
-		clientInvalid: "Cliente inválido.",
+		customerInvalid: "Cliente inválido.",
 		brandInvalid: "Marca do dispositivo inválida.",
 		categoryInvalid: "Categoria do dispositivo inválida.",
 		assigneeInvalid: "Responsável inválido.",

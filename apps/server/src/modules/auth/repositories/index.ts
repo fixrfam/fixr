@@ -1,5 +1,5 @@
 import { db, eq, sql } from "@fixr/db/connection";
-import { clients, companies, employees, users } from "@fixr/db/schema";
+import { companies, customers, employees, users } from "@fixr/db/schema";
 import {
 	type createUserSchema,
 	jwtPayload,
@@ -24,11 +24,11 @@ export class AuthRepository {
 			.select({
 				id: users.id,
 				email: users.email,
-				displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+				displayName: sql`COALESCE(${employees.name}, ${customers.name})`,
 				passwordHash: users.passwordHash,
 				profileType: sql`CASE
                           WHEN ${employees.id} IS NOT NULL THEN 'employee'
-                          WHEN ${clients.id} IS NOT NULL THEN 'client'
+                          WHEN ${customers.id} IS NOT NULL THEN 'customer'
                           ELSE 'unknown'
                         END`,
 				avatarUrl: users.avatarUrl,
@@ -37,7 +37,7 @@ export class AuthRepository {
 			})
 			.from(users)
 			.leftJoin(employees, eq(employees.userId, users.id))
-			.leftJoin(clients, eq(clients.userId, users.id))
+			.leftJoin(customers, eq(customers.userId, users.id))
 			.where(eq(users.id, id))
 			.limit(1);
 
@@ -58,11 +58,11 @@ export class AuthRepository {
 			.select({
 				id: users.id,
 				email: users.email,
-				displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+				displayName: sql`COALESCE(${employees.name}, ${customers.name})`,
 				passwordHash: users.passwordHash,
 				profileType: sql`CASE
                       WHEN ${employees.id} IS NOT NULL THEN 'employee'
-                      WHEN ${clients.id} IS NOT NULL THEN 'client'
+                      WHEN ${customers.id} IS NOT NULL THEN 'customer'
                       ELSE 'unknown'
                     END`,
 				avatarUrl: users.avatarUrl,
@@ -71,7 +71,7 @@ export class AuthRepository {
 			})
 			.from(users)
 			.leftJoin(employees, eq(employees.userId, users.id))
-			.leftJoin(clients, eq(clients.userId, users.id))
+			.leftJoin(customers, eq(customers.userId, users.id))
 			.where(eq(users.email, email))
 			.limit(1);
 
@@ -94,10 +94,10 @@ export class AuthRepository {
 			.select({
 				id: users.id,
 				email: users.email,
-				displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+				displayName: sql`COALESCE(${employees.name}, ${customers.name})`,
 				profileType: sql`CASE
                           WHEN ${employees.id} IS NOT NULL THEN 'employee'
-                          WHEN ${clients.id} IS NOT NULL THEN 'client'
+                          WHEN ${customers.id} IS NOT NULL THEN 'customer'
                           ELSE 'unknown'
                       END`,
 				avatarUrl: users.avatarUrl,
@@ -116,7 +116,7 @@ export class AuthRepository {
 			})
 			.from(users)
 			.leftJoin(employees, eq(employees.userId, users.id))
-			.leftJoin(clients, eq(clients.userId, users.id))
+			.leftJoin(customers, eq(customers.userId, users.id))
 			.leftJoin(companies, eq(employees.companyId, companies.id))
 			.where(eq(users.id, userId));
 

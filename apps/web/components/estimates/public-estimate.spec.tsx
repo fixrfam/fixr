@@ -28,7 +28,7 @@ const estimate = {
 		website: null,
 		logoUrl: null,
 	},
-	client: { name: "Maria" },
+	customer: { name: "Maria" },
 	device: {
 		maker: "Apple",
 		model: "iPhone 13",
@@ -105,7 +105,7 @@ describe("PublicEstimate", () => {
 		expect(toast.success).toHaveBeenCalled();
 	});
 
-	it("rejects with the reason typed by the client", async () => {
+	it("rejects with the reason typed by the customer", async () => {
 		serve();
 		let body: unknown;
 		server.use(
@@ -172,7 +172,7 @@ describe("PublicEstimate", () => {
 		).toBeInTheDocument();
 	});
 
-	it("goes to the client's portal from the estimate", async () => {
+	it("goes to the customer's portal from the estimate", async () => {
 		serve();
 		let body: unknown;
 		server.use(

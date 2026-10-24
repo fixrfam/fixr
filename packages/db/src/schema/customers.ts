@@ -10,14 +10,14 @@ import { users } from "./users";
  *
  * Customers are registered by the shop and scoped to it (`company_id`): the
  * same person can be a customer of several shops, each with its own record.
- * `user_id` is only set when the customer also has a login (client profile).
+ * `user_id` is only set when the customer also has a login (customer profile).
  *
  * `company_id` is nullable so rows created before customers were scoped could
  * be backfilled from their service orders (see the `backfill_client_company`
  * migration); the API never creates or lists a customer without a company.
  */
-export const clients = mysqlTable(
-	"clients",
+export const customers = mysqlTable(
+	"customers",
 	{
 		id: varchar("id", { length: 25 })
 			.$defaultFn(() => createId())
@@ -48,6 +48,9 @@ export const clients = mysqlTable(
 		userId: varchar("user_id", { length: 25 }).references(() => users.id), // Cannot cascade here because it would break business logic
 	},
 	(table) => ({
+		// Keeps the name from when the table was `clients`: renaming it means
+		// dropping the index the company_id foreign key relies on, which MySQL
+		// refuses in the order drizzle-kit generates.
 		cpfCompanyUnique: unique("clients_cpf_company_unique").on(
 			table.companyId,
 			table.cpf
@@ -58,7 +61,7 @@ export const clients = mysqlTable(
 /**
  * Here we override the dates with a coerce so a date coming, for example, as a string, gets converted into a real Date()
  */
-export const clientSelectSchema = createSelectSchema(clients, {
+export const customerSelectSchema = createSelectSchema(customers, {
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 	deletedAt: z.coerce.date().nullable(),

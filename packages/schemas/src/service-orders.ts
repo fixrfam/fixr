@@ -29,9 +29,9 @@ export const createServiceOrderPhotoSchema = z.object({
 });
 
 export const createServiceOrderMockSchema = z.object({
-	clientId: z
+	customerId: z
 		.string()
-		.cuid2({ message: i18nMessage("validation.serviceOrder.clientInvalid") }),
+		.cuid2({ message: i18nMessage("validation.serviceOrder.customerInvalid") }),
 	deviceBrandId: z
 		.string()
 		.cuid2({ message: i18nMessage("validation.serviceOrder.brandInvalid") }),

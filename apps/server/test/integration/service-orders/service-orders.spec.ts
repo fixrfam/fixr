@@ -4,8 +4,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
 import {
 	makeCategory,
-	makeClient,
 	makeCompany,
+	makeCustomerAccount,
 	makeEmployee,
 	makeMaker,
 	makeServiceOrder,
@@ -17,14 +17,14 @@ import { authedInject, createEmployeeSession } from "../../helpers/auth";
 
 const app = await createTestApp();
 
-/** Client of `companyId` (orders only accept the company's own clients), maker and category. */
+/** Customer of `companyId` (orders only accept the company's own customers), maker and category. */
 async function catalog(companyId?: string) {
-	const [client, maker, category] = await Promise.all([
-		makeClient({ name: "Maria Cliente", companyId }),
+	const [customer, maker, category] = await Promise.all([
+		makeCustomerAccount({ name: "Maria Cliente", companyId }),
 		makeMaker(),
 		makeCategory(),
 	]);
-	return { client, maker, category };
+	return { customer, maker, category };
 }
 
 function orderBody(
@@ -32,7 +32,7 @@ function orderBody(
 	extra: object = {}
 ) {
 	return {
-		clientId: refs.client.id,
+		customerId: refs.customer.id,
 		deviceBrandId: refs.maker.id,
 		deviceCategoryId: refs.category.id,
 		deviceModel: "iPhone 12",
@@ -42,7 +42,7 @@ function orderBody(
 }
 
 describe("POST /companies/:subdomain/service-orders", () => {
-	it("creates an order end to end with real client, maker and category", async () => {
+	it("creates an order end to end with real customer, maker and category", async () => {
 		const { token, company, employee } = await createEmployeeSession(app, {
 			role: "manager",
 		});
@@ -58,7 +58,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		expect(response.json().data).toMatchObject({
 			companyId: company.id,
 			employeeId: employee.id,
-			clientId: refs.client.id,
+			customerId: refs.customer.id,
 			status: "pending",
 			photos: [],
 		});
@@ -135,7 +135,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 	});
 
 	it.each([
-		"clientId",
+		"customerId",
 		"deviceBrandId",
 		"deviceCategoryId",
 	])("rejects an unknown %s", async (field) => {
@@ -152,7 +152,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		expect(response.statusCode).toBe(404);
 	});
 
-	it("rejects a client of another company", async () => {
+	it("rejects a customer of another company", async () => {
 		const { token, company } = await createEmployeeSession(app, {
 			role: "manager",
 		});
@@ -165,7 +165,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		});
 
 		expect(response.statusCode).toBe(404);
-		expect(response.json().code).toBe("client_not_found");
+		expect(response.json().code).toBe("customer_not_found");
 	});
 
 	it("cannot create orders in another company", async () => {
@@ -189,7 +189,7 @@ describe("GET /companies/:subdomain/service-orders", () => {
 		const otherCategory = await makeCategory();
 		const base = {
 			companyId: company.id,
-			clientId: refs.client.id,
+			customerId: refs.customer.id,
 			employeeId: technician.id,
 			deviceMakerId: refs.maker.id,
 			deviceCategoryId: refs.category.id,
@@ -237,7 +237,7 @@ describe("GET /companies/:subdomain/service-orders", () => {
 			"Galaxy S20",
 			"iPhone 12",
 		]);
-		expect(records[0].client.name).toBe("Maria Cliente");
+		expect(records[0].customer.name).toBe("Maria Cliente");
 	});
 
 	it("filters by status, category, employee, period and search (combined)", async () => {

@@ -155,6 +155,13 @@
       "when": 1792816379161,
       "tag": "0021_client_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1792863701274,
+      "tag": "0022_customers",
+      "breakpoints": true
     }
   ]
 }

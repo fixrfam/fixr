@@ -20,21 +20,21 @@ afterAll(async () => {
 });
 
 /** A financial employee with a draft estimate of a priced service order. */
-async function setup({ clientEmail = true } = {}) {
+async function setup({ customerEmail = true } = {}) {
 	const session = await createEmployeeSession(app, { role: "financial" });
 	const { company, employee } = session;
 	const [customer, maker, category] = await Promise.all([
 		makeCustomer({
 			companyId: company.id,
 			name: "Maria Oliveira",
-			...(clientEmail ? {} : { email: null }),
+			...(customerEmail ? {} : { email: null }),
 		}),
 		makeMaker({ name: "Apple" }),
 		makeCategory(),
 	]);
 	const serviceOrder = await makeServiceOrder({
 		companyId: company.id,
-		clientId: customer.id,
+		customerId: customer.id,
 		employeeId: employee.id,
 		deviceMakerId: maker.id,
 		deviceCategoryId: category.id,
@@ -148,8 +148,8 @@ describe("POST /companies/:subdomain/estimates/:estimateId/send", () => {
 		expect(row?.hash).not.toBe(token);
 	});
 
-	it("asks for an email when the client has none", async () => {
-		const ctx = await setup({ clientEmail: false });
+	it("asks for an email when the customer has none", async () => {
+		const ctx = await setup({ customerEmail: false });
 
 		const refused = await send(ctx);
 		const sent = await send(ctx, { email: "outro@fixr.test" });
@@ -200,7 +200,7 @@ describe("/estimate-links/:token", () => {
 			number: 1,
 			status: "sent",
 			expired: false,
-			client: { name: "Maria Oliveira" },
+			customer: { name: "Maria Oliveira" },
 			device: { maker: "Apple", model: "iPhone 13" },
 			items: [{ name: "Troca de tela", total: 150 }],
 			totals: { total: 150 },

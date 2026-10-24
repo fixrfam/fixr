@@ -89,7 +89,7 @@ function Entities({
 	translator: Translator;
 }) {
 	const { t } = translator;
-	const { company, client } = data;
+	const { company, customer } = data;
 
 	const companyLines = compact([
 		t("estimates.pdf.cnpj", { cnpj: formatCnpj(company.cnpj) }),
@@ -98,15 +98,15 @@ function Entities({
 		company.phone ? formatPhone(company.phone) : null,
 		company.website,
 	]);
-	const clientLines = client
+	const customerLines = customer
 		? compact([
-				formatCpf(client.cpf),
+				formatCpf(customer.cpf),
 				compact([
-					client.address,
-					compact([client.city, client.state]).join(" - "),
+					customer.address,
+					compact([customer.city, customer.state]).join(" - "),
 				]).join(", "),
-				client.email,
-				client.phone ? formatPhone(client.phone) : null,
+				customer.email,
+				customer.phone ? formatPhone(customer.phone) : null,
 			])
 		: [];
 
@@ -127,14 +127,14 @@ function Entities({
 					))}
 				</View>
 			</View>
-			{client ? (
+			{customer ? (
 				<View style={{ flex: 1, gap: 6, textAlign: "right" }}>
 					<View style={{ gap: 2 }}>
-						<Text style={label}>{t("estimates.pdf.client")}</Text>
-						<Text style={heading}>{client.name}</Text>
+						<Text style={label}>{t("estimates.pdf.customer")}</Text>
+						<Text style={heading}>{customer.name}</Text>
 					</View>
 					<View style={{ gap: 1 }}>
-						{clientLines.map((line) => (
+						{customerLines.map((line) => (
 							<Text key={line} style={detail}>
 								{line}
 							</Text>
@@ -361,7 +361,7 @@ function Footer({
 	);
 }
 
-/** A4 estimate: header, issuer and client, device, items, totals and footer. */
+/** A4 estimate: header, issuer and customer, device, items, totals and footer. */
 export function EstimateDocument({
 	data,
 	translator,

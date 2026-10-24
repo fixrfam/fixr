@@ -61,7 +61,7 @@ export const portal = {
 		sendAccess: "Send portal access",
 		sendAccessTitle: "Send portal access to {{name}}",
 		sendAccessDescription:
-			"The client gets an email with a link to the client portal, to follow their service orders and answer estimates. Previous links sent by your shop stop working.",
+			"The customer gets an email with a link to the customer portal, to follow their service orders and answer estimates. Previous links sent by your shop stop working.",
 		confirm: "Send access",
 		cancel: "Cancel",
 	},
