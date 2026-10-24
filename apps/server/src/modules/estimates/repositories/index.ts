@@ -134,7 +134,8 @@ export class EstimatesRepository {
 			.select()
 			.from(serviceOrderItems)
 			.where(eq(serviceOrderItems.serviceOrderId, serviceOrderId))
-			.orderBy(serviceOrderItems.createdAt);
+			// Same tiebreaker as the service order list, so the copy keeps its order.
+			.orderBy(serviceOrderItems.createdAt, serviceOrderItems.id);
 	}
 
 	/**

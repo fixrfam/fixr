@@ -38,6 +38,7 @@ async function setup({ withItems = true } = {}) {
 				name: "Tela OLED",
 				quantity: 1,
 				unitPrice: 890.5,
+				createdAt: new Date(Date.now() - 2000),
 			},
 			{
 				serviceOrderId: serviceOrder.id,
@@ -45,6 +46,7 @@ async function setup({ withItems = true } = {}) {
 				name: "Troca de tela",
 				quantity: 1,
 				unitPrice: 150,
+				createdAt: new Date(),
 			},
 		]);
 	}
