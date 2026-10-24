@@ -104,10 +104,9 @@ export function PartsTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<div
+			<fieldset
 				aria-label={t("dataTable.filters.title")}
-				className="flex flex-wrap items-center gap-2"
-				role="group"
+				className="m-0 flex min-w-0 flex-wrap items-center gap-2 border-0 p-0"
 			>
 				<FilterSelect
 					onChange={(category) => refine({ category })}
@@ -140,7 +139,7 @@ export function PartsTable() {
 						value={params.sort}
 					/>
 				</div>
-			</div>
+			</fieldset>
 			{query.isPending ? (
 				<Skeleton className="h-96 w-full rounded-md" />
 			) : (
