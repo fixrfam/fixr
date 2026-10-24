@@ -73,6 +73,26 @@ export const messages = {
 			title: "Estimate rejected",
 			description: "Thank you for the answer. The shop was notified.",
 		},
+		portal_link_invalid: {
+			title: "Link not available",
+			description: "This link is invalid or was replaced. Ask for a new one.",
+		},
+		portal_unauthorized: {
+			title: "Session ended",
+			description: "Open the link from your email again.",
+		},
+		portal_access_requested: {
+			title: "Check your email",
+			description: "If the email is registered, a link is on the way.",
+		},
+		send_portal_access_success: {
+			title: "Access sent",
+			description: "The client will get an email with the portal link.",
+		},
+		portal_client_no_email: {
+			title: "No email",
+			description: "Add the client's email before sending portal access.",
+		},
 		estimate_not_found: {
 			title: "Estimate not found",
 			description: "This estimate does not exist or was removed.",

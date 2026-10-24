@@ -148,6 +148,13 @@
       "when": 1792814418571,
       "tag": "0020_estimate_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1792816379161,
+      "tag": "0021_client_portal",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,16 @@ export const emails = {
 			"Change the default password in your account settings after the first login.",
 		footer: "If you do not recognize this company, please ignore this email.",
 	},
+	portalAccess: {
+		subject: "Your service orders at {{company}}",
+		subjectSelf: "Your link to follow your service orders",
+		preview: "Follow your service orders and estimates.",
+		greeting: "Hi, <i>{{name}}</i>!",
+		heading: "Follow your service orders.",
+		body: "Use the button below to see the status of your service orders and answer estimates. <b>Do not share this link</b>: it gives access to your history.",
+		cta: "See my service orders",
+		footer: "If you did not expect this email, please ignore it.",
+	},
 	estimate: {
 		subject: "Estimate #{{number}} from {{company}}",
 		preview: "{{company}} sent you estimate #{{number}}.",

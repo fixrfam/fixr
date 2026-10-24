@@ -122,6 +122,22 @@ describe("parts, services and suppliers routes", () => {
 	});
 });
 
+describe("roles page", () => {
+	it("is reached by whoever manages employees", () => {
+		const permission = getRequiredPermission(
+			"/dashboard/fixr/settings/roles",
+			routeRules
+		) as Permission;
+
+		expect(permission).toBe(permissions.employees.read);
+		expect(
+			employeeRoles.options.filter((role) =>
+				createAbility(role).can(permission)
+			)
+		).toEqual(["manager", "admin"]);
+	});
+});
+
 describe("isPublicRoute", () => {
 	it.each([
 		"/",

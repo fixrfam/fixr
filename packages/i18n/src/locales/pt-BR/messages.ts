@@ -74,6 +74,27 @@ export const messages: Translated<typeof source> = {
 			title: "Orçamento recusado",
 			description: "Obrigado pela resposta. A assistência foi avisada.",
 		},
+		portal_link_invalid: {
+			title: "Link indisponível",
+			description: "Este link é inválido ou foi substituído. Peça um novo.",
+		},
+		portal_unauthorized: {
+			title: "Sessão encerrada",
+			description: "Abra de novo o link do seu email.",
+		},
+		portal_access_requested: {
+			title: "Confira seu email",
+			description: "Se o email estiver cadastrado, um link está a caminho.",
+		},
+		send_portal_access_success: {
+			title: "Acesso enviado",
+			description: "O cliente vai receber um email com o link do portal.",
+		},
+		portal_client_no_email: {
+			title: "Sem email",
+			description:
+				"Cadastre o email do cliente antes de enviar o acesso ao portal.",
+		},
 		estimate_not_found: {
 			title: "Orçamento não encontrado",
 			description: "Este orçamento não existe ou foi removido.",
