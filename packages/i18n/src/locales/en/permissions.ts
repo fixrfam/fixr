@@ -31,4 +31,25 @@ export const permissions = {
 		sendToCustomer: "Send to customer",
 		update: "Edit",
 	},
+	matrix: {
+		title: "Roles and permissions",
+		description:
+			"What each role can do in the company. These are the default permissions every employee gets from their role.",
+		permission: "Permission",
+		allowed: "Allowed",
+		notAllowed: "Not allowed",
+		yourRole: "Your role",
+		count_one: "{{count}} permission",
+		count_other: "{{count}} permissions",
+	},
+	roleDescriptions: {
+		guest: "No access until an administrator assigns a role.",
+		technician:
+			"Works on service orders and looks up the parts and services catalog.",
+		warehouse: "Manages parts, suppliers and stock adjustments.",
+		financial: "Builds, prices and sends estimates to customers.",
+		manager:
+			"Runs the day to day: service orders, customers, catalog, estimates and new employees.",
+		admin: "Full access, including deleting records and managing the company.",
+	},
 } as const;
