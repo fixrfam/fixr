@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { type PartRow, partCategories } from "@fixr/mock";
+import { partCategories } from "@fixr/mock";
 import { createPartSchema } from "@fixr/schemas/parts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { Plus, Save } from "lucide-react";
+import { Loader2, Plus, Save } from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -27,8 +27,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { PartRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
-import { usePartsStore } from "../store";
+import { useCreatePart, useInventory, useUpdatePart } from "../store";
+import { useApiErrorToast } from "./api-feedback";
 import { numberInputProps } from "./number-input";
 
 export function NewPartForm({
@@ -42,39 +44,51 @@ export function NewPartForm({
 	onSuccess?: () => void;
 }) {
 	const { t, format } = useTranslation();
-	const suppliers = usePartsStore((state) => state.suppliers);
-	const addPart = usePartsStore((state) => state.addPart);
-	const updatePart = usePartsStore((state) => state.updatePart);
+	const { suppliers } = useInventory();
+	const createPart = useCreatePart();
+	const updatePart = useUpdatePart();
+	const toastError = useApiErrorToast();
+	const saving = createPart.isPending || updatePart.isPending;
 
 	const form = useForm<z.infer<typeof createPartSchema>>({
 		resolver: zodResolver(createPartSchema),
-		defaultValues: part ?? {
-			sku: "",
-			name: "",
-			category: "",
-			supplierId: "",
-		},
+		defaultValues: part
+			? {
+					sku: part.sku,
+					name: part.name,
+					category: part.category,
+					costPrice: part.costPrice,
+					salePrice: part.salePrice,
+					stock: part.stock,
+					minStock: part.minStock,
+					supplierId: part.supplierId,
+				}
+			: {
+					sku: "",
+					name: "",
+					category: "",
+					supplierId: "",
+				},
 		mode: "all",
 	});
 
 	const pricePlaceholder = format.number(0, { minimumFractionDigits: 2 });
 
-	function onSubmit(values: z.infer<typeof createPartSchema>) {
-		//TODO: enviar para a API quando a rota de peças existir
-		const data = {
-			...values,
-			category: values.category as PartRow["category"],
-		};
-
-		if (part) {
-			updatePart(part.id, data);
-			toast.success({ text: t("parts.form.updated") });
-		} else {
-			addPart(data);
-			toast.success({ text: t("parts.form.created") });
+	async function onSubmit(values: z.infer<typeof createPartSchema>) {
+		try {
+			if (part) {
+				// The stock only changes through a stock adjustment.
+				const { stock: _stock, ...changes } = values;
+				await updatePart.mutateAsync({ id: part.id, values: changes });
+				toast.success({ text: t("parts.form.updated") });
+			} else {
+				await createPart.mutateAsync(values);
+				toast.success({ text: t("parts.form.created") });
+			}
+			onSuccess?.();
+		} catch (error) {
+			toastError(error);
 		}
-
-		onSuccess?.();
 	}
 
 	return (
@@ -213,12 +227,18 @@ export function NewPartForm({
 								<FormLabel>{t("parts.form.stockLabel")}</FormLabel>
 								<FormControl>
 									<Input
+										disabled={Boolean(part)}
 										min={0}
 										placeholder="0"
 										step="1"
 										{...numberInputProps(field)}
 									/>
 								</FormControl>
+								{part && (
+									<FormDescription>
+										{t("parts.form.stockLockedDescription")}
+									</FormDescription>
+								)}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -248,14 +268,16 @@ export function NewPartForm({
 				{part ? (
 					<Button
 						className="w-full"
-						disabled={!form.formState.isDirty}
+						disabled={!form.formState.isDirty || saving}
 						type="submit"
 					>
-						{t("common.actions.saveChanges")} <Save />
+						{t("common.actions.saveChanges")}{" "}
+						{saving ? <Loader2 className="animate-spin" /> : <Save />}
 					</Button>
 				) : (
-					<Button className="w-full" type="submit">
-						{t("parts.form.submit")} <Plus />
+					<Button className="w-full" disabled={saving} type="submit">
+						{t("parts.form.submit")}{" "}
+						{saving ? <Loader2 className="animate-spin" /> : <Plus />}
 					</Button>
 				)}
 			</form>

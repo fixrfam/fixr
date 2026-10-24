@@ -5,13 +5,22 @@ import { Wrench } from "lucide-react";
 import { notFound, useParams } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
-import { useServiceRow } from "@/components/dashboard/parts/store";
+import {
+	useInventory,
+	useServiceRow,
+} from "@/components/dashboard/parts/store";
 import { ServiceDetails } from "@/components/dashboard/services/service-details";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServiceDetailsPage() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
 	const service = useServiceRow(id);
+	const { isPending } = useInventory();
+
+	if (isPending) {
+		return <Skeleton className="h-96 w-full max-w-2xl" />;
+	}
 
 	if (!service) {
 		return notFound();

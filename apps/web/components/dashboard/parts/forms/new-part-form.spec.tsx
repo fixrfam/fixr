@@ -2,10 +2,14 @@ import { createTranslator } from "@fixr/i18n";
 import { mockParts, mockSuppliers } from "@fixr/mock";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { toast } from "@/test/mocks";
-import { render } from "@/test/render";
-import { usePartsStore } from "../store";
+import { apiUrl, envelope } from "@/test/msw/handlers";
+import { serveInventory } from "@/test/msw/inventory";
+import { server } from "@/test/msw/server";
+import { renderWithQuery as render } from "@/test/query";
 import { NewPartForm } from "./new-part-form";
 
 const { t } = createTranslator("pt-BR");
@@ -19,10 +23,11 @@ async function enter(
 	await user.click(element);
 	await user.paste(text);
 }
-const initialState = usePartsStore.getState();
+let api: ReturnType<typeof serveInventory>;
 
 beforeEach(() => {
-	usePartsStore.setState(initialState, true);
+	setSessionCookie(fakeJwt());
+	api = serveInventory();
 });
 
 afterEach(() => {
@@ -56,7 +61,7 @@ async function fill(
 }
 
 describe("NewPartForm", () => {
-	it("creates a part in the store and reports success", async () => {
+	it("creates the part through the API and reports success", async () => {
 		const user = userEvent.setup();
 		const onSuccess = vi.fn();
 		render(<NewPartForm onSuccess={onSuccess} />);
@@ -67,7 +72,12 @@ describe("NewPartForm", () => {
 		);
 
 		await waitFor(() => expect(onSuccess).toHaveBeenCalled());
-		expect(usePartsStore.getState().parts.at(-1)).toMatchObject({
+		expect(api.writes).toHaveLength(1);
+		expect(api.writes[0]).toMatchObject({
+			method: "POST",
+			path: "/companies/fixr/parts",
+		});
+		expect(api.writes[0]!.body).toMatchObject({
 			sku: "BAT-TEST",
 			category: "Baterias",
 			supplierId: mockSuppliers[0]!.id,
@@ -95,7 +105,33 @@ describe("NewPartForm", () => {
 			await screen.findByText(t("validation.part.salePriceBelowCost"))
 		).toBeInTheDocument();
 		expect(onSuccess).not.toHaveBeenCalled();
-		expect(usePartsStore.getState().parts).toHaveLength(mockParts.length);
+		expect(api.writes).toHaveLength(0);
+	});
+
+	it("shows the API error and keeps the form open", async () => {
+		server.use(
+			http.post(apiUrl("/companies/fixr/parts"), () =>
+				HttpResponse.json(
+					envelope(null, { status: 409, code: "part_sku_conflict" }),
+					{ status: 409 }
+				)
+			)
+		);
+		const user = userEvent.setup();
+		const onSuccess = vi.fn();
+		render(<NewPartForm onSuccess={onSuccess} />);
+
+		await fill(user);
+		await user.click(
+			screen.getByRole("button", { name: t("parts.form.submit") })
+		);
+
+		await waitFor(() =>
+			expect(toast.error).toHaveBeenCalledWith(
+				expect.objectContaining({ text: "SKU já cadastrado" })
+			)
+		);
+		expect(onSuccess).not.toHaveBeenCalled();
 	});
 
 	it("does not create anything from an empty form", async () => {
@@ -109,7 +145,7 @@ describe("NewPartForm", () => {
 		expect(
 			await screen.findByText(t("validation.part.skuRequired"))
 		).toBeInTheDocument();
-		expect(usePartsStore.getState().parts).toHaveLength(mockParts.length);
+		expect(api.writes).toHaveLength(0);
 		expect(toast.success).not.toHaveBeenCalled();
 	});
 
@@ -120,11 +156,20 @@ describe("NewPartForm", () => {
 			const user = userEvent.setup();
 			render(<NewPartForm part={part} />);
 
-			await user.clear(label("parts.form.stockLabel"));
+			await user.clear(label("parts.form.minStockLabel"));
 
-			expect(label("parts.form.stockLabel")).toHaveValue(null);
+			expect(label("parts.form.minStockLabel")).toHaveValue(null);
 			expect(
-				await screen.findByText(t("validation.part.stockRequired"))
+				await screen.findByText(t("validation.part.minStockRequired"))
+			).toBeInTheDocument();
+		});
+
+		it("locks the stock, which only changes through an adjustment", () => {
+			render(<NewPartForm part={part} />);
+
+			expect(label("parts.form.stockLabel")).toBeDisabled();
+			expect(
+				screen.getByText(t("parts.form.stockLockedDescription"))
 			).toBeInTheDocument();
 		});
 
@@ -139,18 +184,20 @@ describe("NewPartForm", () => {
 			expect(label("parts.form.skuLabel")).toHaveValue(part.sku);
 			expect(save).toBeDisabled();
 
-			const stock = label("parts.form.stockLabel");
-			await user.clear(stock);
-			await user.type(stock, "42");
+			const minStock = label("parts.form.minStockLabel");
+			await user.clear(minStock);
+			await user.type(minStock, "42");
 			await user.click(save);
 
 			await waitFor(() => expect(onSuccess).toHaveBeenCalled());
-			const { parts } = usePartsStore.getState();
-			expect(parts).toHaveLength(mockParts.length);
-			expect(parts.find((p) => p.id === part.id)).toEqual({
-				...part,
-				stock: 42,
-			});
+			expect(api.writes).toEqual([
+				expect.objectContaining({
+					method: "PATCH",
+					path: `/companies/fixr/parts/${part.id}`,
+					body: expect.objectContaining({ sku: part.sku, minStock: 42 }),
+				}),
+			]);
+			expect(api.writes[0]?.body).not.toHaveProperty("stock");
 			expect(toast.success).toHaveBeenCalledWith({
 				text: t("parts.form.updated"),
 			});

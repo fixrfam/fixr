@@ -3,6 +3,7 @@ import { ExternalLink, Pencil } from "lucide-react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatCnpj } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { STOCK_STATUS_KEYS, type StockStatusId } from "./data";
 
@@ -110,7 +111,11 @@ export function SupplierCell({ name, cnpj }: { name?: string; cnpj?: string }) {
 	return (
 		<div className="flex flex-col">
 			<span className="font-medium">{name}</span>
-			{cnpj && <span className="text-muted-foreground text-xs">{cnpj}</span>}
+			{cnpj && (
+				<span className="text-muted-foreground text-xs">
+					{formatCnpj(cnpj)}
+				</span>
+			)}
 		</div>
 	);
 }

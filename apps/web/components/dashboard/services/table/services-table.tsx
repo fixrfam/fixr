@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -14,16 +15,22 @@ import {
 } from "@tanstack/react-table";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { useServiceRows } from "@/components/dashboard/parts/store";
+import {
+	useCatalogAbility,
+	useInventory,
+	useServiceRows,
+} from "@/components/dashboard/parts/store";
 import { searchServices } from "@/components/dashboard/parts/table/data";
 import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useServiceColumns } from "./columns";
 
 export function ServicesTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const router = useRouter();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const [search, setSearch] = useState("");
@@ -42,6 +49,7 @@ export function ServicesTable() {
 	);
 
 	const rows = useServiceRows();
+	const { isPending } = useInventory();
 
 	const filteredData = useMemo(
 		() => searchServices(rows, search),
@@ -68,6 +76,7 @@ export function ServicesTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.services.create)}
 				createHref="/services/new"
 				createLabel={t("services.table.create")}
 				onClear={() => {
@@ -80,9 +89,13 @@ export function ServicesTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<DataTable className="w-full" onRowClick={handleRowClick} table={table}>
-				<DataTableToolbar showViewOptions={false} table={table} />
-			</DataTable>
+			{isPending ? (
+				<Skeleton className="h-96 w-full rounded-md" />
+			) : (
+				<DataTable className="w-full" onRowClick={handleRowClick} table={table}>
+					<DataTableToolbar showViewOptions={false} table={table} />
+				</DataTable>
+			)}
 		</div>
 	);
 }

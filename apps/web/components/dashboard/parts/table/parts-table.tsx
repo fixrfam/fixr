@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
@@ -17,13 +18,15 @@ import { useMemo, useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { usePartRows } from "../store";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCatalogAbility, useInventory, usePartRows } from "../store";
 import { usePartColumns } from "./columns";
 import { STOCK_STATUS_KEYS, searchParts } from "./data";
 import { TableToolbar } from "./toolbar";
 
 export function PartsTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -34,6 +37,7 @@ export function PartsTable() {
 	const columns = usePartColumns(subdomain);
 
 	const rows = usePartRows();
+	const { isPending } = useInventory();
 
 	const filteredData = useMemo(
 		() => searchParts(rows, search, (status) => t(STOCK_STATUS_KEYS[status])),
@@ -62,6 +66,7 @@ export function PartsTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.parts.create)}
 				createHref="/parts/new"
 				createLabel={t("parts.table.create")}
 				onClear={() => {
@@ -74,9 +79,13 @@ export function PartsTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<DataTable className="w-full" table={table}>
-				<DataTableToolbar showViewOptions={false} table={table} />
-			</DataTable>
+			{isPending ? (
+				<Skeleton className="h-96 w-full rounded-md" />
+			) : (
+				<DataTable className="w-full" table={table}>
+					<DataTableToolbar showViewOptions={false} table={table} />
+				</DataTable>
+			)}
 		</div>
 	);
 }

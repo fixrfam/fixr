@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	getCoreRowModel,
 	getPaginationRowModel,
@@ -9,15 +10,21 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { useSupplierRows } from "@/components/dashboard/parts/store";
+import {
+	useCatalogAbility,
+	useInventory,
+	useSupplierRows,
+} from "@/components/dashboard/parts/store";
 import { searchSuppliers } from "@/components/dashboard/parts/table/data";
 import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSupplierColumns } from "./columns";
 
 export function SuppliersTable() {
 	const { t } = useTranslation();
+	const ability = useCatalogAbility();
 	const [search, setSearch] = useState("");
 	const [sorting, setSorting] = useState<SortingState>([
 		{ id: "name", desc: false },
@@ -26,6 +33,7 @@ export function SuppliersTable() {
 	const columns = useSupplierColumns();
 
 	const rows = useSupplierRows();
+	const { isPending } = useInventory();
 
 	const filteredData = useMemo(
 		() => searchSuppliers(rows, search),
@@ -48,6 +56,7 @@ export function SuppliersTable() {
 	return (
 		<div className="space-y-4">
 			<TableToolbar
+				canCreate={ability.can(permissions.suppliers.create)}
 				createHref="/suppliers/new"
 				createLabel={t("suppliers.table.create")}
 				onClear={() => setSearch("")}
@@ -57,7 +66,11 @@ export function SuppliersTable() {
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<DataTable className="w-full" table={table} />
+			{isPending ? (
+				<Skeleton className="h-96 w-full rounded-md" />
+			) : (
+				<DataTable className="w-full" table={table} />
+			)}
 		</div>
 	);
 }
