@@ -13,6 +13,10 @@ import {
 	renderEmail as renderInviteEmail,
 } from "../emails/invite";
 import { renderEmail as renderPasswordResetEmail } from "../emails/password-reset";
+import {
+	type EmailProps as PortalAccessEmailProps,
+	renderEmail as renderPortalAccessEmail,
+} from "../emails/portal-access";
 import { renderEmail as renderVerificationEmail } from "../emails/verification";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -175,6 +179,23 @@ export const sendEstimateEmail = async ({
 		attachments: [attachment],
 	});
 
+export const sendPortalAccessEmail = async ({
+	to,
+	appName,
+	locale = defaultLocale,
+	...props
+}: Omit<PortalAccessEmailProps, "locale"> & EmailCommonProps) => {
+	const { t } = createTranslator(locale);
+	return sendEmail({
+		to,
+		appName,
+		subject: props.companyName
+			? t("emails.portalAccess.subject", { company: props.companyName })
+			: t("emails.portalAccess.subjectSelf"),
+		html: await renderPortalAccessEmail({ ...props, locale }),
+	});
+};
+
 // Extracts display name from an email
 export const emailDisplayName = (email: string) => email.split("@")[0];
 
@@ -184,4 +205,5 @@ export const emails = {
 	sendAccountDeletionEmail,
 	sendPasswordResetEmail,
 	sendEstimateEmail,
+	sendPortalAccessEmail,
 };

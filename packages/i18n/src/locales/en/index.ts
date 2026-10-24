@@ -14,6 +14,7 @@ import { home } from "./home";
 import { messages } from "./messages";
 import { parts } from "./parts";
 import { permissions } from "./permissions";
+import { portal } from "./portal";
 import { roles } from "./roles";
 import { serviceOrders } from "./service-orders";
 import { services } from "./services";
@@ -38,6 +39,7 @@ export const en = {
 	messages,
 	parts,
 	permissions,
+	portal,
 	roles,
 	serviceOrders,
 	services,

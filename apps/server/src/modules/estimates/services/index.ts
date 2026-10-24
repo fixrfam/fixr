@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from "node:crypto";
 import { APP_NAME } from "@fixr/constants/app";
 import { asc, desc } from "@fixr/db/connection";
 import { estimates } from "@fixr/db/schema";
@@ -18,6 +17,10 @@ import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { AppError } from "../../../core/lib/app-error";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
+import {
+	generateOpaqueToken,
+	hashOpaqueToken,
+} from "../../../core/lib/opaque-token";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
@@ -49,14 +52,6 @@ const TRANSITIONS: Record<EstimateStatus, EstimateStatus[]> = {
 	approved: [],
 	rejected: ["draft"],
 };
-
-/** Bytes of entropy in a public link token (encoded as 43 base64url chars). */
-const TOKEN_BYTES = 32;
-
-/** Links are looked up by the token's hash; the token itself is never stored. */
-function hashToken(token: string) {
-	return createHash("sha256").update(token).digest("hex");
-}
 
 function isExpired(estimate: { validUntil: Date }) {
 	return estimate.validUntil.getTime() < Date.now();
@@ -434,9 +429,9 @@ export class EstimatesService {
 			throw new AppError("ESTIMATE_NO_RECIPIENT");
 		}
 
-		const token = randomBytes(TOKEN_BYTES).toString("base64url");
+		const token = generateOpaqueToken();
 		await EstimatesRepository.markSent(estimate, {
-			publicTokenHash: hashToken(token),
+			publicTokenHash: hashOpaqueToken(token),
 			sentTo: recipient,
 		});
 
@@ -472,7 +467,7 @@ export class EstimatesService {
 	/** Estimate behind a public link, or an error when the link is not valid. */
 	private static async queryByToken(token: string) {
 		const estimate = await EstimatesRepository.queryByTokenHash(
-			hashToken(token)
+			hashOpaqueToken(token)
 		);
 		if (!estimate) {
 			throw new AppError("ESTIMATE_LINK_INVALID");
