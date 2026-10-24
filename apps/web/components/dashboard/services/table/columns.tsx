@@ -1,10 +1,12 @@
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import {
 	type ColumnDef,
 	createColumnHelper,
 	type Row,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
 	DurationCell,
 	EditCell,
@@ -31,6 +33,7 @@ export function useServiceColumns(
 	subdomain: string
 ): ColumnDef<ServiceTableRow>[] {
 	const { t } = useTranslation();
+	const canEdit = useCatalogAbility().can(permissions.services.update);
 
 	return useMemo(
 		() => [
@@ -124,26 +127,32 @@ export function useServiceColumns(
 				),
 				meta: { label: t("services.table.headers.parts") },
 			}),
-			serviceColumnHelper.display({
-				id: "actions",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						className="px-0.5"
-						column={column}
-						label={t("services.table.headers.actions")}
-					/>
-				),
-				cell: ({ row }) => (
-					<EditCell
-						href={`/services/${row.original.id}/edit`}
-						label={t("services.table.editLabel", { name: row.original.name })}
-						subdomain={subdomain}
-					/>
-				),
-				enableSorting: false,
-				enableHiding: false,
-			}),
+			...(canEdit
+				? [
+						serviceColumnHelper.display({
+							id: "actions",
+							header: ({ column }) => (
+								<DataTableColumnHeader
+									className="px-0.5"
+									column={column}
+									label={t("services.table.headers.actions")}
+								/>
+							),
+							cell: ({ row }) => (
+								<EditCell
+									href={`/services/${row.original.id}/edit`}
+									label={t("services.table.editLabel", {
+										name: row.original.name,
+									})}
+									subdomain={subdomain}
+								/>
+							),
+							enableSorting: false,
+							enableHiding: false,
+						}),
+					]
+				: []),
 		],
-		[subdomain, t]
+		[subdomain, t, canEdit]
 	) as ColumnDef<ServiceTableRow>[];
 }

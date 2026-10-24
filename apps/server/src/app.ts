@@ -106,9 +106,16 @@ const OPENAPI_TAGS = [
 			"Estimates (orçamentos) built from service orders, with PDF generation.",
 	},
 	{
-		name: "Parts & Services",
-		description:
-			"Company inventory: parts, the repair services offered and suppliers.",
+		name: "Parts",
+		description: "Company parts catalog: pricing, stock and minimum stock.",
+	},
+	{
+		name: "Services",
+		description: "Repair services the company offers and the parts they use.",
+	},
+	{
+		name: "Suppliers",
+		description: "Suppliers the company buys parts from.",
 	},
 	{
 		name: "Uploads",
