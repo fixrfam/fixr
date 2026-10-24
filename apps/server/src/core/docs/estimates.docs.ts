@@ -7,8 +7,11 @@ import {
 	createEstimateSchema,
 	estimateIdParamsSchema,
 	estimateStatuses,
+	estimateTokenParamsSchema,
 	getEstimatesQuerySchema,
 	patchEstimateSchema,
+	rejectEstimateSchema,
+	sendEstimateSchema,
 	updateEstimateStatusSchema,
 } from "@fixr/schemas/estimates";
 import { paginatedDataSchema } from "@fixr/schemas/utils";
@@ -30,8 +33,11 @@ const totalsSchema = z.object({
 	total: z.number(),
 });
 
+/** The link token hash never leaves the server. */
+const { publicTokenHash: _hash, ...estimateShape } = estimateSelectSchema.shape;
+
 const estimateRecordSchema = z.object({
-	...estimateSelectSchema.shape,
+	...estimateShape,
 	client: z.object({ id: z.string(), name: z.string() }).nullable(),
 	totals: totalsSchema,
 });
@@ -229,6 +235,168 @@ const deleteEstimateSchema: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const expiredError = zodResponseSchema({
+	status: 410,
+	error: "Gone",
+	code: "estimate_expired",
+	message: "The estimate's validity date has passed.",
+	data: null,
+}).describe("The validity date has passed.");
+
+const sendEstimateSchemaDoc: FastifySchema = {
+	tags: ["Estimates"],
+	summary: "Send estimate to the client",
+	description: `
+**Emails the estimate to the client, with the PDF attached and a link to approve or reject it.**
+
+- \`email\` defaults to the client's email; it is required when the client has none (\`400 estimate_no_recipient\`).
+- Works on a \`draft\` or an already \`sent\` estimate. Sending again issues a new link and the previous one stops working.
+- The estimate becomes \`sent\` and its service order moves to \`waiting_approval\` (only when the order has not gone past that point).
+- The email is queued; the worker delivers it.
+`,
+	params: estimateParams,
+	body: sendEstimateSchema,
+	response: {
+		200: detailResponse(
+			200,
+			"send_estimate_success",
+			"Estimate sent to the client."
+		),
+		400: zodResponseSchema({
+			status: 400,
+			error: "Bad Request",
+			code: "estimate_no_recipient",
+			message:
+				"The client has no email. Send the estimate to an email address.",
+			data: null,
+		}).describe("No email to send to."),
+		409: conflictError(
+			"estimate_invalid_transition",
+			"The estimate can't move to this status from its current one."
+		),
+		410: expiredError,
+		...companyScopedErrors,
+		404: estimateNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const linkNotFound = notFoundError(
+	"estimate_link_invalid",
+	"This estimate link is invalid or was replaced."
+);
+
+const publicEstimateSchema = z.object({
+	number: z.number(),
+	status: estimateStatuses,
+	validUntil: z.coerce.date(),
+	expired: z.boolean(),
+	discountPercentage: z.number(),
+	notes: z.string().nullable(),
+	sentAt: z.coerce.date().nullable(),
+	respondedAt: z.coerce.date().nullable(),
+	rejectionReason: z.string().nullable(),
+	company: z.object({
+		name: z.string(),
+		email: z.string().nullable(),
+		phone: z.string().nullable(),
+		website: z.string().nullable(),
+		logoUrl: z.string().nullable(),
+	}),
+	client: z.object({ name: z.string() }).nullable(),
+	device: z.object({
+		maker: z.string(),
+		model: z.string(),
+		reportedDefect: z.string(),
+	}),
+	items: z.array(
+		z.object({
+			type: z.enum(["part", "service"]),
+			name: z.string(),
+			quantity: z.number(),
+			unitPrice: z.number(),
+			total: z.number(),
+		})
+	),
+	totals: totalsSchema,
+});
+
+const publicResponse = (code: string, message: string) =>
+	zodResponseSchema({
+		status: 200,
+		error: null,
+		code,
+		message,
+		data: publicEstimateSchema,
+	}).describe(message);
+
+const getPublicEstimateSchema: FastifySchema = {
+	tags: ["Estimates"],
+	summary: "View estimate from its link",
+	description: `
+**Public: what the client sees when opening the link from the email.**
+
+No authentication: the token in the URL is the credential. It only exposes the estimate itself (company contact data, client name, device, items and totals), never internal ids.
+`,
+	params: estimateTokenParamsSchema,
+	response: {
+		200: publicResponse(
+			"get_estimate_success",
+			"Estimate retrieved successfully."
+		),
+		404: linkNotFound,
+	},
+};
+
+const getPublicEstimatePdfSchema: FastifySchema = {
+	tags: ["Estimates"],
+	summary: "Download estimate PDF from its link",
+	description:
+		"**Public:** the same PDF sent by email (`application/pdf`, inline).",
+	params: estimateTokenParamsSchema,
+	response: { 404: linkNotFound },
+};
+
+const answerErrors = {
+	404: linkNotFound,
+	409: conflictError(
+		"estimate_already_answered",
+		"The estimate was already approved or rejected."
+	),
+	410: expiredError,
+};
+
+const approvePublicEstimateSchema: FastifySchema = {
+	tags: ["Estimates"],
+	summary: "Approve estimate from its link",
+	description: `
+**Public: the client approves the estimate.**
+
+The estimate becomes \`approved\` and its service order moves to \`approved\` (only when the order has not gone past that point). Only a \`sent\`, unexpired estimate can be answered.
+`,
+	params: estimateTokenParamsSchema,
+	response: {
+		200: publicResponse("approve_estimate_success", "Answer recorded."),
+		...answerErrors,
+	},
+};
+
+const rejectPublicEstimateSchema: FastifySchema = {
+	tags: ["Estimates"],
+	summary: "Reject estimate from its link",
+	description: `
+**Public: the client rejects the estimate**, optionally with a reason the staff sees.
+
+Only a \`sent\`, unexpired estimate can be answered. The service order keeps its status.
+`,
+	params: estimateTokenParamsSchema,
+	body: rejectEstimateSchema,
+	response: {
+		200: publicResponse("reject_estimate_success", "Answer recorded."),
+		...answerErrors,
+	},
+};
+
 export const estimatesDocs = {
 	listEstimatesSchema,
 	getEstimateSchema,
@@ -237,4 +405,9 @@ export const estimatesDocs = {
 	patchEstimateSchema: patchEstimateSchemaDoc,
 	updateEstimateStatusSchema: updateEstimateStatusSchemaDoc,
 	deleteEstimateSchema,
+	sendEstimateSchema: sendEstimateSchemaDoc,
+	getPublicEstimateSchema,
+	getPublicEstimatePdfSchema,
+	approvePublicEstimateSchema,
+	rejectPublicEstimateSchema,
 };

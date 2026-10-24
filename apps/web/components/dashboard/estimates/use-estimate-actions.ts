@@ -31,7 +31,7 @@ export function useOpenEstimatePdf() {
 	};
 }
 
-/** Status changes and deletion, refreshing the estimates list afterwards. */
+/** Status changes, sending and deletion, refreshing the estimates list afterwards. */
 export function useEstimateActions() {
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const queryClient = useQueryClient();
@@ -51,11 +51,18 @@ export function useEstimateActions() {
 		onError: toastError,
 	});
 
+	const send = useMutation({
+		mutationFn: ({ id, email }: { id: string; email?: string }) =>
+			estimatesApi.send(subdomain, id, { email }),
+		onSuccess: () => onSuccess("send_estimate_success"),
+		onError: toastError,
+	});
+
 	const remove = useMutation({
 		mutationFn: (id: string) => estimatesApi.remove(subdomain, id),
 		onSuccess: () => onSuccess("delete_estimate_success"),
 		onError: toastError,
 	});
 
-	return { updateStatus, remove };
+	return { updateStatus, send, remove };
 }

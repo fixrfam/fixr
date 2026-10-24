@@ -7,6 +7,7 @@ import {
 	Ban,
 	Check,
 	FileText,
+	Mail,
 	MoreHorizontal,
 	Send,
 	Trash2,
@@ -45,6 +46,7 @@ import {
 	estimatesApi,
 } from "@/lib/services/estimates";
 import { EstimateStatusBadge } from "./estimate-status-badge";
+import { SendEstimateDialog } from "./send-estimate-dialog";
 import {
 	estimatesKey,
 	useEstimateActions,
@@ -81,55 +83,76 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 	const canUpdate = ability.can(permissions.estimates.update);
 	const canDelete =
 		ability.can(permissions.estimates.delete) && estimate.status === "draft";
+	const canSend =
+		ability.can(permissions.estimates.sendToCustomer) &&
+		(estimate.status === "draft" || estimate.status === "sent");
+	const [sending, setSending] = useState(false);
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button
-					aria-label={t("estimates.actions.menu", {
-						number: String(estimate.number).padStart(4, "0"),
-					})}
-					size="icon"
-					variant="ghost"
-				>
-					<MoreHorizontal className="size-4" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
-				<DropdownMenuItem onSelect={() => openPdf(estimate.id)}>
-					<FileText className="size-4" />
-					{t("estimates.actions.openPdf")}
-				</DropdownMenuItem>
-				{canUpdate
-					? NEXT_STATUSES[estimate.status].map((status) => {
-							const { label, Icon } = statusLabels[status];
-							return (
-								<DropdownMenuItem
-									key={status}
-									onSelect={() =>
-										updateStatus.mutate({ id: estimate.id, status })
-									}
-								>
-									<Icon className="size-4" />
-									{label}
-								</DropdownMenuItem>
-							);
-						})
-					: null}
-				{canDelete ? (
-					<>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							className="text-destructive"
-							onSelect={() => remove.mutate(estimate.id)}
-						>
-							<Trash2 className="size-4" />
-							{t("estimates.actions.delete")}
+		<>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						aria-label={t("estimates.actions.menu", {
+							number: String(estimate.number).padStart(4, "0"),
+						})}
+						size="icon"
+						variant="ghost"
+					>
+						<MoreHorizontal className="size-4" />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					<DropdownMenuItem onSelect={() => openPdf(estimate.id)}>
+						<FileText className="size-4" />
+						{t("estimates.actions.openPdf")}
+					</DropdownMenuItem>
+					{canSend ? (
+						<DropdownMenuItem onSelect={() => setSending(true)}>
+							<Mail className="size-4" />
+							{estimate.status === "sent"
+								? t("estimates.actions.resendToClient")
+								: t("estimates.actions.sendToClient")}
 						</DropdownMenuItem>
-					</>
-				) : null}
-			</DropdownMenuContent>
-		</DropdownMenu>
+					) : null}
+					{canUpdate
+						? NEXT_STATUSES[estimate.status].map((status) => {
+								const { label, Icon } = statusLabels[status];
+								return (
+									<DropdownMenuItem
+										key={status}
+										onSelect={() =>
+											updateStatus.mutate({ id: estimate.id, status })
+										}
+									>
+										<Icon className="size-4" />
+										{label}
+									</DropdownMenuItem>
+								);
+							})
+						: null}
+					{canDelete ? (
+						<>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								className="text-destructive"
+								onSelect={() => remove.mutate(estimate.id)}
+							>
+								<Trash2 className="size-4" />
+								{t("estimates.actions.delete")}
+							</DropdownMenuItem>
+						</>
+					) : null}
+				</DropdownMenuContent>
+			</DropdownMenu>
+			{sending ? (
+				<SendEstimateDialog
+					estimate={estimate}
+					onOpenChange={setSending}
+					open={sending}
+				/>
+			) : null}
+		</>
 	);
 }
 
@@ -218,6 +241,14 @@ export function EstimatesTable() {
 										</TableCell>
 										<TableCell>
 											<EstimateStatusBadge status={estimate.status} />
+											{estimate.rejectionReason ? (
+												<p
+													className="mt-1 max-w-56 truncate text-muted-foreground text-xs"
+													title={estimate.rejectionReason}
+												>
+													{estimate.rejectionReason}
+												</p>
+											) : null}
 										</TableCell>
 										<TableCell className="text-right tabular-nums">
 											{format.currency(estimate.totals.total)}

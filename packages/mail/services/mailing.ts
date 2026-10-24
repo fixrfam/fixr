@@ -5,6 +5,10 @@ import dotenv from "dotenv";
 import { resend } from "../config/resend";
 import { renderEmail as renderDeletionEmail } from "../emails/account-deletion";
 import {
+	type EmailProps as EstimateEmailProps,
+	renderEmail as renderEstimateEmail,
+} from "../emails/estimate";
+import {
 	type EmailProps as InviteEmailProps,
 	renderEmail as renderInviteEmail,
 } from "../emails/invite";
@@ -26,13 +30,24 @@ interface EmailCommonProps {
 	locale?: Locale;
 }
 
+/**
+ * A file sent along with the email. The content is base64 so the job payload
+ * stays plain JSON in the queue.
+ */
+export interface EmailAttachment {
+	fileName: string;
+	contentBase64: string;
+}
+
 const sendEmail = async ({
 	to,
 	subject,
 	html,
+	attachments,
 }: EmailCommonProps & {
 	html: string;
 	subject: string;
+	attachments?: EmailAttachment[];
 }) => {
 	try {
 		const { data, error } = await resend.emails.send({
@@ -40,6 +55,10 @@ const sendEmail = async ({
 			to: [to],
 			subject,
 			html,
+			attachments: attachments?.map((attachment) => ({
+				filename: attachment.fileName,
+				content: attachment.contentBase64,
+			})),
 		});
 
 		if (error) {
@@ -137,6 +156,25 @@ export const sendPasswordResetEmail = async ({
 		}),
 	});
 
+export const sendEstimateEmail = async ({
+	to,
+	appName,
+	locale = defaultLocale,
+	attachment,
+	...props
+}: Omit<EstimateEmailProps, "locale"> &
+	EmailCommonProps & { attachment: EmailAttachment }) =>
+	sendEmail({
+		to,
+		appName,
+		subject: createTranslator(locale).t("emails.estimate.subject", {
+			number: props.number,
+			company: props.companyName,
+		}),
+		html: await renderEstimateEmail({ ...props, locale }),
+		attachments: [attachment],
+	});
+
 // Extracts display name from an email
 export const emailDisplayName = (email: string) => email.split("@")[0];
 
@@ -145,4 +183,5 @@ export const emails = {
 	sendAccountVerificationEmail,
 	sendAccountDeletionEmail,
 	sendPasswordResetEmail,
+	sendEstimateEmail,
 };
