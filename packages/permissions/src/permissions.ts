@@ -64,9 +64,6 @@ export const permissions = {
 	},
 	inventory: {
 		read: "inventory:read",
-		create: "inventory:create",
-		update: "inventory:update",
-		delete: "inventory:delete",
 		adjust: "inventory:adjust",
 	},
 	suppliers: {

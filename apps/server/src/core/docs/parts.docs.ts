@@ -1,6 +1,7 @@
 import { partSelectSchema } from "@fixr/db/schema";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
+	adjustPartStockSchema,
 	createPartSchema,
 	getPartsQuerySchema,
 	partIdParamsSchema,
@@ -40,7 +41,7 @@ const supplierNotFound = zodResponseSchema({
 }).describe("The supplier does not exist in this company.");
 
 const listPartsSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Parts"],
 	summary: "List parts",
 	description: `
 **Retrieves the company's parts (paginated)**
@@ -69,7 +70,7 @@ Optional filters (query string):
 };
 
 const getPartSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Parts"],
 	summary: "Get part",
 	params: partParams,
 	response: {
@@ -87,7 +88,7 @@ const getPartSchema: FastifySchema = {
 };
 
 const createPartSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Parts"],
 	summary: "Create part",
 	description: `
 **Creates a part for the authenticated company**
@@ -115,10 +116,12 @@ Rules:
 };
 
 const patchPartSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Parts"],
 	summary: "Update part",
 	description: `
 **Partially updates a part.** When only one of the prices is sent it is checked against the stored one (\`400 part_sale_price_below_cost\`).
+
+The stock is not editable here: use \`POST /parts/:partId/stock-adjustments\`.
 `,
 	params: partParams,
 	body: patchPartSchema,
@@ -138,8 +141,36 @@ const patchPartSchemaDoc: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const adjustPartStockSchemaDoc: FastifySchema = {
+	tags: ["Parts"],
+	summary: "Adjust part stock",
+	description: `
+**Adds or removes units from a part's stock.** \`delta\` is a non-zero whole number, negative to remove. The change is applied atomically, and an adjustment that would leave the stock below zero is refused (\`409 part_stock_insufficient\`).
+
+Requires \`inventory:adjust\`.
+`,
+	params: partParams,
+	body: adjustPartStockSchema,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Part stock adjusted successfully.",
+			code: "adjust_part_stock_success",
+			data: partRecordSchema,
+		}).describe("Part stock adjusted successfully."),
+		409: conflictError(
+			"part_stock_insufficient",
+			"The adjustment would leave the stock below zero."
+		),
+		...companyScopedErrors,
+		404: partNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
 const deletePartSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Parts"],
 	summary: "Delete part",
 	description: `
 **Deletes a part.** It is also removed from the services that suggested it.
@@ -164,5 +195,6 @@ export const partsDocs = {
 	getPartSchema,
 	createPartSchema: createPartSchemaDoc,
 	patchPartSchema: patchPartSchemaDoc,
+	adjustPartStockSchema: adjustPartStockSchemaDoc,
 	deletePartSchema,
 };

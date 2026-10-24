@@ -39,7 +39,7 @@ const partNotFound = zodResponseSchema({
 }).describe("One or more parts do not exist in this company.");
 
 const listServicesSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Services"],
 	summary: "List services",
 	description: `
 **Retrieves the repair services the company offers (paginated)**
@@ -66,7 +66,7 @@ Optional filters (query string):
 };
 
 const getServiceSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Services"],
 	summary: "Get service",
 	params: serviceParams,
 	response: {
@@ -84,7 +84,7 @@ const getServiceSchema: FastifySchema = {
 };
 
 const createServiceSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Services"],
 	summary: "Create service",
 	description: `
 **Creates a repair service for the authenticated company**
@@ -108,7 +108,7 @@ const createServiceSchemaDoc: FastifySchema = {
 };
 
 const patchServiceSchemaDoc: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Services"],
 	summary: "Update service",
 	description: `
 **Partially updates a service.** Sending \`partIds\` replaces the linked parts.
@@ -131,7 +131,7 @@ const patchServiceSchemaDoc: FastifySchema = {
 };
 
 const deleteServiceSchema: FastifySchema = {
-	tags: ["Parts & Services"],
+	tags: ["Services"],
 	summary: "Delete service",
 	params: serviceParams,
 	response: {
