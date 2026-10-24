@@ -1,16 +1,22 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { type ServiceRow, serviceDeviceCategories } from "@fixr/mock";
+import { serviceDeviceCategories } from "@fixr/mock";
 import { createServiceSchema } from "@fixr/schemas/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { Check, ChevronsUpDown, Plus, Save, X } from "lucide-react";
-import type { ComponentPropsWithoutRef } from "react";
-import { useForm } from "react-hook-form";
+import { Check, ChevronsUpDown, Loader2, Plus, Save, X } from "lucide-react";
+import { type ComponentPropsWithoutRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
+import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { numberInputProps } from "@/components/dashboard/parts/forms/number-input";
-import { usePartsStore } from "@/components/dashboard/parts/store";
+import {
+	useCreateService,
+	usePartSearch,
+	usePartsByIds,
+	useUpdateService,
+} from "@/components/dashboard/parts/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +43,8 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import type { ServiceRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
 import { TopicsInput } from "./topics-input";
 
@@ -55,40 +63,56 @@ export function NewServiceForm({
 	onSuccess?: () => void;
 }) {
 	const { t, format } = useTranslation();
-	const parts = usePartsStore((state) => state.parts);
-	const addService = usePartsStore((state) => state.addService);
-	const updateService = usePartsStore((state) => state.updateService);
+	const [partSearch, setPartSearch] = useState("");
+	const onPartSearchChange = useDebouncedCallback(setPartSearch, 250);
+	const partPicker = usePartSearch(partSearch);
+	const parts = partPicker.parts;
+	const createService = useCreateService();
+	const updateService = useUpdateService();
+	const toastError = useApiErrorToast();
+	const saving = createService.isPending || updateService.isPending;
 
 	const form = useForm<z.infer<typeof createServiceSchema>>({
 		resolver: zodResolver(createServiceSchema),
-		defaultValues: service ?? {
-			name: "",
-			description: "",
-			partIds: [],
-			deviceCategories: [],
-			testInstructions: [],
-			testParameters: [],
-		},
+		defaultValues: service
+			? {
+					name: service.name,
+					description: service.description,
+					estimatedDurationMinutes: service.estimatedDurationMinutes,
+					price: service.price,
+					partIds: service.partIds,
+					deviceCategories: service.deviceCategories,
+					testInstructions: service.testInstructions,
+					testParameters: service.testParameters,
+				}
+			: {
+					name: "",
+					description: "",
+					partIds: [],
+					deviceCategories: [],
+					testInstructions: [],
+					testParameters: [],
+				},
 		mode: "all",
 	});
 
-	function onSubmit(values: z.infer<typeof createServiceSchema>) {
-		//TODO: enviar para a API quando a rota de serviços existir
-		const data = {
-			...values,
-			deviceCategories:
-				values.deviceCategories as ServiceRow["deviceCategories"],
-		};
+	const partIds = useWatch({ control: form.control, name: "partIds" });
+	// Names of the chosen parts, which may not be in the current search results.
+	const { parts: selectedParts } = usePartsByIds(partIds);
 
-		if (service) {
-			updateService(service.id, data);
-			toast.success({ text: t("services.form.updated") });
-		} else {
-			addService(data);
-			toast.success({ text: t("services.form.created") });
+	async function onSubmit(values: z.infer<typeof createServiceSchema>) {
+		try {
+			if (service) {
+				await updateService.mutateAsync({ id: service.id, values });
+				toast.success({ text: t("services.form.updated") });
+			} else {
+				await createService.mutateAsync(values);
+				toast.success({ text: t("services.form.created") });
+			}
+			onSuccess?.();
+		} catch (error) {
+			toastError(error);
 		}
-
-		onSuccess?.();
 	}
 
 	return (
@@ -207,9 +231,7 @@ export function NewServiceForm({
 						control={form.control}
 						name="partIds"
 						render={({ field }) => {
-							const selected = parts.filter((part) =>
-								field.value.includes(part.id)
-							);
+							const selected = selectedParts;
 
 							return (
 								<FormItem className="col-span-full">
@@ -223,9 +245,9 @@ export function NewServiceForm({
 													type="button"
 													variant="outline"
 												>
-													{selected.length > 0
+													{field.value.length > 0
 														? t("services.form.partsSelected", {
-																count: selected.length,
+																count: field.value.length,
 															})
 														: t("services.form.partsPlaceholder")}
 													<ChevronsUpDown className="size-4 opacity-50" />
@@ -236,22 +258,26 @@ export function NewServiceForm({
 											align="start"
 											className="w-(--radix-popover-trigger-width) p-0"
 										>
-											<Command>
+											{/* The API searches; the list shows what it answers. */}
+											<Command shouldFilter={false}>
 												<CommandInput
+													onValueChange={onPartSearchChange}
 													placeholder={t("services.form.partsSearch")}
 												/>
 												<CommandList>
 													<CommandEmpty>
-														{t("services.form.partsEmpty")}
+														{partPicker.loading
+															? t("dataTable.filters.loading")
+															: t("services.form.partsEmpty")}
 													</CommandEmpty>
 													<CommandGroup>
 														{parts.map((part) => (
 															<CommandItem
 																key={part.id}
-																keywords={[part.sku, part.category]}
-																onSelect={() =>
-																	field.onChange(toggle(field.value, part.id))
-																}
+																onSelect={() => {
+																	partPicker.remember(part);
+																	field.onChange(toggle(field.value, part.id));
+																}}
 																value={part.name}
 															>
 																<Check
@@ -349,14 +375,16 @@ export function NewServiceForm({
 				{service ? (
 					<Button
 						className="w-full"
-						disabled={!form.formState.isDirty}
+						disabled={!form.formState.isDirty || saving}
 						type="submit"
 					>
-						{t("common.actions.saveChanges")} <Save />
+						{t("common.actions.saveChanges")}{" "}
+						{saving ? <Loader2 className="animate-spin" /> : <Save />}
 					</Button>
 				) : (
-					<Button className="w-full" type="submit">
-						{t("services.form.submit")} <Plus />
+					<Button className="w-full" disabled={saving} type="submit">
+						{t("services.form.submit")}{" "}
+						{saving ? <Loader2 className="animate-spin" /> : <Plus />}
 					</Button>
 				)}
 			</form>

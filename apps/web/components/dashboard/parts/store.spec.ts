@@ -1,122 +1,232 @@
 import { mockParts, mockServices, mockSuppliers } from "@fixr/mock";
-import { act, renderHook } from "@testing-library/react";
+import type { EmployeeRole } from "@fixr/permissions";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
+import { SessionProvider } from "@/lib/hooks/use-session";
+import { fakeJwt, setSessionCookie } from "@/test/jwt";
+import "@/test/mocks";
+import { serveInventory } from "@/test/msw/inventory";
+import { employeeSession } from "@/test/session";
 import {
-	usePartRows,
-	usePartsStore,
+	useCreatePart,
+	usePartsPage,
 	useServiceRow,
-	useSupplierRows,
+	useSupplierPartCounts,
+	useSuppliersPage,
 } from "./store";
 
-const initialState = usePartsStore.getState();
+function wrapperFor(role: EmployeeRole) {
+	return function Wrapper({ children }: { children: ReactNode }) {
+		const client = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		return createElement(
+			QueryClientProvider,
+			{ client },
+			createElement(SessionProvider, {
+				children,
+				session: employeeSession(role),
+			})
+		);
+	};
+}
+
+const wrapper = wrapperFor("admin");
 
 beforeEach(() => {
-	usePartsStore.setState(initialState, true);
+	setSessionCookie(fakeJwt());
 });
 
-const newPart = {
-	sku: "NEW-1",
-	name: "New part",
-	category: "Baterias" as const,
-	costPrice: 1,
-	salePrice: 2,
-	stock: 0,
-	minStock: 1,
-	supplierId: mockSuppliers[0]!.id,
-};
+describe("usePartsPage", () => {
+	it("asks the API for one page with the search, filters and order", async () => {
+		const { listQueries } = serveInventory();
+		const supplierId = mockParts[0]!.supplierId;
 
-describe("usePartsStore", () => {
-	it("starts from the mocks", () => {
-		const state = usePartsStore.getState();
+		const { result } = renderHook(
+			() =>
+				usePartsPage({
+					page: 1,
+					perPage: 5,
+					query: "",
+					sort: "name",
+					supplierId,
+					lowStock: false,
+				}),
+			{ wrapper }
+		);
 
-		expect(state.parts).toBe(mockParts);
-		expect(state.services).toBe(mockServices);
-		expect(state.suppliers).toBe(mockSuppliers);
-	});
-
-	it("adds a part with a fresh id", () => {
-		usePartsStore.getState().addPart(newPart);
-		usePartsStore.getState().addPart(newPart);
-
-		const added = usePartsStore.getState().parts.slice(-2);
-		expect(added).toHaveLength(2);
-		expect(added[0]).toMatchObject(newPart);
-		expect(added[0]!.id).toBeTruthy();
-		expect(added[0]!.id).not.toBe(added[1]!.id);
-	});
-
-	it("updates only the targeted part and keeps its id", () => {
-		const target = mockParts[0]!;
-		const untouched = mockParts[1]!;
-
-		usePartsStore.getState().updatePart(target.id, newPart);
-
-		const { parts } = usePartsStore.getState();
-		expect(parts.find((p) => p.id === target.id)).toEqual({
-			...newPart,
-			id: target.id,
-		});
-		expect(parts.find((p) => p.id === untouched.id)).toBe(untouched);
-		expect(parts).toHaveLength(mockParts.length);
-	});
-
-	it("adds and updates services", () => {
-		const { id: _id, ...service } = mockServices[0]!;
-
-		usePartsStore.getState().addService({ ...service, name: "Added" });
-		usePartsStore
-			.getState()
-			.updateService(mockServices[1]!.id, { ...service, name: "Edited" });
-
-		const { services } = usePartsStore.getState();
-		expect(services.at(-1)?.name).toBe("Added");
-		expect(services.find((s) => s.id === mockServices[1]!.id)?.name).toBe(
-			"Edited"
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		// Empty and false values stay out of the query string.
+		expect(listQueries).toEqual([
+			{
+				path: "/companies/fixr/parts",
+				params: { page: "1", perPage: "5", sort: "name", supplierId },
+			},
+		]);
+		expect(result.current.data?.records.map((p) => p.id)).toEqual(
+			mockParts
+				.filter((p) => p.supplierId === supplierId)
+				.sort((a, b) => a.name.localeCompare(b.name))
+				.slice(0, 5)
+				.map((p) => p.id)
 		);
 	});
 
-	it("adds a supplier", () => {
-		const { id: _id, ...supplier } = mockSuppliers[0]!;
+	it("sends the low stock flag only when it is on", async () => {
+		const { listQueries } = serveInventory();
 
-		usePartsStore.getState().addSupplier({ ...supplier, name: "Nova" });
+		renderHook(() => usePartsPage({ page: 2, perPage: 10, lowStock: true }), {
+			wrapper,
+		});
 
-		expect(usePartsStore.getState().suppliers.at(-1)?.name).toBe("Nova");
+		await waitFor(() => expect(listQueries).toHaveLength(1));
+		expect(listQueries[0]?.params).toEqual({
+			page: "2",
+			perPage: "10",
+			lowStock: "true",
+		});
 	});
 });
 
-describe("row hooks", () => {
-	it("recompute rows when the store changes", () => {
-		const { result } = renderHook(() => usePartRows());
-		const before = result.current.length;
+describe("catalog access by role", () => {
+	it("never lists suppliers for a technician", async () => {
+		const { reads } = serveInventory();
 
-		act(() => usePartsStore.getState().addPart(newPart));
+		const { result } = renderHook(
+			() => ({
+				parts: usePartsPage({ page: 1, perPage: 10 }),
+				suppliers: useSuppliersPage({ page: 1, perPage: 10 }),
+			}),
+			{ wrapper: wrapperFor("technician") }
+		);
 
-		expect(result.current).toHaveLength(before + 1);
-		expect(result.current.at(-1)).toMatchObject({
-			sku: "NEW-1",
-			stockStatus: "out_of_stock",
-			supplier: mockSuppliers[0],
+		await waitFor(() => expect(result.current.parts.isSuccess).toBe(true));
+		// Parts embed the supplier name, so the list still shows it.
+		expect(result.current.parts.data?.records[0]?.supplier?.name).toBeTruthy();
+		expect(reads).not.toContain("/companies/fixr/suppliers");
+	});
+});
+
+describe("useSuppliersPage", () => {
+	it("searches a typed CNPJ by its digits, as the API stores it", async () => {
+		const { listQueries } = serveInventory();
+
+		renderHook(
+			() => useSuppliersPage({ page: 1, perPage: 10, query: "12.345.678/" }),
+			{ wrapper }
+		);
+
+		await waitFor(() => expect(listQueries).toHaveLength(1));
+		expect(listQueries[0]?.params.query).toBe("12345678");
+	});
+});
+
+describe("useServiceRow", () => {
+	it("loads the service and resolves its parts by id", async () => {
+		serveInventory();
+		const service = mockServices.find((s) => s.partIds.length > 0)!;
+
+		const { result } = renderHook(() => useServiceRow(service.id), {
+			wrapper,
 		});
+
+		await waitFor(() => expect(result.current.isPending).toBe(false));
+		expect(result.current.service?.id).toBe(service.id);
+		expect(result.current.service?.parts.map((p) => p.id)).toEqual(
+			service.partIds.filter((id) => mockParts.some((p) => p.id === id))
+		);
 	});
 
-	it("link a new part to its supplier's row", () => {
-		const { result } = renderHook(() => useSupplierRows());
+	it("settles without a part that no longer exists", async () => {
+		const service = {
+			...mockServices[0]!,
+			partIds: [mockParts[0]!.id, "gone"],
+		};
+		serveInventory("fixr", {
+			parts: [...mockParts],
+			services: [service],
+			suppliers: [...mockSuppliers],
+		});
 
-		act(() => usePartsStore.getState().addPart(newPart));
+		const { result } = renderHook(() => useServiceRow(service.id), {
+			wrapper,
+		});
 
-		const supplierRow = result.current.find(
-			(row) => row.id === newPart.supplierId
-		);
-		expect(supplierRow?.parts.map((p) => p.sku)).toContain("NEW-1");
+		await waitFor(() => expect(result.current.isPending).toBe(false));
+		expect(result.current.service?.parts.map((p) => p.id)).toEqual([
+			mockParts[0]!.id,
+		]);
 	});
 
-	it("find a single service, or null", () => {
-		const { result: found } = renderHook(() =>
-			useServiceRow(mockServices[0]!.id)
-		);
-		const { result: missing } = renderHook(() => useServiceRow("nope"));
+	it("is not found for an unknown id", async () => {
+		serveInventory();
 
-		expect(found.current?.name).toBe(mockServices[0]!.name);
-		expect(missing.current).toBeNull();
+		const { result } = renderHook(() => useServiceRow("missing"), {
+			wrapper,
+		});
+
+		await waitFor(() => expect(result.current.isPending).toBe(false));
+		expect(result.current.service).toBeNull();
+	});
+});
+
+describe("useSupplierPartCounts", () => {
+	it("counts the parts of each supplier from the list total", async () => {
+		serveInventory();
+		const ids = mockSuppliers.slice(0, 2).map((s) => s.id);
+
+		const { result } = renderHook(() => useSupplierPartCounts(ids), {
+			wrapper,
+		});
+
+		await waitFor(() =>
+			expect(ids.every((id) => result.current.get(id) !== undefined)).toBe(true)
+		);
+		for (const id of ids) {
+			expect(result.current.get(id)).toBe(
+				mockParts.filter((p) => p.supplierId === id).length
+			);
+		}
+	});
+});
+
+describe("mutations", () => {
+	it("creates a part through the API and refreshes the lists", async () => {
+		const { writes } = serveInventory();
+		const { result } = renderHook(
+			() => ({
+				page: usePartsPage({ page: 1, perPage: 100 }),
+				create: useCreatePart(),
+			}),
+			{ wrapper }
+		);
+		await waitFor(() => expect(result.current.page.isSuccess).toBe(true));
+
+		await act(() =>
+			result.current.create.mutateAsync({
+				sku: "NEW-1",
+				name: "New part",
+				category: "Baterias",
+				costPrice: 1,
+				salePrice: 2,
+				stock: 0,
+				minStock: 1,
+				supplierId: mockSuppliers[0]!.id,
+			})
+		);
+
+		expect(writes).toEqual([
+			expect.objectContaining({
+				method: "POST",
+				path: "/companies/fixr/parts",
+			}),
+		]);
+		await waitFor(() =>
+			expect(result.current.page.data?.pagination.total_records).toBe(
+				mockParts.length + 1
+			)
+		);
 	});
 });

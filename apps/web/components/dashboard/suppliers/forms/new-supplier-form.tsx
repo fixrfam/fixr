@@ -1,16 +1,25 @@
 "use client";
 
-import { cnpj, phone } from "@fixr/constants/masks";
+import { cnpj, phone, unmask } from "@fixr/constants/masks";
 import { useTranslation } from "@fixr/i18n/react";
 import { createSupplierSchema } from "@fixr/schemas/suppliers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
-import { Building2, IdCard, Mail, PhoneIcon, Plus, User } from "lucide-react";
+import {
+	Building2,
+	IdCard,
+	Loader2,
+	Mail,
+	PhoneIcon,
+	Plus,
+	User,
+} from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
-import { usePartsStore } from "@/components/dashboard/parts/store";
+import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
+import { useCreateSupplier } from "@/components/dashboard/parts/store";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -31,7 +40,8 @@ export function NewSupplierForm({
 	onSuccess?: () => void;
 }) {
 	const { t } = useTranslation();
-	const addSupplier = usePartsStore((state) => state.addSupplier);
+	const createSupplier = useCreateSupplier();
+	const toastError = useApiErrorToast();
 
 	const form = useForm<z.infer<typeof createSupplierSchema>>({
 		resolver: zodResolver(createSupplierSchema),
@@ -48,12 +58,18 @@ export function NewSupplierForm({
 	const cnpjMask = useMaskito({ options: { mask: cnpj } });
 	const phoneMask = useMaskito({ options: { mask: phone } });
 
-	function onSubmit(values: z.infer<typeof createSupplierSchema>) {
-		//TODO: enviar para a API (com CNPJ e telefone sem máscara) quando a rota de fornecedores existir
-		addSupplier(values);
-
-		toast.success({ text: t("suppliers.form.created") });
-		onSuccess?.();
+	async function onSubmit(values: z.infer<typeof createSupplierSchema>) {
+		try {
+			await createSupplier.mutateAsync({
+				...values,
+				cnpj: unmask.cnpj(values.cnpj),
+				phone: unmask.phone(values.phone) ?? "",
+			});
+			toast.success({ text: t("suppliers.form.created") });
+			onSuccess?.();
+		} catch (error) {
+			toastError(error);
+		}
 	}
 
 	return (
@@ -168,8 +184,17 @@ export function NewSupplierForm({
 						)}
 					/>
 				</div>
-				<Button className="w-full" type="submit">
-					{t("suppliers.form.submit")} <Plus />
+				<Button
+					className="w-full"
+					disabled={createSupplier.isPending}
+					type="submit"
+				>
+					{t("suppliers.form.submit")}{" "}
+					{createSupplier.isPending ? (
+						<Loader2 className="animate-spin" />
+					) : (
+						<Plus />
+					)}
 				</Button>
 			</form>
 		</Form>
