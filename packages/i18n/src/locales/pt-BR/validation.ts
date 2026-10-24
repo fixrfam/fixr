@@ -77,6 +77,8 @@ export const validation: Translated<typeof source> = {
 	part: {
 		skuRequired: "O SKU é obrigatório.",
 		skuMax: "O SKU excede {{count}} caracteres.",
+		descriptionMax: "A descrição excede {{count}} caracteres.",
+		categoryMax: "A categoria excede {{count}} caracteres.",
 		categoryRequired: "Selecione a categoria.",
 		supplierRequired: "Selecione o fornecedor.",
 		costPriceRequired: "Informe o preço de custo.",
@@ -88,6 +90,9 @@ export const validation: Translated<typeof source> = {
 		stockRequired: "Informe o estoque.",
 		stockInteger: "O estoque deve ser um número inteiro.",
 		stockMin: "O estoque não pode ser negativo.",
+		stockDeltaRequired: "Informe quantas unidades adicionar ou remover.",
+		stockDeltaInteger: "A quantidade deve ser um número inteiro.",
+		stockDeltaZero: "A quantidade não pode ser zero.",
 		minStockRequired: "Informe o estoque mínimo.",
 		minStockInteger: "O estoque mínimo deve ser um número inteiro.",
 		minStockMin: "O estoque mínimo não pode ser negativo.",

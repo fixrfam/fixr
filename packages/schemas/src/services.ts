@@ -1,5 +1,6 @@
 import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
+import { getPaginatedDataSchema } from "./utils";
 
 const topicSchema = z
 	.string()
@@ -28,4 +29,18 @@ export const createServiceSchema = z.object({
 		.min(1, i18nMessage("validation.service.deviceCategoriesRequired")),
 	testInstructions: z.array(topicSchema),
 	testParameters: z.array(topicSchema),
+});
+
+/** @description Body schema for partially updating a service */
+export const patchServiceSchema = createServiceSchema.partial();
+
+/** @description Query schema for listing services: pagination, search and filters */
+export const getServicesQuerySchema = getPaginatedDataSchema.extend({
+	deviceCategory: z.string().optional(),
+	sort: z.enum(["newer", "older", "name"]).optional(),
+});
+
+/** @description Params schema for routes that target a single service */
+export const serviceIdParamsSchema = z.object({
+	serviceId: z.string().cuid2(),
 });

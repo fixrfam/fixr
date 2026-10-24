@@ -78,6 +78,8 @@ export const validation = {
 	part: {
 		skuRequired: "The SKU is required.",
 		skuMax: "The SKU exceeds {{count}} characters.",
+		descriptionMax: "The description exceeds {{count}} characters.",
+		categoryMax: "The category exceeds {{count}} characters.",
 		categoryRequired: "Pick a category.",
 		supplierRequired: "Pick a supplier.",
 		costPriceRequired: "Enter the cost price.",
@@ -89,6 +91,9 @@ export const validation = {
 		stockRequired: "Enter the stock.",
 		stockInteger: "The stock must be a whole number.",
 		stockMin: "The stock can't be negative.",
+		stockDeltaRequired: "Enter how many units to add or remove.",
+		stockDeltaInteger: "The amount must be a whole number.",
+		stockDeltaZero: "The amount can't be zero.",
 		minStockRequired: "Enter the minimum stock.",
 		minStockInteger: "The minimum stock must be a whole number.",
 		minStockMin: "The minimum stock can't be negative.",

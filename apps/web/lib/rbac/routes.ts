@@ -84,7 +84,7 @@ export const routeRules: RouteRule[] = [
 	},
 	{
 		path: "/dashboard/:subdomain/inventory/new",
-		permission: permissions.inventory.create,
+		permission: permissions.inventory.adjust,
 	},
 	{
 		path: "/dashboard/:subdomain/inventory/:id",
