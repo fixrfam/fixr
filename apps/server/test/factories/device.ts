@@ -35,6 +35,7 @@ export async function makeModel(input: {
 	categoryId?: string | null;
 	name?: string;
 	status?: string;
+	released?: string | null;
 }) {
 	const name = input.name ?? `Model ${nextSeq()}`;
 	const slug = slugify(name);
@@ -47,6 +48,7 @@ export async function makeModel(input: {
 		slug,
 		url: `/models/${slug}`,
 		status: input.status ?? "Available",
+		released: input.released ?? null,
 	};
 
 	await db.insert(models).values(model);
