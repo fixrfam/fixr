@@ -15,6 +15,18 @@ export const messages = {
 		},
 	},
 	codes: {
+		service_order_catalog_item_not_found: {
+			title: "Item not found",
+			description: "This part or service is no longer in the catalog.",
+		},
+		service_order_item_not_found: {
+			title: "Item not found",
+			description: "This item was already removed from the order.",
+		},
+		service_order_not_found: {
+			title: "Service order not found",
+			description: "This service order does not exist or was removed.",
+		},
 		part_stock_insufficient: {
 			title: "Not enough stock",
 			description: "The adjustment would leave the stock below zero.",

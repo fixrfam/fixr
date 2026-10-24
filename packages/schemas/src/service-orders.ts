@@ -71,6 +71,51 @@ export const createServiceOrderMockSchema = z.object({
 /** @deprecated Use createServiceOrderSchema */
 export const createOrderServiceMockSchema = createServiceOrderMockSchema;
 
+/** @description Kind of catalog item used on a service order */
+export const serviceOrderItemTypes = z.enum(["part", "service"]);
+
+const itemQuantity = z
+	.number({
+		error: i18nMessage("validation.serviceOrder.itemQuantityRequired"),
+	})
+	.int(i18nMessage("validation.serviceOrder.itemQuantityInteger"))
+	.min(1, i18nMessage("validation.serviceOrder.itemQuantityMin"))
+	.max(
+		999,
+		i18nMessage("validation.serviceOrder.itemQuantityMax", { count: 999 })
+	);
+
+const itemUnitPrice = z
+	.number({ error: i18nMessage("validation.serviceOrder.itemPriceRequired") })
+	.min(0, i18nMessage("validation.serviceOrder.itemPriceMin"));
+
+/**
+ * @description Body schema for adding a catalog part or service to a service
+ * order. `unitPrice` defaults to the catalog price at the time it is added.
+ */
+export const addServiceOrderItemSchema = z.object({
+	type: serviceOrderItemTypes,
+	itemId: z.string().cuid2(i18nMessage("validation.serviceOrder.itemInvalid")),
+	quantity: itemQuantity.default(1),
+	unitPrice: itemUnitPrice.optional(),
+});
+
+/** @description Body schema for changing an item's quantity or price */
+export const patchServiceOrderItemSchema = z.object({
+	quantity: itemQuantity.optional(),
+	unitPrice: itemUnitPrice.optional(),
+});
+
+/** @description Params schema for routes that target a service order */
+export const serviceOrderIdParamsSchema = z.object({
+	serviceOrderId: z.string().cuid2(),
+});
+
+/** @description Params schema for routes that target an item of a service order */
+export const serviceOrderItemParamsSchema = serviceOrderIdParamsSchema.extend({
+	itemId: z.string().cuid2(),
+});
+
 export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 	.extend({
 		deviceCategoryId: z

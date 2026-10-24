@@ -59,6 +59,13 @@ export const validation = {
 		expirationInPast: "The expiration date must be in the future.",
 	},
 	serviceOrder: {
+		itemInvalid: "Pick an item from the catalog.",
+		itemQuantityRequired: "Enter the quantity.",
+		itemQuantityInteger: "The quantity must be a whole number.",
+		itemQuantityMin: "The quantity must be at least 1.",
+		itemQuantityMax: "The quantity can't exceed {{count}}.",
+		itemPriceRequired: "Enter the price.",
+		itemPriceMin: "The price can't be negative.",
 		clientInvalid: "Invalid client.",
 		brandInvalid: "Invalid device brand.",
 		categoryInvalid: "Invalid device category.",

@@ -2,8 +2,12 @@ import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
+	addServiceOrderItemSchema,
 	createServiceOrderMockSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderItemSchema,
+	serviceOrderIdParamsSchema,
+	serviceOrderItemParamsSchema,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import { serviceOrdersDocs } from "../../../core/docs/service-orders.docs";
@@ -56,6 +60,112 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 				userJwt,
 				data: body,
 				subdomain,
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/:serviceOrderId/items",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.read),
+			],
+			schema: serviceOrdersDocs.listServiceOrderItemsSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.listItems({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:serviceOrderId/items",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.addServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = addServiceOrderItemSchema.parse(request.body);
+
+			await ServiceOrdersController.addItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:serviceOrderId/items/:itemId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.patchServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, itemId } = serviceOrderItemParamsSchema.parse(
+				request.params
+			);
+			const data = patchServiceOrderItemSchema.parse(request.body);
+
+			await ServiceOrdersController.patchItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				itemId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/:serviceOrderId/items/:itemId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.deleteServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, itemId } = serviceOrderItemParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.deleteItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				itemId,
 				response,
 			});
 		})

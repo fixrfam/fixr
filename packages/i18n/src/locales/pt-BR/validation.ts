@@ -58,6 +58,13 @@ export const validation: Translated<typeof source> = {
 		expirationInPast: "A data de expiração deve ser no futuro.",
 	},
 	serviceOrder: {
+		itemInvalid: "Escolha um item do catálogo.",
+		itemQuantityRequired: "Informe a quantidade.",
+		itemQuantityInteger: "A quantidade deve ser um número inteiro.",
+		itemQuantityMin: "A quantidade deve ser pelo menos 1.",
+		itemQuantityMax: "A quantidade não pode passar de {{count}}.",
+		itemPriceRequired: "Informe o preço.",
+		itemPriceMin: "O preço não pode ser negativo.",
 		clientInvalid: "Cliente inválido.",
 		brandInvalid: "Marca do dispositivo inválida.",
 		categoryInvalid: "Categoria do dispositivo inválida.",

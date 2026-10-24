@@ -12,11 +12,11 @@ import {
 import { ServiceOrderLifecycle } from "@/components/dashboard/service-order/lifecycle";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
+import { ServiceOrderItems } from "@/components/dashboard/service-order/widgets/service-order-items";
 import {
 	ServiceOrderKeyValueItem,
 	ServiceOrderKeyValueList,
 } from "@/components/dashboard/service-order/widgets/service-order-key-value";
-import { ServiceOrderPartsList } from "@/components/dashboard/service-order/widgets/service-order-parts-list";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import type { CardId } from "./utils/constants";
@@ -150,11 +150,11 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 		),
 		parts: (
 			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.partsDescription")}
+				description={t("serviceOrders.items.description")}
 				icon={Package}
-				title={t("serviceOrders.cards.partsTitle")}
+				title={t("serviceOrders.items.title")}
 			>
-				<ServiceOrderPartsList parts={order.parts} />
+				<ServiceOrderItems serviceOrderId={order.id} />
 			</ServiceOrderDetailsCard>
 		),
 		images: (
