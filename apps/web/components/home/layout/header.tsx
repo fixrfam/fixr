@@ -14,6 +14,13 @@ import { useScrollPosition } from "@/lib/hooks/use-scroll-position";
 import { useSession } from "@/lib/hooks/use-session";
 import { cn } from "@/lib/utils";
 
+const NAV_LINKS = [
+	{ key: "features", href: "/#features" },
+	{ key: "howItWorks", href: "/#how-it-works" },
+	{ key: "roles", href: "/#roles" },
+	{ key: "faq", href: "/#faq" },
+] as const;
+
 export default function Header() {
 	const { t } = useTranslation();
 	const { hasScrolled } = useScrollPosition();
@@ -36,13 +43,18 @@ export default function Header() {
 					<Link href="/" prefetch>
 						<TextLogo className="w-16 text-primary" />
 					</Link>
-					<nav className="hidden lg:block">
+					<nav aria-label={t("home.nav.label")} className="hidden lg:block">
 						<ul className="flex gap-6 font-light">
-							<li>{t("home.nav.features")}</li>
-							<li>{t("home.nav.products")}</li>
-							<li>{t("home.nav.pricing")}</li>
-							<li>{t("home.nav.customers")}</li>
-							<li>{t("home.nav.contact")}</li>
+							{NAV_LINKS.map(({ key, href }) => (
+								<li key={key}>
+									<Link
+										className="rounded-sm transition-colors duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										href={href}
+									>
+										{t(`home.nav.${key}`)}
+									</Link>
+								</li>
+							))}
 						</ul>
 					</nav>
 				</div>
