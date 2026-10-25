@@ -2,7 +2,7 @@
 
 import { env } from "@fixr/env/web";
 import { useTranslation } from "@fixr/i18n/react";
-import { ExternalLink, WandSparkles } from "lucide-react";
+import { Check, ExternalLink, WandSparkles } from "lucide-react";
 import Link from "next/link";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { TextAnimate } from "@/components/magicui/text-animate";
@@ -11,12 +11,17 @@ import { dashboardHref } from "@/lib/auth/utils";
 import { useSession } from "@/lib/hooks/use-session";
 import { AppPreview } from "./app-preview";
 
+const PROOF = ["openSource", "interviews", "languages"] as const;
+
 export default function Hero() {
 	const { t } = useTranslation();
 	const { session } = useSession();
 
 	return (
-		<section className="relative z-10 flex w-full max-w-7xl flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10">
+		<section
+			className="relative z-10 flex w-full max-w-7xl scroll-mt-24 flex-col items-start justify-center gap-10 space-y-6 py-2 lg:py-10"
+			id="overview"
+		>
 			<div className="z-3 flex w-full flex-col items-start gap-4">
 				<BlurFade delay={0.3} direction="up" inView>
 					<div className="rounded-full border border-primary bg-primary/15 px-3 py-2 font-light text-primary text-xs shadow-[0_4px_30_-8px_var(--primary-500)] md:px-4 md:py-2 md:text-sm">
@@ -89,6 +94,16 @@ export default function Hero() {
 								</Link>
 							</BlurFade>
 						</div>
+						<BlurFade delay={0.3 * 3} inView>
+							<ul className="flex flex-wrap gap-x-4 gap-y-2 font-light text-muted-foreground text-xs">
+								{PROOF.map((key) => (
+									<li className="flex items-center gap-1" key={key}>
+										<Check className="size-3.5 text-primary" />
+										{t(`home.hero.proof.${key}`)}
+									</li>
+								))}
+							</ul>
+						</BlurFade>
 					</div>
 				</div>
 			</div>

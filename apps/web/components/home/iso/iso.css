@@ -1,0 +1,419 @@
+/*
+ * Isometric scenes for the landing page. Faces read their colors from tone
+ * variables, so every scene follows the light and dark themes on its own.
+ */
+
+:root {
+	--iso-ease: cubic-bezier(0.32, 0.72, 0, 1);
+	--iso-ease-float: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+	--iso-ease-drop: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+	--iso-edge: oklch(14.45% 0 0 / 0.1);
+	--iso-shadow: oklch(14.45% 0 0 / 0.06);
+
+	--iso-base-top: oklch(100% 0 0);
+	--iso-base-left: oklch(96.5% 0.003 258);
+	--iso-base-right: oklch(93% 0.005 258);
+
+	--iso-raised-top: oklch(96.5% 0.004 258);
+	--iso-raised-left: oklch(92.5% 0.006 258);
+	--iso-raised-right: oklch(89% 0.008 258);
+
+	--iso-soft-top: oklch(93% 0.04 258);
+	--iso-soft-left: oklch(88% 0.06 258);
+	--iso-soft-right: oklch(84% 0.07 258);
+
+	--iso-primary-top: var(--primary-300);
+	--iso-primary-left: var(--primary);
+	--iso-primary-right: var(--primary-600);
+
+	--iso-deep-top: var(--primary-700);
+	--iso-deep-left: var(--primary-900);
+	--iso-deep-right: var(--primary-950);
+
+	--iso-warn-top: oklch(88% 0.12 80);
+	--iso-warn-left: oklch(80% 0.14 75);
+	--iso-warn-right: oklch(74% 0.14 70);
+
+	--iso-screen: oklch(97% 0.012 258);
+}
+
+.dark {
+	--iso-edge: oklch(98.48% 0 0 / 0.08);
+	--iso-shadow: oklch(0% 0 0 / 0.18);
+
+	--iso-base-top: oklch(29% 0.014 258);
+	--iso-base-left: oklch(23% 0.012 258);
+	--iso-base-right: oklch(19.5% 0.011 258);
+
+	--iso-raised-top: oklch(35% 0.016 258);
+	--iso-raised-left: oklch(28% 0.014 258);
+	--iso-raised-right: oklch(24% 0.012 258);
+
+	--iso-soft-top: oklch(40% 0.1 262);
+	--iso-soft-left: oklch(33% 0.11 263);
+	--iso-soft-right: oklch(29% 0.1 264);
+
+	--iso-warn-top: oklch(78% 0.14 75);
+	--iso-warn-left: oklch(66% 0.14 70);
+	--iso-warn-right: oklch(58% 0.13 65);
+
+	--iso-screen: oklch(19% 0.02 260);
+}
+
+.iso-box polygon,
+.iso-quad {
+	stroke: var(--iso-edge);
+	stroke-width: 1;
+	stroke-linejoin: round;
+}
+
+.iso-base .iso-top,
+.iso-quad.iso-base {
+	fill: var(--iso-base-top);
+}
+.iso-base .iso-left {
+	fill: var(--iso-base-left);
+}
+.iso-base .iso-right {
+	fill: var(--iso-base-right);
+}
+
+.iso-raised .iso-top,
+.iso-quad.iso-raised {
+	fill: var(--iso-raised-top);
+}
+.iso-raised .iso-left {
+	fill: var(--iso-raised-left);
+}
+.iso-raised .iso-right {
+	fill: var(--iso-raised-right);
+}
+
+.iso-soft .iso-top,
+.iso-quad.iso-soft {
+	fill: var(--iso-soft-top);
+}
+.iso-soft .iso-left {
+	fill: var(--iso-soft-left);
+}
+.iso-soft .iso-right {
+	fill: var(--iso-soft-right);
+}
+
+.iso-primary .iso-top,
+.iso-quad.iso-primary {
+	fill: var(--iso-primary-top);
+}
+.iso-primary .iso-left {
+	fill: var(--iso-primary-left);
+}
+.iso-primary .iso-right {
+	fill: var(--iso-primary-right);
+}
+
+.iso-deep .iso-top,
+.iso-quad.iso-deep {
+	fill: var(--iso-deep-top);
+}
+.iso-deep .iso-left {
+	fill: var(--iso-deep-left);
+}
+.iso-deep .iso-right {
+	fill: var(--iso-deep-right);
+}
+
+.iso-warn .iso-top,
+.iso-quad.iso-warn {
+	fill: var(--iso-warn-top);
+}
+.iso-warn .iso-left {
+	fill: var(--iso-warn-left);
+}
+.iso-warn .iso-right {
+	fill: var(--iso-warn-right);
+}
+
+.iso-quad.iso-screen {
+	fill: var(--iso-screen);
+}
+
+.iso-shadow {
+	fill: var(--iso-shadow);
+}
+
+.iso-ring {
+	fill: none;
+	stroke: var(--primary);
+	stroke-width: 2;
+}
+
+.iso-dot {
+	fill: var(--primary);
+}
+
+.iso-check {
+	fill: none;
+	stroke: var(--primary-foreground);
+	stroke-width: 3;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.iso-quad.iso-dashed {
+	fill: none;
+	stroke: var(--iso-warn-left);
+	stroke-width: 1.5;
+	stroke-dasharray: 4 4;
+}
+
+/* Every animated group runs on the same knobs, set per element. */
+.iso-anim {
+	animation-duration: var(--dur, 7s);
+	animation-delay: var(--delay, 0s);
+	animation-iteration-count: infinite;
+	animation-timing-function: var(--iso-ease);
+	animation-fill-mode: both;
+}
+
+.iso-float {
+	animation-name: iso-float;
+	animation-timing-function: var(--iso-ease-float);
+}
+
+.iso-travel {
+	animation-name: iso-travel;
+}
+
+.iso-drop {
+	animation-name: iso-drop;
+	animation-timing-function: var(--iso-ease-drop);
+}
+
+.iso-pulse {
+	animation-name: iso-pulse;
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+.iso-appear {
+	animation-name: iso-appear;
+}
+
+.iso-blink {
+	animation-name: iso-blink;
+	animation-timing-function: var(--iso-ease-float);
+}
+
+.iso-converge {
+	animation-name: iso-converge;
+}
+
+.iso-slide-in {
+	animation-name: iso-slide-in;
+}
+
+.iso-lift {
+	transition: transform 900ms var(--iso-ease);
+}
+
+@keyframes iso-float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(var(--float, -8px));
+	}
+}
+
+/* Moves twice along (--tx, --ty), resting on each stop like a card changing lanes. */
+@keyframes iso-travel {
+	0% {
+		transform: translate(0, 0);
+		opacity: 0;
+	}
+	6%,
+	22% {
+		transform: translate(0, 0);
+		opacity: 1;
+	}
+	38%,
+	56% {
+		transform: translate(var(--tx), var(--ty));
+	}
+	72%,
+	88% {
+		transform: translate(calc(var(--tx) * 2), calc(var(--ty) * 2));
+		opacity: 1;
+	}
+	96%,
+	100% {
+		transform: translate(calc(var(--tx) * 2), calc(var(--ty) * 2));
+		opacity: 0;
+	}
+}
+
+@keyframes iso-drop {
+	0%,
+	40% {
+		transform: translateY(-64px);
+		opacity: 0;
+	}
+	56%,
+	88% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 0;
+	}
+}
+
+@keyframes iso-pulse {
+	0%,
+	54% {
+		transform: scale(0.6);
+		opacity: 0;
+	}
+	58% {
+		opacity: 0.9;
+	}
+	90%,
+	100% {
+		transform: scale(1.8);
+		opacity: 0;
+	}
+}
+
+@keyframes iso-appear {
+	0% {
+		transform: translateY(4px);
+		opacity: 0;
+	}
+	10%,
+	86% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 0;
+	}
+}
+
+@keyframes iso-blink {
+	0%,
+	100% {
+		opacity: 0.3;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+/* From a scattered spot to its place in the stack, then gone, then back. */
+@keyframes iso-converge {
+	0% {
+		transform: translate(0, 0);
+		opacity: 0;
+	}
+	8%,
+	20% {
+		transform: translate(0, 0);
+		opacity: 1;
+	}
+	50%,
+	88% {
+		transform: translate(var(--tx), var(--ty));
+		opacity: 1;
+	}
+	96%,
+	100% {
+		transform: translate(var(--tx), var(--ty));
+		opacity: 0;
+	}
+}
+
+@keyframes iso-slide-in {
+	0% {
+		transform: translate(var(--tx), var(--ty));
+		opacity: 0;
+	}
+	14% {
+		transform: translate(var(--tx), var(--ty));
+		opacity: 1;
+	}
+	44%,
+	86% {
+		transform: translate(0, 0);
+		opacity: 1;
+	}
+	100% {
+		transform: translate(0, 0);
+		opacity: 0;
+	}
+}
+
+/* Flat shadows cast on a surface: beat the tone fill, no outline. */
+.iso-quad.iso-shadow {
+	fill: var(--iso-shadow);
+	stroke: none;
+}
+
+/* Hero dashboard drawing: cards settle in once, then a few live details. */
+.mock-card {
+	animation: mock-card-in 900ms var(--iso-ease) var(--delay, 0s) both;
+}
+
+.mock-ring {
+	animation-name: mock-ring;
+	animation-duration: 2.4s;
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+.mock-blink {
+	animation-name: iso-blink;
+	animation-duration: 1.6s;
+	animation-timing-function: var(--iso-ease-float);
+}
+
+@keyframes mock-card-in {
+	from {
+		transform: translateY(24px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes mock-ring {
+	0% {
+		transform: scale(1);
+		opacity: 0.7;
+	}
+	100% {
+		transform: scale(1.6);
+		opacity: 0;
+	}
+}
+
+.iso-scene:not([data-active]) .mock-card,
+.iso-scene:not([data-active]) .iso-anim {
+	animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.iso-scene .iso-anim,
+	.iso-scene .mock-card {
+		animation: none;
+		opacity: 1;
+	}
+	.iso-lift {
+		transition: none;
+	}
+}
