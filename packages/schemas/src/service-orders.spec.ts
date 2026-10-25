@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+	createOrderServiceSchema,
 	createServiceOrderMockSchema,
 	getServiceOrdersQuerySchema,
 	serviceOrderStatuses,
@@ -127,5 +128,59 @@ describe("getServiceOrdersQuerySchema", () => {
 				employeeId: "Not-A-Cuid",
 			})
 		).toEqual(["employeeId"]);
+	});
+});
+
+describe("createOrderServiceSchema", () => {
+	const photo = () => new File(["x"], "photo.jpg", { type: "image/jpeg" });
+	const validInput = (images: unknown[]) => ({
+		customerCPF: "529.982.247-25",
+		description: "Tela quebrada",
+		deviceId: createId(),
+		assigned_to: createId(),
+		images,
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.resetModules();
+	});
+
+	it("loads where File is not a global, like Node 18", async () => {
+		vi.stubGlobal("File", undefined);
+		vi.resetModules();
+
+		const module = await import("./service-orders");
+
+		expect(module.createOrderServiceSchema).toBeDefined();
+	});
+
+	it("rejects images when File is not available", async () => {
+		const images = [photo(), photo(), photo()];
+		vi.stubGlobal("File", undefined);
+
+		expect(createOrderServiceSchema.safeParse(validInput(images)).success).toBe(
+			false
+		);
+	});
+
+	it("accepts three to fifteen device photos", () => {
+		const images = Array.from({ length: 3 }, photo);
+
+		expect(createOrderServiceSchema.safeParse(validInput(images)).success).toBe(
+			true
+		);
+	});
+
+	it("rejects anything that is not a file", () => {
+		const input = validInput([photo(), photo(), "photo.jpg"]);
+
+		expect(issuePaths(createOrderServiceSchema, input)).toContain("images.2");
+	});
+
+	it("rejects fewer than three photos", () => {
+		const input = validInput([photo()]);
+
+		expect(issuePaths(createOrderServiceSchema, input)).toContain("images");
 	});
 });

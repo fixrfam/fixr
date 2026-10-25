@@ -117,8 +117,14 @@ export const createOrderServiceSchema = z.object({
 	assigned_to: z
 		.string()
 		.min(1, "Selecione o funcionário responsável pela ordem de serviço"),
+	// `File` is only global from Node 20 on, so it is read inside the check
+	// instead of at import time, or the API crashes on boot under Node 18.
 	images: z
-		.array(z.instanceof(File))
+		.array(
+			z.custom<File>(
+				(value) => typeof File !== "undefined" && value instanceof File
+			)
+		)
 		.min(3, "Adicione pelo menos três fotos do aparelho")
 		.max(15, "Adicione no máximo quinze fotos do aparelho"),
 });
