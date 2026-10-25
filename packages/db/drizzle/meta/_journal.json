@@ -92,6 +92,48 @@
       "when": 1781833963308,
       "tag": "0012_wooden_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1789426179388,
+      "tag": "0013_add_api_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1792786295949,
+      "tag": "0014_parts_services_suppliers",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1792788663829,
+      "tag": "0015_scope_clients_by_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1792788671648,
+      "tag": "0016_backfill_client_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1792789644458,
+      "tag": "0017_company_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1792881763103,
+      "tag": "0018_tidb_json_defaults",
+      "breakpoints": true
     }
   ]
 }

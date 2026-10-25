@@ -5,16 +5,24 @@ import { SessionProvider } from "@/lib/hooks/use-session";
 import QueryClientWrapper from "@/lib/query-client";
 import "../../../globals.css";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Header } from "@/components/dashboard/sidebar/header";
+import { I18nProvider } from "@/components/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { getSession } from "@/lib/auth/utils";
+import { getLocale, getTranslator } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-	title: "Fixr - Dashboard",
-	description: "O jeito fácil de gerenciar sua assistência técnica.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const { t } = await getTranslator();
+
+	return {
+		title: t("dashboard.metadata.title"),
+		description: t("common.app.tagline"),
+	};
+}
 
 const inter = localFont({
 	src: "../../../fonts/InterVF.ttf",
@@ -34,9 +42,14 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
 	const cookieStore = await cookies();
 	const session = getSession(cookieStore);
+	const locale = await getLocale();
+
+	if (!session) {
+		redirect("/auth/login");
+	}
 
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang={locale} suppressHydrationWarning>
 			<head>
 				<script
 					defer
@@ -46,31 +59,35 @@ export default async function RootLayout({
 			<body
 				className={`${inter.variable} ${cal.variable} font-(family-name:--font-inter) antialiased`}
 			>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="system"
-					disableTransitionOnChange
-					enableSystem
-				>
-					<QueryClientWrapper>
-						<SessionProvider session={session}>
-							<Sidebar session={session} />
-							<Header />
-							<div className="lg:py-2">
-								<main
-									className={cn(
-										"h-[calc(100dvh-1rem)] overflow-auto bg-card px-5 py-6 pt-20 transition-all",
-										"lg:ml-[286px] lg:w-[calc(100%-(286px+0.5rem))] lg:rounded-md lg:border lg:border-border lg:px-10 lg:py-8"
-									)}
-								>
-									{children}
-								</main>
-							</div>
-							{modal}
-						</SessionProvider>
-						<ThemedToaster />
-					</QueryClientWrapper>
-				</ThemeProvider>
+				<I18nProvider locale={locale}>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						disableTransitionOnChange
+						enableSystem
+					>
+						<QueryClientWrapper>
+							<NuqsAdapter>
+								<SessionProvider session={session}>
+									<Sidebar session={session} />
+									<Header />
+									<div className="lg:py-2">
+										<main
+											className={cn(
+												"h-[calc(100dvh-1rem)] overflow-auto bg-card px-5 py-6 pt-20 transition-all",
+												"lg:ml-[286px] lg:w-[calc(100%-(286px+0.5rem))] lg:rounded-md lg:border lg:border-border lg:px-10 lg:py-8"
+											)}
+										>
+											{children}
+										</main>
+									</div>
+									{modal}
+								</SessionProvider>
+							</NuqsAdapter>
+							<ThemedToaster />
+						</QueryClientWrapper>
+					</ThemeProvider>
+				</I18nProvider>
 			</body>
 		</html>
 	);

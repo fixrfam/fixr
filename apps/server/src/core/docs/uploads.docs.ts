@@ -1,6 +1,7 @@
 import {
 	createUploadPresignSchema,
 	uploadPresignResponseSchema,
+	uploadPurpose,
 } from "@fixr/schemas/uploads";
 import type { FastifySchema } from "fastify";
 import { z } from "zod";
@@ -11,24 +12,35 @@ const createPresignSchema: FastifySchema = {
 	summary: "Generate pre-signed upload URL",
 	description: `**Generate a presigned PUT URL for uploading files to Cloudflare R2**
 
-Supports three purposes controlled by the path parameter:
+Supports four purposes controlled by the path parameter:
 
 - \`avatar\` - user profile picture. Deterministic key, no DB record. Call \`PUT /account/avatar\` after uploading.
 - \`service-orders\` - service order images. Creates a pending upload record, reference the returned \`id\` when creating the service order.
 - \`models\` - model images. Creates a pending upload record, reference the returned \`id\` when assigning to a model.
+- \`company-logo\` - the company logo (needs \`companies:update\`). Deterministic key per company; send the returned \`url\` as \`logoUrl\` to \`PATCH /companies/:subdomain\`.
 `,
 	params: z.object({
-		purpose: z.enum(["avatar", "service-orders", "models"]),
+		purpose: uploadPurpose,
 	}),
 	body: createUploadPresignSchema,
 	response: {
+		// One success code per purpose (see SUCCESS_CODES in modules/uploads/services).
 		200: zodResponseSchema({
 			status: 200,
 			error: null,
 			message: "Upload URL generated successfully.",
 			code: "create_avatar_presign_success",
 			data: uploadPresignResponseSchema,
-		}).describe("Presigned upload URL generated."),
+		})
+			.extend({
+				code: z.enum([
+					"create_avatar_presign_success",
+					"create_upload_presign_success",
+					"create_model_image_presign_success",
+					"create_company_logo_presign_success",
+				]),
+			})
+			.describe("Presigned upload URL generated."),
 		403: zodResponseSchema({
 			status: 403,
 			error: "Forbidden",

@@ -221,59 +221,28 @@ cd fixr
 bun install
 ```
 
-3. Configure as variáveis de ambiente:
-
-O projeto utiliza um **sistema centralizado de variáveis de ambiente** através do pacote `@fixr/env`, mas cada app/pacote carrega o seu próprio arquivo `.env` local (não existe um único `.env` na raiz). Copie o `.env.example` de cada um para `.env` no mesmo diretório e preencha os valores:
+3. Prepare o ambiente local com um único comando:
 
 ```bash
-cp packages/db/.env.example packages/db/.env
-cp apps/server/.env.example apps/server/.env
-cp apps/web/.env.example apps/web/.env
-cp apps/workers/.env.example apps/workers/.env
-cp packages/mail/.env.example packages/mail/.env
-cp apps/admin/.env.example apps/admin/.env   # só necessário se for mexer no painel admin
+bun run setup
 ```
 
----
+O `setup` faz tudo o que antes era manual:
 
-#### Variáveis de Ambiente
+- cria o `.env` na raiz a partir do `.env.example`, gerando `JWT_SECRET`, `API_KEY_SECRET` e `COOKIE_ENCRYPTION_SECRET` (se você ainda tiver os `.env` antigos por pasta, os valores deles são reaproveitados);
+- sobe o MySQL e o Redis via Docker e espera ficarem saudáveis;
+- cria ou atualiza o schema do banco;
+- popula o banco com dados de demonstração e imprime os logins.
 
-| Arquivo | Principais variáveis |
-| --- | --- |
-| `packages/db/.env` | `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `DB_URL`, `REDIS_PASSWORD` |
-| `apps/server/.env` | `REDIS_URL`, `RESEND_KEY`, `JWT_SECRET`, `COOKIE_ENCRYPTION_SECRET`, `COOKIE_DOMAIN`, `GOOGLE_AUTH_CLIENT_ID`, `GOOGLE_AUTH_CLIENT_SECRET`, `GOOGLE_AUTH_REDIRECT_URI`, `TURNSTILE_SECRET_KEY`, `NODE_PORT`, `FRONTEND_URL`, `ADMIN_URL`, `CLERK_SECRET_KEY`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_URL`, `R2_REGION`, `R2_PUBLIC_BASE_URL`, `R2_PRESIGN_EXPIRES_IN` |
-| `apps/web/.env` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DOCS_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LINKTREE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` |
-| `apps/admin/.env` | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_API_URL`, `REDIS_URL`, `FRONTEND_URL` |
-| `apps/workers/.env` | `RESEND_KEY`, `REDIS_URL` |
-| `packages/mail/.env` | `RESEND_KEY` |
+Use `bun run setup --reset` para apagar os dados e popular de novo, ou `--no-seed` para pular o seed.
 
-Os valores de exemplo (senhas `docker`/`fixr`, chaves de teste do Cloudflare Turnstile, etc.) já funcionam para desenvolvimento local; chaves de serviços externos (Resend, Google OAuth, Clerk, Cloudflare R2) precisam ser geradas nos respectivos painéis — veja os comentários em cada `.env.example`.
-
-> **Nota:** As variáveis são validadas automaticamente pelo pacote `@fixr/env` usando Zod, garantindo que todas as configurações necessárias estejam presentes antes da inicialização dos apps.
-
----
-
-#### Inicializando o Projeto
-
-1. **Inicie os containers Docker** (MySQL e Redis):
-
-```bash
-bun run db:start
-```
-
-2. **Execute as migrations** para criar as tabelas no banco:
-
-```bash
-bun run db:migrate
-```
-
-3. **Inicie server, web e workers em modo desenvolvimento**:
+4. Inicie server, web e workers em modo desenvolvimento:
 
 ```bash
 bun run dev
 ```
 
-4. **(Opcional) Inicie o painel admin**, separadamente:
+5. **(Opcional) Inicie o painel admin**, separadamente (precisa das chaves do Clerk no `.env`):
 
 ```bash
 bun run dev:admin
@@ -286,13 +255,30 @@ Os serviços estarão disponíveis em:
 - **Documentação API (Scalar):** `http://localhost:3333/docs`
 - **Drizzle Studio:** Execute `bun run db:studio` para acessar
 
+---
+
+#### Variáveis de Ambiente
+
+Em desenvolvimento existe **um único `.env` na raiz**, lido por todos os apps e pacotes. O `.env.example` é a referência: ele agrupa as variáveis por serviço e já traz valores que funcionam localmente (senhas `docker`/`fixr`, chaves de teste do Cloudflare Turnstile e placeholders para Google OAuth e Cloudflare R2). Para usar esses serviços de verdade, ou o painel admin (Clerk), troque os placeholders pelas chaves geradas nos respectivos painéis.
+
+Em produção nada muda: o deploy (GitHub Actions + Alchemy e Coolify) injeta as variáveis diretamente, sem arquivo `.env`.
+
+> **Nota:** As variáveis são validadas automaticamente pelo pacote `@fixr/env` usando Zod, garantindo que todas as configurações necessárias estejam presentes antes da inicialização dos apps.
+
+#### Dados de demonstração
+
+O seed (`packages/db/src/seed`) cria duas empresas (`alfa` e `beta`), um usuário para cada cargo na `alfa`, clientes, fabricantes e modelos de aparelhos e ordens de serviço em vários status. Todas as contas usam a senha `Fixr!Dev123`, por exemplo `admin@alfa.dev`, `technician@alfa.dev` ou `carla@cliente.dev`. O `setup` imprime a lista completa.
+
 #### Scripts Disponíveis
 
 ```bash
 # Desenvolvimento
+bun run setup            # Prepara .env, Docker, schema e dados de demonstração
 bun run dev              # Inicia server, web e workers em modo desenvolvimento
 bun run dev:admin        # Inicia o painel admin em modo desenvolvimento
 bun run check-types      # Executa verificação de tipos em todos os projetos
+bun run test             # Testes unitários de todos os projetos
+bun run test:watch       # Testes unitários em modo watch
 
 # Build
 bun run build            # Build completo (pacotes + apps)
@@ -306,13 +292,15 @@ bun run db:migrate       # Executa migrations
 bun run db:generate      # Gera migrations a partir dos schemas
 bun run db:studio        # Abre Drizzle Studio (GUI do banco)
 bun run db:push          # Push direto do schema (desenvolvimento)
-bun run db:seed          # Popula o banco com dados de exemplo
+bun run db:seed          # Popula o banco com dados de demonstração (--reset apaga antes)
 
 # Formatação e Lint
 bun run format           # Formata código com Ultracite
 bun run lint             # Executa linting
 bun run lint:write       # Corrige problemas de lint automaticamente
 ```
+
+Os scripts locais (`dev`, `build`, `test`, `lint`, `check-types`) rodam via [Turborepo](https://turborepo.com): cada pacote ganha seu próprio painel no terminal e resultados sem mudanças vêm do cache. Os scripts com sufixo `:ci` continuam usando `bun run --filter`, então CI e deploy não dependem do Turborepo.
 
 #### Pre-commit Hooks
 

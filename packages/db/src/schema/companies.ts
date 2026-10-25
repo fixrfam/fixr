@@ -10,6 +10,13 @@ export const companies = mysqlTable("companies", {
 	name: varchar("name", { length: 100 }).notNull(),
 	cnpj: varchar("cnpj", { length: 14 }).unique().notNull(),
 	address: varchar("address", { length: 255 }),
+	/** Public contact data shown on documents (estimate PDF header and footer). */
+	email: varchar("email", { length: 255 }),
+	/** Digits only. */
+	phone: varchar("phone", { length: 11 }),
+	website: varchar("website", { length: 255 }),
+	/** Public R2 URL of the logo, uploaded through the `company-logo` presign purpose. */
+	logoUrl: varchar("logo_url", { length: 500 }),
 	subdomain: varchar("subdomain", { length: 32 }).unique().notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });

@@ -8,7 +8,7 @@ import {
 import type { z } from "zod";
 import { serviceOrdersDocs } from "../../../core/docs/service-orders.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { ServiceOrdersController } from "../controllers";
@@ -19,7 +19,7 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.serviceOrders.read),
 			],
 			schema: serviceOrdersDocs.getCompanyServiceOrdersSchema,
@@ -42,7 +42,7 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.serviceOrders.create),
 			],
 			schema: serviceOrdersDocs.createServiceOrderSchema,

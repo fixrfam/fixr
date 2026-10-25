@@ -7,12 +7,21 @@
     "dev": "tsc --watch",
     "build": "biome check && tsc",
     "lint": "biome check",
-    "lint:write": "biome check --write"
+    "lint:write": "biome check --write",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:ci": "vitest run --coverage",
+    "check-types": "tsc --noEmit"
   },
   "exports": {
     "./account": {
       "types": "./src/account.ts",
       "default": "./src/account.ts"
+    },
+    "./api-keys": {
+      "types": "./src/api-keys.ts",
+      "default": "./src/api-keys.ts"
     },
     "./auth": {
       "types": "./src/auth.ts",
@@ -58,6 +67,18 @@
       "types": "./src/uploads.ts",
       "default": "./src/uploads.ts"
     },
+    "./services": {
+      "types": "./src/services.ts",
+      "default": "./src/services.ts"
+    },
+    "./suppliers": {
+      "types": "./src/suppliers.ts",
+      "default": "./src/suppliers.ts"
+    },
+    "./parts": {
+      "types": "./src/parts.ts",
+      "default": "./src/parts.ts"
+    },
     "./models": {
       "types": "./src/models.ts",
       "default": "./src/models.ts"
@@ -69,9 +90,14 @@
     "@types/bun": "catalog:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@fixr/permissions": "workspace:*"
   },
   "dependencies": {
+    "@fixr/i18n": "workspace:*",
     "zod": "catalog:"
   }
 }

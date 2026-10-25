@@ -8,11 +8,13 @@
     "db:generate": "bunx --bun drizzle-kit generate",
     "db:studio": "bunx --bun drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts",
-    "db:start": "docker compose up -d",
-    "db:watch": "docker compose up",
-    "db:stop": "docker compose stop",
-    "db:down": "docker compose down",
-    "check-types": "tsc --noEmit"
+    "db:seed": "tsx src/seed/index.ts",
+    "db:catalog": "bun src/catalog/import.ts",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:ci": "vitest run"
   },
   "exports": {
     "./connection": {
@@ -25,15 +27,20 @@
     }
   },
   "devDependencies": {
-    "@fixr/typescript-config": "workspace:*",
-    "@fixr/env": "workspace:*",
     "@biomejs/biome": "catalog:",
-    "@types/eslint": "^8.56.5",
+    "@fixr/env": "workspace:*",
+    "@fixr/typescript-config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
     "@types/bun": "catalog:",
+    "@types/eslint": "^8.56.5",
     "drizzle-kit": "^0.31.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1051.0",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "bcryptjs": "^2.4.3",
     "chalk": "^5.6.2",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",

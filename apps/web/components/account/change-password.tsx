@@ -1,6 +1,7 @@
 "use client";
 
 import { PASSWORD_RESTRICTION_REGEXES as REGEXES } from "@fixr/constants/enforcements";
+import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { changePasswordAuthenticatedSchema as baseChangePasswordAuthenticatedSchema } from "@fixr/schemas/credentials";
 import type { ApiResponse } from "@fixr/schemas/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +24,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { axios } from "@/lib/auth/axios";
-import { fallbackMessages, messages } from "@/lib/messages";
 import { api } from "@/lib/utils";
 import {
 	Form,
@@ -35,6 +35,8 @@ import {
 } from "../ui/form";
 
 export function ChangePassword() {
+	const { t } = useTranslation();
+	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 
@@ -43,26 +45,26 @@ export function ChangePassword() {
 			.extend({
 				new: z
 					.string()
-					.min(8, { message: "A senha deve ter pelo menos 8 caracteres." })
-					.max(128, { message: "A senha deve ter no máximo 128 caracteres." })
+					.min(8, { message: t("validation.password.min", { count: 8 }) })
+					.max(128, { message: t("validation.password.max", { count: 128 }) })
 					.refine((password) => REGEXES.lowercase.test(password), {
-						message: "A senha deve conter pelo menos uma letra maiúscula.",
+						message: t("validation.password.uppercase"),
 					})
 					.refine((password) => REGEXES.uppercase.test(password), {
-						message: "A senha deve conter pelo menos uma letra minúscula.",
+						message: t("validation.password.lowercase"),
 					})
 					.refine((password) => REGEXES.number.test(password), {
-						message: "A senha deve conter pelo menos um número.",
+						message: t("validation.password.number"),
 					})
 					.refine((password) => REGEXES.special.test(password), {
-						message: "A senha deve conter pelo menos um caractere especial.",
+						message: t("validation.password.special"),
 					}),
 				confirmNew: z
-					.string({ error: "Por favor, confirme sua senha." })
-					.min(1, { message: "Confirme sua senha." }),
+					.string({ error: t("validation.password.confirm") })
+					.min(1, { message: t("validation.password.confirm") }),
 			})
 			.refine((data) => data.new === data.confirmNew, {
-				message: "As senhas não coincidem.",
+				message: t("validation.password.mismatch"),
 				path: ["confirmNew"],
 			});
 
@@ -90,22 +92,22 @@ export function ChangePassword() {
 				}
 			);
 			if (res.status === 200) {
-				const message = messages[res.data.code] ?? fallbackMessages.success;
+				const feedback = message(res.data.code, "success");
 				setOpen(false);
 
 				toast.success({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				const errorData = error.response?.data as ApiResponse;
-				const message = messages[errorData.code] ?? fallbackMessages.error;
+				const feedback = message(errorData.code, "error");
 
 				toast.error({
-					text: message.title,
-					description: message.description,
+					text: feedback.title,
+					description: feedback.description,
 				});
 			}
 		} finally {
@@ -116,13 +118,13 @@ export function ChangePassword() {
 	return (
 		<Dialog onOpenChange={setOpen} open={open}>
 			<DialogTrigger asChild>
-				<Button size={"sm"}>Mudar</Button>
+				<Button size={"sm"}>{t("account.changePassword.trigger")}</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Alterar senha</DialogTitle>
+					<DialogTitle>{t("account.changePassword.title")}</DialogTitle>
 					<DialogDescription>
-						Insira sua senha atual e a nova senha que você deseja usar.
+						{t("account.changePassword.description")}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -133,7 +135,7 @@ export function ChangePassword() {
 					>
 						<div className="grid grid-cols-4 items-start gap-4">
 							<Label className="py-3 text-right" htmlFor="name">
-								Atual
+								{t("account.changePassword.current")}
 							</Label>
 							<FormField
 								control={form.control}
@@ -156,7 +158,7 @@ export function ChangePassword() {
 						</div>
 						<div className="grid grid-cols-4 items-start gap-4">
 							<Label className="py-3 text-right" htmlFor="username">
-								Nova
+								{t("account.changePassword.new")}
 							</Label>
 							<FormField
 								control={form.control}
@@ -178,7 +180,7 @@ export function ChangePassword() {
 						</div>
 						<div className="grid grid-cols-4 items-start gap-4">
 							<Label className="py-3 text-right" htmlFor="name">
-								Confirmar
+								{t("account.changePassword.confirm")}
 							</Label>
 							<FormField
 								control={form.control}
@@ -195,8 +197,7 @@ export function ChangePassword() {
 											/>
 										</FormControl>
 										<FormDescription>
-											Confirme sua senha para garantir que não haja erros de
-											digitação, mantendo sua conta segura.
+											{t("account.changePassword.confirmDescription")}
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -216,7 +217,7 @@ export function ChangePassword() {
 							<Loader2 className="size-4 animate-spin" />
 						) : (
 							<>
-								Salvar <Save />
+								{t("common.actions.save")} <Save />
 							</>
 						)}
 					</Button>

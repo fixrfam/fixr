@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@fixr/i18n/react";
 import { ArrowRight, CircleCheck } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -11,6 +14,8 @@ export default function AuthFormSuccess({
 	description: string;
 	paragraph: string;
 }) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="flex flex-col items-center space-y-6">
 			<div className="rounded-lg bg-primary p-3">
@@ -23,7 +28,7 @@ export default function AuthFormSuccess({
 			<p className="text-center">{paragraph}</p>
 			<Link href="/auth/login">
 				<Button>
-					Ir para o login <ArrowRight />
+					{t("auth.success.goToLogin")} <ArrowRight />
 				</Button>
 			</Link>
 		</div>

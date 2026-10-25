@@ -8,6 +8,7 @@ import type { FastifyRequest } from "fastify";
 import { z } from "zod";
 import { credentialDocs } from "../../../core/docs/credentials.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { requestLocale } from "../../../core/lib/locale";
 import { authenticate } from "../../../core/middlewares/authenticate";
 import { requireTurnstile } from "../../../core/middlewares/turnstile";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
@@ -43,6 +44,7 @@ export function credentialsRoutes(fastify: FastifyTypedInstance) {
 			const body = requestPasswordResetSchema.parse(request.body);
 			await CredentialsController.requestPasswordReset({
 				email: body.email,
+				locale: requestLocale(request),
 				response,
 			});
 		})

@@ -1,12 +1,17 @@
 import { accountErrors } from "../../modules/account/errors";
+import { apiKeysErrors } from "../../modules/api-keys/errors";
 import { authErrors } from "../../modules/auth/errors";
 import { categoriesErrors } from "../../modules/categories/errors";
+import { clientsErrors } from "../../modules/clients/errors";
 import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
 import { employeesErrors } from "../../modules/employees/errors";
 import { makersErrors } from "../../modules/makers/errors";
 import { modelsErrors } from "../../modules/models/errors";
+import { partsErrors } from "../../modules/parts/errors";
 import { serviceOrdersErrors } from "../../modules/service-orders/errors";
+import { servicesErrors } from "../../modules/services/errors";
+import { suppliersErrors } from "../../modules/suppliers/errors";
 import { tokensErrors } from "../../modules/tokens/errors";
 import { uploadsErrors } from "../../modules/uploads/errors";
 import { defineErrors } from "../utils/errors";
@@ -14,13 +19,18 @@ import { defineErrors } from "../utils/errors";
 export const errors = defineErrors({
 	...authErrors,
 	...accountErrors,
+	...apiKeysErrors,
 	...credentialsErrors,
 	...companiesErrors,
 	...employeesErrors,
 	...categoriesErrors,
 	...makersErrors,
 	...modelsErrors,
+	...clientsErrors,
 	...serviceOrdersErrors,
+	...partsErrors,
+	...servicesErrors,
+	...suppliersErrors,
 	...tokensErrors,
 	...uploadsErrors,
 

@@ -1,0 +1,45 @@
+# Local MySQL + Redis. Credentials come from the root `.env`.
+# The project keeps the name it had in `packages/db`, so existing local
+# containers and volumes are reused.
+name: db
+
+services:
+    mysql:
+        image: mysql:8.3.0-oraclelinux8
+        restart: unless-stopped
+        env_file:
+            - .env
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        ports:
+            - 3306:3306
+        volumes:
+            - db:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    redis:
+        image: redis:7.4-alpine
+        restart: unless-stopped
+        env_file:
+            - .env
+        ports:
+            - 6379:6379
+        volumes:
+            - redis:/data
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+        healthcheck:
+            test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes: 
+    db:
+    redis:

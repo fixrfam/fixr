@@ -3,11 +3,11 @@ import type { SidebarSection } from "./types";
 
 export const sidebarSections: readonly SidebarSection[] = [
 	{
-		title: "Sistema",
+		titleKey: "dashboard.sidebar.sections.system",
 		items: [
 			{
 				id: "home",
-				label: "Início",
+				labelKey: "dashboard.nav.home",
 				href: "/home",
 				type: "route",
 				icon: "Home",
@@ -15,7 +15,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "notifications",
-				label: "Notificações",
+				labelKey: "dashboard.nav.notifications",
 				href: "/notifications",
 				type: "route",
 				icon: "Bell",
@@ -23,7 +23,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "logs",
-				label: "Registros",
+				labelKey: "dashboard.nav.logs",
 				href: "/logs",
 				type: "route",
 				icon: "List",
@@ -31,24 +31,40 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "settings",
-				label: "Configurações",
+				labelKey: "dashboard.nav.settings",
 				icon: "Settings",
 				items: [
 					{
 						id: "profile",
-						label: "Perfil",
+						labelKey: "dashboard.nav.profile",
 						href: "/account",
 						type: "route",
 						icon: "User",
 						permission: permissions.companies.read,
 					},
 					{
+						id: "company",
+						labelKey: "dashboard.nav.company",
+						href: "/settings/company",
+						type: "route",
+						icon: "Building2",
+						permission: permissions.companies.update,
+					},
+					{
 						id: "security",
-						label: "Segurança",
+						labelKey: "dashboard.nav.security",
 						href: "/settings/security",
 						type: "route",
 						icon: "Shield",
 						permission: permissions.settings.security,
+					},
+					{
+						id: "api-keys",
+						labelKey: "dashboard.nav.apiKeys",
+						href: "/settings/api-keys",
+						type: "route",
+						icon: "KeyRound",
+						permission: permissions.apiKeys.read,
 					},
 				],
 				type: "menu",
@@ -56,11 +72,11 @@ export const sidebarSections: readonly SidebarSection[] = [
 		],
 	},
 	{
-		title: "Módulos",
+		titleKey: "dashboard.sidebar.sections.modules",
 		items: [
 			{
 				id: "service-orders",
-				label: "Ordens de Serviço",
+				labelKey: "dashboard.nav.serviceOrders",
 				href: "/service-orders",
 				type: "route",
 				icon: "Clipboard",
@@ -68,7 +84,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "estimates",
-				label: "Orçamentos",
+				labelKey: "dashboard.nav.estimates",
 				href: "/estimates",
 				type: "route",
 				icon: "HandCoins",
@@ -76,7 +92,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "suppliers",
-				label: "Fornecedores",
+				labelKey: "dashboard.nav.suppliers",
 				href: "/suppliers",
 				type: "route",
 				icon: "Package",
@@ -84,15 +100,23 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "parts",
-				label: "Peças",
+				labelKey: "dashboard.nav.parts",
 				href: "/parts",
 				type: "route",
 				icon: "Puzzle",
 				permission: permissions.parts.read,
 			},
 			{
+				id: "services",
+				labelKey: "dashboard.nav.services",
+				href: "/services",
+				type: "route",
+				icon: "Wrench",
+				permission: permissions.services.read,
+			},
+			{
 				id: "inventory",
-				label: "Estoque",
+				labelKey: "dashboard.nav.inventory",
 				href: "/inventory",
 				type: "route",
 				icon: "Warehouse",
@@ -100,14 +124,14 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "support",
-				label: "Suporte",
+				labelKey: "dashboard.nav.support",
 				href: "/support",
 				type: "route",
 				icon: "MessageCircleQuestion",
 			},
 			{
 				id: "customers",
-				label: "Clientes",
+				labelKey: "dashboard.nav.customers",
 				href: "/customers",
 				type: "route",
 				icon: "Users",
@@ -115,20 +139,36 @@ export const sidebarSections: readonly SidebarSection[] = [
 			},
 			{
 				id: "devices",
-				label: "Aparelhos",
-				href: "/devices",
-				type: "route",
+				labelKey: "dashboard.nav.devices",
 				icon: "MonitorSmartphone",
-				permission: permissions.devices.read,
+				type: "menu",
+				items: [
+					{
+						id: "models",
+						labelKey: "dashboard.nav.models",
+						href: "/devices/models",
+						type: "route",
+						icon: "Smartphone",
+						permission: permissions.devices.read,
+					},
+					{
+						id: "customer-devices",
+						labelKey: "dashboard.nav.customerDevices",
+						href: "/devices/customers",
+						type: "route",
+						icon: "UserRound",
+						permission: permissions.customers.read,
+					},
+				],
 			},
 		],
 	},
 	{
-		title: "Empresa",
+		titleKey: "dashboard.sidebar.sections.company",
 		items: [
 			{
 				id: "employees",
-				label: "Funcionários",
+				labelKey: "dashboard.nav.employees",
 				href: "/employees",
 				type: "route",
 				icon: "ContactRound",

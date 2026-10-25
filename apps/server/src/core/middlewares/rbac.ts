@@ -35,7 +35,7 @@ export function setupRBAC(fastify: FastifyInstance) {
 }
 
 export function requirePermission(permission: Permission) {
-	return (
+	const guard = (
 		request: FastifyRequest,
 		_reply: FastifyReply,
 		done: (err?: Error) => void
@@ -46,4 +46,7 @@ export function requirePermission(permission: Permission) {
 		}
 		done();
 	};
+
+	// Tag the guard so route sweeps can tell which permission a route requires.
+	return Object.assign(guard, { permission });
 }

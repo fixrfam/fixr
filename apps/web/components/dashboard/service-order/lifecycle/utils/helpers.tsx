@@ -1,3 +1,4 @@
+import type { StaticTranslationKey } from "@fixr/i18n";
 import { Check, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { cn } from "@/lib/utils";
@@ -26,8 +27,8 @@ export function getDotClass({
 	return "bg-primary/45 !border-0";
 }
 
-/** Returns the status label text for a phase based on its state. */
-export function getStatusLabel({
+/** Returns the translation key naming a phase based on its state. */
+export function getStatusLabelKey({
 	isCanceled,
 	isCompleted,
 	isActive,
@@ -35,17 +36,17 @@ export function getStatusLabel({
 	isCanceled: boolean;
 	isCompleted: boolean;
 	isActive: boolean;
-}) {
+}): StaticTranslationKey {
 	if (isCanceled) {
-		return "Cancelado";
+		return "serviceOrders.phase.canceled";
 	}
 	if (isCompleted) {
-		return "Finalizado";
+		return "serviceOrders.phase.finished";
 	}
 	if (isActive) {
-		return "Em progresso";
+		return "serviceOrders.phase.inProgress";
 	}
-	return "Pendente";
+	return "serviceOrders.phase.pending";
 }
 
 /** Returns the Tailwind class for the status badge based on phase state. */

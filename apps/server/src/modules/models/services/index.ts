@@ -41,13 +41,34 @@ export class ModelsService {
 		} as typeof models.$inferInsert;
 	}
 	/**
-	 * List models with pagination, fulltext search, and filters
+	 * Load a model the company is allowed to modify.
+	 *
+	 * Another company's model is reported as not found (its existence is not
+	 * leaked); a shared catalog model (no company) can be read by everyone but
+	 * modified by no single tenant.
+	 */
+	private static async queryWritableModel(modelId: string, companyId: string) {
+		const model = await ModelsRepository.queryModelById(modelId);
+
+		if (!model || (model.companyId && model.companyId !== companyId)) {
+			throw new AppError("MODEL_NOT_FOUND");
+		}
+
+		if (!model.companyId) {
+			throw new AppError("MODEL_NOT_ALLOWED");
+		}
+
+		return model;
+	}
+
+	/**
+	 * List models with pagination, search, and filters
 	 *
 	 * @param userJwt - Authenticated user JWT payload
 	 * @param subdomain - Company subdomain
 	 * @param page - Current page number
 	 * @param perPage - Items per page
-	 * @param query - Fulltext search query
+	 * @param query - Words to search for
 	 * @param makerId - Filter by maker
 	 * @param categoryId - Filter by category
 	 * @param status - Filter by release status
@@ -109,6 +130,7 @@ export class ModelsService {
 			getPaginatedCount({
 				table: models,
 				where: filter,
+				joins: modelListJoins,
 			}),
 		]);
 
@@ -150,9 +172,19 @@ export class ModelsService {
 				id: r.id,
 				name: r.name,
 				slug: r.slug,
-				status: r.status ?? "Available",
+				status: r.status,
 				price: r.price,
+				announced: r.announced,
 				released: r.released,
+				displaySize: r.displaySize,
+				displaySizeInches: r.displaySizeInches,
+				displayResolution: r.displayResolution,
+				chipset: r.chipset,
+				cpu: r.cpu,
+				internalMemory: r.internalMemory,
+				battery: r.battery,
+				colorsHex: r.colorsHex,
+				isCustom: r.companyId !== null,
 				maker: {
 					id: r.makerId,
 					name: r.makerName,
@@ -243,7 +275,7 @@ export class ModelsService {
 				message: "Model retrieved successfully.",
 				data: {
 					...model,
-					status: model.status ?? "Available",
+					status: model.status,
 					imageUrl,
 					images: imagesWithPresignedUrls,
 				},
@@ -346,11 +378,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const updateData: Record<string, unknown> = {};
 
@@ -380,7 +411,7 @@ export class ModelsService {
 				message: "Model updated successfully.",
 				data: {
 					...(updated ?? model),
-					status: (updated ?? model).status ?? "Available",
+					status: (updated ?? model).status,
 					imageUrl,
 					images: imagesWithPresignedUrls,
 				},
@@ -414,10 +445,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		await ModelsRepository.deleteModel(model.id);
 
@@ -461,10 +492,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const [uploadRecord] = await db
 			.select({ companyId: uploads.companyId })
@@ -554,10 +585,10 @@ export class ModelsService {
 			throw new AppError("MODEL_NOT_ALLOWED");
 		}
 
-		const model = await ModelsRepository.queryModelById(modelId);
-		if (!model) {
-			throw new AppError("MODEL_NOT_FOUND");
-		}
+		const model = await ModelsService.queryWritableModel(
+			modelId,
+			userJwt.company.id
+		);
 
 		const images = await ModelsRepository.queryModelImages(model.id);
 		const image = images.find((img) => img.id === imageId);

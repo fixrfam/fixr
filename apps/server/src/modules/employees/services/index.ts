@@ -5,6 +5,7 @@ import {
 	users as usersTable,
 } from "@fixr/db/schema";
 import { env } from "@fixr/env/server";
+import type { Locale } from "@fixr/i18n";
 import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type { createEmployeeSchema } from "@fixr/schemas/employees";
@@ -212,11 +213,13 @@ export class EmployeesService {
 		userJwt,
 		subdomain,
 		data,
+		locale,
 		response,
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
 		data: z.infer<typeof createEmployeeSchema>;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
 		if (!userJwt.company) {
@@ -277,6 +280,7 @@ export class EmployeesService {
 			payload: {
 				to: data.email,
 				appName: APP_NAME,
+				locale,
 				companyName: userJwt.company.name,
 				ctaUrl: `${env.FRONTEND_URL}/auth/login`,
 				displayName: data.name,

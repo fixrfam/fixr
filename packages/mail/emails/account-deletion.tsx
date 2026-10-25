@@ -1,3 +1,10 @@
+/**
+ * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
+ * from our own catalogs and every interpolated value is escaped by the
+ * translator, so the only markup that reaches the email is the emphasis the
+ * design asks for.
+ */
+import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
 import {
 	Body,
 	Button,
@@ -5,7 +12,6 @@ import {
 	Head,
 	Html,
 	Img,
-	Link,
 	Preview,
 	render,
 	Section,
@@ -18,48 +24,64 @@ interface EmailProps {
 	displayName: string;
 	appName: string;
 	verificationUrl: string;
+	/** Language of the recipient. Defaults to the app's default locale. */
+	locale?: Locale;
 }
 
 export const AccountDeletionEmail = ({
 	displayName,
 	appName,
 	verificationUrl,
-}: EmailProps) => (
-	<Html>
-		<Head />
-		<Preview>{displayName}, confirm your account deletion.</Preview>
-		<Body style={main}>
-			<Container style={container}>
-				<Img alt="" height="25" src={"/public/logo.png"} width="31" />
+	locale = defaultLocale,
+}: EmailProps) => {
+	const { t } = createTranslator(locale, { escapeValues: true });
 
-				<Text style={title}>Account deletion confirmation</Text>
+	return (
+		<Html>
+			<Head />
+			<Preview>
+				{t("emails.accountDeletion.preview", { name: displayName })}
+			</Preview>
+			<Body style={main}>
+				<Container style={container}>
+					<Img alt="" height="25" src={"/public/logo.png"} width="31" />
 
-				<Section style={section}>
-					<Text style={text}>
-						Hey <strong>{displayName}</strong>.
-					</Text>
-					<Text style={text}>
-						You requested account deletion on (<Link>{appName}</Link>). By
-						clicking the button below, your account will be{" "}
-						<strong>permanently deleted</strong> with all associated data.
-					</Text>
+					<Text style={title}>{t("emails.accountDeletion.title")}</Text>
 
-					<Text style={text}>
-						<strong>This action is irreversible.</strong>
-					</Text>
+					<Section style={section}>
+						<Text
+							dangerouslySetInnerHTML={{
+								__html: t("emails.accountDeletion.greeting", {
+									name: displayName,
+								}),
+							}}
+							style={text}
+						/>
+						<Text
+							dangerouslySetInnerHTML={{
+								__html: t("emails.accountDeletion.body", { app: appName }),
+							}}
+							style={text}
+						/>
 
-					<Button href={verificationUrl} style={button} target="_blank">
-						Delete account
-					</Button>
-				</Section>
+						<Text
+							dangerouslySetInnerHTML={{
+								__html: t("emails.accountDeletion.irreversible"),
+							}}
+							style={text}
+						/>
 
-				<Text style={footer}>
-					If you haven't requested deletion, please ignore this email.
-				</Text>
-			</Container>
-		</Body>
-	</Html>
-);
+						<Button href={verificationUrl} style={button} target="_blank">
+							{t("emails.accountDeletion.cta")}
+						</Button>
+					</Section>
+
+					<Text style={footer}>{t("emails.accountDeletion.footer")}</Text>
+				</Container>
+			</Body>
+		</Html>
+	);
+};
 
 export default AccountDeletionEmail;
 
@@ -122,15 +144,13 @@ export async function renderEmail({
 	verificationUrl,
 	displayName,
 	appName,
-}: {
-	verificationUrl: string;
-	displayName: string;
-	appName: string;
-}): Promise<string> {
+	locale,
+}: EmailProps): Promise<string> {
 	return await render(
 		<AccountDeletionEmail
 			appName={appName}
 			displayName={displayName}
+			locale={locale}
 			verificationUrl={verificationUrl}
 		/>
 	);

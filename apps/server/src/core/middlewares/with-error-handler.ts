@@ -1,12 +1,14 @@
+import { env } from "@fixr/env/server";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { AppError } from "../lib/app-error";
-import { apiResponse } from "../lib/response";
+import { sendErrorResponse } from "../lib/response";
 
 function errorResponseData(err: unknown) {
 	const data: Record<string, unknown> = {};
 	if (err instanceof Error) {
 		data.message = err.message;
-		if (err.stack) {
+		// Stack traces help locally but must not leak to API clients in production.
+		if (err.stack && env.NODE_ENV !== "production") {
 			data.stack = err.stack.split("\n").slice(0, 4).join("\n");
 		}
 	} else if (err && typeof err === "object") {
@@ -36,15 +38,13 @@ export function withErrorHandler<
 
 			req.log.error(err, "Unexpected error in route handler");
 
-			return res.status(500).send(
-				apiResponse({
-					status: 500,
-					error: "Internal Server Error",
-					code: "internal_error",
-					message: err instanceof Error ? err.message : "Something went wrong.",
-					data: errorResponseData(err),
-				})
-			);
+			return sendErrorResponse(res, {
+				status: 500,
+				error: "Internal Server Error",
+				code: "internal_error",
+				message: err instanceof Error ? err.message : "Something went wrong.",
+				data: errorResponseData(err),
+			});
 		}
 	};
 }

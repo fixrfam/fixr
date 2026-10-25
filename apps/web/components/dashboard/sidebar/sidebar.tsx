@@ -1,27 +1,33 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { createAbility } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { PanelLeft, Search } from "lucide-react";
 import type { z } from "zod";
-import { Avatar } from "@/components/account/profile-avatar";
+import { LanguageToggle } from "@/components/language-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/svg/logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSidebarStore } from "@/lib/hooks/stores/use-sidebar-store";
+import { useCompany } from "@/lib/hooks/use-company";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { AccountPopover } from "../account-popover";
+import { CompanyMark } from "./company-mark";
 import { SidebarButton } from "./sidebar-button";
 import { sidebarSections } from "./sidebar-routes";
 import type { MenuItem, SidebarItem } from "./types";
 
 export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
+	const { t } = useTranslation();
 	const { isOpen, close } = useSidebarStore();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 
 	const ability = createAbility(session.company?.role ?? "guest");
+	// Name and logo can be edited in the settings; the session keeps the sign in values.
+	const { data: company } = useCompany(session.company?.subdomain);
 
 	function filterItem(item: SidebarItem): SidebarItem | null {
 		if (item.type === "route") {
@@ -69,18 +75,16 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 				<div className="space-y-4">
 					<div className="flex w-full items-center justify-between px-5">
 						<div className="flex gap-3">
-							<Avatar
-								className="size-9 rounded-sm"
-								fallbackHash={session.company?.id as string}
-								fallbackType="marble"
-								variant="square"
+							<CompanyMark
+								companyId={session.company?.id as string}
+								subdomain={session.company?.subdomain as string}
 							/>
 							<div>
 								<p className="font-medium text-2xs tracking-tight">
-									{session.company?.name}
+									{company?.name ?? session.company?.name}
 								</p>
 								<p className="text-muted-foreground text-xs tracking-tight">
-									Minha empresa
+									{t("dashboard.sidebar.myCompany")}
 								</p>
 							</div>
 						</div>
@@ -92,7 +96,7 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 						>
 							<div className="inline-flex items-center gap-1.5">
 								<Search className={"size-3.5"} />
-								Acesso rápido
+								{t("dashboard.sidebar.quickAccess")}
 							</div>
 							<div className="inline-flex items-center gap-1.5">
 								<Badge
@@ -123,9 +127,9 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 					}}
 				>
 					{filteredSections.map((section) => (
-						<div className="space-y-1" key={section.title}>
+						<div className="space-y-1" key={section.titleKey}>
 							<p className="px-5 font-medium text-muted-foreground text-xs">
-								{section.title}
+								{t(section.titleKey)}
 							</p>
 							<div className="px-3">
 								{section.items.map((item) => (
@@ -144,7 +148,10 @@ export function Sidebar({ session }: { session: z.infer<typeof userJWT> }) {
 							variant="square"
 						/>
 					</div>
-					<ModeToggle />
+					<div className="flex items-center">
+						<LanguageToggle />
+						<ModeToggle />
+					</div>
 				</div>
 			</aside>
 			<button

@@ -8,7 +8,10 @@ export interface Ability {
 }
 
 export function createAbility(role: EmployeeRole): Ability {
-	const perms = roleAbilities[role];
+	// Fail closed: an unknown/missing role (e.g. a malformed JWT) gets no permissions.
+	const perms = Object.keys(roleAbilities).includes(role)
+		? roleAbilities[role]
+		: roleAbilities.guest;
 	return {
 		can: (permission) => perms.includes(permission),
 		cannot: (permission) => !perms.includes(permission),

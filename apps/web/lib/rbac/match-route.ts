@@ -7,10 +7,15 @@ interface RouteMatch {
 	params: Record<string, string>;
 }
 
-function convertPatternToRegex(pattern: string): {
-	regex: RegExp;
+interface RouteMatcher {
+	/** Matches the pattern itself (optionally with a trailing slash). */
+	exact: RegExp;
+	/** Matches the pattern or anything nested below it. */
+	prefix: RegExp;
 	paramNames: string[];
-} {
+}
+
+function convertPatternToRegex(pattern: string): RouteMatcher {
 	const paramNames: string[] = [];
 	const regexPattern = pattern.replace(/:([^/]+)/g, (_, paramName) => {
 		paramNames.push(paramName);
@@ -18,12 +23,15 @@ function convertPatternToRegex(pattern: string): {
 	});
 
 	return {
-		regex: new RegExp(`^${regexPattern}(/.*)?$`),
+		exact: new RegExp(`^${regexPattern}/?$`),
+		prefix: new RegExp(`^${regexPattern}(/.*)?$`),
 		paramNames,
 	};
 }
 
-const routeCache = new Map<string, { regex: RegExp; paramNames: string[] }>();
+const routeCache = new Map<string, RouteMatcher>();
+
+const QUERY_OR_HASH_REGEX = /[?#]/;
 
 function getRouteMatcher(pattern: string) {
 	if (!routeCache.has(pattern)) {
@@ -32,17 +40,18 @@ function getRouteMatcher(pattern: string) {
 	return routeCache.get(pattern)!;
 }
 
-export function matchRoute(
+function findMatch(
 	pathname: string,
-	rules: RouteRule[]
+	rules: RouteRule[],
+	kind: "exact" | "prefix"
 ): Nullable<RouteMatch> {
 	for (const rule of rules) {
-		const { regex, paramNames } = getRouteMatcher(rule.path);
-		const match = regex.exec(pathname);
+		const matcher = getRouteMatcher(rule.path);
+		const match = matcher[kind].exec(pathname);
 
 		if (match) {
 			const params: Record<string, string> = {};
-			paramNames.forEach((name, index) => {
+			matcher.paramNames.forEach((name, index) => {
 				const value = match[index + 1];
 				if (value !== undefined) {
 					params[name] = value;
@@ -54,6 +63,19 @@ export function matchRoute(
 	}
 
 	return null;
+}
+
+/**
+ * Find the rule for a pathname. An exact match always wins over a prefix
+ * match, so `/service-orders/new` gets its own rule (serviceOrders:create)
+ * instead of the `/service-orders` one (serviceOrders:read) listed before it.
+ */
+export function matchRoute(
+	pathname: string,
+	rules: RouteRule[]
+): Nullable<RouteMatch> {
+	const path = pathname.split(QUERY_OR_HASH_REGEX)[0] ?? pathname;
+	return findMatch(path, rules, "exact") ?? findMatch(path, rules, "prefix");
 }
 
 export function isPublicRoute(pathname: string, rules: RouteRule[]): boolean {

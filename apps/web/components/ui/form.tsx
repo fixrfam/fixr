@@ -1,5 +1,7 @@
 "use client";
 
+import { translateMessage } from "@fixr/i18n";
+import { useTranslation } from "@fixr/i18n/react";
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
@@ -134,8 +136,17 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
+	const { t, locale, format } = useTranslation();
 	const { error, formMessageId } = useFormField();
-	const body = error ? String(error?.message ?? "") : props.children;
+
+	/**
+	 * Schemas run where the reader's language is unknown, so they emit
+	 * encoded keys. Anything else (a plain message from the API) renders
+	 * as-is.
+	 */
+	const body = error
+		? translateMessage({ t, locale, format }, String(error?.message ?? ""))
+		: props.children;
 
 	if (!body) {
 		return null;

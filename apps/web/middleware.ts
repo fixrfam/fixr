@@ -156,9 +156,13 @@ export async function middleware(request: NextRequest) {
 	return NextResponse.next();
 
 	function redirectToHome(tenant: string) {
-		return NextResponse.redirect(
-			new URL(`/dashboard/${tenant}/home`, env.NEXT_PUBLIC_APP_URL)
-		);
+		const home = `/dashboard/${tenant}/home`;
+		// A role that can't see home either (e.g. guest) would loop home -> home;
+		// send it to the public support page instead.
+		const target =
+			request.nextUrl.pathname === home ? `/dashboard/${tenant}/support` : home;
+
+		return NextResponse.redirect(new URL(target, env.NEXT_PUBLIC_APP_URL));
 	}
 }
 
@@ -178,7 +182,21 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 	if (revalidateResponse.ok) {
 		const setCookies = revalidateResponse.headers.getSetCookie();
 		if (setCookies.length > 0) {
-			const res = NextResponse.next();
+			// Forward the refreshed cookies to this same request too: server
+			// components rendering it read request cookies, and without them they
+			// still see the expired/missing session and fail (500) until the next load.
+			for (const cookie of setCookies) {
+				const [pair = ""] = cookie.split(";");
+				const separator = pair.indexOf("=");
+				if (separator > 0) {
+					request.cookies.set(
+						pair.slice(0, separator).trim(),
+						pair.slice(separator + 1).trim()
+					);
+				}
+			}
+
+			const res = NextResponse.next({ request: { headers: request.headers } });
 			for (const cookie of setCookies) {
 				res.headers.append("Set-Cookie", cookie);
 			}

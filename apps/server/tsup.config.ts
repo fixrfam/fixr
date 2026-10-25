@@ -11,5 +11,6 @@ export default defineConfig({
 		"@fixr/permissions",
 		"@fixr/schemas",
 		"@fixr/env",
+		"@fixr/i18n",
 	],
 });

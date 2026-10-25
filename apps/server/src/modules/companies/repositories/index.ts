@@ -110,4 +110,13 @@ export class CompaniesRepository {
 			companyId: orgId?.id as string,
 		});
 	}
+
+	/** @description Update the company profile (name, address and public contact data) */
+	@InvalidateCache({ patterns: ["company*"] })
+	static async updateCompanyProfile(
+		companyId: string,
+		values: Partial<typeof companies.$inferInsert>
+	) {
+		await db.update(companies).set(values).where(eq(companies.id, companyId));
+	}
 }

@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslation } from "@fixr/i18n/react";
 import { ArrowLeft, Construction } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
+	const { t } = useTranslation();
 	const router = useRouter();
 
 	return (
@@ -14,15 +16,16 @@ export default function NotFound() {
 					<Construction className="size-8" />
 				</div>
 				<div className="space-y-2">
-					<h1 className="font-semibold text-2xl">Em breve por aqui!</h1>
-					<p className="mt-2">Essa funcionalidade ainda está em construção.</p>
+					<h1 className="font-semibold text-2xl">
+						{t("dashboard.notFound.title")}
+					</h1>
+					<p className="mt-2">{t("dashboard.notFound.description")}</p>
 					<p className="mt-1 text-gray-700 text-sm">
-						Estamos trabalhando para lançar novidades o quanto antes. Obrigado
-						pela paciência!
+						{t("dashboard.notFound.hint")}
 					</p>
 				</div>
 				<Button onClick={() => router.back()} variant={"default"}>
-					<ArrowLeft /> Voltar
+					<ArrowLeft /> {t("common.actions.back")}
 				</Button>
 			</div>
 		</div>

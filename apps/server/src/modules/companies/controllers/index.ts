@@ -1,5 +1,9 @@
+import type { Locale } from "@fixr/i18n";
 import type { jwtPayload } from "@fixr/schemas/auth";
-import type { createCompanySchema } from "@fixr/schemas/companies";
+import type {
+	createCompanySchema,
+	updateCompanyProfileSchema,
+} from "@fixr/schemas/companies";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { CompaniesService } from "../services";
@@ -43,11 +47,25 @@ export class CompaniesController {
 	 */
 	static createCompany({
 		body,
+		locale,
 		response,
 	}: {
 		body: z.infer<typeof createCompanySchema>;
+		locale: Locale;
 		response: FastifyReply;
 	}) {
-		return CompaniesService.createCompany({ body, response });
+		return CompaniesService.createCompany({ body, locale, response });
+	}
+
+	/**
+	 * @description Update the company profile
+	 */
+	static updateCompanyProfile(params: {
+		subdomain: string;
+		userJwt: z.infer<typeof jwtPayload>;
+		data: z.infer<typeof updateCompanyProfileSchema>;
+		response: FastifyReply;
+	}) {
+		return CompaniesService.updateCompanyProfile(params);
 	}
 }

@@ -5,7 +5,7 @@ import {
 } from "@fixr/schemas/models";
 import { categoriesDocs } from "../../../core/docs/categories/categories.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { CategoriesController } from "../controllers";
@@ -16,7 +16,7 @@ export function categoriesRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.read),
 			],
 			schema: categoriesDocs.listCategoriesSchema,
@@ -32,7 +32,7 @@ export function categoriesRoutes(fastify: FastifyTypedInstance) {
 		"/:slug",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.devices.read),
 			],
 			schema: categoriesDocs.getCategoryBySlugSchema,

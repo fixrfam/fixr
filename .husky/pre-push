@@ -2,7 +2,8 @@
 set -e
 
 echo "Running lint..."
-bun run lint
+# lint:ci skips the TTY-only --elide-lines flag, so the hook also works in non-interactive shells.
+bun run lint:ci
 
 echo "Running type checks..."
 bun run check-types:ci

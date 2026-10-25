@@ -3,12 +3,14 @@ import type { userJWT } from "@fixr/schemas/auth";
 import {
 	createCompanySchema,
 	getCompanyBySubdomainSchema,
+	updateCompanyProfileSchema,
 } from "@fixr/schemas/companies";
 import type { z } from "zod";
 import { companiesDocs } from "../../../core/docs/companies/companies.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
+import { requestLocale } from "../../../core/lib/locale";
 import { authenticateAdmin } from "../../../core/middlewares/authenticate-admin";
-import { authenticateEmployee } from "../../../core/middlewares/authenticate-employee";
+import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { CompaniesController } from "../controllers";
@@ -19,7 +21,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 		"/",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.companies.read),
 			],
 			schema: companiesDocs.getUserCompanySchema,
@@ -35,7 +37,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 		"/:subdomain",
 		{
 			preHandler: [
-				authenticateEmployee,
+				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.companies.read),
 			],
 			schema: companiesDocs.getCompanyByIdSchema,
@@ -49,6 +51,31 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 			await CompaniesController.getCompanyBySubdomain({
 				subdomain: params.subdomain,
 				userJwt,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:subdomain",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.companies.update),
+			],
+			schema: companiesDocs.updateCompanyProfileSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = await getCompanyBySubdomainSchema.parseAsync(
+				request.params
+			);
+			const data = updateCompanyProfileSchema.parse(request.body);
+
+			await CompaniesController.updateCompanyProfile({
+				subdomain,
+				userJwt,
+				data,
 				response,
 			});
 		})
@@ -74,6 +101,7 @@ export function companiesRoutes(fastify: FastifyTypedInstance) {
 
 			await CompaniesController.createCompany({
 				body,
+				locale: requestLocale(request),
 				response,
 			});
 		})

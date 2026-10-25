@@ -22,27 +22,15 @@ O Fixr é um monorepo com Bun workspaces (`apps/server`, `apps/web`, `apps/admin
    bun install   # também configura os hooks do Husky
    ```
 
-2. Configure as variáveis de ambiente. Cada app/pacote tem seu próprio `.env` local (não existe um único `.env` na raiz) — copie o `.env.example` de cada um para `.env` no mesmo diretório:
+2. Prepare o ambiente local (cria o `.env` da raiz, sobe MySQL e Redis via Docker, cria o schema e popula dados de demonstração):
 
    ```bash
-   cp packages/db/.env.example packages/db/.env
-   cp apps/server/.env.example apps/server/.env
-   cp apps/web/.env.example apps/web/.env
-   cp apps/workers/.env.example apps/workers/.env
-   cp packages/mail/.env.example packages/mail/.env
-   cp apps/admin/.env.example apps/admin/.env   # só necessário se for mexer no painel admin
+   bun run setup
    ```
 
-   Os valores de exemplo já funcionam para desenvolvimento local; chaves de serviços externos (Resend, Google OAuth, Clerk, Cloudflare R2/Turnstile) precisam ser geradas nos respectivos painéis — veja os comentários em cada `.env.example`. As variáveis são validadas com Zod pelo pacote `@fixr/env`; o app não sobe se faltar alguma.
+   Existe um único `.env` na raiz para todos os apps e pacotes; o `.env.example` traz valores que já funcionam localmente. Chaves de serviços externos (Resend, Google OAuth, Clerk, Cloudflare R2) só são necessárias para usar esses serviços: troque os placeholders pelas chaves geradas nos respectivos painéis. As variáveis são validadas com Zod pelo pacote `@fixr/env`; o app não sobe se faltar alguma. Use `bun run setup --reset` para recomeçar com os dados de demonstração (senha de todas as contas: `Fixr!Dev123`).
 
-3. Suba o banco (MySQL) e o Redis via Docker, e rode as migrations:
-
-   ```bash
-   bun run db:start
-   bun run db:migrate
-   ```
-
-4. Suba os apps em modo desenvolvimento:
+3. Suba os apps em modo desenvolvimento:
 
    ```bash
    bun run dev         # server (3333), web (3000) e workers

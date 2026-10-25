@@ -1,4 +1,5 @@
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
+import type { FastifyReply } from "fastify";
 
 export const apiResponse = ({
 	status,
@@ -37,3 +38,19 @@ export const httpStatusCodes: Record<number, string> = {
 	503: "Service Unavailable",
 	504: "Gateway Timeout",
 };
+
+/**
+ * Send an error envelope, bypassing the route's response schema.
+ *
+ * Route docs declare error responses with literal values (one code per
+ * status). Serializing a different error through them (e.g. a validation
+ * error on a route that documents a 400 `invalid_token`) fails and turns the
+ * reply into a generic 500, so error envelopes are serialized as plain JSON.
+ */
+export function sendErrorResponse(reply: FastifyReply, body: ApiResponse) {
+	return reply
+		.status(body.status)
+		.type("application/json; charset=utf-8")
+		.serializer(JSON.stringify)
+		.send(apiResponse(body));
+}

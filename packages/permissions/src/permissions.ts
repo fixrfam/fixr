@@ -4,6 +4,11 @@ export const permissions = {
 		update: "account:update",
 		delete: "account:delete",
 	},
+	apiKeys: {
+		read: "apiKeys:read",
+		create: "apiKeys:create",
+		revoke: "apiKeys:revoke",
+	},
 	companies: {
 		read: "companies:read",
 		update: "companies:update",
@@ -30,6 +35,12 @@ export const permissions = {
 		update: "parts:update",
 		delete: "parts:delete",
 	},
+	services: {
+		read: "services:read",
+		create: "services:create",
+		update: "services:update",
+		delete: "services:delete",
+	},
 	serviceOrders: {
 		read: "serviceOrders:read",
 		create: "serviceOrders:create",
@@ -53,9 +64,6 @@ export const permissions = {
 	},
 	inventory: {
 		read: "inventory:read",
-		create: "inventory:create",
-		update: "inventory:update",
-		delete: "inventory:delete",
 		adjust: "inventory:adjust",
 	},
 	suppliers: {
