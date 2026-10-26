@@ -1,18 +1,16 @@
 import { createId } from "@paralleldrive/cuid2";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-	createOrderServiceSchema,
-	createServiceOrderMockSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderSchema,
 	serviceOrderStatuses,
 } from "./service-orders";
 import { issuePaths } from "./test-utils";
 
 const validOrder = () => ({
-	clientId: createId(),
-	deviceBrandId: createId(),
-	deviceCategoryId: createId(),
-	deviceModel: "iPhone 12",
+	deviceId: createId(),
 	reportedDefect: "Tela quebrada",
 });
 
@@ -30,37 +28,31 @@ describe("serviceOrderStatuses", () => {
 	});
 });
 
-describe("createServiceOrderMockSchema", () => {
+describe("createServiceOrderSchema", () => {
 	it("accepts a valid order and defaults photos to []", () => {
-		const result = createServiceOrderMockSchema.parse(validOrder());
+		const result = createServiceOrderSchema.parse(validOrder());
 
 		expect(result.photos).toEqual([]);
 	});
 
-	it.each([
-		"clientId",
-		"deviceBrandId",
-		"deviceCategoryId",
-		"deviceModel",
-		"reportedDefect",
-	])("requires %s", (field) => {
+	it.each(["deviceId", "reportedDefect"])("requires %s", (field) => {
 		const input: Record<string, unknown> = validOrder();
 		delete input[field];
 
-		expect(issuePaths(createServiceOrderMockSchema, input)).toEqual([field]);
+		expect(issuePaths(createServiceOrderSchema, input)).toEqual([field]);
 	});
 
 	it("rejects ids that are not cuid2", () => {
 		expect(
-			issuePaths(createServiceOrderMockSchema, {
+			issuePaths(createServiceOrderSchema, {
 				...validOrder(),
-				clientId: "Not-A-Cuid",
+				deviceId: "Not-A-Cuid",
 			})
-		).toEqual(["clientId"]);
+		).toEqual(["deviceId"]);
 	});
 
 	it("does not accept a status from the caller", () => {
-		const result = createServiceOrderMockSchema.parse({
+		const result = createServiceOrderSchema.parse({
 			...validOrder(),
 			status: "delivered",
 		});
@@ -72,18 +64,17 @@ describe("createServiceOrderMockSchema", () => {
 		const photos = Array.from({ length: 21 }, () => ({ uploadId: createId() }));
 
 		expect(
-			issuePaths(createServiceOrderMockSchema, { ...validOrder(), photos })
+			issuePaths(createServiceOrderSchema, { ...validOrder(), photos })
 		).toEqual(["photos"]);
 	});
 
-	it("limits deviceModel to 100 chars and imei to 50", () => {
+	it("refuses a blank reported issue", () => {
 		expect(
-			issuePaths(createServiceOrderMockSchema, {
+			issuePaths(createServiceOrderSchema, {
 				...validOrder(),
-				deviceModel: "a".repeat(101),
-				imei: "1".repeat(51),
-			}).sort()
-		).toEqual(["deviceModel", "imei"]);
+				reportedDefect: "  ",
+			})
+		).toEqual(["reportedDefect"]);
 	});
 });
 
@@ -131,56 +122,28 @@ describe("getServiceOrdersQuerySchema", () => {
 	});
 });
 
-describe("createOrderServiceSchema", () => {
-	const photo = () => new File(["x"], "photo.jpg", { type: "image/jpeg" });
-	const validInput = (images: unknown[]) => ({
-		customerCPF: "529.982.247-25",
-		description: "Tela quebrada",
-		deviceId: createId(),
-		assigned_to: createId(),
-		images,
+describe("patchServiceOrderSchema", () => {
+	it("accepts an empty patch and clears the notes with null", () => {
+		expect(patchServiceOrderSchema.parse({})).toEqual({});
+		expect(patchServiceOrderSchema.parse({ observations: null })).toEqual({
+			observations: null,
+		});
 	});
 
-	afterEach(() => {
-		vi.unstubAllGlobals();
-		vi.resetModules();
+	it("refuses a blank reported issue", () => {
+		expect(
+			issuePaths(patchServiceOrderSchema, { reportedDefect: "   " })
+		).toEqual(["reportedDefect"]);
 	});
+});
 
-	it("loads where File is not a global, like Node 18", async () => {
-		vi.stubGlobal("File", undefined);
-		vi.resetModules();
-
-		const module = await import("./service-orders");
-
-		expect(module.createOrderServiceSchema).toBeDefined();
-	});
-
-	it("rejects images when File is not available", async () => {
-		const images = [photo(), photo(), photo()];
-		vi.stubGlobal("File", undefined);
-
-		expect(createOrderServiceSchema.safeParse(validInput(images)).success).toBe(
-			false
+describe("changeServiceOrderStatusSchema", () => {
+	it("accepts a lifecycle status only", () => {
+		expect(changeServiceOrderStatusSchema.parse({ status: "ready" })).toEqual({
+			status: "ready",
+		});
+		expect(issuePaths(changeServiceOrderStatusSchema, { status: "x" })).toEqual(
+			["status"]
 		);
-	});
-
-	it("accepts three to fifteen device photos", () => {
-		const images = Array.from({ length: 3 }, photo);
-
-		expect(createOrderServiceSchema.safeParse(validInput(images)).success).toBe(
-			true
-		);
-	});
-
-	it("rejects anything that is not a file", () => {
-		const input = validInput([photo(), photo(), "photo.jpg"]);
-
-		expect(issuePaths(createOrderServiceSchema, input)).toContain("images.2");
-	});
-
-	it("rejects fewer than three photos", () => {
-		const input = validInput([photo()]);
-
-		expect(issuePaths(createOrderServiceSchema, input)).toContain("images");
 	});
 });

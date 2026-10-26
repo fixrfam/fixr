@@ -7,6 +7,7 @@ import { db } from "../connection";
 import {
 	clients,
 	companies,
+	devices,
 	employees,
 	modelCategories,
 	modelMakers,
@@ -194,7 +195,7 @@ async function seed() {
 		}
 
 		const makerIds = new Map<string, string>();
-		const modelCategory = new Map<string, string>();
+		const modelIds = new Map<string, string>();
 		for (const maker of MAKERS) {
 			const makerId = createId();
 			makerIds.set(maker.slug, makerId);
@@ -207,8 +208,10 @@ async function seed() {
 			});
 			for (const model of maker.models) {
 				const slug = `${maker.slug}-${slugify(model.name)}`;
-				modelCategory.set(`${maker.slug}:${model.name}`, model.category);
+				const modelId = createId();
+				modelIds.set(`${maker.slug}:${model.name}`, modelId);
 				await tx.insert(models).values({
+					id: modelId,
 					makerId,
 					name: `${maker.name} ${model.name}`,
 					slug,
@@ -263,25 +266,82 @@ async function seed() {
 			cpfs: CLIENTS.map(() => cpf(documentSeq++)),
 		});
 
-		for (const [index, order] of SERVICE_ORDERS.entries()) {
-			const category = modelCategory.get(`${order.maker}:${order.model}`);
-			const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
-			await tx.insert(serviceOrders).values({
-				companyId: companyIds.get(order.company) as string,
-				clientId: clientIds.get(`${order.company}:${order.client}`) as string,
-				employeeId: employeeIds.get(order.technician) as string,
-				deviceMakerId: makerIds.get(order.maker) as string,
-				deviceCategoryId: categoryIds.get(category as string) as string,
-				deviceModel: order.model,
+		await seedServiceOrders(tx, {
+			companyIds,
+			clientIds,
+			employeeIds,
+			modelIds,
+		});
+	});
+}
+
+/** One device per customer and model; the latest order says where it is. */
+async function seedServiceOrders(
+	tx: Transaction,
+	{
+		companyIds,
+		clientIds,
+		employeeIds,
+		modelIds,
+	}: {
+		companyIds: Map<string, string>;
+		clientIds: Map<string, string>;
+		employeeIds: Map<string, string>;
+		modelIds: Map<string, string>;
+	}
+) {
+	const deviceIds = new Map<string, string>();
+	const latestOrder = new Map<string, number>();
+	for (const [index, order] of SERVICE_ORDERS.entries()) {
+		const companyId = companyIds.get(order.company) as string;
+		const clientId = clientIds.get(
+			`${order.company}:${order.client}`
+		) as string;
+		const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
+		const deviceKey = `${clientId}:${order.maker}:${order.model}`;
+		let deviceId = deviceIds.get(deviceKey);
+		if (!deviceId) {
+			deviceId = createId();
+			deviceIds.set(deviceKey, deviceId);
+			await tx.insert(devices).values({
+				id: deviceId,
+				companyId,
+				clientId,
+				modelId: modelIds.get(`${order.maker}:${order.model}`) as string,
 				imei: `35${String(209_900_000_000 + index).padStart(13, "0")}`,
-				reportedDefect: order.defect,
-				observations: order.observations,
-				status: order.status,
 				createdAt,
-				updatedAt: createdAt,
 			});
 		}
-	});
+		if (
+			order.daysAgo <= (latestOrder.get(deviceId) ?? Number.POSITIVE_INFINITY)
+		) {
+			latestOrder.set(deviceId, order.daysAgo);
+			await tx
+				.update(devices)
+				.set({ status: deviceStatusFor(order.status) })
+				.where(eq(devices.id, deviceId));
+		}
+		await tx.insert(serviceOrders).values({
+			companyId,
+			clientId,
+			employeeId: employeeIds.get(order.technician) as string,
+			deviceId,
+			reportedDefect: order.defect,
+			observations: order.observations,
+			status: order.status,
+			createdAt,
+			updatedAt: createdAt,
+		});
+	}
+}
+
+function deviceStatusFor(status: (typeof SERVICE_ORDERS)[number]["status"]) {
+	if (status === "delivered") {
+		return "with_customer" as const;
+	}
+	return status === "ready"
+		? ("ready_for_pickup" as const)
+		: ("in_shop" as const);
 }
 
 function printCredentials() {

@@ -9,11 +9,12 @@ const { dbMock, repo, pagination } = vi.hoisted(() => ({
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		queryEmployeeByUserId: vi.fn(),
-		queryClientById: vi.fn(),
-		queryDeviceMakerById: vi.fn(),
-		queryDeviceCategoryById: vi.fn(),
+		queryDeviceOfCompany: vi.fn(),
 		createWithPhotos: vi.fn(),
 		queryServiceOrderOfCompany: vi.fn(),
+		queryServiceOrderDetail: vi.fn(),
+		updateServiceOrder: vi.fn(),
+		updateStatus: vi.fn(),
 		queryItems: vi.fn(),
 		queryItem: vi.fn(),
 		queryCatalogItem: vi.fn(),
@@ -120,13 +121,8 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 		});
 	});
 
-	it("only joins on the count query when searching (the search spans the client name)", async () => {
+	it("joins on the count query too (search and the category filter read joined tables)", async () => {
 		await list().promise;
-		expect(pagination.getPaginatedCount).toHaveBeenLastCalledWith(
-			expect.objectContaining({ joins: undefined })
-		);
-
-		await list({ query: "maria" }).promise;
 		expect(pagination.getPaginatedCount).toHaveBeenLastCalledWith(
 			expect.objectContaining({ joins: ["JOINS"] })
 		);
@@ -189,11 +185,9 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 });
 
 describe("ServiceOrdersService.createServiceOrder", () => {
+	const clientId = createId();
 	const data = {
-		clientId: createId(),
-		deviceBrandId: createId(),
-		deviceCategoryId: createId(),
-		deviceModel: "iPhone 12",
+		deviceId: createId(),
 		reportedDefect: "Tela quebrada",
 		photos: [] as { uploadId: string; description?: string | null }[],
 	};
@@ -201,14 +195,9 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 
 	beforeEach(() => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
-		repo.queryClientById.mockResolvedValue({
-			id: data.clientId,
-			companyId,
-			deletedAt: null,
-		});
-		repo.queryDeviceMakerById.mockResolvedValue({ id: data.deviceBrandId });
-		repo.queryDeviceCategoryById.mockResolvedValue({
-			id: data.deviceCategoryId,
+		repo.queryDeviceOfCompany.mockResolvedValue({
+			id: data.deviceId,
+			clientId,
 		});
 		repo.createWithPhotos.mockImplementation(
 			async ({ companyId: cid, employeeId }) => ({
@@ -239,13 +228,18 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		};
 	};
 
-	it("creates the order for the caller's company and employee", async () => {
+	it("creates the order for the caller's company, employee and the device's owner", async () => {
 		const { reply, promise } = create();
 		await promise;
 
+		expect(repo.queryDeviceOfCompany).toHaveBeenCalledWith(
+			data.deviceId,
+			companyId
+		);
 		expect(repo.createWithPhotos).toHaveBeenCalledWith({
 			companyId,
 			employeeId: employee.id,
+			clientId,
 			data,
 		});
 		expect(reply.state.statusCode).toBe(201);
@@ -286,25 +280,11 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		});
 	});
 
-	it.each([
-		["client", "queryClientById", "client_not_found"],
-		["device maker", "queryDeviceMakerById", "device_brand_not_found"],
-		["device category", "queryDeviceCategoryById", "device_category_not_found"],
-	] as const)("rejects an unknown %s", async (_label, method, code) => {
-		repo[method].mockResolvedValue(null);
-
-		await expect(create().promise).rejects.toMatchObject({ code });
-		expect(repo.createWithPhotos).not.toHaveBeenCalled();
-	});
-
-	it.each([
-		["another company", { companyId: createId(), deletedAt: null }],
-		["a deleted client", { companyId, deletedAt: new Date() }],
-	])("rejects a client of %s", async (_label, client) => {
-		repo.queryClientById.mockResolvedValue({ id: data.clientId, ...client });
+	it("rejects a device that is not an active device of the company", async () => {
+		repo.queryDeviceOfCompany.mockResolvedValue(null);
 
 		await expect(create().promise).rejects.toMatchObject({
-			code: "client_not_found",
+			code: "service_order_device_not_found",
 		});
 		expect(repo.createWithPhotos).not.toHaveBeenCalled();
 	});
@@ -455,5 +435,94 @@ describe("ServiceOrdersService items", () => {
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "service_order_item_not_found" });
+	});
+});
+
+describe("ServiceOrdersService detail, edit and status", () => {
+	const serviceOrderId = createId();
+	const deviceId = createId();
+	const detail = { id: serviceOrderId, status: "ready", photos: [] };
+
+	beforeEach(() => {
+		repo.queryServiceOrderOfCompany.mockResolvedValue({
+			id: serviceOrderId,
+			deviceId,
+		});
+		repo.queryServiceOrderDetail.mockResolvedValue(detail);
+	});
+
+	const call = <
+		K extends "getServiceOrder" | "patchServiceOrder" | "changeStatus",
+	>(
+		method: K,
+		data?: object
+	) => {
+		const reply = createFakeReply();
+		return {
+			reply,
+			promise: ServiceOrdersService[method]({
+				userJwt,
+				subdomain: "fixr",
+				serviceOrderId,
+				data: data as never,
+				response: asReply(reply),
+			}),
+		};
+	};
+
+	it("returns the detail of an order of the company", async () => {
+		const { reply, promise } = call("getServiceOrder");
+		await promise;
+
+		expect(repo.queryServiceOrderDetail).toHaveBeenCalledWith(
+			serviceOrderId,
+			companyId
+		);
+		expect(reply.state.body).toMatchObject({ data: detail });
+	});
+
+	it("reports a missing order as not found", async () => {
+		repo.queryServiceOrderDetail.mockResolvedValue(null);
+
+		await expect(call("getServiceOrder").promise).rejects.toMatchObject({
+			code: "service_order_not_found",
+		});
+	});
+
+	it("skips the update when nothing changed", async () => {
+		await call("patchServiceOrder", {}).promise;
+
+		expect(repo.updateServiceOrder).not.toHaveBeenCalled();
+	});
+
+	it("updates the issue and notes", async () => {
+		await call("patchServiceOrder", { observations: "Sem chip" }).promise;
+
+		expect(repo.updateServiceOrder).toHaveBeenCalledWith(serviceOrderId, {
+			observations: "Sem chip",
+		});
+	});
+
+	it("moves the order and its device together", async () => {
+		const { reply, promise } = call("changeStatus", { status: "ready" });
+		await promise;
+
+		expect(repo.updateStatus).toHaveBeenCalledWith({
+			serviceOrderId,
+			deviceId,
+			status: "ready",
+		});
+		expect(reply.state.body).toMatchObject({
+			code: "change_service_order_status_success",
+		});
+	});
+
+	it("never changes another company's order", async () => {
+		repo.queryServiceOrderOfCompany.mockResolvedValue(null);
+
+		await expect(
+			call("changeStatus", { status: "ready" }).promise
+		).rejects.toMatchObject({ code: "service_order_not_found" });
+		expect(repo.updateStatus).not.toHaveBeenCalled();
 	});
 });
