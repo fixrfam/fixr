@@ -4,25 +4,27 @@ import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 import { hashOpaqueToken } from "../../../core/lib/opaque-token";
 import { PORTAL_SESSION_COOKIE } from "../../../core/middlewares/authenticate-portal";
 
-const { repo, estimatesRepo, estimatesService, queueEmail } = vi.hoisted(() => ({
-	estimatesService: { recordAnswer: vi.fn() },
-	repo: {
-		insertLink: vi.fn(),
-		revokeShopLinks: vi.fn(),
-		queryActiveLink: vi.fn(),
-		touchLink: vi.fn(),
-		insertSession: vi.fn(),
-		queryClientsByEmail: vi.fn(),
-		queryClient: vi.fn(),
-		queryScopeClients: vi.fn(),
-		queryEstimate: vi.fn(),
-	},
-	estimatesRepo: {
-		queryByTokenHash: vi.fn(),
-		queryItemsByEstimateIds: vi.fn(),
-	},
-	queueEmail: vi.fn(),
-}));
+const { repo, estimatesRepo, estimatesService, queueEmail } = vi.hoisted(
+	() => ({
+		estimatesService: { recordAnswer: vi.fn() },
+		repo: {
+			insertLink: vi.fn(),
+			revokeShopLinks: vi.fn(),
+			queryActiveLink: vi.fn(),
+			touchLink: vi.fn(),
+			insertSession: vi.fn(),
+			queryClientsByEmail: vi.fn(),
+			queryClient: vi.fn(),
+			queryScopeClients: vi.fn(),
+			queryEstimate: vi.fn(),
+		},
+		estimatesRepo: {
+			queryByTokenHash: vi.fn(),
+			queryItemsByEstimateIds: vi.fn(),
+		},
+		queueEmail: vi.fn(),
+	})
+);
 
 vi.mock("../repositories", () => ({ PortalRepository: repo }));
 vi.mock("../../estimates/repositories", () => ({
