@@ -293,6 +293,21 @@ export class ServiceOrdersRepository {
 			.where(eq(serviceOrders.id, serviceOrderId));
 	}
 
+	/** The order's status, locked until the transaction ends so two changes can't interleave. */
+	static async queryStatusForUpdate(tx: Transaction, serviceOrderId: string) {
+		const [serviceOrder] = await tx
+			.select({
+				companyId: serviceOrders.companyId,
+				deviceId: serviceOrders.deviceId,
+				status: serviceOrders.status,
+			})
+			.from(serviceOrders)
+			.where(eq(serviceOrders.id, serviceOrderId))
+			.limit(1)
+			.for("update");
+		return serviceOrder ?? null;
+	}
+
 	/** Set the order's status. Runs in the caller's transaction, which also emits `serviceOrder.statusChanged`. */
 	@InvalidateCache({ patterns: ["service-orders:*"] })
 	static async updateStatus(

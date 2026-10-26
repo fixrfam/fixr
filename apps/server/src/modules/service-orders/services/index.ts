@@ -25,6 +25,7 @@ import {
 	serviceOrdersListJoins,
 	serviceOrdersListSelect,
 } from "../repositories";
+import { moveServiceOrder } from "./move-status";
 
 export class ServiceOrdersService {
 	static async getCompanyServiceOrders({
@@ -339,27 +340,18 @@ export class ServiceOrdersService {
 		response: FastifyReply;
 	}) {
 		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
-		const current = await ServiceOrdersService.assertOwnServiceOrder(
-			serviceOrderId,
-			companyId
-		);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
 
-		if (current.status !== data.status) {
-			await inTransaction(async (tx) => {
-				await ServiceOrdersRepository.updateStatus(
-					tx,
+		await inTransaction((tx) =>
+			moveServiceOrder(
+				tx,
+				(event, payload) => events.emit(tx, event, payload),
+				{
 					serviceOrderId,
-					data.status
-				);
-				await events.emit(tx, "serviceOrder.statusChanged", {
-					serviceOrderId,
-					companyId,
-					deviceId: current.deviceId,
-					from: current.status,
 					to: data.status,
-				});
-			});
-		}
+				}
+			)
+		);
 
 		return response.status(200).send(
 			apiResponse({
