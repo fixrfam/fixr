@@ -1,6 +1,7 @@
 import {
 	and,
 	asc,
+	type DbExecutor,
 	db,
 	desc,
 	eq,
@@ -201,7 +202,11 @@ export class DevicesRepository {
 
 	// Service order lists and details show the device they point to.
 	@InvalidateCache({ patterns: ["service-orders:*"] })
-	static async updateDevice(deviceId: string, values: Partial<DeviceInsert>) {
-		await db.update(devices).set(values).where(eq(devices.id, deviceId));
+	static async updateDevice(
+		deviceId: string,
+		values: Partial<DeviceInsert>,
+		executor: DbExecutor = db
+	) {
+		await executor.update(devices).set(values).where(eq(devices.id, deviceId));
 	}
 }

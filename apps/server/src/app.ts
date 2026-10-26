@@ -25,6 +25,7 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError, z } from "zod";
 import { apiDescription } from "./core/docs/main";
+import { registerEffects } from "./core/events";
 import type { FastifyTypedInstance } from "./core/interfaces/fastify";
 import { AppError } from "./core/lib/app-error";
 import { bindJWT } from "./core/lib/jwt";
@@ -215,6 +216,7 @@ export async function buildApp(
 	const { logger = envToLogger.development, docs = true, onRoute } = options;
 
 	registerSchemas();
+	registerEffects();
 
 	const app = fastify({
 		logger,

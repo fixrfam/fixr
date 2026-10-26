@@ -2,7 +2,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { dbMock, repo, pagination } = vi.hoisted(() => ({
+const { dbMock, repo, pagination, emit } = vi.hoisted(() => ({
+	emit: vi.fn(),
 	dbMock: {} as ReturnType<
 		typeof import("@/test/helpers/query-builder-mock").createDbMock
 	>,
@@ -36,6 +37,10 @@ vi.mock("../repositories", () => ({
 	serviceOrdersListSelect: {},
 }));
 vi.mock("../../../core/lib/pagination", () => pagination);
+vi.mock("../../../core/lib/transaction", () => ({
+	inTransaction: (work: (tx: unknown) => unknown) => work("TX"),
+}));
+vi.mock("../../../core/events", () => ({ events: { emit } }));
 
 const { ServiceOrdersService } = await import(".");
 
@@ -236,11 +241,17 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 			data.deviceId,
 			companyId
 		);
-		expect(repo.createWithPhotos).toHaveBeenCalledWith({
+		expect(repo.createWithPhotos).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
 			clientId,
 			data,
+		});
+		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.opened", {
+			serviceOrderId: "so1",
+			companyId,
+			deviceId: data.deviceId,
+			employeeId: employee.id,
 		});
 		expect(reply.state.statusCode).toBe(201);
 		expect(reply.state.body).toMatchObject({
@@ -447,6 +458,7 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		repo.queryServiceOrderOfCompany.mockResolvedValue({
 			id: serviceOrderId,
 			deviceId,
+			status: "fixing",
 		});
 		repo.queryServiceOrderDetail.mockResolvedValue(detail);
 	});
@@ -503,18 +515,32 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		});
 	});
 
-	it("moves the order and its device together", async () => {
+	it("moves the order and announces it in the same transaction", async () => {
 		const { reply, promise } = call("changeStatus", { status: "ready" });
 		await promise;
 
-		expect(repo.updateStatus).toHaveBeenCalledWith({
+		expect(repo.updateStatus).toHaveBeenCalledWith(
+			"TX",
 			serviceOrderId,
+			"ready"
+		);
+		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.statusChanged", {
+			serviceOrderId,
+			companyId,
 			deviceId,
-			status: "ready",
+			from: "fixing",
+			to: "ready",
 		});
 		expect(reply.state.body).toMatchObject({
 			code: "change_service_order_status_success",
 		});
+	});
+
+	it("changes nothing when the status is the current one", async () => {
+		await call("changeStatus", { status: "fixing" }).promise;
+
+		expect(repo.updateStatus).not.toHaveBeenCalled();
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it("never changes another company's order", async () => {
