@@ -4,7 +4,8 @@ import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 import { hashOpaqueToken } from "../../../core/lib/opaque-token";
 import { PORTAL_SESSION_COOKIE } from "../../../core/middlewares/authenticate-portal";
 
-const { repo, estimatesRepo, queueEmail } = vi.hoisted(() => ({
+const { repo, estimatesRepo, estimatesService, queueEmail } = vi.hoisted(() => ({
+	estimatesService: { recordAnswer: vi.fn() },
 	repo: {
 		insertLink: vi.fn(),
 		revokeShopLinks: vi.fn(),
@@ -19,7 +20,6 @@ const { repo, estimatesRepo, queueEmail } = vi.hoisted(() => ({
 	estimatesRepo: {
 		queryByTokenHash: vi.fn(),
 		queryItemsByEstimateIds: vi.fn(),
-		recordAnswer: vi.fn(),
 	},
 	queueEmail: vi.fn(),
 }));
@@ -28,7 +28,9 @@ vi.mock("../repositories", () => ({ PortalRepository: repo }));
 vi.mock("../../estimates/repositories", () => ({
 	EstimatesRepository: estimatesRepo,
 }));
-vi.mock("../../estimates/services", () => ({ EstimatesService: {} }));
+vi.mock("../../estimates/services", () => ({
+	EstimatesService: estimatesService,
+}));
 vi.mock("@fixr/mail/queue", () => ({
 	createEmailQueue: vi.fn(() => "email-queue"),
 	queueEmail,
@@ -279,7 +281,7 @@ describe("PortalService.answerEstimate", () => {
 		await expect(answer()).rejects.toMatchObject({
 			code: "estimate_already_answered",
 		});
-		expect(estimatesRepo.recordAnswer).not.toHaveBeenCalled();
+		expect(estimatesService.recordAnswer).not.toHaveBeenCalled();
 	});
 
 	it("refuses an expired estimate", async () => {

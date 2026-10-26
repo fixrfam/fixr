@@ -9,6 +9,7 @@ import {
 	lte,
 	or,
 	type SQL,
+	type Transaction,
 } from "@fixr/db/connection";
 import {
 	clients,
@@ -24,7 +25,6 @@ import {
 	services,
 	uploads,
 } from "@fixr/db/schema";
-import type { deviceStatuses } from "@fixr/schemas/devices";
 import type {
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -105,16 +105,6 @@ export const serviceOrdersListJoins = [
 	},
 ];
 
-/** Where the device is while its order is in a status. */
-export function deviceStatusFor(
-	status: z.infer<typeof serviceOrderStatuses>
-): z.infer<typeof deviceStatuses> {
-	if (status === "delivered") {
-		return "with_customer";
-	}
-	return status === "ready" ? "ready_for_pickup" : "in_shop";
-}
-
 export class ServiceOrdersRepository {
 	@Cached({ ttl: 3600, key: "service-orders:employee" })
 	static async queryEmployeeByUserId(userId: string) {
@@ -186,81 +176,77 @@ export class ServiceOrdersRepository {
 		return and(...conditions);
 	}
 
+	/** Insert the order and its photos. Runs in the caller's transaction, which also emits `serviceOrder.opened`. */
 	@InvalidateCache({ patterns: ["service-orders:*"] })
-	static async createWithPhotos({
-		companyId,
-		employeeId,
-		clientId,
-		data,
-	}: {
-		companyId: string;
-		employeeId: string;
-		clientId: string;
-		data: z.infer<typeof createServiceOrderSchema>;
-	}) {
-		return await db.transaction(async (tx) => {
-			const [serviceOrderId] = await tx
-				.insert(serviceOrders)
-				.values({
-					companyId,
-					clientId,
-					employeeId,
-					deviceId: data.deviceId,
-					reportedDefect: data.reportedDefect,
-					observations: data.observations ?? null,
+	static async createWithPhotos(
+		tx: Transaction,
+		{
+			companyId,
+			employeeId,
+			clientId,
+			data,
+		}: {
+			companyId: string;
+			employeeId: string;
+			clientId: string;
+			data: z.infer<typeof createServiceOrderSchema>;
+		}
+	) {
+		const [serviceOrderId] = await tx
+			.insert(serviceOrders)
+			.values({
+				companyId,
+				clientId,
+				employeeId,
+				deviceId: data.deviceId,
+				reportedDefect: data.reportedDefect,
+				observations: data.observations ?? null,
+			})
+			.$returningId();
+
+		if (data.photos.length > 0) {
+			const uploadIds = data.photos.map((p) => p.uploadId);
+			const uploadRecords = await tx
+				.select()
+				.from(uploads)
+				.where(inArray(uploads.id, uploadIds));
+
+			const uploadMap = new Map(uploadRecords.map((u) => [u.id, u]));
+
+			await tx.insert(serviceOrderImages).values(
+				data.photos.map((photo) => {
+					const upload = uploadMap.get(photo.uploadId)!;
+					return {
+						serviceOrderId: serviceOrderId.id,
+						employeeId,
+						uploadId: photo.uploadId,
+						imageUrl: upload.url,
+						fileName: upload.fileName,
+						sizeInBytes: upload.sizeInBytes,
+						contentType: upload.contentType,
+						description: photo.description ?? null,
+					};
 				})
-				.$returningId();
+			);
 
-			// The device was just dropped off.
 			await tx
-				.update(devices)
-				.set({ status: deviceStatusFor("pending") })
-				.where(eq(devices.id, data.deviceId));
+				.update(uploads)
+				.set({ status: "completed" })
+				.where(inArray(uploads.id, uploadIds));
+		}
 
-			if (data.photos.length > 0) {
-				const uploadIds = data.photos.map((p) => p.uploadId);
-				const uploadRecords = await tx
-					.select()
-					.from(uploads)
-					.where(inArray(uploads.id, uploadIds));
+		const [serviceOrder] = await tx
+			.select()
+			.from(serviceOrders)
+			.where(eq(serviceOrders.id, serviceOrderId.id))
+			.limit(1);
 
-				const uploadMap = new Map(uploadRecords.map((u) => [u.id, u]));
+		const photos = await tx
+			.select()
+			.from(serviceOrderImages)
+			.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId.id));
 
-				await tx.insert(serviceOrderImages).values(
-					data.photos.map((photo) => {
-						const upload = uploadMap.get(photo.uploadId)!;
-						return {
-							serviceOrderId: serviceOrderId.id,
-							employeeId,
-							uploadId: photo.uploadId,
-							imageUrl: upload.url,
-							fileName: upload.fileName,
-							sizeInBytes: upload.sizeInBytes,
-							contentType: upload.contentType,
-							description: photo.description ?? null,
-						};
-					})
-				);
-
-				await tx
-					.update(uploads)
-					.set({ status: "completed" })
-					.where(inArray(uploads.id, uploadIds));
-			}
-
-			const [serviceOrder] = await tx
-				.select()
-				.from(serviceOrders)
-				.where(eq(serviceOrders.id, serviceOrderId.id))
-				.limit(1);
-
-			const photos = await tx
-				.select()
-				.from(serviceOrderImages)
-				.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId.id));
-
-			return { serviceOrder, photos };
-		});
+		return { serviceOrder, photos };
 	}
 
 	/** One order of the company with its customer, device, technician and photos. */
@@ -307,27 +293,32 @@ export class ServiceOrdersRepository {
 			.where(eq(serviceOrders.id, serviceOrderId));
 	}
 
-	/** Move the order to `status` and its device to where that status leaves it. */
+	/** The order's status, locked until the transaction ends so two changes can't interleave. */
+	static async queryStatusForUpdate(tx: Transaction, serviceOrderId: string) {
+		const [serviceOrder] = await tx
+			.select({
+				companyId: serviceOrders.companyId,
+				deviceId: serviceOrders.deviceId,
+				status: serviceOrders.status,
+			})
+			.from(serviceOrders)
+			.where(eq(serviceOrders.id, serviceOrderId))
+			.limit(1)
+			.for("update");
+		return serviceOrder ?? null;
+	}
+
+	/** Set the order's status. Runs in the caller's transaction, which also emits `serviceOrder.statusChanged`. */
 	@InvalidateCache({ patterns: ["service-orders:*"] })
-	static async updateStatus({
-		serviceOrderId,
-		deviceId,
-		status,
-	}: {
-		serviceOrderId: string;
-		deviceId: string;
-		status: z.infer<typeof serviceOrderStatuses>;
-	}) {
-		await db.transaction(async (tx) => {
-			await tx
-				.update(serviceOrders)
-				.set({ status })
-				.where(eq(serviceOrders.id, serviceOrderId));
-			await tx
-				.update(devices)
-				.set({ status: deviceStatusFor(status) })
-				.where(eq(devices.id, deviceId));
-		});
+	static async updateStatus(
+		tx: Transaction,
+		serviceOrderId: string,
+		status: z.infer<typeof serviceOrderStatuses>
+	) {
+		await tx
+			.update(serviceOrders)
+			.set({ status })
+			.where(eq(serviceOrders.id, serviceOrderId));
 	}
 
 	static async queryServiceOrderOfCompany(
@@ -335,7 +326,11 @@ export class ServiceOrdersRepository {
 		companyId: string
 	) {
 		const [serviceOrder] = await db
-			.select({ id: serviceOrders.id, deviceId: serviceOrders.deviceId })
+			.select({
+				id: serviceOrders.id,
+				deviceId: serviceOrders.deviceId,
+				status: serviceOrders.status,
+			})
 			.from(serviceOrders)
 			.where(
 				and(

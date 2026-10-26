@@ -439,7 +439,7 @@ export class PortalService {
 			throw new AppError("ESTIMATE_EXPIRED");
 		}
 
-		const recorded = await EstimatesRepository.recordAnswer(
+		const recorded = await EstimatesService.recordAnswer(
 			estimate,
 			answer.status === "approved"
 				? answer

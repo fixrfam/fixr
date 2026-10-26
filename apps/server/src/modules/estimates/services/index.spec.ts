@@ -2,7 +2,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { repo, pdf, queueEmail } = vi.hoisted(() => ({
+const { repo, pdf, queueEmail, emit } = vi.hoisted(() => ({
+	emit: vi.fn(),
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		queryEstimate: vi.fn(),
@@ -32,6 +33,10 @@ vi.mock("../repositories", () => ({
 	estimatesListSelect: {},
 }));
 vi.mock("../pdf/render", () => pdf);
+vi.mock("../../../core/lib/transaction", () => ({
+	inTransaction: (work: (tx: unknown) => unknown) => work("TX"),
+}));
+vi.mock("../../../core/events", () => ({ events: { emit } }));
 vi.mock("@fixr/mail/queue", () => ({
 	createEmailQueue: vi.fn(() => "email-queue"),
 	queueEmail,
@@ -174,9 +179,14 @@ describe("EstimatesService.updateStatus", () => {
 
 		await move("sent");
 
-		expect(repo.markSent).toHaveBeenCalledWith(
-			expect.objectContaining({ id: estimateId, serviceOrderId }),
-			{ publicTokenHash: null, sentTo: null }
+		expect(repo.markSent).toHaveBeenCalledWith("TX", estimateId, {
+			publicTokenHash: null,
+			sentTo: null,
+		});
+		expect(emit).toHaveBeenCalledWith(
+			"TX",
+			"estimate.sent",
+			expect.objectContaining({ estimateId, serviceOrderId })
 		);
 	});
 
@@ -185,9 +195,13 @@ describe("EstimatesService.updateStatus", () => {
 
 		await move("approved");
 
-		expect(repo.recordAnswer).toHaveBeenCalledWith(
-			expect.objectContaining({ id: estimateId }),
-			{ status: "approved" }
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", estimateId, {
+			status: "approved",
+		});
+		expect(emit).toHaveBeenCalledWith(
+			"TX",
+			"estimate.approved",
+			expect.objectContaining({ estimateId, serviceOrderId })
 		);
 	});
 
@@ -196,10 +210,11 @@ describe("EstimatesService.updateStatus", () => {
 
 		await move("rejected");
 
-		expect(repo.recordAnswer).toHaveBeenCalledWith(
-			expect.objectContaining({ id: estimateId }),
-			{ status: "rejected", rejectionReason: null }
-		);
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", estimateId, {
+			status: "rejected",
+			rejectionReason: null,
+		});
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it.each([
@@ -273,7 +288,7 @@ describe("EstimatesService.sendEstimate", () => {
 	it("queues the email with the PDF and a link whose hash is stored", async () => {
 		await send();
 
-		const [, { publicTokenHash, sentTo }] = repo.markSent.mock.calls[0]!;
+		const [, , { publicTokenHash, sentTo }] = repo.markSent.mock.calls[0]!;
 		expect(sentTo).toBe("maria@fixr.test");
 
 		const [, { job, payload }] = queueEmail.mock.calls[0]!;
@@ -366,7 +381,7 @@ describe("EstimatesService.answerEstimate", () => {
 	it("records a rejection with its reason", async () => {
 		await answer({ status: "rejected", reason: "Caro" });
 
-		expect(repo.recordAnswer).toHaveBeenCalledWith(sent, {
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", sent.id, {
 			status: "rejected",
 			rejectionReason: "Caro",
 		});
