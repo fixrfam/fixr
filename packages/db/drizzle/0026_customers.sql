@@ -19,8 +19,6 @@ ALTER TABLE `portal_sessions` DROP FOREIGN KEY `portal_sessions_client_id_client
 ALTER TABLE `service_orders` DROP FOREIGN KEY `service_orders_client_id_clients_id_fk`;
 --> statement-breakpoint
 DROP INDEX `portal_links_client_idx` ON `portal_links`;--> statement-breakpoint
-ALTER TABLE `customers` DROP PRIMARY KEY;--> statement-breakpoint
-ALTER TABLE `customers` ADD PRIMARY KEY(`id`);--> statement-breakpoint
 ALTER TABLE `customers` ADD CONSTRAINT `customers_company_id_companies_id_fk` FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `customers` ADD CONSTRAINT `customers_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `devices` ADD CONSTRAINT `devices_customer_id_customers_id_fk` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
