@@ -1,17 +1,13 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import type { ServiceOrderRow } from "@fixr/mock";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import type { ServiceOrderPhoto } from "@/lib/services/service-orders";
 
-type ImageItem = NonNullable<ServiceOrderRow["images"]>[number];
+type ImageItem = ServiceOrderPhoto;
 
-function ServiceOrderImageGrid({
-	images,
-}: {
-	images: ServiceOrderRow["images"];
-}) {
+function ServiceOrderImageGrid({ images }: { images: ServiceOrderPhoto[] }) {
 	const { t } = useTranslation();
 	const [selected, setSelected] = useState<ImageItem | null>(null);
 
@@ -35,9 +31,9 @@ function ServiceOrderImageGrid({
 					>
 						{/** biome-ignore lint/correctness/useImageSize: <No need for that> */}
 						<img
-							alt={image.description}
+							alt={image.description ?? image.fileName}
 							className="h-32 w-full object-cover"
-							src={image.url}
+							src={image.imageUrl}
 						/>
 						<p className="p-2 text-center text-muted-foreground text-xs">
 							{image.description}
@@ -59,9 +55,9 @@ function ServiceOrderImageGrid({
 						<>
 							{/** biome-ignore lint/correctness/useImageSize: <No need for that> */}
 							<img
-								alt={selected.description}
+								alt={selected.description ?? selected.fileName}
 								className="max-h-[70vh] w-full rounded-lg object-contain"
-								src={selected.url}
+								src={selected.imageUrl}
 							/>
 							<p className="text-center text-2xs text-muted-foreground">
 								{selected.description}

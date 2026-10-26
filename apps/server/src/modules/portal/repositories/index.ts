@@ -13,8 +13,10 @@ import {
 import {
 	companies,
 	customers,
+	devices,
 	estimates,
 	modelMakers,
+	models,
 	portalLinks,
 	portalSessions,
 	serviceOrderItems,
@@ -161,7 +163,7 @@ export class PortalRepository {
 				id: serviceOrders.id,
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,
-				deviceModel: serviceOrders.deviceModel,
+				deviceModel: models.name,
 				createdAt: serviceOrders.createdAt,
 				updatedAt: serviceOrders.updatedAt,
 				company: { name: companies.name, logoUrl: companies.logoUrl },
@@ -173,7 +175,9 @@ export class PortalRepository {
 			})
 			.from(serviceOrders)
 			.innerJoin(companies, eq(companies.id, serviceOrders.companyId))
-			.innerJoin(modelMakers, eq(modelMakers.id, serviceOrders.deviceMakerId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
 			.where(inArray(serviceOrders.customerId, customerIds))
 			.orderBy(desc(serviceOrders.createdAt));
 	}
@@ -191,7 +195,7 @@ export class PortalRepository {
 				companyId: serviceOrders.companyId,
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,
-				deviceModel: serviceOrders.deviceModel,
+				deviceModel: models.name,
 				reportedDefect: serviceOrders.reportedDefect,
 				createdAt: serviceOrders.createdAt,
 				updatedAt: serviceOrders.updatedAt,
@@ -206,7 +210,9 @@ export class PortalRepository {
 			})
 			.from(serviceOrders)
 			.innerJoin(companies, eq(companies.id, serviceOrders.companyId))
-			.innerJoin(modelMakers, eq(modelMakers.id, serviceOrders.deviceMakerId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
 			.where(
 				and(
 					eq(serviceOrders.id, serviceOrderId),

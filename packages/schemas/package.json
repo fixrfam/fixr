@@ -67,6 +67,10 @@
       "types": "./src/customers.ts",
       "default": "./src/customers.ts"
     },
+    "./devices": {
+      "types": "./src/devices.ts",
+      "default": "./src/devices.ts"
+    },
     "./service-orders": {
       "types": "./src/service-orders.ts",
       "default": "./src/service-orders.ts"

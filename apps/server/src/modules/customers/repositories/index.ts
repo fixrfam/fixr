@@ -9,7 +9,7 @@ import {
 	or,
 	type SQL,
 } from "@fixr/db/connection";
-import { customers, serviceOrders } from "@fixr/db/schema";
+import { customers, devices, models, serviceOrders } from "@fixr/db/schema";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
 export type CustomerInsert = typeof customers.$inferInsert;
@@ -78,11 +78,14 @@ export class CustomersRepository {
 		return await db
 			.select({
 				id: serviceOrders.id,
-				deviceModel: serviceOrders.deviceModel,
+				deviceId: serviceOrders.deviceId,
+				deviceModel: models.name,
 				status: serviceOrders.status,
 				createdAt: serviceOrders.createdAt,
 			})
 			.from(serviceOrders)
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
 			.where(
 				and(
 					eq(serviceOrders.customerId, customerId),

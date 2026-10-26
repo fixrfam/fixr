@@ -1,9 +1,11 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
-	createServiceOrderMockSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
 	patchServiceOrderItemSchema,
+	patchServiceOrderSchema,
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
@@ -53,7 +55,7 @@ export class ServiceOrdersController {
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
-		data: z.infer<typeof createServiceOrderMockSchema>;
+		data: z.infer<typeof createServiceOrderSchema>;
 		response: FastifyReply;
 	}) {
 		return ServiceOrdersService.createServiceOrder({
@@ -62,6 +64,35 @@ export class ServiceOrdersController {
 			data,
 			response,
 		});
+	}
+
+	static getServiceOrder(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.getServiceOrder(params);
+	}
+
+	static patchServiceOrder(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof patchServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.patchServiceOrder(params);
+	}
+
+	static changeStatus(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof changeServiceOrderStatusSchema>;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.changeStatus(params);
 	}
 
 	static listItems(params: {

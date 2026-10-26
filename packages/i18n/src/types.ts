@@ -65,9 +65,14 @@ type Trim<S extends string> = S extends `${Whitespace}${infer Rest}`
 		? Trim<Rest>
 		: S;
 
+/** `count, number` (i18next's formatted placeholder) is the `count` value. */
+type WithoutFormat<S extends string> = S extends `${infer Name},${string}`
+	? Name
+	: S;
+
 /** Pulls `{{name}}` placeholders out of a message so `t` can demand them. */
 type Placeholders<S> = S extends `${string}{{${infer Name}}}${infer Rest}`
-	? Trim<Name> | Placeholders<Rest>
+	? Trim<WithoutFormat<Name>> | Placeholders<Rest>
 	: never;
 
 type PlaceholderNames<K extends TranslationKey> =

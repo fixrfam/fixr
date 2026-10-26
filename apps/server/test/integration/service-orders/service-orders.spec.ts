@@ -1,11 +1,17 @@
 import { db, eq } from "@fixr/db/connection";
-import { serviceOrderImages, serviceOrders, uploads } from "@fixr/db/schema";
+import {
+	devices,
+	serviceOrderImages,
+	serviceOrders,
+	uploads,
+} from "@fixr/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
 import {
 	makeCategory,
 	makeCompany,
-	makeCustomerAccount,
+	makeCustomer,
+	makeDevice,
 	makeEmployee,
 	makeMaker,
 	makeServiceOrder,
@@ -17,14 +23,22 @@ import { authedInject, createEmployeeSession } from "../../helpers/auth";
 
 const app = await createTestApp();
 
-/** Customer of `companyId` (orders only accept the company's own customers), maker and category. */
+/** A customer of `companyId` (orders only accept the company's own devices) with a device, plus its maker and category. */
 async function catalog(companyId?: string) {
+	const owner = companyId ?? (await makeCompany()).id;
 	const [customer, maker, category] = await Promise.all([
-		makeCustomerAccount({ name: "Maria Cliente", companyId }),
+		makeCustomer({ name: "Maria Cliente", companyId: owner }),
 		makeMaker(),
 		makeCategory(),
 	]);
-	return { customer, maker, category };
+	const device = await makeDevice({
+		companyId: owner,
+		customerId: customer.id,
+		makerId: maker.id,
+		categoryId: category.id,
+		modelName: "iPhone 12",
+	});
+	return { customer, maker, category, device };
 }
 
 function orderBody(
@@ -32,17 +46,17 @@ function orderBody(
 	extra: object = {}
 ) {
 	return {
-		customerId: refs.customer.id,
-		deviceBrandId: refs.maker.id,
-		deviceCategoryId: refs.category.id,
-		deviceModel: "iPhone 12",
+		deviceId: refs.device.id,
 		reportedDefect: "Tela quebrada",
 		...extra,
 	};
 }
 
+const deviceStatus = async (deviceId: string) =>
+	(await db.select().from(devices).where(eq(devices.id, deviceId)))[0]?.status;
+
 describe("POST /companies/:subdomain/service-orders", () => {
-	it("creates an order end to end with real customer, maker and category", async () => {
+	it("opens an order for the device's owner and moves the device to the shop", async () => {
 		const { token, company, employee } = await createEmployeeSession(app, {
 			role: "manager",
 		});
@@ -59,9 +73,11 @@ describe("POST /companies/:subdomain/service-orders", () => {
 			companyId: company.id,
 			employeeId: employee.id,
 			customerId: refs.customer.id,
+			deviceId: refs.device.id,
 			status: "pending",
 			photos: [],
 		});
+		expect(await deviceStatus(refs.device.id)).toBe("in_shop");
 	});
 
 	it("ignores a caller-provided status and timestamps", async () => {
@@ -134,11 +150,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		expect(await db.select().from(serviceOrders)).toHaveLength(0);
 	});
 
-	it.each([
-		"customerId",
-		"deviceBrandId",
-		"deviceCategoryId",
-	])("rejects an unknown %s", async (field) => {
+	it("rejects an unknown device", async () => {
 		const { token, company } = await createEmployeeSession(app, {
 			role: "manager",
 		});
@@ -146,13 +158,33 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		const response = await authedInject(app, token, {
 			method: "POST",
 			url: `/companies/${company.subdomain}/service-orders`,
-			payload: orderBody(await catalog(company.id), { [field]: createId() }),
+			payload: orderBody(await catalog(company.id), { deviceId: createId() }),
 		});
 
-		expect(response.statusCode).toBe(404);
+		expect(response.statusCode).toBe(400);
+		expect(response.json().code).toBe("service_order_device_not_found");
 	});
 
-	it("rejects a customer of another company", async () => {
+	it("rejects a deleted device", async () => {
+		const { token, company } = await createEmployeeSession(app, {
+			role: "manager",
+		});
+		const refs = await catalog(company.id);
+		await db
+			.update(devices)
+			.set({ deletedAt: new Date() })
+			.where(eq(devices.id, refs.device.id));
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url: `/companies/${company.subdomain}/service-orders`,
+			payload: orderBody(refs),
+		});
+
+		expect(response.statusCode).toBe(400);
+	});
+
+	it("rejects a device of another company", async () => {
 		const { token, company } = await createEmployeeSession(app, {
 			role: "manager",
 		});
@@ -164,8 +196,8 @@ describe("POST /companies/:subdomain/service-orders", () => {
 			payload: orderBody(foreign),
 		});
 
-		expect(response.statusCode).toBe(404);
-		expect(response.json().code).toBe("customer_not_found");
+		expect(response.statusCode).toBe(400);
+		expect(response.json().code).toBe("service_order_device_not_found");
 	});
 
 	it("cannot create orders in another company", async () => {
@@ -194,9 +226,10 @@ describe("GET /companies/:subdomain/service-orders", () => {
 			deviceMakerId: refs.maker.id,
 			deviceCategoryId: refs.category.id,
 		};
+		// The catalog's device is an iPhone 12 of `refs.category`.
 		await makeServiceOrder({
 			...base,
-			deviceModel: "iPhone 12",
+			deviceId: refs.device.id,
 			status: "pending",
 			createdAt: new Date("2024-01-10"),
 		});
@@ -232,12 +265,11 @@ describe("GET /companies/:subdomain/service-orders", () => {
 
 		expect(response.statusCode).toBe(200);
 		const records = response.json().data.records;
-		expect(records.map((r: { deviceModel: string }) => r.deviceModel)).toEqual([
-			"Moto G",
-			"Galaxy S20",
-			"iPhone 12",
-		]);
+		expect(
+			records.map((r: { model: { name: string } }) => r.model.name)
+		).toEqual(["Moto G", "Galaxy S20", "iPhone 12"]);
 		expect(records[0].customer.name).toBe("Maria Cliente");
+		expect(records[0].deviceCategory.id).toBeTruthy();
 	});
 
 	it("filters by status, category, employee, period and search (combined)", async () => {
@@ -280,5 +312,98 @@ describe("GET /companies/:subdomain/service-orders", () => {
 
 		expect(own.json().data.records).toEqual([]);
 		expect(foreign.statusCode).toBe(403);
+	});
+});
+
+describe("service order detail and status", () => {
+	async function setup(
+		role: "manager" | "technician" | "warehouse" = "manager"
+	) {
+		const session = await createEmployeeSession(app, { role });
+		const refs = await catalog(session.company.id);
+		const serviceOrder = await makeServiceOrder({
+			companyId: session.company.id,
+			customerId: refs.customer.id,
+			employeeId: session.employee.id,
+			deviceId: refs.device.id,
+		});
+		const url = `/companies/${session.company.subdomain}/service-orders/${serviceOrder.id}`;
+		return { ...session, refs, serviceOrder, url };
+	}
+
+	it("returns the order with its customer, device and model", async () => {
+		const { token, url, refs } = await setup("technician");
+
+		const response = await authedInject(app, token, { method: "GET", url });
+
+		expect(response.statusCode).toBe(200);
+		expect(response.json().data).toMatchObject({
+			customer: { id: refs.customer.id, name: "Maria Cliente" },
+			device: { id: refs.device.id },
+			model: { name: "iPhone 12" },
+			deviceMaker: { id: refs.maker.id },
+			deviceCategory: { id: refs.category.id },
+			photos: [],
+		});
+	});
+
+	it("hides another company's order", async () => {
+		const { serviceOrder } = await setup();
+		const { token, company } = await createEmployeeSession(app, {
+			role: "manager",
+		});
+
+		const response = await authedInject(app, token, {
+			method: "GET",
+			url: `/companies/${company.subdomain}/service-orders/${serviceOrder.id}`,
+		});
+
+		expect(response.statusCode).toBe(404);
+	});
+
+	it("edits the reported issue and the notes", async () => {
+		const { token, url } = await setup();
+
+		const response = await authedInject(app, token, {
+			method: "PATCH",
+			url,
+			payload: { reportedDefect: "Não liga", observations: "Sem carregador" },
+		});
+
+		expect(response.statusCode).toBe(200);
+		expect(response.json().data).toMatchObject({
+			reportedDefect: "Não liga",
+			observations: "Sem carregador",
+		});
+	});
+
+	it.each([
+		["fixing", "in_shop"],
+		["ready", "ready_for_pickup"],
+		["delivered", "with_customer"],
+	] as const)("moving to %s leaves the device %s", async (status, expected) => {
+		const { token, url, refs } = await setup("technician");
+
+		const response = await authedInject(app, token, {
+			method: "PATCH",
+			url: `${url}/status`,
+			payload: { status },
+		});
+
+		expect(response.statusCode).toBe(200);
+		expect(response.json().data.status).toBe(status);
+		expect(await deviceStatus(refs.device.id)).toBe(expected);
+	});
+
+	it("needs the change status permission", async () => {
+		const { token, url } = await setup("warehouse");
+
+		const response = await authedInject(app, token, {
+			method: "PATCH",
+			url: `${url}/status`,
+			payload: { status: "ready" },
+		});
+
+		expect(response.statusCode).toBe(403);
 	});
 });

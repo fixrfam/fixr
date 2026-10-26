@@ -15,7 +15,6 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useTranslation } from "@fixr/i18n/react";
-import type { ServiceOrderRow } from "@fixr/mock";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -23,6 +22,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import type { ServiceOrderDetail } from "@/lib/services/service-orders";
 import { getCards } from "./cards";
 import { DroppableColumn } from "./droppable-column";
 import { SortableCard } from "./sortable-card";
@@ -32,7 +32,7 @@ import type { LayoutState } from "./utils/layout-state";
 import { useResizableLayout } from "./utils/use-resizable-layout";
 
 interface Props {
-	order: ServiceOrderRow;
+	order: ServiceOrderDetail;
 	subdomain: string;
 }
 
@@ -51,7 +51,7 @@ function DropPlaceholder() {
 }
 
 export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
-	const { t } = useTranslation();
+	const { t, format } = useTranslation();
 	const availableCards = useMemo(() => {
 		const cards: CardId[] = [
 			"summary",
@@ -62,10 +62,8 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			"parts",
 			"images",
 		];
-		return new Set(
-			cards.filter((card) => card !== "device" || order.orderDetails)
-		);
-	}, [order.orderDetails]);
+		return new Set(cards);
+	}, []);
 
 	const storageKey = `service-order-layout:${subdomain}:${order.id}`;
 	const [layout, setLayout] = useResizableLayout(storageKey, availableCards);
@@ -82,7 +80,10 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 		useSensor(KeyboardSensor)
 	);
 
-	const cards = useMemo(() => getCards(order, t), [order, t]);
+	const cards = useMemo(
+		() => getCards(order, { t, format }, subdomain),
+		[order, t, format, subdomain]
+	);
 
 	const renderCard = (cardId: CardId) => {
 		const content = cards[cardId];

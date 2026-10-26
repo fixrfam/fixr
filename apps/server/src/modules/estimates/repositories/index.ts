@@ -11,10 +11,12 @@ import {
 import {
 	companies,
 	customers,
+	devices,
 	employees,
 	estimateItems,
 	estimates,
 	modelMakers,
+	models,
 	serviceOrderItems,
 	serviceOrders,
 } from "@fixr/db/schema";
@@ -304,14 +306,16 @@ export class EstimatesRepository {
 				},
 				device: {
 					maker: modelMakers.name,
-					model: serviceOrders.deviceModel,
+					model: models.name,
 					reportedDefect: serviceOrders.reportedDefect,
 				},
 			})
 			.from(estimates)
 			.innerJoin(companies, eq(companies.id, estimates.companyId))
 			.innerJoin(serviceOrders, eq(serviceOrders.id, estimates.serviceOrderId))
-			.innerJoin(modelMakers, eq(modelMakers.id, serviceOrders.deviceMakerId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
 			.where(eq(estimates.id, estimateId))
 			.limit(1);
 

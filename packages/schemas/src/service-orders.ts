@@ -1,5 +1,4 @@
 import { i18nMessage } from "@fixr/i18n";
-import { formattedIMEI } from "@fixr/schemas/common";
 import { z } from "zod";
 import { getPaginatedDataSchema } from "./utils";
 
@@ -28,38 +27,28 @@ export const createServiceOrderPhotoSchema = z.object({
 		.nullable(),
 });
 
-export const createServiceOrderMockSchema = z.object({
-	customerId: z
+const reportedDefect = z
+	.string({ error: i18nMessage("validation.serviceOrder.issueRequired") })
+	.trim()
+	.min(1, { message: i18nMessage("validation.serviceOrder.issueRequired") })
+	.max(65_535, { message: i18nMessage("validation.serviceOrder.issueMax") });
+
+const observations = z
+	.string()
+	.max(65_535, { message: i18nMessage("validation.serviceOrder.notesMax") })
+	.optional()
+	.nullable();
+
+/**
+ * @description Body schema for opening a service order for a customer's
+ * device. The customer is the device's owner.
+ */
+export const createServiceOrderSchema = z.object({
+	deviceId: z
 		.string()
-		.cuid2({ message: i18nMessage("validation.serviceOrder.customerInvalid") }),
-	deviceBrandId: z
-		.string()
-		.cuid2({ message: i18nMessage("validation.serviceOrder.brandInvalid") }),
-	deviceCategoryId: z
-		.string()
-		.cuid2({ message: i18nMessage("validation.serviceOrder.categoryInvalid") }),
-	deviceModel: z
-		.string({ error: i18nMessage("validation.serviceOrder.modelRequired") })
-		.min(1, { message: i18nMessage("validation.serviceOrder.modelRequired") })
-		.max(100, {
-			message: i18nMessage("validation.serviceOrder.modelMax", { count: 100 }),
-		}),
-	imei: z
-		.string()
-		.max(50, {
-			message: i18nMessage("validation.serviceOrder.imeiMax", { count: 50 }),
-		})
-		.optional()
-		.nullable(),
-	reportedDefect: z
-		.string({ error: i18nMessage("validation.serviceOrder.issueRequired") })
-		.min(1, { message: i18nMessage("validation.serviceOrder.issueRequired") })
-		.max(65_535, { message: i18nMessage("validation.serviceOrder.issueMax") }),
-	observations: z
-		.string()
-		.max(65_535, { message: i18nMessage("validation.serviceOrder.notesMax") })
-		.optional()
-		.nullable(),
+		.cuid2({ message: i18nMessage("validation.serviceOrder.deviceRequired") }),
+	reportedDefect,
+	observations,
 	photos: z
 		.array(createServiceOrderPhotoSchema)
 		.max(20, {
@@ -68,8 +57,16 @@ export const createServiceOrderMockSchema = z.object({
 		.default([]),
 });
 
-/** @deprecated Use createServiceOrderSchema */
-export const createOrderServiceMockSchema = createServiceOrderMockSchema;
+/** @description Body schema for editing the reported issue and the notes */
+export const patchServiceOrderSchema = z.object({
+	reportedDefect: reportedDefect.optional(),
+	observations,
+});
+
+/** @description Body schema for moving a service order to another status */
+export const changeServiceOrderStatusSchema = z.object({
+	status: serviceOrderStatuses,
+});
 
 /** @description Kind of catalog item used on a service order */
 export const serviceOrderItemTypes = z.enum(["part", "service"]);
@@ -150,20 +147,3 @@ export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 			path: ["dateTo"],
 		}
 	);
-
-import { documentSchema } from "./documents";
-
-export const createOrderServiceSchema = z.object({
-	customerCPF: documentSchema("cpf").min(1, "O CPF é obrigatório"),
-	deviceIMEI: formattedIMEI.optional(),
-	description: z.string().min(1, "A descrição do problema é obrigatória"),
-	notes: z.string().optional(),
-	deviceId: z.string().min(1, "Selecione o modelo do aparelho"),
-	assigned_to: z
-		.string()
-		.min(1, "Selecione o funcionário responsável pela ordem de serviço"),
-	images: z
-		.array(z.instanceof(File))
-		.min(3, "Adicione pelo menos três fotos do aparelho")
-		.max(15, "Adicione no máximo quinze fotos do aparelho"),
-});

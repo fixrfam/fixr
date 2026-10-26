@@ -1,15 +1,9 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import type { ServiceOrderRow } from "@fixr/mock";
-import {
-	type ColumnDef,
-	createColumnHelper,
-	type Row,
-} from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import type { ServiceOrderRow } from "@/lib/services/service-orders";
 import {
 	ActionsCell,
 	CategoryCell,
@@ -17,173 +11,74 @@ import {
 	DeviceCell,
 	IssueCell,
 	OrderNumberCell,
-	PartsCell,
 	StatusCell,
-	TechnicianCell,
-	UpdatedAtCell,
 } from "./cells";
-import {
-	CATEGORY_OPTIONS,
-	TECH_OPTIONS,
-	useStatusOptions,
-} from "./filter-options";
 
 const columnHelper = createColumnHelper<ServiceOrderRow>();
 
-function multiSelectFilter(
-	row: Row<ServiceOrderRow>,
-	columnId: string,
-	filterValue: string[]
-) {
-	if (!filterValue?.length) return true;
-	return filterValue.includes(row.getValue(columnId));
-}
-
 export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
-	const { t } = useTranslation();
-	const statusOptions = useStatusOptions();
+	const { t, format } = useTranslation();
 
 	return useMemo(
 		() => [
-			columnHelper.accessor("orderNumber", {
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.order")}
-					/>
-				),
-				cell: ({ getValue, row }) => (
+			columnHelper.display({
+				id: "order",
+				header: t("serviceOrders.table.columns.order"),
+				cell: ({ row }) => (
 					<OrderNumberCell
-						orderNumber={getValue()}
-						receivedAt={row.original.orderDetails?.receivedAt}
+						createdAt={row.original.createdAt}
+						id={row.original.id}
 					/>
 				),
 				meta: { label: t("serviceOrders.table.columns.order") },
 			}),
-			columnHelper.accessor((row) => row.customer.name, {
+			columnHelper.display({
 				id: "customer",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.customer")}
-					/>
-				),
-				cell: ({ row }) => (
-					<CustomerCell
-						cpf={row.original.customer.cpf}
-						name={row.original.customer.name}
-						phone={row.original.customer.phone}
-					/>
-				),
+				header: t("serviceOrders.table.columns.customer"),
+				cell: ({ row }) => <CustomerCell customer={row.original.customer} />,
 				meta: { label: t("serviceOrders.table.columns.customer") },
 			}),
-			columnHelper.accessor((row) => `${row.mark} ${row.model}`.trim(), {
+			columnHelper.display({
 				id: "device",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.device")}
-					/>
-				),
-				cell: ({ row }) => (
-					<DeviceCell
-						imei={row.original.orderDetails?.imei}
-						mark={row.original.mark}
-						model={row.original.model}
-					/>
-				),
+				header: t("serviceOrders.table.columns.device"),
+				cell: ({ row }) => <DeviceCell order={row.original} />,
 				meta: { label: t("serviceOrders.table.columns.device") },
 			}),
-			columnHelper.accessor("category", {
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.category")}
-					/>
-				),
-				cell: ({ getValue }) => <CategoryCell category={getValue()} />,
-				enableColumnFilter: true,
-				filterFn: multiSelectFilter,
-				meta: {
-					label: t("serviceOrders.table.columns.category"),
-					variant: "multiSelect",
-					options: CATEGORY_OPTIONS,
-				},
-			}),
-			columnHelper.accessor("technician", {
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.technician")}
-					/>
-				),
-				cell: ({ getValue }) => <TechnicianCell name={getValue()} />,
-				enableColumnFilter: true,
-				filterFn: multiSelectFilter,
-				meta: {
-					label: t("serviceOrders.table.columns.technician"),
-					variant: "multiSelect",
-					options: TECH_OPTIONS,
-				},
-			}),
-			columnHelper.accessor((row) => row.status.id, {
-				id: "status",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.status")}
-					/>
-				),
+			columnHelper.display({
+				id: "category",
+				header: t("serviceOrders.table.columns.category"),
 				cell: ({ row }) => (
-					<StatusCell
-						label={t(serviceOrderStatusKeys[row.original.status.id])}
-						statusId={row.original.status.id}
-					/>
+					<CategoryCell category={row.original.deviceCategory?.name} />
 				),
-				enableColumnFilter: true,
-				filterFn: multiSelectFilter,
-				meta: {
-					label: t("serviceOrders.table.columns.status"),
-					variant: "multiSelect",
-					options: statusOptions,
-				},
+				meta: { label: t("serviceOrders.table.columns.category") },
 			}),
-			columnHelper.accessor((row) => row.orderDetails?.description ?? "", {
+			columnHelper.accessor((row) => row.employee.name, {
+				id: "technician",
+				header: t("serviceOrders.table.columns.technician"),
+				meta: { label: t("serviceOrders.table.columns.technician") },
+			}),
+			columnHelper.display({
+				id: "status",
+				header: t("serviceOrders.table.columns.status"),
+				cell: ({ row }) => <StatusCell status={row.original.status} />,
+				meta: { label: t("serviceOrders.table.columns.status") },
+			}),
+			columnHelper.display({
 				id: "issue",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.issue")}
-					/>
-				),
+				header: t("serviceOrders.table.columns.issue"),
 				cell: ({ row }) => (
 					<IssueCell
-						description={row.original.orderDetails?.description}
-						notes={row.original.notes}
+						description={row.original.reportedDefect}
+						notes={row.original.observations}
 					/>
 				),
 				meta: { label: t("serviceOrders.table.columns.issue") },
 			}),
-			columnHelper.accessor((row) => row.parts?.length ?? 0, {
-				id: "parts",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.parts")}
-					/>
+			columnHelper.accessor("updatedAt", {
+				header: t("serviceOrders.table.columns.update"),
+				cell: ({ getValue }) => (
+					<span className="text-xs">{format.relativeTime(getValue())}</span>
 				),
-				cell: ({ row }) => <PartsCell parts={row.original.parts} />,
-				meta: { label: t("serviceOrders.table.columns.parts") },
-			}),
-			columnHelper.accessor((row) => row.history.at(-1)?.dateTime ?? "", {
-				id: "updatedAt",
-				header: ({ column }) => (
-					<DataTableColumnHeader
-						column={column}
-						label={t("serviceOrders.table.columns.update")}
-					/>
-				),
-				cell: ({ row }) => <UpdatedAtCell history={row.original.history} />,
 				meta: { label: t("serviceOrders.table.columns.update") },
 			}),
 			columnHelper.display({
@@ -196,10 +91,9 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				cell: ({ row }) => (
 					<ActionsCell id={row.original.id} subdomain={subdomain} />
 				),
-				enableSorting: false,
 				enableHiding: false,
 			}),
 		],
-		[subdomain, t, statusOptions]
+		[subdomain, t, format]
 	) as ColumnDef<ServiceOrderRow>[];
 }

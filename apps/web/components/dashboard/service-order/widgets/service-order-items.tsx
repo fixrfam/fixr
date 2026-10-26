@@ -9,7 +9,11 @@ import { HandCoins, Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
-import { useInventory } from "@/components/dashboard/parts/store";
+import {
+	PICKER_PAGE_SIZE,
+	usePartSearch,
+	useServicesPage,
+} from "@/components/dashboard/parts/store";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -295,8 +299,16 @@ function AddItemPicker({
 }) {
 	const { t, format } = useTranslation();
 	const { subdomain } = useParams<{ subdomain: string }>();
-	const { parts, services } = useInventory();
 	const [open, setOpen] = useState(false);
+	const [search, setSearch] = useState("");
+	const { parts } = usePartSearch(search);
+	const services =
+		useServicesPage({
+			page: 1,
+			perPage: PICKER_PAGE_SIZE,
+			query: search,
+			sort: "name",
+		}).data?.records ?? [];
 
 	function pick(type: "part" | "service", itemId: string) {
 		setOpen(false);
@@ -318,8 +330,12 @@ function AddItemPicker({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent align="start" className="w-80 p-0">
-				<Command>
-					<CommandInput placeholder={t("serviceOrders.items.search")} />
+				<Command shouldFilter={false}>
+					<CommandInput
+						onValueChange={setSearch}
+						placeholder={t("serviceOrders.items.search")}
+						value={search}
+					/>
 					<CommandList>
 						<CommandEmpty>{t("serviceOrders.items.noResults")}</CommandEmpty>
 						<CommandGroup heading={t("serviceOrders.items.partsGroup")}>

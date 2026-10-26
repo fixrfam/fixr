@@ -170,9 +170,7 @@ function Device({
 		>
 			<View style={{ flex: 1, gap: 2 }}>
 				<Text style={{ color: colors.muted }}>{t("estimates.pdf.device")}</Text>
-				<Text style={{ fontWeight: 600 }}>
-					{`${data.device.maker} ${data.device.model}`}
-				</Text>
+				<Text style={{ fontWeight: 600 }}>{deviceLabel(data.device)}</Text>
 			</View>
 			<View style={{ flex: 2, gap: 2 }}>
 				<Text style={{ color: colors.muted }}>
@@ -362,6 +360,13 @@ function Footer({
 }
 
 /** A4 estimate: header, issuer and customer, device, items, totals and footer. */
+/** Catalog names usually start with the maker ("Apple iPhone 13"): print it once. */
+function deviceLabel(device: { maker: string; model: string }) {
+	return device.model.toLowerCase().startsWith(device.maker.toLowerCase())
+		? device.model
+		: `${device.maker} ${device.model}`;
+}
+
 export function EstimateDocument({
 	data,
 	translator,

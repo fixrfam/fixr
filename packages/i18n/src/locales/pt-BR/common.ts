@@ -63,6 +63,8 @@ export const common: Translated<typeof source> = {
 		login: "Entrar",
 		logout: "Sair",
 		register: "Criar conta",
+		goToDashboard: "Ir para o painel",
+		signedInAs: "Conectado como {{name}}",
 	},
 	logo: {
 		fixr: "Logo do Fixr",
@@ -75,5 +77,17 @@ export const common: Translated<typeof source> = {
 		email: "Email",
 		password: "Senha",
 		optional: "opcional",
+	},
+	clipboard: {
+		copy: "Copiar {{label}}",
+		copied: "{{label}} copiado",
+		failed: "Não conseguimos copiar. Selecione o texto e copie manualmente.",
+	},
+	upload: {
+		tooLarge: "A imagem deve ter no máximo 5 MB.",
+		invalidType: "Escolha uma imagem PNG, JPG ou WebP.",
+		tooMany: "Escolha uma única imagem.",
+		formats: "PNG, JPG ou WebP de até 5 MB",
+		browse: "Procurar arquivos",
 	},
 } as const;

@@ -6,6 +6,7 @@ import {
 	desc,
 	eq,
 	inArray,
+	like,
 	or,
 	type SQL,
 	sql,
@@ -25,8 +26,15 @@ import {
 } from "../../../config/r2";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
-const FTS_OPERATOR_REGEX = /[+\-*~()<>@]/;
 const WHITESPACE_REGEX = /\s+/;
+const LIKE_WILDCARDS_REGEX = /[\\%_]/g;
+/** Longest search the list accepts, so a pasted text can't build a huge query. */
+const MAX_SEARCH_WORDS = 8;
+
+/** Escapes `%`, `_` and `\` so a typed value matches literally in LIKE. */
+function likeContains(value: string) {
+	return `%${value.replace(LIKE_WILDCARDS_REGEX, "\\$&")}%`;
+}
 
 /** @description Column selection for paginated models minimal list */
 export const modelMinimalListSelect = {
@@ -35,7 +43,17 @@ export const modelMinimalListSelect = {
 	slug: models.slug,
 	status: models.status,
 	price: models.price,
+	announced: models.announced,
 	released: models.released,
+	displaySize: models.displaySize,
+	displaySizeInches: models.displaySizeInches,
+	displayResolution: models.displayResolution,
+	chipset: models.chipset,
+	cpu: models.cpu,
+	internalMemory: models.internalMemory,
+	battery: models.battery,
+	colorsHex: models.colorsHex,
+	companyId: models.companyId,
 	makerId: modelMakers.id,
 	makerName: modelMakers.name,
 	makerSlug: modelMakers.slug,
@@ -58,13 +76,26 @@ export const modelListJoins = [
 	},
 ];
 
-export interface ModelFlatRecord {
+interface ModelListSpecs {
+	price: string | null;
+	announced: string | null;
+	released: string | null;
+	displaySize: string | null;
+	displaySizeInches: number | null;
+	displayResolution: string | null;
+	chipset: string | null;
+	cpu: string | null;
+	internalMemory: string | null;
+	battery: string | null;
+	colorsHex: string | null;
+}
+
+export interface ModelFlatRecord extends ModelListSpecs {
 	id: string;
 	name: string;
 	slug: string;
 	status: string | null;
-	price: string | null;
-	released: string | null;
+	companyId: string | null;
 	makerId: string;
 	makerName: string;
 	makerSlug: string;
@@ -73,13 +104,12 @@ export interface ModelFlatRecord {
 	categorySlug: string | null;
 }
 
-export interface ModelListRecord {
+export interface ModelListRecord extends ModelListSpecs {
 	id: string;
 	name: string;
 	slug: string;
-	status: string;
-	price: string | null;
-	released: string | null;
+	status: string | null;
+	isCustom: boolean;
 	maker: { id: string; name: string; slug: string };
 	category: { id: string; name: string; slug: string } | null;
 	imageUrl: string | null;
@@ -88,7 +118,7 @@ export interface ModelListRecord {
 /** @description Data access layer for device models */
 export class ModelsRepository {
 	/**
-	 * Build a WHERE clause for filtering models with fulltext search support
+	 * Build a WHERE clause for filtering models, with a word by word search
 	 *
 	 * @param companyId - Company ID for scoping
 	 * @param filters - Query, maker, category, and status filters
@@ -115,17 +145,22 @@ export class ModelsRepository {
 		if (filters.status) {
 			conditions.push(eq(models.status, filters.status));
 		}
-		if (filters.query) {
-			const hasOperators = FTS_OPERATOR_REGEX.test(filters.query);
-			const ftsQuery = hasOperators
-				? filters.query
-				: filters.query
-						.trim()
-						.split(WHITESPACE_REGEX)
-						.map((w) => `${w}*`)
-						.join(" ");
+		const words = (filters.query ?? "")
+			.trim()
+			.split(WHITESPACE_REGEX)
+			.filter(Boolean)
+			.slice(0, MAX_SEARCH_WORDS);
+		// Every word has to appear somewhere: "galaxy s24" finds "Samsung Galaxy S24".
+		for (const word of words) {
+			const pattern = likeContains(word);
 			conditions.push(
-				sql`MATCH(${models.name}, ${models.modelsText}, ${models.chipset}, ${models.cpu}, ${models.internalMemory}, ${models.os}) AGAINST(${ftsQuery} IN BOOLEAN MODE)`
+				or(
+					like(models.name, pattern),
+					like(modelMakers.name, pattern),
+					like(models.modelsText, pattern),
+					like(models.chipset, pattern),
+					like(models.cpu, pattern)
+				)!
 			);
 		}
 
@@ -133,20 +168,23 @@ export class ModelsRepository {
 	}
 
 	/**
-	 * Build an ORDER BY clause for models
+	 * Build the ORDER BY of the models list. `newer`/`older` follow the release
+	 * date, with undated models (most custom ones) last either way.
 	 *
 	 * @param sort - Sort key: newer, older, name
 	 */
-	static buildOrder(sort?: string) {
+	static buildOrder(sort?: string): SQL[] {
+		// Partial ISO dates ("2024", "2024-03-11") sort correctly as text.
+		const releaseDate = sql`coalesce(${models.released}, ${models.announced})`;
+		const undated = sql`${releaseDate} is null`;
+
 		switch (sort) {
-			case "newer":
-				return desc(models.createdAt);
-			case "older":
-				return asc(models.createdAt);
 			case "name":
-				return asc(models.name);
+				return [asc(models.name)];
+			case "older":
+				return [undated, asc(releaseDate), asc(models.createdAt)];
 			default:
-				return desc(models.createdAt);
+				return [undated, desc(releaseDate), desc(models.createdAt)];
 		}
 	}
 

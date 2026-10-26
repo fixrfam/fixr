@@ -9,11 +9,13 @@ import { company } from "./company";
 import { customers } from "./customers";
 import { dashboard } from "./dashboard";
 import { dataTable } from "./data-table";
+import { devices } from "./devices";
 import { emails } from "./emails";
 import { employees } from "./employees";
 import { estimates } from "./estimates";
 import { home } from "./home";
 import { messages } from "./messages";
+import { models } from "./models";
 import { parts } from "./parts";
 import { permissions } from "./permissions";
 import { portal } from "./portal";
@@ -33,11 +35,13 @@ export const ptBR: Translated<typeof en> = {
 	company,
 	dashboard,
 	dataTable,
+	devices,
 	emails,
 	employees,
 	estimates,
 	home,
 	messages,
+	models,
 	parts,
 	permissions,
 	portal,

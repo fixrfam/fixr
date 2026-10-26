@@ -2,6 +2,7 @@ export * from "./api-keys";
 export * from "./columns";
 export * from "./companies";
 export * from "./customers";
+export * from "./devices";
 export * from "./employees";
 export * from "./estimates";
 export * from "./model-categories";

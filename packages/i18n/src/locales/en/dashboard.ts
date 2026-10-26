@@ -30,6 +30,8 @@ export const dashboard = {
 		support: "Support",
 		customers: "Customers",
 		devices: "Devices",
+		models: "Models",
+		customerDevices: "Customer devices",
 		employees: "Employees",
 	},
 	account: {

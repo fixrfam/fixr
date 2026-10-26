@@ -3,7 +3,7 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { Wrench } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useInventory } from "@/components/dashboard/parts/store";
+import { useService } from "@/components/dashboard/parts/store";
 import { NewServiceForm } from "@/components/dashboard/services/forms/new-service-form";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,8 +12,7 @@ export default function EditServiceModal() {
 	const router = useRouter();
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
-	const { services, isPending } = useInventory();
-	const service = services.find((item) => item.id === id);
+	const { data: service, isPending } = useService(id);
 
 	let body = (
 		<p className="text-muted-foreground text-sm">

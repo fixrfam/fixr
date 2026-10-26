@@ -12,7 +12,7 @@ export const portal = {
 	},
 	detail: {
 		back: "Back to my service orders",
-		title: "{{maker}} {{model}}",
+		title: "{{device}}",
 		shop: "Shop",
 		reportedDefect: "Reported defect",
 		items: "Parts and services",

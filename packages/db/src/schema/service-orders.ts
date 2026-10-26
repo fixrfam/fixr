@@ -10,9 +10,8 @@ import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { companies } from "./companies";
 import { customers } from "./customers";
+import { devices } from "./devices";
 import { employees } from "./employees";
-import { modelCategories } from "./model-categories";
-import { modelMakers } from "./model-makers";
 
 export const serviceOrderStatusEnum = mysqlEnum("status", [
 	"pending",
@@ -37,14 +36,10 @@ export const serviceOrders = mysqlTable("service_orders", {
 	employeeId: varchar("employee_id", { length: 25 })
 		.references(() => employees.id, { onDelete: "restrict" })
 		.notNull(),
-	deviceMakerId: varchar("device_brand_id", { length: 25 })
-		.references(() => modelMakers.id, { onDelete: "restrict" })
+	/** The customer's device being repaired (its model, IMEI and status live there). */
+	deviceId: varchar("device_id", { length: 25 })
+		.references(() => devices.id, { onDelete: "restrict" })
 		.notNull(),
-	deviceCategoryId: varchar("device_category_id", { length: 25 })
-		.references(() => modelCategories.id, { onDelete: "restrict" })
-		.notNull(),
-	deviceModel: varchar("device_model", { length: 100 }).notNull(),
-	imei: varchar("imei", { length: 50 }),
 	reportedDefect: text("reported_defect").notNull(),
 	observations: text("observations"),
 	status: serviceOrderStatusEnum.default("pending").notNull(),

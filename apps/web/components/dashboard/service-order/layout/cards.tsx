@@ -1,5 +1,4 @@
 import type { Translator } from "@fixr/i18n";
-import type { ServiceOrderRow } from "@fixr/mock";
 import {
 	ClipboardList,
 	FileUser,
@@ -9,21 +8,30 @@ import {
 	User,
 	Wrench,
 } from "lucide-react";
-import { ServiceOrderLifecycle } from "@/components/dashboard/service-order/lifecycle";
+import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
+import { ServiceOrderIssue } from "@/components/dashboard/service-order/widgets/service-order-issue";
 import { ServiceOrderItems } from "@/components/dashboard/service-order/widgets/service-order-items";
 import {
 	ServiceOrderKeyValueItem,
 	ServiceOrderKeyValueList,
 } from "@/components/dashboard/service-order/widgets/service-order-key-value";
+import { ServiceOrderProgress } from "@/components/dashboard/service-order/widgets/service-order-progress";
+import { formatCpf, formatPhone } from "@/lib/format";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import type { ServiceOrderDetail } from "@/lib/services/service-orders";
+import { orderNumber } from "../order-number";
 import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import type { CardId } from "./utils/constants";
 
 type CardsMap = Record<CardId, React.ReactNode>;
 
-export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
+export function getCards(
+	order: ServiceOrderDetail,
+	{ t, format }: Pick<Translator, "t" | "format">,
+	subdomain: string
+): CardsMap {
 	return {
 		summary: (
 			<ServiceOrderDetailsCard
@@ -34,59 +42,65 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.number")}
-						value={order.orderNumber}
+						value={`#${orderNumber(order.id)}`}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.status")}
 						value={
 							<ServiceOrderStatusBadge
 								className="rounded-lg px-2.5 py-1 font-semibold text-xs"
-								variant={order.status.id}
+								variant={order.status}
 							>
-								{t(serviceOrderStatusKeys[order.status.id])}
+								{t(serviceOrderStatusKeys[order.status])}
 							</ServiceOrderStatusBadge>
 						}
 					/>
 					<ServiceOrderKeyValueItem
-						label={t("serviceOrders.fields.category")}
-						value={order.category}
+						label={t("serviceOrders.fields.openedAt")}
+						value={format.dateTime(order.createdAt)}
 					/>
+					{order.deviceCategory && (
+						<ServiceOrderKeyValueItem
+							label={t("serviceOrders.fields.category")}
+							value={order.deviceCategory.name}
+						/>
+					)}
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.brand")}
-						value={order.mark}
+						value={order.deviceMaker.name}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.model")}
-						value={order.model}
+						value={order.model.name}
 					/>
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
-		device: order.orderDetails ? (
+		device: (
 			<ServiceOrderDetailsCard
 				description={t("serviceOrders.cards.deviceDescription")}
 				icon={Wrench}
 				title={t("serviceOrders.cards.deviceTitle")}
 			>
-				<ServiceOrderKeyValueList>
-					<ServiceOrderKeyValueItem
-						label={t("serviceOrders.fields.receivedAt")}
-						value={order.orderDetails.receivedAt}
-					/>
-					{order.orderDetails.imei && (
-						<ServiceOrderKeyValueItem
-							label={t("serviceOrders.fields.imei")}
-							value={order.orderDetails.imei}
-						/>
-					)}
-					<ServiceOrderKeyValueItem
-						label={t("serviceOrders.fields.description")}
-						stacked
-						value={order.orderDetails.description}
-					/>
-				</ServiceOrderKeyValueList>
+				<div className="space-y-3">
+					<ServiceOrderKeyValueList>
+						{order.device.imei && (
+							<ServiceOrderKeyValueItem
+								label={t("serviceOrders.fields.imei")}
+								value={order.device.imei}
+							/>
+						)}
+						{order.device.serialNumber && (
+							<ServiceOrderKeyValueItem
+								label={t("serviceOrders.fields.serialNumber")}
+								value={order.device.serialNumber}
+							/>
+						)}
+					</ServiceOrderKeyValueList>
+					<ServiceOrderIssue order={order} />
+				</div>
 			</ServiceOrderDetailsCard>
-		) : null,
+		),
 		technician: (
 			<ServiceOrderDetailsCard
 				description={t("serviceOrders.cards.technicianDescription")}
@@ -96,15 +110,8 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.assignee")}
-						value={order.technician}
+						value={order.employee.name}
 					/>
-					{order.notes && (
-						<ServiceOrderKeyValueItem
-							label={t("serviceOrders.fields.notes")}
-							stacked
-							value={order.notes}
-						/>
-					)}
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
@@ -117,35 +124,40 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.name")}
-						value={order.customer.name}
+						value={
+							<DashLink
+								className="hover:underline"
+								href={`/customers/${order.customer.id}`}
+								subdomain={subdomain}
+							>
+								{order.customer.name}
+							</DashLink>
+						}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.document")}
-						value={order.customer.cpf}
+						value={formatCpf(order.customer.cpf)}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.phone")}
-						value={order.customer.phone}
+						value={formatPhone(order.customer.phone)}
 					/>
+					{order.customer.email && (
+						<ServiceOrderKeyValueItem
+							label={t("serviceOrders.fields.email")}
+							value={order.customer.email}
+						/>
+					)}
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
 		lifecycle: (
 			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.lifecycleDescription")}
+				description={t("serviceOrders.statusCard.description")}
 				icon={History}
-				title={t("serviceOrders.cards.lifecycleTitle")}
+				title={t("serviceOrders.statusCard.title")}
 			>
-				{order.history.length > 0 ? (
-					<ServiceOrderLifecycle
-						currentStatus={order.status.id}
-						history={order.history}
-					/>
-				) : (
-					<p className="text-muted-foreground text-sm">
-						{t("serviceOrders.cards.noHistory")}
-					</p>
-				)}
+				<ServiceOrderProgress order={order} />
 			</ServiceOrderDetailsCard>
 		),
 		parts: (
@@ -163,7 +175,7 @@ export function getCards(order: ServiceOrderRow, t: Translator["t"]): CardsMap {
 				icon={ImageIcon}
 				title={t("serviceOrders.cards.imagesTitle")}
 			>
-				<ServiceOrderImageGrid images={order.images} />
+				<ServiceOrderImageGrid images={order.photos} />
 			</ServiceOrderDetailsCard>
 		),
 	};

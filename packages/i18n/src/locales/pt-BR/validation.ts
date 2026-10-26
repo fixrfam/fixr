@@ -57,7 +57,15 @@ export const validation: Translated<typeof source> = {
 	apiKey: {
 		expirationInPast: "A data de expiração deve ser no futuro.",
 	},
+	device: {
+		customerRequired: "Escolha o cliente dono do aparelho.",
+		modelRequired: "Escolha o modelo do aparelho.",
+		imeiMax: "O IMEI excede {{count}} caracteres.",
+		serialNumberMax: "O número de série excede {{count}} caracteres.",
+		notesMax: "As observações excedem {{count}} caracteres.",
+	},
 	serviceOrder: {
+		deviceRequired: "Escolha o aparelho que será consertado.",
 		itemInvalid: "Escolha um item do catálogo.",
 		itemQuantityRequired: "Informe a quantidade.",
 		itemQuantityInteger: "A quantidade deve ser um número inteiro.",

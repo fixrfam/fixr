@@ -6,87 +6,82 @@ import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderStatusBadge } from "@/components/dashboard/service-order/service-order-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ServiceOrderStatusId } from "@/lib/utils/service-orders";
+import { formatCpf, formatPhone } from "@/lib/format";
+import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import type {
+	ServiceOrderRow,
+	ServiceOrderStatus,
+} from "@/lib/services/service-orders";
+import { orderNumber } from "../order-number";
 
 export function OrderNumberCell({
-	orderNumber,
-	receivedAt,
+	id,
+	createdAt,
 }: {
-	orderNumber: string;
-	receivedAt?: string;
+	id: string;
+	createdAt: string;
 }) {
+	const { format } = useTranslation();
+
 	return (
 		<div className="flex flex-col">
-			<span className="font-semibold">
-				#{orderNumber} <ExternalLink className="inline-block size-3.5" />
+			<span className="font-semibold tabular-nums">
+				#{orderNumber(id)} <ExternalLink className="inline-block size-3.5" />
 			</span>
-			{receivedAt && (
-				<span className="text-muted-foreground text-xs">{receivedAt}</span>
-			)}
+			<span className="text-muted-foreground text-xs">
+				{format.date(createdAt)}
+			</span>
 		</div>
 	);
 }
 
 export function CustomerCell({
-	name,
-	phone,
-	cpf,
+	customer,
 }: {
-	name: string;
-	phone: string;
-	cpf: string;
+	customer: ServiceOrderRow["customer"];
 }) {
 	return (
 		<div className="flex flex-col">
-			<span className="font-medium">{name}</span>
-			<span className="text-muted-foreground text-xs">{phone}</span>
-			<span className="text-muted-foreground text-xs">{cpf}</span>
+			<span className="font-medium">{customer.name}</span>
+			<span className="text-muted-foreground text-xs">
+				{formatPhone(customer.phone)}
+			</span>
+			<span className="text-muted-foreground text-xs tabular-nums">
+				{formatCpf(customer.cpf)}
+			</span>
 		</div>
 	);
 }
 
-export function DeviceCell({
-	mark,
-	model,
-	imei,
-}: {
-	mark: string;
-	model: string;
-	imei?: string;
-}) {
+export function DeviceCell({ order }: { order: ServiceOrderRow }) {
 	return (
 		<div className="flex flex-col">
-			<span className="font-medium">
-				{mark} {model}
+			<span className="font-medium">{order.model.name}</span>
+			<span className="text-muted-foreground text-xs">
+				{order.deviceMaker.name}
 			</span>
-			{imei && (
-				<span className="text-muted-foreground text-xs">IMEI {imei}</span>
+			{order.device.imei && (
+				<span className="text-muted-foreground text-xs tabular-nums">
+					{order.device.imei}
+				</span>
 			)}
 		</div>
 	);
 }
 
-export function CategoryCell({ category }: { category: string }) {
-	return <span className="text-2xs">{category}</span>;
+export function CategoryCell({ category }: { category?: string }) {
+	return category ? <Badge variant="outline">{category}</Badge> : null;
 }
 
-export function TechnicianCell({ name }: { name: string }) {
-	return <span className="font-medium">{name}</span>;
-}
+export function StatusCell({ status }: { status: ServiceOrderStatus }) {
+	const { t } = useTranslation();
 
-export function StatusCell({
-	statusId,
-	label,
-}: {
-	statusId: ServiceOrderStatusId;
-	label: string;
-}) {
 	return (
 		<ServiceOrderStatusBadge
-			className="rounded-lg px-2.5 py-1 font-semibold text-xs"
-			variant={statusId}
+			className="rounded-lg px-2.5 py-1 font-semibold"
+			variant={status}
 		>
-			{label}
+			{t(serviceOrderStatusKeys[status])}
 		</ServiceOrderStatusBadge>
 	);
 }
@@ -95,80 +90,17 @@ export function IssueCell({
 	description,
 	notes,
 }: {
-	description?: string;
-	notes?: string;
+	description: string;
+	notes?: string | null;
 }) {
-	const { t } = useTranslation();
-	const desc = description ?? t("serviceOrders.table.noDescription");
 	return (
-		<div className="flex flex-col">
-			<span className="max-w-55 truncate text-2xs">{desc}</span>
+		<div className="flex max-w-64 flex-col">
+			<span className="line-clamp-2 text-xs">{description}</span>
 			{notes && (
-				<span className="max-w-55 truncate text-muted-foreground text-xs">
+				<span className="line-clamp-1 text-muted-foreground text-xs">
 					{notes}
 				</span>
 			)}
-		</div>
-	);
-}
-
-export function PartsCell({ parts }: { parts?: string[] }) {
-	const { t } = useTranslation();
-	const list = parts ?? [];
-	if (list.length === 0) {
-		return (
-			<span className="text-muted-foreground text-xs">
-				{t("serviceOrders.table.noParts")}
-			</span>
-		);
-	}
-
-	const visible = list.slice(0, 2);
-	const remaining = list.length - visible.length;
-
-	return (
-		<div className="flex flex-nowrap gap-1">
-			{visible.map((part) => (
-				<Badge
-					className="whitespace-nowrap rounded-md px-2 py-0.5 text-xs"
-					key={part}
-					variant="secondary"
-				>
-					{part}
-				</Badge>
-			))}
-			{remaining > 0 && (
-				<Badge
-					className="whitespace-nowrap rounded-md px-2 py-0.5 text-xs"
-					variant="outline"
-				>
-					+{remaining}
-				</Badge>
-			)}
-		</div>
-	);
-}
-
-export function UpdatedAtCell({
-	history,
-}: {
-	history: { label: string; dateTime: string }[];
-}) {
-	const { t } = useTranslation();
-	const lastUpdate = history.at(-1);
-	if (!lastUpdate) {
-		return (
-			<span className="text-muted-foreground text-xs">
-				{t("serviceOrders.table.noHistory")}
-			</span>
-		);
-	}
-	return (
-		<div className="flex flex-col">
-			<span className="font-medium">{lastUpdate.label}</span>
-			<span className="text-muted-foreground text-xs">
-				{lastUpdate.dateTime}
-			</span>
 		</div>
 	);
 }

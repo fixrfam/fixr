@@ -97,6 +97,34 @@ export const messages = {
 			title: "Estimate not found",
 			description: "This estimate does not exist or was removed.",
 		},
+		customer_not_found: {
+			title: "Customer not found",
+			description: "This customer does not exist or was removed.",
+		},
+		customer_cpf_conflict: {
+			title: "CPF already registered",
+			description: "Another customer of the shop already has this CPF.",
+		},
+		customer_phone_invalid: {
+			title: "Invalid phone",
+			description: "Phone numbers must have 10 or 11 digits.",
+		},
+		device_not_found: {
+			title: "Device not found",
+			description: "This device does not exist or was removed.",
+		},
+		device_client_not_found: {
+			title: "Customer not found",
+			description: "Pick one of the shop's customers.",
+		},
+		device_model_not_found: {
+			title: "Model not found",
+			description: "Pick a model from the catalog.",
+		},
+		service_order_device_not_found: {
+			title: "Device not found",
+			description: "Pick one of the customer's devices.",
+		},
 		service_order_catalog_item_not_found: {
 			title: "Item not found",
 			description: "This part or service is no longer in the catalog.",
