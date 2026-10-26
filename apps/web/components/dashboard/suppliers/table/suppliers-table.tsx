@@ -2,55 +2,65 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { permissions } from "@fixr/permissions";
-import {
-	getCoreRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
 	useCatalogAbility,
-	useInventory,
-	useSupplierRows,
+	useSupplierPartCounts,
+	useSuppliersPage,
 } from "@/components/dashboard/parts/store";
-import { searchSuppliers } from "@/components/dashboard/parts/table/data";
+import { SortSelect } from "@/components/dashboard/parts/table/catalog-filters";
 import { TableToolbar } from "@/components/dashboard/parts/table/toolbar";
+import {
+	useCatalogParams,
+	useCatalogTable,
+	useOutOfRangePage,
+	useSearchInput,
+} from "@/components/dashboard/parts/table/use-catalog-table";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { useSupplierColumns } from "./columns";
+
+const supplierFilters = {};
 
 export function SuppliersTable() {
 	const { t } = useTranslation();
 	const ability = useCatalogAbility();
-	const [search, setSearch] = useState("");
-	const [sorting, setSorting] = useState<SortingState>([
-		{ id: "name", desc: false },
-	]);
-
 	const columns = useSupplierColumns();
+	const { params, refine, setPagination, reset } =
+		useCatalogParams(supplierFilters);
+	const search = useSearchInput(params.q, (q) => refine({ q }));
 
-	const rows = useSupplierRows();
-	const { isPending } = useInventory();
+	const query = useSuppliersPage({
+		page: params.page,
+		perPage: params.perPage,
+		query: params.q,
+		sort: params.sort,
+	});
+	useOutOfRangePage(query, params, setPagination);
 
-	const filteredData = useMemo(
-		() => searchSuppliers(rows, search),
-		[rows, search]
+	const suppliers = query.data?.records;
+	const partCounts = useSupplierPartCounts(
+		(suppliers ?? []).map((supplier) => supplier.id)
+	);
+	const rows = useMemo(
+		() =>
+			(suppliers ?? []).map((supplier) => ({
+				...supplier,
+				partsCount: partCounts.get(supplier.id),
+			})),
+		[suppliers, partCounts]
 	);
 
-	const table = useReactTable({
-		data: filteredData,
+	const table = useCatalogTable({
+		data: rows,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		onSortingChange: setSorting,
-		state: { sorting },
-		initialState: {
-			pagination: { pageIndex: 0, pageSize: 10 },
-		},
+		page: params.page,
+		perPage: params.perPage,
+		pageCount: query.data?.pagination.total_pages ?? 0,
+		rowCount: query.data?.pagination.total_records ?? 0,
+		onPaginationChange: setPagination,
 	});
 
 	return (
@@ -59,17 +69,27 @@ export function SuppliersTable() {
 				canCreate={ability.can(permissions.suppliers.create)}
 				createHref="/suppliers/new"
 				createLabel={t("suppliers.table.create")}
-				onClear={() => setSearch("")}
-				onSearchChange={setSearch}
+				onClear={reset}
+				onSearchChange={search.setInput}
 				placeholder={t("suppliers.table.search")}
-				search={search}
+				search={search.input}
 			>
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			{isPending ? (
+			<div className="flex items-center justify-end">
+				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
+			</div>
+			{query.isPending ? (
 				<Skeleton className="h-96 w-full rounded-md" />
 			) : (
-				<DataTable className="w-full" table={table} />
+				<DataTable
+					aria-busy={query.isPlaceholderData}
+					className={cn(
+						"w-full transition-opacity",
+						query.isPlaceholderData && "opacity-60"
+					)}
+					table={table}
+				/>
 			)}
 		</div>
 	);

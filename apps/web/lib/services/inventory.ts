@@ -47,27 +47,54 @@ export interface SupplierRow {
 	email: string;
 }
 
-/** The API caps `perPage` at 100. */
-const PAGE_SIZE = 100;
+/** Sort orders every catalog list accepts. */
+export type CatalogSort = "name" | "newer" | "older";
 
-/**
- * Fetch every record of a company-scoped list. The dashboard tables search,
- * filter and paginate on the client, so they need the whole catalog.
- */
-async function fetchAll<T>(path: string): Promise<T[]> {
-	const records: T[] = [];
-	let page: number | null = 1;
+interface ListParams {
+	page: number;
+	perPage: number;
+	/** Free text search; each list decides which fields it matches. */
+	query?: string;
+	sort?: CatalogSort;
+}
 
-	while (page) {
-		const response = await axios.get<ApiResponse<PaginatedData<T>>>(path, {
-			params: { page, perPage: PAGE_SIZE },
-		});
-		const data = response.data.data as PaginatedData<T>;
-		records.push(...data.records);
-		page = data.pagination.next_page;
-	}
+export interface PartListParams extends ListParams {
+	category?: string;
+	supplierId?: string;
+	/** Only parts at or below their minimum stock (out of stock included). */
+	lowStock?: boolean;
+}
 
-	return records;
+export interface ServiceListParams extends ListParams {
+	deviceCategory?: string;
+}
+
+export type SupplierListParams = ListParams;
+
+/** Drops empty values so they never reach the query string. */
+function toQuery(params: object) {
+	return Object.fromEntries(
+		Object.entries(params)
+			.filter(
+				([, value]) => value !== undefined && value !== "" && value !== false
+			)
+			.map(([key, value]) => [key, String(value)])
+	);
+}
+
+const CNPJ_LIKE = /^[\d./\s-]+$/;
+const NON_DIGITS = /\D/g;
+
+/** CNPJs are stored as digits, so a typed "12.345.678/" searches "12345678". */
+function toCnpjSearch(query: string) {
+	return CNPJ_LIKE.test(query) ? query.replace(NON_DIGITS, "") : query;
+}
+
+async function fetchPage<T>(path: string, params: object) {
+	const response = await axios.get<ApiResponse<PaginatedData<T>>>(path, {
+		params: toQuery(params),
+	});
+	return response.data.data as PaginatedData<T>;
 }
 
 async function send<T>(request: Promise<{ data: ApiResponse<T> }>) {
@@ -75,13 +102,25 @@ async function send<T>(request: Promise<{ data: ApiResponse<T> }>) {
 	return response.data.data as T;
 }
 
+/**
+ * The catalog API. Lists are paginated, searched, filtered and sorted by the
+ * server; the dashboard only asks for the page it shows.
+ */
 export const inventoryApi = {
-	listParts: (subdomain: string) =>
-		fetchAll<PartRow>(`/companies/${subdomain}/parts`),
-	listServices: (subdomain: string) =>
-		fetchAll<ServiceRow>(`/companies/${subdomain}/services`),
-	listSuppliers: (subdomain: string) =>
-		fetchAll<SupplierRow>(`/companies/${subdomain}/suppliers`),
+	listParts: (subdomain: string, params: PartListParams) =>
+		fetchPage<PartRow>(`/companies/${subdomain}/parts`, params),
+	listServices: (subdomain: string, params: ServiceListParams) =>
+		fetchPage<ServiceRow>(`/companies/${subdomain}/services`, params),
+	listSuppliers: (subdomain: string, params: SupplierListParams) =>
+		fetchPage<SupplierRow>(`/companies/${subdomain}/suppliers`, {
+			...params,
+			query: params.query && toCnpjSearch(params.query),
+		}),
+
+	getPart: (subdomain: string, id: string) =>
+		send<PartRow>(axios.get(`/companies/${subdomain}/parts/${id}`)),
+	getService: (subdomain: string, id: string) =>
+		send<ServiceRow>(axios.get(`/companies/${subdomain}/services/${id}`)),
 
 	createPart: (subdomain: string, values: z.input<typeof createPartSchema>) =>
 		send<PartRow>(axios.post(`/companies/${subdomain}/parts`, values)),

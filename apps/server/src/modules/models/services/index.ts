@@ -62,13 +62,13 @@ export class ModelsService {
 	}
 
 	/**
-	 * List models with pagination, fulltext search, and filters
+	 * List models with pagination, search, and filters
 	 *
 	 * @param userJwt - Authenticated user JWT payload
 	 * @param subdomain - Company subdomain
 	 * @param page - Current page number
 	 * @param perPage - Items per page
-	 * @param query - Fulltext search query
+	 * @param query - Words to search for
 	 * @param makerId - Filter by maker
 	 * @param categoryId - Filter by category
 	 * @param status - Filter by release status
@@ -130,6 +130,7 @@ export class ModelsService {
 			getPaginatedCount({
 				table: models,
 				where: filter,
+				joins: modelListJoins,
 			}),
 		]);
 
@@ -171,9 +172,19 @@ export class ModelsService {
 				id: r.id,
 				name: r.name,
 				slug: r.slug,
-				status: r.status ?? "Available",
+				status: r.status,
 				price: r.price,
+				announced: r.announced,
 				released: r.released,
+				displaySize: r.displaySize,
+				displaySizeInches: r.displaySizeInches,
+				displayResolution: r.displayResolution,
+				chipset: r.chipset,
+				cpu: r.cpu,
+				internalMemory: r.internalMemory,
+				battery: r.battery,
+				colorsHex: r.colorsHex,
+				isCustom: r.companyId !== null,
 				maker: {
 					id: r.makerId,
 					name: r.makerName,
@@ -264,7 +275,7 @@ export class ModelsService {
 				message: "Model retrieved successfully.",
 				data: {
 					...model,
-					status: model.status ?? "Available",
+					status: model.status,
 					imageUrl,
 					images: imagesWithPresignedUrls,
 				},
@@ -400,7 +411,7 @@ export class ModelsService {
 				message: "Model updated successfully.",
 				data: {
 					...(updated ?? model),
-					status: (updated ?? model).status ?? "Available",
+					status: (updated ?? model).status,
 					imageUrl,
 					images: imagesWithPresignedUrls,
 				},

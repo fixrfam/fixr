@@ -28,6 +28,17 @@ export function getSession(
 	return result.success ? result.data : null;
 }
 
+/**
+ * Where a signed in user lands: their company's dashboard. Without a company,
+ * `/dashboard/account` lets the middleware pick the right place.
+ */
+export function dashboardHref(
+	session: Pick<ReturnType<typeof userJWT.parse>, "company">
+) {
+	const subdomain = session.company?.subdomain;
+	return subdomain ? `/dashboard/${subdomain}/home` : "/dashboard/account";
+}
+
 export const getClientSession = (): ReturnType<typeof userJWT.parse> | null => {
 	const cookies = parseCookies();
 

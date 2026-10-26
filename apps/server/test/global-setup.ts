@@ -8,7 +8,6 @@ import {
 	RedisContainer,
 	type StartedRedisContainer,
 } from "@testcontainers/redis";
-import mysql from "mysql2/promise";
 import type { TestProject } from "vitest/node";
 
 const DB_PACKAGE_DIR = fileURLToPath(
@@ -71,19 +70,6 @@ export async function setup(project: TestProject) {
 	const redisUrl = redisContainer.getConnectionUrl();
 
 	pushSchema(dbUrl);
-
-	const connection = await mysql.createConnection({
-		uri: dbUrl,
-	});
-	try {
-		// `ModelsRepository.buildListFilter` uses MATCH ... AGAINST, which needs this
-		// FULLTEXT index (created by migration 0010, not declared in the schema source).
-		await connection.query(
-			"ALTER TABLE `models` ADD FULLTEXT INDEX `models_fulltext_idx` (`name`, `models_text`, `chipset`, `cpu`, `internal_memory`, `os`)"
-		);
-	} finally {
-		await connection.end();
-	}
 
 	project.provide("DB_URL", dbUrl);
 	project.provide("REDIS_URL", redisUrl);

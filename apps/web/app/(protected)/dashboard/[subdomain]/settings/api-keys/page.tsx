@@ -4,7 +4,6 @@ import { useTranslation } from "@fixr/i18n/react";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
-import { KeyRound } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { ApiKeyRow } from "@/components/dashboard/api-keys/columns";
 import { ApiKeysTable } from "@/components/dashboard/api-keys/data-table";
@@ -30,7 +29,6 @@ export default function ApiKeysPage() {
 		<div className="flex flex-col gap-2">
 			<Heading
 				description={t("apiKeys.page.description")}
-				Icon={KeyRound}
 				title={t("apiKeys.page.title")}
 			/>
 			{isPending ? (

@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import {
 	int,
 	json,
@@ -14,6 +15,9 @@ import { companies } from "./companies";
 import { parts } from "./parts";
 
 /** Repair services a company offers (labor), priced separately from parts. */
+/** A `[]` default as an expression: TiDB rejects JSON literal defaults (`DEFAULT ('[]')`). */
+const JSON_EMPTY_ARRAY = sql`(json_array())`;
+
 export const services = mysqlTable("services", {
 	id: varchar("id", { length: 25 })
 		.$defaultFn(() => createId())
@@ -28,15 +32,15 @@ export const services = mysqlTable("services", {
 	deviceCategories: json("device_categories")
 		.$type<string[]>()
 		.notNull()
-		.default([]),
+		.default(JSON_EMPTY_ARRAY),
 	testInstructions: json("test_instructions")
 		.$type<string[]>()
 		.notNull()
-		.default([]),
+		.default(JSON_EMPTY_ARRAY),
 	testParameters: json("test_parameters")
 		.$type<string[]>()
 		.notNull()
-		.default([]),
+		.default(JSON_EMPTY_ARRAY),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()

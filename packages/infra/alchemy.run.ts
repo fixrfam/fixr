@@ -40,6 +40,12 @@ interface CloudFlareDomainConfig {
 }
 
 const parseDomains = (envName: string): CloudFlareDomainConfig[] => {
+	// Only prod owns the custom domains. Previews and branch stages run on their
+	// workers.dev URL; binding the same hostname there fails with a 409.
+	if (stage !== "prod") {
+		return [];
+	}
+
 	const domains = process.env[envName]?.split(",").map((d) => d.trim());
 
 	const mapped = domains?.map((domain) => {

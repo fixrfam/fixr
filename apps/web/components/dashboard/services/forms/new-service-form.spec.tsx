@@ -67,6 +67,11 @@ describe("NewServiceForm", () => {
 
 		await fillRequired(user);
 		await user.click(screen.getByRole("combobox"));
+		// The picker searches the API, not a list loaded up front.
+		await user.type(
+			screen.getByPlaceholderText(t("services.form.partsSearch")),
+			part.sku
+		);
 		await user.click(
 			await screen.findByRole("option", { name: new RegExp(part.sku) })
 		);
