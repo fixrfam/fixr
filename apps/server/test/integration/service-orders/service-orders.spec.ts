@@ -7,6 +7,7 @@ import {
 } from "@fixr/db/schema";
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
+import { events } from "../../../src/core/events";
 import {
 	makeCategory,
 	makeCompany,
@@ -393,6 +394,31 @@ describe("service order detail and status", () => {
 		expect(response.statusCode).toBe(200);
 		expect(response.json().data.status).toBe(status);
 		expect(await deviceStatus(refs.device.id)).toBe(expected);
+	});
+
+	it("rolls the status back when an effect of the change fails", async () => {
+		const { token, url, refs, serviceOrder } = await setup("technician");
+		events.on("serviceOrder.statusChanged", "test.fail", () => {
+			throw new Error("effect failed");
+		});
+
+		try {
+			const response = await authedInject(app, token, {
+				method: "PATCH",
+				url: `${url}/status`,
+				payload: { status: "delivered" },
+			});
+
+			expect(response.statusCode).toBe(500);
+		} finally {
+			events.off("serviceOrder.statusChanged", "test.fail");
+		}
+		const [stored] = await db
+			.select()
+			.from(serviceOrders)
+			.where(eq(serviceOrders.id, serviceOrder.id));
+		expect(stored?.status).toBe("pending");
+		expect(await deviceStatus(refs.device.id)).toBe("with_customer");
 	});
 
 	it("needs the change status permission", async () => {

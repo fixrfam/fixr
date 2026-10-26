@@ -2,7 +2,9 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { dbMock, repo, pagination } = vi.hoisted(() => ({
+const { dbMock, repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
+	emit: vi.fn(),
+	moveServiceOrder: vi.fn(),
 	dbMock: {} as ReturnType<
 		typeof import("@/test/helpers/query-builder-mock").createDbMock
 	>,
@@ -36,6 +38,11 @@ vi.mock("../repositories", () => ({
 	serviceOrdersListSelect: {},
 }));
 vi.mock("../../../core/lib/pagination", () => pagination);
+vi.mock("../../../core/lib/transaction", () => ({
+	inTransaction: (work: (tx: unknown) => unknown) => work("TX"),
+}));
+vi.mock("../../../core/events", () => ({ events: { emit } }));
+vi.mock("./move-status", () => ({ moveServiceOrder }));
 
 const { ServiceOrdersService } = await import(".");
 
@@ -236,11 +243,17 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 			data.deviceId,
 			companyId
 		);
-		expect(repo.createWithPhotos).toHaveBeenCalledWith({
+		expect(repo.createWithPhotos).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
 			customerId,
 			data,
+		});
+		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.opened", {
+			serviceOrderId: "so1",
+			companyId,
+			deviceId: data.deviceId,
+			employeeId: employee.id,
 		});
 		expect(reply.state.statusCode).toBe(201);
 		expect(reply.state.body).toMatchObject({
@@ -447,6 +460,7 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		repo.queryServiceOrderOfCompany.mockResolvedValue({
 			id: serviceOrderId,
 			deviceId,
+			status: "fixing",
 		});
 		repo.queryServiceOrderDetail.mockResolvedValue(detail);
 	});
@@ -503,17 +517,27 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		});
 	});
 
-	it("moves the order and its device together", async () => {
+	it("moves the order through moveServiceOrder, in a transaction", async () => {
 		const { reply, promise } = call("changeStatus", { status: "ready" });
 		await promise;
 
-		expect(repo.updateStatus).toHaveBeenCalledWith({
+		expect(moveServiceOrder).toHaveBeenCalledWith("TX", expect.any(Function), {
 			serviceOrderId,
-			deviceId,
-			status: "ready",
+			to: "ready",
 		});
 		expect(reply.state.body).toMatchObject({
 			code: "change_service_order_status_success",
+		});
+	});
+
+	it("emits through the bus, bound to the transaction", async () => {
+		await call("changeStatus", { status: "ready" }).promise;
+		const [, bound] = moveServiceOrder.mock.calls[0]!;
+
+		await bound("serviceOrder.statusChanged", { to: "ready" });
+
+		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.statusChanged", {
+			to: "ready",
 		});
 	});
 
@@ -523,6 +547,6 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		await expect(
 			call("changeStatus", { status: "ready" }).promise
 		).rejects.toMatchObject({ code: "service_order_not_found" });
-		expect(repo.updateStatus).not.toHaveBeenCalled();
+		expect(moveServiceOrder).not.toHaveBeenCalled();
 	});
 });

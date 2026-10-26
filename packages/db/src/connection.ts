@@ -21,5 +21,11 @@ const poolConnection = mysql.createPool({
 
 export const db = drizzle(poolConnection, { schema, mode: "default" });
 
+/** An open database transaction (the `tx` of `db.transaction`). */
+export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/** Runs queries: the pool, or a transaction when the work must be atomic. */
+export type DbExecutor = typeof db | Transaction;
+
 export * from "drizzle-orm";
 export { MySqlTable } from "drizzle-orm/mysql-core";
