@@ -11,6 +11,7 @@ import type {
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
 import { itemTotals, lineTotal } from "../../../core/lib/money";
 import {
@@ -18,6 +19,7 @@ import {
 	getPaginatedRecords,
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
+import { inTransaction } from "../../../core/lib/transaction";
 import {
 	ServiceOrdersRepository,
 	serviceOrdersListJoins,
@@ -192,13 +194,21 @@ export class ServiceOrdersService {
 			}
 		}
 
-		const { serviceOrder, photos } =
-			await ServiceOrdersRepository.createWithPhotos({
+		const { serviceOrder, photos } = await inTransaction(async (tx) => {
+			const created = await ServiceOrdersRepository.createWithPhotos(tx, {
 				companyId,
 				employeeId: employee.id,
 				clientId: device.clientId,
 				data,
 			});
+			await events.emit(tx, "serviceOrder.opened", {
+				serviceOrderId: created.serviceOrder.id,
+				companyId,
+				deviceId: device.id,
+				employeeId: employee.id,
+			});
+			return created;
+		});
 
 		return response.status(201).send(
 			apiResponse({
@@ -311,9 +321,9 @@ export class ServiceOrdersService {
 	}
 
 	/**
-	 * Move the order to another status. The device follows: ready orders wait
-	 * for pickup, delivered ones are back with the customer, any other status
-	 * keeps the device in the shop.
+	 * Move the order to another status and emit `serviceOrder.statusChanged`,
+	 * whose effects (e.g. the device following the order) run in the same
+	 * transaction. Setting the current status again changes nothing.
 	 */
 	static async changeStatus({
 		userJwt,
@@ -329,16 +339,27 @@ export class ServiceOrdersService {
 		response: FastifyReply;
 	}) {
 		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
-		const { deviceId } = await ServiceOrdersService.assertOwnServiceOrder(
+		const current = await ServiceOrdersService.assertOwnServiceOrder(
 			serviceOrderId,
 			companyId
 		);
 
-		await ServiceOrdersRepository.updateStatus({
-			serviceOrderId,
-			deviceId,
-			status: data.status,
-		});
+		if (current.status !== data.status) {
+			await inTransaction(async (tx) => {
+				await ServiceOrdersRepository.updateStatus(
+					tx,
+					serviceOrderId,
+					data.status
+				);
+				await events.emit(tx, "serviceOrder.statusChanged", {
+					serviceOrderId,
+					companyId,
+					deviceId: current.deviceId,
+					from: current.status,
+					to: data.status,
+				});
+			});
+		}
 
 		return response.status(200).send(
 			apiResponse({
