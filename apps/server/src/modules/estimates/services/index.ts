@@ -16,6 +16,7 @@ import type {
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
+import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
@@ -24,6 +25,7 @@ import {
 	paginationMeta,
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
+import { inTransaction } from "../../../core/lib/transaction";
 import { fetchLogo, renderEstimatePdf } from "../pdf/render";
 import {
 	type EstimateItemRow,
@@ -354,6 +356,50 @@ export class EstimatesService {
 		);
 	}
 
+	/** Mark the estimate as sent and announce it: the service order waits for approval. */
+	private static markSent(
+		estimate: EstimateRow,
+		values: { publicTokenHash: string | null; sentTo: string | null }
+	) {
+		return inTransaction(async (tx) => {
+			await EstimatesRepository.markSent(tx, estimate.id, values);
+			await events.emit(tx, "estimate.sent", {
+				estimateId: estimate.id,
+				serviceOrderId: estimate.serviceOrderId,
+				companyId: estimate.companyId,
+			});
+		});
+	}
+
+	/**
+	 * Record the customer's answer and, for an approval, announce it: the
+	 * service order is approved.
+	 *
+	 * @returns whether the answer was recorded (only a sent estimate is answered)
+	 */
+	private static recordAnswer(
+		estimate: EstimateRow,
+		answer:
+			| { status: "approved" }
+			| { status: "rejected"; rejectionReason: string | null }
+	) {
+		return inTransaction(async (tx) => {
+			const recorded = await EstimatesRepository.recordAnswer(
+				tx,
+				estimate.id,
+				answer
+			);
+			if (recorded && answer.status === "approved") {
+				await events.emit(tx, "estimate.approved", {
+					estimateId: estimate.id,
+					serviceOrderId: estimate.serviceOrderId,
+					companyId: estimate.companyId,
+				});
+			}
+			return recorded;
+		});
+	}
+
 	/**
 	 * Staff-side status change. It has the same effects on the service order as
 	 * the client's link, and going back to draft disables the link.
@@ -370,14 +416,14 @@ export class EstimatesService {
 			return;
 		}
 		if (status === "sent") {
-			await EstimatesRepository.markSent(estimate, {
+			await EstimatesService.markSent(estimate, {
 				publicTokenHash: null,
 				sentTo: null,
 			});
 			return;
 		}
 
-		const recorded = await EstimatesRepository.recordAnswer(
+		const recorded = await EstimatesService.recordAnswer(
 			estimate,
 			status === "approved" ? { status } : { status, rejectionReason: null }
 		);
@@ -435,7 +481,7 @@ export class EstimatesService {
 		}
 
 		const token = randomBytes(TOKEN_BYTES).toString("base64url");
-		await EstimatesRepository.markSent(estimate, {
+		await EstimatesService.markSent(estimate, {
 			publicTokenHash: hashToken(token),
 			sentTo: recipient,
 		});
@@ -583,7 +629,7 @@ export class EstimatesService {
 			throw new AppError("ESTIMATE_EXPIRED");
 		}
 
-		const recorded = await EstimatesRepository.recordAnswer(
+		const recorded = await EstimatesService.recordAnswer(
 			estimate,
 			answer.status === "approved"
 				? answer
