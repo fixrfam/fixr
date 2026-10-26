@@ -12,8 +12,9 @@ tense) and the modules that care **register effects** on it.
 ```
 ServiceOrdersService.changeStatus
   └─ inTransaction(tx)
-       ├─ ServiceOrdersRepository.updateStatus(tx, ...)
-       └─ events.emit(tx, "serviceOrder.statusChanged", { from, to, ... })
+       └─ moveServiceOrder(tx, ...)
+            ├─ ServiceOrdersRepository.updateStatus(tx, ...)
+            └─ emit "serviceOrder.statusChanged" { from, to, ... }
             ├─ devices.followServiceOrder   → DevicesRepository.updateDevice(..., tx)
             └─ (inventory.consumeParts      → later)
 ```
@@ -38,9 +39,17 @@ ServiceOrdersService.changeStatus
 | Event | Emitted by | When | Effects |
 | --- | --- | --- | --- |
 | `serviceOrder.opened` | `ServiceOrdersService.createServiceOrder` | A service order was opened for a device | `devices.checkIn`: the device is `in_shop` |
-| `serviceOrder.statusChanged` | `ServiceOrdersService.changeStatus` | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop` |
+| `serviceOrder.statusChanged` | `moveServiceOrder` (used by `ServiceOrdersService.changeStatus`) | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop` |
 
 Keep this table up to date: it is the map of what happens when.
+
+## Changing a service order's status
+
+Always through `moveServiceOrder` (`modules/service-orders/services/move-status.ts`).
+It locks the order, updates it and emits `serviceOrder.statusChanged` in the
+caller's transaction, so the effects of a status change run no matter who
+moves the order: the API (`ServiceOrdersService.changeStatus`) or an effect of
+another event. Writing `service_orders.status` anywhere else skips them.
 
 ## Adding an event
 

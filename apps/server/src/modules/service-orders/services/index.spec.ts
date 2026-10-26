@@ -2,8 +2,9 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { dbMock, repo, pagination, emit } = vi.hoisted(() => ({
+const { dbMock, repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
 	emit: vi.fn(),
+	moveServiceOrder: vi.fn(),
 	dbMock: {} as ReturnType<
 		typeof import("@/test/helpers/query-builder-mock").createDbMock
 	>,
@@ -41,6 +42,7 @@ vi.mock("../../../core/lib/transaction", () => ({
 	inTransaction: (work: (tx: unknown) => unknown) => work("TX"),
 }));
 vi.mock("../../../core/events", () => ({ events: { emit } }));
+vi.mock("./move-status", () => ({ moveServiceOrder }));
 
 const { ServiceOrdersService } = await import(".");
 
@@ -515,20 +517,12 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		});
 	});
 
-	it("moves the order and announces it in the same transaction", async () => {
+	it("moves the order through moveServiceOrder, in a transaction", async () => {
 		const { reply, promise } = call("changeStatus", { status: "ready" });
 		await promise;
 
-		expect(repo.updateStatus).toHaveBeenCalledWith(
-			"TX",
+		expect(moveServiceOrder).toHaveBeenCalledWith("TX", expect.any(Function), {
 			serviceOrderId,
-			"ready"
-		);
-		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.statusChanged", {
-			serviceOrderId,
-			companyId,
-			deviceId,
-			from: "fixing",
 			to: "ready",
 		});
 		expect(reply.state.body).toMatchObject({
@@ -536,11 +530,15 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		});
 	});
 
-	it("changes nothing when the status is the current one", async () => {
-		await call("changeStatus", { status: "fixing" }).promise;
+	it("emits through the bus, bound to the transaction", async () => {
+		await call("changeStatus", { status: "ready" }).promise;
+		const [, bound] = moveServiceOrder.mock.calls[0]!;
 
-		expect(repo.updateStatus).not.toHaveBeenCalled();
-		expect(emit).not.toHaveBeenCalled();
+		await bound("serviceOrder.statusChanged", { to: "ready" });
+
+		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.statusChanged", {
+			to: "ready",
+		});
 	});
 
 	it("never changes another company's order", async () => {
@@ -549,6 +547,6 @@ describe("ServiceOrdersService detail, edit and status", () => {
 		await expect(
 			call("changeStatus", { status: "ready" }).promise
 		).rejects.toMatchObject({ code: "service_order_not_found" });
-		expect(repo.updateStatus).not.toHaveBeenCalled();
+		expect(moveServiceOrder).not.toHaveBeenCalled();
 	});
 });
