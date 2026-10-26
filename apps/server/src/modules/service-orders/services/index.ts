@@ -3,9 +3,11 @@ import { serviceOrders as serviceOrdersTable, uploads } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
-	createServiceOrderMockSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
 	patchServiceOrderItemSchema,
+	patchServiceOrderSchema,
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
@@ -80,7 +82,8 @@ export class ServiceOrdersService {
 			getPaginatedCount({
 				table: serviceOrdersTable,
 				where: filter,
-				joins: query ? serviceOrdersListJoins : undefined,
+				// Search and the category filter read joined tables.
+				joins: serviceOrdersListJoins,
 			}),
 		]);
 
@@ -142,7 +145,7 @@ export class ServiceOrdersService {
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
-		data: z.infer<typeof createServiceOrderMockSchema>;
+		data: z.infer<typeof createServiceOrderSchema>;
 		response: FastifyReply;
 	}) {
 		if (!userJwt.company) {
@@ -163,21 +166,13 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
 		}
 
-		const [client, deviceMaker, deviceCategory] = await Promise.all([
-			ServiceOrdersRepository.queryClientById(data.clientId),
-			ServiceOrdersRepository.queryDeviceMakerById(data.deviceBrandId),
-			ServiceOrdersRepository.queryDeviceCategoryById(data.deviceCategoryId),
-		]);
-
-		// Clients are company-scoped: another company's (or a deleted) client doesn't exist here.
-		if (!client || client.companyId !== companyId || client.deletedAt) {
-			throw new AppError("SERVICE_ORDER_CLIENT_NOT_FOUND");
-		}
-		if (!deviceMaker) {
-			throw new AppError("SERVICE_ORDER_DEVICE_BRAND_NOT_FOUND");
-		}
-		if (!deviceCategory) {
-			throw new AppError("SERVICE_ORDER_DEVICE_CATEGORY_NOT_FOUND");
+		// Devices are company-scoped: another company's (or a deleted) device doesn't exist here.
+		const device = await ServiceOrdersRepository.queryDeviceOfCompany(
+			data.deviceId,
+			companyId
+		);
+		if (!device) {
+			throw new AppError("SERVICE_ORDER_DEVICE_NOT_FOUND");
 		}
 
 		if (data.photos.length > 0) {
@@ -201,6 +196,7 @@ export class ServiceOrdersService {
 			await ServiceOrdersRepository.createWithPhotos({
 				companyId,
 				employeeId: employee.id,
+				clientId: device.clientId,
 				data,
 			});
 
@@ -244,6 +240,115 @@ export class ServiceOrdersService {
 		if (!serviceOrder) {
 			throw new AppError("SERVICE_ORDER_NOT_FOUND");
 		}
+		return serviceOrder;
+	}
+
+	private static async queryDetail(serviceOrderId: string, companyId: string) {
+		const serviceOrder = await ServiceOrdersRepository.queryServiceOrderDetail(
+			serviceOrderId,
+			companyId
+		);
+		if (!serviceOrder) {
+			throw new AppError("SERVICE_ORDER_NOT_FOUND");
+		}
+		return serviceOrder;
+	}
+
+	static async getServiceOrder({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "get_service_order_success",
+				message: "Service order retrieved successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/** Edit the reported issue and the notes. */
+	static async patchServiceOrder({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof patchServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		if (Object.keys(data).length > 0) {
+			await ServiceOrdersRepository.updateServiceOrder(serviceOrderId, data);
+		}
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "patch_service_order_success",
+				message: "Service order updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/**
+	 * Move the order to another status. The device follows: ready orders wait
+	 * for pickup, delivered ones are back with the customer, any other status
+	 * keeps the device in the shop.
+	 */
+	static async changeStatus({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof changeServiceOrderStatusSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		const { deviceId } = await ServiceOrdersService.assertOwnServiceOrder(
+			serviceOrderId,
+			companyId
+		);
+
+		await ServiceOrdersRepository.updateStatus({
+			serviceOrderId,
+			deviceId,
+			status: data.status,
+		});
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "change_service_order_status_success",
+				message: "Service order status updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
 	}
 
 	/** The order's items with their line totals, plus subtotals per type and the total. */

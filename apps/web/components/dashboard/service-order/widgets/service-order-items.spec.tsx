@@ -93,6 +93,8 @@ describe("ServiceOrderItems", () => {
 		await user.click(
 			await screen.findByRole("button", { name: /Adicionar item/ })
 		);
+		// The picker searches the API, which answers with the first page only.
+		await user.type(screen.getByRole("combobox"), mockParts[0]!.name);
 		await user.click(await screen.findByText(mockParts[0]!.name));
 
 		await waitFor(() =>

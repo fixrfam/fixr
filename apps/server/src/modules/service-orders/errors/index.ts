@@ -16,20 +16,10 @@ export const serviceOrdersErrors = defineErrors({
 		message: "Employee profile not found for this account.",
 		status: 403,
 	},
-	SERVICE_ORDER_CLIENT_NOT_FOUND: {
-		code: "client_not_found",
-		message: "Client not found.",
-		status: 404,
-	},
-	SERVICE_ORDER_DEVICE_BRAND_NOT_FOUND: {
-		code: "device_brand_not_found",
-		message: "Device brand not found.",
-		status: 404,
-	},
-	SERVICE_ORDER_DEVICE_CATEGORY_NOT_FOUND: {
-		code: "device_category_not_found",
-		message: "Device category not found.",
-		status: 404,
+	SERVICE_ORDER_DEVICE_NOT_FOUND: {
+		code: "service_order_device_not_found",
+		message: "The device does not exist in this company.",
+		status: 400,
 	},
 	SERVICE_ORDER_UPLOAD_NOT_FOUND: {
 		code: "upload_not_found",

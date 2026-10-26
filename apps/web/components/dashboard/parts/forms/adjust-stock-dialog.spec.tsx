@@ -19,14 +19,19 @@ let api: ReturnType<typeof serveInventory>;
 
 beforeEach(() => {
 	setSessionCookie(fakeJwt());
-	api = serveInventory("fixr", { parts: [part], services: [], suppliers: [] });
+	// A copy: the handler changes the stock it serves.
+	api = serveInventory("fixr", {
+		parts: [{ ...part }],
+		services: [],
+		suppliers: [],
+	});
 });
 
 afterEach(() => {
 	vi.clearAllMocks();
 });
 
-async function openAndEnter(delta: string) {
+async function open() {
 	const user = userEvent.setup();
 	render(<AdjustStockDialog part={part} />);
 	await user.click(
@@ -34,28 +39,46 @@ async function openAndEnter(delta: string) {
 			name: t("parts.stockAdjustment.triggerLabel", { name: part.name }),
 		})
 	);
-	const input = screen.getByLabelText(t("parts.stockAdjustment.deltaLabel"));
-	await user.type(input, delta);
 	return user;
 }
 
-function submit(user: ReturnType<typeof userEvent.setup>) {
-	return user.click(
-		screen.getByRole("button", { name: t("parts.stockAdjustment.submit") })
+async function openAndEnter(delta: string) {
+	const user = await open();
+	await user.type(
+		screen.getByLabelText(t("parts.stockAdjustment.deltaLabel")),
+		delta
 	);
+	return user;
 }
 
+const submitButton = (name: string) => screen.getByRole("button", { name });
+
 describe("AdjustStockDialog", () => {
-	it("previews the new stock and sends the delta", async () => {
-		const user = await openAndEnter("-2");
+	it("steps with the buttons, previews the new stock and sends the delta", async () => {
+		const user = await open();
+		const increase = screen.getByRole("button", {
+			name: t("parts.stockAdjustment.increase"),
+		});
+		await user.click(increase);
+		await user.click(increase);
+		await user.click(
+			screen.getByRole("button", {
+				name: t("parts.stockAdjustment.quickAdd", { count: 5 }),
+			})
+		);
 
 		expect(
+			screen.getByLabelText(t("parts.stockAdjustment.deltaLabel"))
+		).toHaveValue("+7");
+		expect(
 			screen.getByText(
-				t("parts.stockAdjustment.preview", { current: 3, next: 1 })
+				t("parts.stockAdjustment.preview", { current: 3, next: 10 })
 			)
 		).toBeInTheDocument();
 
-		await submit(user);
+		await user.click(
+			submitButton(t("parts.stockAdjustment.submitAdd", { count: 7 }))
+		);
 
 		await waitFor(() =>
 			expect(toast.success).toHaveBeenCalledWith({
@@ -66,24 +89,61 @@ describe("AdjustStockDialog", () => {
 			expect.objectContaining({
 				method: "POST",
 				path: `/companies/fixr/parts/${part.id}/stock-adjustments`,
-				body: { delta: -2 },
+				body: { delta: 7 },
 			}),
 		]);
 	});
 
-	it("refuses a zero delta without calling the API", async () => {
-		const user = await openAndEnter("0");
-		await submit(user);
+	it("sends a typed removal", async () => {
+		const user = await openAndEnter("-2");
 
 		expect(
-			await screen.findByText(t("validation.part.stockDeltaZero"))
+			screen.getByText(
+				t("parts.stockAdjustment.preview", { current: 3, next: 1 })
+			)
 		).toBeInTheDocument();
+
+		await user.click(
+			submitButton(t("parts.stockAdjustment.submitRemove", { count: 2 }))
+		);
+
+		await waitFor(() =>
+			expect(api.writes).toEqual([
+				expect.objectContaining({ body: { delta: -2 } }),
+			])
+		);
+	});
+
+	it("keeps the submit disabled until there is something to adjust", async () => {
+		await open();
+
+		expect(submitButton(t("parts.stockAdjustment.submit"))).toBeDisabled();
+	});
+
+	it("stops removals below zero before calling the API", async () => {
+		await openAndEnter("-5");
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			t("parts.stockAdjustment.insufficient", { count: 3 })
+		);
+		expect(submitButton(t("parts.stockAdjustment.submit"))).toBeDisabled();
+		expect(
+			screen.getByRole("button", { name: t("parts.stockAdjustment.decrease") })
+		).toBeDisabled();
 		expect(api.writes).toEqual([]);
 	});
 
-	it("shows the API error when the stock would go negative", async () => {
-		const user = await openAndEnter("-5");
-		await submit(user);
+	it("shows the API error when the stock changed in the meantime", async () => {
+		// Someone else took units since the list loaded.
+		api = serveInventory("fixr", {
+			parts: [{ ...part, stock: 1 }],
+			services: [],
+			suppliers: [],
+		});
+		const user = await openAndEnter("-2");
+		await user.click(
+			submitButton(t("parts.stockAdjustment.submitRemove", { count: 2 }))
+		);
 
 		await waitFor(() =>
 			expect(toast.error).toHaveBeenCalledWith(

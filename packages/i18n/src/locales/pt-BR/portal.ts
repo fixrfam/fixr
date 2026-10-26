@@ -15,7 +15,7 @@ export const portal: Translated<typeof source> = {
 	},
 	detail: {
 		back: "Voltar para minhas ordens de serviço",
-		title: "{{maker}} {{model}}",
+		title: "{{device}}",
 		shop: "Assistência",
 		reportedDefect: "Defeito relatado",
 		items: "Peças e serviços",

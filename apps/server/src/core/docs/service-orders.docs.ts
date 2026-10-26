@@ -4,11 +4,14 @@ import {
 	serviceOrderSelectSchema,
 } from "@fixr/db/schema";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
+import { deviceStatuses } from "@fixr/schemas/devices";
 import {
 	addServiceOrderItemSchema,
-	createServiceOrderMockSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
 	patchServiceOrderItemSchema,
+	patchServiceOrderSchema,
 	serviceOrderIdParamsSchema,
 	serviceOrderItemParamsSchema,
 	serviceOrderStatuses,
@@ -23,24 +26,29 @@ const createServiceOrderResponseDataSchema = serviceOrderSelectSchema.extend({
 	photos: z.array(serviceOrderImageSelectSchema),
 });
 
+const relation = z.object({ id: z.string(), name: z.string() });
+
 const serviceOrderListRecordSchema = z.object({
 	...serviceOrderSelectSchema.shape,
-	client: z.object({
-		id: z.string(),
-		name: z.string(),
+	client: relation.extend({
+		cpf: z.string(),
+		phone: z.string().nullable(),
+		email: z.string().nullable(),
 	}),
-	employee: z.object({
+	employee: relation,
+	device: z.object({
 		id: z.string(),
-		name: z.string(),
+		imei: z.string().nullable(),
+		serialNumber: z.string().nullable(),
+		status: deviceStatuses,
 	}),
-	deviceCategory: z.object({
-		id: z.string(),
-		name: z.string(),
-	}),
-	deviceMaker: z.object({
-		id: z.string(),
-		name: z.string(),
-	}),
+	model: relation.extend({ slug: z.string() }),
+	deviceMaker: relation,
+	deviceCategory: relation.nullable(),
+});
+
+const serviceOrderDetailSchema = serviceOrderListRecordSchema.extend({
+	photos: z.array(serviceOrderImageSelectSchema),
 });
 
 const getCompanyServiceOrdersSchema: FastifySchema = {
@@ -54,7 +62,7 @@ Optional filters (query string):
 - \`employeeId\`: responsible employee (cuid2)
 - \`status\`: one of: ${serviceOrderStatuses.options.join(", ")}
 - \`dateFrom\` / \`dateTo\`: filter by \`created_at\` (inclusive; ISO date or datetime)
-- \`query\`: search in device model, reported defect, or client name
+- \`query\`: search in device model, maker, IMEI, reported defect, or client name
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`): pagination (see API pagination docs)
 `,
 	params: getCompanyNestedDataSchema,
@@ -98,6 +106,8 @@ const createServiceOrderSchemaDoc: FastifySchema = {
 	description: `
 **Creates a new service order for the authenticated company**
 
+The order is opened for a customer's device (\`deviceId\`, see \`/companies/:subdomain/devices\`); its owner becomes the order's client and the device moves to \`in_shop\`.
+
 The \`company_id\` and \`employee_id\` are inferred from the authenticated employee session (\`req.user\`).
 Photo uploads are assumed to have been completed beforehand via pre-signed URLs; this endpoint only persists metadata.
 
@@ -106,7 +116,7 @@ Rules:
 - The \`subdomain\` in the URL must match the employee's company.
 `,
 	params: getCompanyNestedDataSchema,
-	body: createServiceOrderMockSchema,
+	body: createServiceOrderSchema,
 	response: {
 		201: zodResponseSchema({
 			status: 201,
@@ -115,14 +125,25 @@ Rules:
 			code: "create_service_order_success",
 			data: createServiceOrderResponseDataSchema,
 		}).describe("Service order created successfully."),
-		400: zodResponseSchema({
-			status: 400,
-			error: "Bad Request",
-			code: "upload_not_found",
-			message:
-				"One or more uploads were not found or do not belong to this company.",
-			data: null,
-		}).describe("Upload was not found or does not belong to this company."),
+		400: z
+			.union([
+				zodResponseSchema({
+					status: 400,
+					error: "Bad Request",
+					code: "upload_not_found",
+					message:
+						"One or more uploads were not found or do not belong to this company.",
+					data: null,
+				}),
+				zodResponseSchema({
+					status: 400,
+					error: "Bad Request",
+					code: "service_order_device_not_found",
+					message: "The device does not exist in this company.",
+					data: null,
+				}),
+			])
+			.describe("An upload or the device does not belong to this company."),
 		403: z
 			.union([
 				zodResponseSchema({
@@ -141,38 +162,7 @@ Rules:
 				}),
 			])
 			.describe("User is not allowed to perform this action."),
-		404: z
-			.union([
-				zodResponseSchema({
-					status: 404,
-					error: "Not Found",
-					code: "company_not_found",
-					message: "There's no companies bound to your account",
-					data: null,
-				}),
-				zodResponseSchema({
-					status: 404,
-					error: "Not Found",
-					code: "client_not_found",
-					message: "Client not found.",
-					data: null,
-				}),
-				zodResponseSchema({
-					status: 404,
-					error: "Not Found",
-					code: "device_brand_not_found",
-					message: "Device brand not found.",
-					data: null,
-				}),
-				zodResponseSchema({
-					status: 404,
-					error: "Not Found",
-					code: "device_category_not_found",
-					message: "Device category not found.",
-					data: null,
-				}),
-			])
-			.describe("Referenced resource was not found."),
+		404: companyScopedErrors[404],
 	},
 	security: [{ JWT: [] }],
 };
@@ -199,6 +189,75 @@ const serviceOrderNotFound = notFoundError(
 	"service_order_not_found",
 	"Service order not found."
 );
+const getServiceOrderSchema: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Get service order",
+	description: `
+**Retrieves a service order** with its customer, device (model, maker, category), technician and photos.
+`,
+	params: serviceOrderParams,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Service order retrieved successfully.",
+			code: "get_service_order_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Service order retrieved successfully."),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const patchServiceOrderSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Update service order",
+	description: `
+**Edits the reported issue and the notes of a service order.**
+`,
+	params: serviceOrderParams,
+	body: patchServiceOrderSchema,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Service order updated successfully.",
+			code: "patch_service_order_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Service order updated successfully."),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const changeServiceOrderStatusSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Change service order status",
+	description: `
+**Moves a service order to another status.** The device follows it:
+
+- \`ready\`: the device is \`ready_for_pickup\`
+- \`delivered\`: the device is \`with_customer\`
+- any other status: the device is \`in_shop\`
+`,
+	params: serviceOrderParams,
+	body: changeServiceOrderStatusSchema,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Service order status updated successfully.",
+			code: "change_service_order_status_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Service order status updated successfully."),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
 const itemNotFound = notFoundError(
 	"service_order_item_not_found",
 	"Item not found in this service order."
@@ -298,6 +357,9 @@ const deleteServiceOrderItemSchema: FastifySchema = {
 export const serviceOrdersDocs = {
 	getCompanyServiceOrdersSchema,
 	createServiceOrderSchema: createServiceOrderSchemaDoc,
+	getServiceOrderSchema,
+	patchServiceOrderSchema: patchServiceOrderSchemaDoc,
+	changeServiceOrderStatusSchema: changeServiceOrderStatusSchemaDoc,
 	listServiceOrderItemsSchema,
 	addServiceOrderItemSchema: addServiceOrderItemSchemaDoc,
 	patchServiceOrderItemSchema: patchServiceOrderItemSchemaDoc,

@@ -58,7 +58,15 @@ export const validation = {
 	apiKey: {
 		expirationInPast: "The expiration date must be in the future.",
 	},
+	device: {
+		clientRequired: "Pick the customer who owns the device.",
+		modelRequired: "Pick the device model.",
+		imeiMax: "The IMEI exceeds {{count}} characters.",
+		serialNumberMax: "The serial number exceeds {{count}} characters.",
+		notesMax: "The notes exceed {{count}} characters.",
+	},
 	serviceOrder: {
+		deviceRequired: "Pick the device being repaired.",
 		itemInvalid: "Pick an item from the catalog.",
 		itemQuantityRequired: "Enter the quantity.",
 		itemQuantityInteger: "The quantity must be a whole number.",

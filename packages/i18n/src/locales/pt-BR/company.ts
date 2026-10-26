@@ -6,28 +6,62 @@ export const company: Translated<typeof source> = {
 		title: "Empresa",
 		description: "Dados exibidos nos seus orçamentos e outros documentos.",
 	},
+	sections: {
+		identity: {
+			title: "Identidade",
+			description:
+				"Como a sua assistência aparece para os clientes e para a equipe.",
+		},
+		contact: {
+			title: "Contato",
+			description: "Onde os clientes encontram e falam com você.",
+		},
+	},
 	logo: {
 		title: "Logo",
 		description:
-			"Aparece no cabeçalho dos seus documentos. PNG, JPG ou WebP de até 5 MB.",
+			"Aparece na barra lateral do painel para toda a equipe e no cabeçalho dos seus orçamentos.",
+		pickHint: "Arraste uma imagem ou clique para escolher",
 		upload: "Enviar logo",
 		replace: "Trocar logo",
 		remove: "Remover",
 		alt: "Logo da empresa",
-		uploading: "Enviando...",
-		tooLarge: "O logo deve ter no máximo 5 MB.",
+		dialogTitle: "Logo da empresa",
+		stepSelect: "Escolha uma imagem do seu logo.",
+		stepCrop: "Ajuste o enquadramento do seu logo.",
+		stepUploading: "Salvando...",
+		saving: "Enviando seu logo...",
+		dropzoneTitle: "Envie seu logo",
+		dropzoneHint: "Arraste aqui ou clique para escolher",
+		uploaded: "Logo atualizado.",
+		removed: "Logo removido.",
+		uploadError: "Não foi possível enviar o logo.",
 	},
 	form: {
 		name: "Razão social",
+		nameDescription:
+			"Aparece no topo dos orçamentos, nos e-mails enviados aos clientes e no portal do cliente.",
 		cnpj: "CNPJ",
-		cnpjDescription: "O CNPJ não pode ser alterado.",
+		cnpjDescription:
+			"Sai nos seus orçamentos. Foi definido no cadastro da empresa e não pode ser alterado.",
 		address: "Endereço",
+		addressDescription:
+			"Onde os clientes deixam e retiram os aparelhos. Aparece nos orçamentos e no portal do cliente.",
 		addressPlaceholder: "Rua, número, cidade - UF",
 		email: "E-mail de contato",
+		emailDescription:
+			"Onde os clientes falam com a assistência. Aparece nos orçamentos e no portal do cliente.",
 		emailPlaceholder: "contato@suaassistencia.com.br",
 		phone: "Telefone",
+		phonePlaceholder: "(11) 3456-7890",
+		phoneDescription:
+			"Telefone de contato que aparece nos orçamentos e no portal do cliente.",
 		website: "Site",
+		websiteDescription:
+			"Opcional. Site ou rede social da assistência, exibido nos orçamentos e no portal do cliente.",
 		websitePlaceholder: "https://suaassistencia.com.br",
 		save: "Salvar alterações",
+		discard: "Descartar",
+		saveHint: "Somente administradores podem alterar estes dados.",
 	},
 };

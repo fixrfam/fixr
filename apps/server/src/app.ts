@@ -36,6 +36,7 @@ import { categoriesRoutes } from "./modules/categories/routes";
 import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
+import { devicesRoutes } from "./modules/devices/routes";
 import { employeesRoutes } from "./modules/employees/routes";
 import {
 	estimateLinksRoutes,
@@ -102,6 +103,11 @@ const OPENAPI_TAGS = [
 	{
 		name: "Clients",
 		description: "Manage the company's clients (customers).",
+	},
+	{
+		name: "Customer Devices",
+		description:
+			"The customers' devices: a catalog model owned by a customer, with where it is now.",
 	},
 	{
 		name: "Service Orders",
@@ -292,6 +298,9 @@ export async function buildApp(
 	});
 	await app.register(clientsRoutes, {
 		prefix: "/companies/:subdomain/clients",
+	});
+	await app.register(devicesRoutes, {
+		prefix: "/companies/:subdomain/devices",
 	});
 	await app.register(serviceOrdersRoutes, {
 		prefix: "/companies/:subdomain/service-orders",

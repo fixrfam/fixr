@@ -1,6 +1,7 @@
 import { roleAbilities } from "@fixr/permissions/abilities";
 import { COMPANY_A, type SeededRole } from "../fixtures/data";
 import { authFile, expect, test } from "../fixtures/test";
+import { API_URL } from "../support/env";
 
 const ALFA = `/dashboard/${COMPANY_A.subdomain}`;
 
@@ -8,16 +9,31 @@ test.describe("parts (admin)", () => {
 	test.use({ storageState: authFile("admin") });
 
 	test("registers a part and finds it in the table", async ({ page }) => {
+		// A part needs a supplier, and none is seeded. 409: a retry already made it.
+		const supplier = await page.request.post(
+			`${API_URL}/companies/${COMPANY_A.subdomain}/suppliers`,
+			{
+				data: {
+					name: "Fornecedor E2E",
+					cnpj: "11222333000181",
+					contact: "Carlos",
+					phone: "11987654321",
+					email: "fornecedor@e2e.test",
+				},
+			}
+		);
+		expect([201, 409]).toContain(supplier.status());
+
 		await page.goto(`${ALFA}/parts`);
 		await expect(page.getByRole("heading", { name: "Peças" })).toBeVisible();
 
 		await page.getByRole("link", { name: /Nova peça/ }).click();
 		await page.getByLabel("SKU").fill("BAT-E2E-001");
 		await page.getByLabel("Nome").fill("Bateria E2E");
-		await page.getByRole("combobox").first().click();
-		await page.getByRole("option", { name: "Baterias" }).click();
-		await page.getByRole("combobox").nth(1).click();
-		await page.getByRole("option").first().click();
+		await page.getByRole("button", { name: "Baterias", exact: true }).click();
+		// The supplier picker is the form's only combobox.
+		await page.getByRole("combobox").click();
+		await page.getByRole("option", { name: /Fornecedor E2E/ }).click();
 		await page.getByLabel("Preço de custo (R$)").fill("80");
 		await page.getByLabel("Preço de venda (R$)").fill("150");
 		await page.getByLabel("Estoque", { exact: true }).fill("5");

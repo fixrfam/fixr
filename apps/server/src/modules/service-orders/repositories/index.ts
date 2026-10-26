@@ -4,6 +4,7 @@ import {
 	eq,
 	gte,
 	inArray,
+	isNull,
 	like,
 	lte,
 	or,
@@ -11,9 +12,11 @@ import {
 } from "@fixr/db/connection";
 import {
 	clients,
+	devices,
 	employees,
 	modelCategories,
 	modelMakers,
+	models,
 	parts,
 	serviceOrderImages,
 	serviceOrderItems,
@@ -21,10 +24,12 @@ import {
 	services,
 	uploads,
 } from "@fixr/db/schema";
+import type { deviceStatuses } from "@fixr/schemas/devices";
 import type {
-	createServiceOrderMockSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
 	serviceOrderItemTypes,
+	serviceOrderStatuses,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
@@ -42,19 +47,29 @@ export const serviceOrdersListSelect = {
 	companyId: serviceOrders.companyId,
 	clientId: serviceOrders.clientId,
 	employeeId: serviceOrders.employeeId,
-	deviceMakerId: serviceOrders.deviceMakerId,
-	deviceCategoryId: serviceOrders.deviceCategoryId,
-	deviceModel: serviceOrders.deviceModel,
-	imei: serviceOrders.imei,
+	deviceId: serviceOrders.deviceId,
 	reportedDefect: serviceOrders.reportedDefect,
 	observations: serviceOrders.observations,
 	status: serviceOrders.status,
 	createdAt: serviceOrders.createdAt,
 	updatedAt: serviceOrders.updatedAt,
-	client: { id: clients.id, name: clients.name },
+	client: {
+		id: clients.id,
+		name: clients.name,
+		cpf: clients.cpf,
+		phone: clients.phone,
+		email: clients.email,
+	},
 	employee: { id: employees.id, name: employees.name },
-	deviceCategory: { id: modelCategories.id, name: modelCategories.name },
+	device: {
+		id: devices.id,
+		imei: devices.imei,
+		serialNumber: devices.serialNumber,
+		status: devices.status,
+	},
+	model: { id: models.id, name: models.name, slug: models.slug },
 	deviceMaker: { id: modelMakers.id, name: modelMakers.name },
+	deviceCategory: { id: modelCategories.id, name: modelCategories.name },
 };
 
 export const serviceOrdersListJoins = [
@@ -70,15 +85,35 @@ export const serviceOrdersListJoins = [
 	},
 	{
 		type: "inner" as const,
-		table: modelCategories,
-		on: eq(modelCategories.id, serviceOrders.deviceCategoryId),
+		table: devices,
+		on: eq(devices.id, serviceOrders.deviceId),
+	},
+	{
+		type: "inner" as const,
+		table: models,
+		on: eq(models.id, devices.modelId),
 	},
 	{
 		type: "inner" as const,
 		table: modelMakers,
-		on: eq(modelMakers.id, serviceOrders.deviceMakerId),
+		on: eq(modelMakers.id, models.makerId),
+	},
+	{
+		type: "left" as const,
+		table: modelCategories,
+		on: eq(modelCategories.id, models.categoryId),
 	},
 ];
+
+/** Where the device is while its order is in a status. */
+export function deviceStatusFor(
+	status: z.infer<typeof serviceOrderStatuses>
+): z.infer<typeof deviceStatuses> {
+	if (status === "delivered") {
+		return "with_customer";
+	}
+	return status === "ready" ? "ready_for_pickup" : "in_shop";
+}
 
 export class ServiceOrdersRepository {
 	@Cached({ ttl: 3600, key: "service-orders:employee" })
@@ -91,34 +126,20 @@ export class ServiceOrdersRepository {
 		return employee ?? null;
 	}
 
-	@Cached({ ttl: 3600, key: "service-orders:client" })
-	static async queryClientById(clientId: string) {
-		const [client] = await db
-			.select()
-			.from(clients)
-			.where(eq(clients.id, clientId))
+	/** An active device of the company, with its owner. */
+	static async queryDeviceOfCompany(deviceId: string, companyId: string) {
+		const [device] = await db
+			.select({ id: devices.id, clientId: devices.clientId })
+			.from(devices)
+			.where(
+				and(
+					eq(devices.id, deviceId),
+					eq(devices.companyId, companyId),
+					isNull(devices.deletedAt)
+				)
+			)
 			.limit(1);
-		return client ?? null;
-	}
-
-	@Cached({ ttl: 3600, key: "service-orders:device-maker" })
-	static async queryDeviceMakerById(deviceMakerId: string) {
-		const [maker] = await db
-			.select()
-			.from(modelMakers)
-			.where(eq(modelMakers.id, deviceMakerId))
-			.limit(1);
-		return maker ?? null;
-	}
-
-	@Cached({ ttl: 3600, key: "service-orders:device-category" })
-	static async queryDeviceCategoryById(deviceCategoryId: string) {
-		const [category] = await db
-			.select()
-			.from(modelCategories)
-			.where(eq(modelCategories.id, deviceCategoryId))
-			.limit(1);
-		return category ?? null;
+		return device ?? null;
 	}
 
 	static buildListFilter(
@@ -136,9 +157,7 @@ export class ServiceOrdersRepository {
 		const conditions: SQL[] = [eq(serviceOrders.companyId, companyId)];
 
 		if (filters.deviceCategoryId) {
-			conditions.push(
-				eq(serviceOrders.deviceCategoryId, filters.deviceCategoryId)
-			);
+			conditions.push(eq(models.categoryId, filters.deviceCategoryId));
 		}
 		if (filters.employeeId) {
 			conditions.push(eq(serviceOrders.employeeId, filters.employeeId));
@@ -155,7 +174,9 @@ export class ServiceOrdersRepository {
 		if (filters.query) {
 			conditions.push(
 				or(
-					like(serviceOrders.deviceModel, `%${filters.query}%`),
+					like(models.name, `%${filters.query}%`),
+					like(modelMakers.name, `%${filters.query}%`),
+					like(devices.imei, `%${filters.query}%`),
 					like(serviceOrders.reportedDefect, `%${filters.query}%`),
 					like(clients.name, `%${filters.query}%`)
 				)!
@@ -169,27 +190,32 @@ export class ServiceOrdersRepository {
 	static async createWithPhotos({
 		companyId,
 		employeeId,
+		clientId,
 		data,
 	}: {
 		companyId: string;
 		employeeId: string;
-		data: z.infer<typeof createServiceOrderMockSchema>;
+		clientId: string;
+		data: z.infer<typeof createServiceOrderSchema>;
 	}) {
 		return await db.transaction(async (tx) => {
 			const [serviceOrderId] = await tx
 				.insert(serviceOrders)
 				.values({
 					companyId,
-					clientId: data.clientId,
+					clientId,
 					employeeId,
-					deviceMakerId: data.deviceBrandId,
-					deviceCategoryId: data.deviceCategoryId,
-					deviceModel: data.deviceModel,
-					imei: data.imei ?? null,
+					deviceId: data.deviceId,
 					reportedDefect: data.reportedDefect,
 					observations: data.observations ?? null,
 				})
 				.$returningId();
+
+			// The device was just dropped off.
+			await tx
+				.update(devices)
+				.set({ status: deviceStatusFor("pending") })
+				.where(eq(devices.id, data.deviceId));
 
 			if (data.photos.length > 0) {
 				const uploadIds = data.photos.map((p) => p.uploadId);
@@ -237,12 +263,79 @@ export class ServiceOrdersRepository {
 		});
 	}
 
+	/** One order of the company with its customer, device, technician and photos. */
+	static async queryServiceOrderDetail(
+		serviceOrderId: string,
+		companyId: string
+	) {
+		const [serviceOrder] = await db
+			.select(serviceOrdersListSelect)
+			.from(serviceOrders)
+			.innerJoin(clients, eq(clients.id, serviceOrders.clientId))
+			.innerJoin(employees, eq(employees.id, serviceOrders.employeeId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId))
+			.where(
+				and(
+					eq(serviceOrders.id, serviceOrderId),
+					eq(serviceOrders.companyId, companyId)
+				)
+			)
+			.limit(1);
+
+		if (!serviceOrder) {
+			return null;
+		}
+
+		const photos = await db
+			.select()
+			.from(serviceOrderImages)
+			.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId));
+
+		return { ...serviceOrder, photos };
+	}
+
+	static async updateServiceOrder(
+		serviceOrderId: string,
+		values: Partial<typeof serviceOrders.$inferInsert>
+	) {
+		await db
+			.update(serviceOrders)
+			.set(values)
+			.where(eq(serviceOrders.id, serviceOrderId));
+	}
+
+	/** Move the order to `status` and its device to where that status leaves it. */
+	@InvalidateCache({ patterns: ["service-orders:*"] })
+	static async updateStatus({
+		serviceOrderId,
+		deviceId,
+		status,
+	}: {
+		serviceOrderId: string;
+		deviceId: string;
+		status: z.infer<typeof serviceOrderStatuses>;
+	}) {
+		await db.transaction(async (tx) => {
+			await tx
+				.update(serviceOrders)
+				.set({ status })
+				.where(eq(serviceOrders.id, serviceOrderId));
+			await tx
+				.update(devices)
+				.set({ status: deviceStatusFor(status) })
+				.where(eq(devices.id, deviceId));
+		});
+	}
+
 	static async queryServiceOrderOfCompany(
 		serviceOrderId: string,
 		companyId: string
 	) {
 		const [serviceOrder] = await db
-			.select({ id: serviceOrders.id })
+			.select({ id: serviceOrders.id, deviceId: serviceOrders.deviceId })
 			.from(serviceOrders)
 			.where(
 				and(

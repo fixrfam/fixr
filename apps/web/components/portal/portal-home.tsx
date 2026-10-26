@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BellDot, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { deviceName } from "@/lib/format";
 import { portalApi } from "@/lib/services/portal";
 import { PortalHeader } from "./portal-header";
 import { PortalStatusBadge } from "./portal-status-badge";
@@ -40,7 +41,7 @@ export function PortalHome() {
 								<div className="min-w-0 flex-1 space-y-1">
 									<div className="flex flex-wrap items-center gap-2">
 										<span className="font-medium">
-											{order.deviceMaker} {order.deviceModel}
+											{deviceName(order.deviceMaker, order.deviceModel)}
 										</span>
 										<PortalStatusBadge status={order.status} />
 									</div>

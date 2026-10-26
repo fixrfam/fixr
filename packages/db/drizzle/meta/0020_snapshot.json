@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e1ba30d7-dda8-4377-8218-11c0bb237e37",
-  "prevId": "0043d514-6781-44a2-b02f-91cc149016b0",
+  "id": "ec2d825b-8bca-49bf-a61b-0e2182de1c6f",
+  "prevId": "166adb30-4cc3-46f6-b2de-02551af4718d",
   "tables": {
     "api_keys": {
       "name": "api_keys",
@@ -55,7 +55,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "expires_at": {
           "name": "expires_at",
@@ -356,6 +356,195 @@
       },
       "checkConstraint": {}
     },
+    "model_makers": {
+      "name": "model_makers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "device_count": {
+          "name": "device_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "page_count": {
+          "name": "page_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "model_makers_id": {
+          "name": "model_makers_id",
+          "columns": ["id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "devices": {
+      "name": "devices",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "model_id": {
+          "name": "model_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "imei": {
+          "name": "imei",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "serial_number": {
+          "name": "serial_number",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('in_shop','ready_for_pickup','with_customer')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'with_customer'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "devices_company_id_companies_id_fk": {
+          "name": "devices_company_id_companies_id_fk",
+          "tableFrom": "devices",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "devices_client_id_clients_id_fk": {
+          "name": "devices_client_id_clients_id_fk",
+          "tableFrom": "devices",
+          "tableTo": "clients",
+          "columnsFrom": ["client_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "devices_model_id_models_id_fk": {
+          "name": "devices_model_id_models_id_fk",
+          "tableFrom": "devices",
+          "tableTo": "models",
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "devices_id": {
+          "name": "devices_id",
+          "columns": ["id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "employees": {
       "name": "employees",
       "columns": {
@@ -448,297 +637,6 @@
         "employees_cpf_unique": {
           "name": "employees_cpf_unique",
           "columns": ["cpf"]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "estimate_items": {
-      "name": "estimate_items",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "estimate_id": {
-          "name": "estimate_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "item_type": {
-          "name": "item_type",
-          "type": "enum('part','service')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "part_id": {
-          "name": "part_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "service_id": {
-          "name": "service_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(120)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "decimal(10, 2)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "position": {
-          "name": "position",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "estimate_items_estimate_id_estimates_id_fk": {
-          "name": "estimate_items_estimate_id_estimates_id_fk",
-          "tableFrom": "estimate_items",
-          "tableTo": "estimates",
-          "columnsFrom": ["estimate_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "estimate_items_part_id_parts_id_fk": {
-          "name": "estimate_items_part_id_parts_id_fk",
-          "tableFrom": "estimate_items",
-          "tableTo": "parts",
-          "columnsFrom": ["part_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "estimate_items_service_id_services_id_fk": {
-          "name": "estimate_items_service_id_services_id_fk",
-          "tableFrom": "estimate_items",
-          "tableTo": "services",
-          "columnsFrom": ["service_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "estimate_items_id": {
-          "name": "estimate_items_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "estimates": {
-      "name": "estimates",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "company_id": {
-          "name": "company_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "service_order_id": {
-          "name": "service_order_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "client_id": {
-          "name": "client_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "number": {
-          "name": "number",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "estimate_status": {
-          "name": "estimate_status",
-          "type": "enum('draft','sent','approved','rejected')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'draft'"
-        },
-        "discount_percentage": {
-          "name": "discount_percentage",
-          "type": "decimal(5, 2)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "valid_until": {
-          "name": "valid_until",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "public_token_hash": {
-          "name": "public_token_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "sent_to": {
-          "name": "sent_to",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "responded_at": {
-          "name": "responded_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "rejection_reason": {
-          "name": "rejection_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "estimates_company_id_companies_id_fk": {
-          "name": "estimates_company_id_companies_id_fk",
-          "tableFrom": "estimates",
-          "tableTo": "companies",
-          "columnsFrom": ["company_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "estimates_service_order_id_service_orders_id_fk": {
-          "name": "estimates_service_order_id_service_orders_id_fk",
-          "tableFrom": "estimates",
-          "tableTo": "service_orders",
-          "columnsFrom": ["service_order_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "estimates_client_id_clients_id_fk": {
-          "name": "estimates_client_id_clients_id_fk",
-          "tableFrom": "estimates",
-          "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "estimates_created_by_employees_id_fk": {
-          "name": "estimates_created_by_employees_id_fk",
-          "tableFrom": "estimates",
-          "tableTo": "employees",
-          "columnsFrom": ["created_by"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "estimates_id": {
-          "name": "estimates_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {
-        "estimates_public_token_hash_unique": {
-          "name": "estimates_public_token_hash_unique",
-          "columns": ["public_token_hash"]
-        },
-        "estimates_number_company_unique": {
-          "name": "estimates_number_company_unique",
-          "columns": ["company_id", "number"]
         }
       },
       "checkConstraint": {}
@@ -859,72 +757,6 @@
       "compositePrimaryKeys": {
         "model_images_id": {
           "name": "model_images_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "model_makers": {
-      "name": "model_makers",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "url": {
-          "name": "url",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "device_count": {
-          "name": "device_count",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "page_count": {
-          "name": "page_count",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "model_makers_id": {
-          "name": "model_makers_id",
           "columns": ["id"]
         }
       },
@@ -1603,6 +1435,92 @@
       },
       "checkConstraint": {}
     },
+    "service_order_images": {
+      "name": "service_order_images",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "service_order_id": {
+          "name": "service_order_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "employee_id": {
+          "name": "employee_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "upload_id": {
+          "name": "upload_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "service_order_images_service_order_id_service_orders_id_fk": {
+          "name": "service_order_images_service_order_id_service_orders_id_fk",
+          "tableFrom": "service_order_images",
+          "tableTo": "service_orders",
+          "columnsFrom": ["service_order_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "service_order_images_employee_id_employees_id_fk": {
+          "name": "service_order_images_employee_id_employees_id_fk",
+          "tableFrom": "service_order_images",
+          "tableTo": "employees",
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "service_order_images_upload_id_uploads_id_fk": {
+          "name": "service_order_images_upload_id_uploads_id_fk",
+          "tableFrom": "service_order_images",
+          "tableTo": "uploads",
+          "columnsFrom": ["upload_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "service_order_images_id": {
+          "name": "service_order_images_id",
+          "columns": ["id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "service_order_items": {
       "name": "service_order_items",
       "columns": {
@@ -1719,92 +1637,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "service_order_images": {
-      "name": "service_order_images",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "service_order_id": {
-          "name": "service_order_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "employee_id": {
-          "name": "employee_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "upload_id": {
-          "name": "upload_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "service_order_images_service_order_id_service_orders_id_fk": {
-          "name": "service_order_images_service_order_id_service_orders_id_fk",
-          "tableFrom": "service_order_images",
-          "tableTo": "service_orders",
-          "columnsFrom": ["service_order_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "service_order_images_employee_id_employees_id_fk": {
-          "name": "service_order_images_employee_id_employees_id_fk",
-          "tableFrom": "service_order_images",
-          "tableTo": "employees",
-          "columnsFrom": ["employee_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "service_order_images_upload_id_uploads_id_fk": {
-          "name": "service_order_images_upload_id_uploads_id_fk",
-          "tableFrom": "service_order_images",
-          "tableTo": "uploads",
-          "columnsFrom": ["upload_id"],
-          "columnsTo": ["id"],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "service_order_images_id": {
-          "name": "service_order_images_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "service_orders": {
       "name": "service_orders",
       "columns": {
@@ -1834,6 +1666,13 @@
           "type": "varchar(25)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "device_id": {
+          "name": "device_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "device_brand_id": {
@@ -1928,6 +1767,15 @@
           "tableFrom": "service_orders",
           "tableTo": "employees",
           "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "service_orders_device_id_devices_id_fk": {
+          "name": "service_orders_device_id_devices_id_fk",
+          "tableFrom": "service_orders",
+          "tableTo": "devices",
+          "columnsFrom": ["device_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
@@ -2059,7 +1907,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "test_instructions": {
           "name": "test_instructions",
@@ -2067,7 +1915,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "test_parameters": {
           "name": "test_parameters",
@@ -2075,7 +1923,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "created_at": {
           "name": "created_at",

@@ -2,6 +2,46 @@ import type { Translated } from "../../types";
 import type { clients as source } from "../en/clients";
 
 export const clients: Translated<typeof source> = {
+	page: {
+		title: "Clientes",
+		description: "As pessoas que trazem aparelhos para consertar.",
+		newTitle: "Novo cliente",
+		newDescription: "Cadastre um cliente preenchendo os campos abaixo.",
+	},
+	table: {
+		search: "Busque por nome, CPF, telefone ou email...",
+		create: "Novo cliente",
+		headers: {
+			name: "Nome",
+			cpf: "CPF",
+			phone: "Telefone",
+			email: "Email",
+			city: "Cidade",
+		},
+	},
+	detail: {
+		back: "Voltar",
+		description: "Contato, aparelhos e ordens de serviço do cliente.",
+		dataTitle: "Dados do cliente",
+		dataDescription: "Contato e identificação.",
+		edit: "Editar",
+		editTitle: "Editar cliente",
+		editDescription: "Atualize os dados de contato do cliente.",
+		devicesTitle: "Aparelhos",
+		devicesDescription: "Aparelhos que este cliente trouxe para a loja.",
+		addDevice: "Adicionar aparelho",
+		ordersTitle: "Ordens de serviço",
+		ordersDescription: "As últimas ordens de serviço deste cliente.",
+		noOrders: "Nenhuma ordem de serviço ainda.",
+		notFound: "Cliente não encontrado.",
+		delete: "Excluir cliente",
+		deleteTitle: "Excluir este cliente?",
+		deleteDescription:
+			"Ele sai da lista, mas os aparelhos e as ordens de serviço são mantidos.",
+		deleteConfirm: "Excluir",
+		deleteCancel: "Cancelar",
+		deleted: "Cliente excluído.",
+	},
 	form: {
 		nameLabel: "Nome",
 		namePlaceholder: "João da Silva",
@@ -18,6 +58,8 @@ export const clients: Translated<typeof source> = {
 		statePlaceholder: "UF",
 		cityLabel: "Cidade",
 		cityPlaceholder: "Cidade",
+		save: "Salvar alterações",
+		updated: "Cliente atualizado!",
 		submit: "Finalizar cadastro",
 		success: "Cliente cadastrado com sucesso!",
 		error: "Erro ao cadastrar cliente",

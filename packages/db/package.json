@@ -9,7 +9,12 @@
     "db:studio": "bunx --bun drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts",
     "db:seed": "tsx src/seed/index.ts",
-    "check-types": "tsc --noEmit"
+    "db:catalog": "bun src/catalog/import.ts",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:ci": "vitest run"
   },
   "exports": {
     "./connection": {
@@ -29,9 +34,11 @@
     "@types/bun": "catalog:",
     "@types/eslint": "^8.56.5",
     "drizzle-kit": "^0.31.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1051.0",
     "@paralleldrive/cuid2": "^3.3.0",
     "bcryptjs": "^2.4.3",
     "chalk": "^5.6.2",

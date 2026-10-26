@@ -14,6 +14,22 @@ interface Catalog {
 	suppliers: SupplierRow[];
 }
 
+/** Case insensitive "contains", like the API's LIKE on a MySQL `_ci` column. */
+function contains(value: string | null | undefined, query: string) {
+	return (value ?? "").toLowerCase().includes(query.toLowerCase());
+}
+
+/** The API's three orders. The mocks have no timestamps: list order stands in. */
+function sortRecords<T extends { name: string }>(
+	records: T[],
+	sort: string | null
+) {
+	if (sort === "name") {
+		return [...records].sort((a, b) => a.name.localeCompare(b.name));
+	}
+	return sort === "older" ? records : [...records].reverse();
+}
+
 /** Paginated list response, shaped like apps/server's. */
 function page<T>(records: T[], request: Request) {
 	const url = new URL(request.url);
@@ -21,6 +37,13 @@ function page<T>(records: T[], request: Request) {
 	const perPage = Number(url.searchParams.get("perPage") ?? 10);
 	const slice = records.slice((current - 1) * perPage, current * perPage);
 	const totalPages = Math.ceil(records.length / perPage);
+
+	if (records.length > 0 && current > totalPages) {
+		return HttpResponse.json(
+			{ status: 404, code: "page_out_of_bounds" },
+			{ status: 404 }
+		);
+	}
 
 	return HttpResponse.json(
 		envelope({
@@ -51,7 +74,31 @@ export function serveInventory(
 	const writes: { method: string; path: string; body: unknown }[] = [];
 	/** Path of every list the dashboard fetched. */
 	const reads: string[] = [];
+	/** Query of every list request, to check what the tables ask the API for. */
+	const listQueries: { path: string; params: Record<string, string> }[] = [];
 	const base = `/companies/${subdomain}`;
+
+	function list(request: Request) {
+		const url = new URL(request.url);
+		reads.push(url.pathname);
+		listQueries.push({
+			path: url.pathname,
+			params: Object.fromEntries(url.searchParams),
+		});
+		return url.searchParams;
+	}
+
+	function withSupplier(part: PartRow): PartRow {
+		const supplier = catalog.suppliers.find((s) => s.id === part.supplierId);
+		return {
+			...part,
+			supplier:
+				part.supplier ?? (supplier && { id: supplier.id, name: supplier.name }),
+		};
+	}
+
+	const notFound = () =>
+		HttpResponse.json({ status: 404, code: "not_found" }, { status: 404 });
 
 	async function record(request: Request) {
 		const body = await request.json();
@@ -65,16 +112,56 @@ export function serveInventory(
 
 	server.use(
 		http.get(apiUrl(`${base}/parts`), ({ request }) => {
-			reads.push(new URL(request.url).pathname);
-			return page(catalog.parts, request);
+			const params = list(request);
+			const query = params.get("query");
+			const category = params.get("category");
+			const supplierId = params.get("supplierId");
+			const parts = catalog.parts.filter(
+				(part) =>
+					(!query || contains(part.name, query) || contains(part.sku, query)) &&
+					(!category || part.category === category) &&
+					(!supplierId || part.supplierId === supplierId) &&
+					(params.get("lowStock") !== "true" || part.stock <= part.minStock)
+			);
+			return page(
+				sortRecords(parts, params.get("sort")).map(withSupplier),
+				request
+			);
+		}),
+		http.get(apiUrl(`${base}/parts/:id`), ({ params }) => {
+			const part = catalog.parts.find((p) => p.id === params.id);
+			return part
+				? HttpResponse.json(envelope(withSupplier(part)))
+				: notFound();
 		}),
 		http.get(apiUrl(`${base}/services`), ({ request }) => {
-			reads.push(new URL(request.url).pathname);
-			return page(catalog.services, request);
+			const params = list(request);
+			const query = params.get("query");
+			const deviceCategory = params.get("deviceCategory");
+			const services = catalog.services.filter(
+				(service) =>
+					(!query ||
+						contains(service.name, query) ||
+						contains(service.description, query)) &&
+					(!deviceCategory || service.deviceCategories.includes(deviceCategory))
+			);
+			return page(sortRecords(services, params.get("sort")), request);
+		}),
+		http.get(apiUrl(`${base}/services/:id`), ({ params }) => {
+			const service = catalog.services.find((s) => s.id === params.id);
+			return service ? HttpResponse.json(envelope(service)) : notFound();
 		}),
 		http.get(apiUrl(`${base}/suppliers`), ({ request }) => {
-			reads.push(new URL(request.url).pathname);
-			return page(catalog.suppliers, request);
+			const params = list(request);
+			const query = params.get("query");
+			const suppliers = catalog.suppliers.filter(
+				(supplier) =>
+					!query ||
+					contains(supplier.name, query) ||
+					contains(supplier.cnpj, query) ||
+					contains(supplier.contact, query)
+			);
+			return page(sortRecords(suppliers, params.get("sort")), request);
 		}),
 		http.post(apiUrl(`${base}/parts`), async ({ request }) => {
 			const part = { ...(await record(request)), id: `part-${writes.length}` };
@@ -134,5 +221,5 @@ export function serveInventory(
 		})
 	);
 
-	return { catalog, writes, reads };
+	return { catalog, writes, reads, listQueries };
 }

@@ -19,7 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { formatPhone } from "@/lib/format";
+import { deviceName, formatPhone } from "@/lib/format";
 import {
 	type PortalEstimate,
 	portalApi,
@@ -203,8 +203,7 @@ export function PortalServiceOrder({ id }: { id: string }) {
 				<div>
 					<h1 className="font-heading font-semibold text-2xl md:text-3xl">
 						{t("portal.detail.title", {
-							maker: order.deviceMaker,
-							model: order.deviceModel,
+							device: deviceName(order.deviceMaker, order.deviceModel),
 						})}
 					</h1>
 					<p className="text-muted-foreground text-sm">

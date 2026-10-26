@@ -46,7 +46,7 @@ import {
 	type EstimateStatus,
 	estimatesApi,
 } from "@/lib/services/estimates";
-import { SendPortalAccessDialog } from "../clients/send-portal-access-dialog";
+import { SendPortalAccessDialog } from "../customers/send-portal-access-dialog";
 import { EstimateStatusBadge } from "./estimate-status-badge";
 import { SendEstimateDialog } from "./send-estimate-dialog";
 import {

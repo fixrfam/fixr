@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import { json, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -12,6 +13,9 @@ import { employees } from "./employees";
  * `prefix` is the public, uniquely indexed handle used to look a key up in a
  * single query before the secret is verified.
  */
+/** A `[]` default as an expression: TiDB rejects JSON literal defaults (`DEFAULT ('[]')`). */
+const JSON_EMPTY_ARRAY = sql`(json_array())`;
+
 export const apiKeys = mysqlTable("api_keys", {
 	id: varchar("id", { length: 25 })
 		.$defaultFn(() => createId())
@@ -26,7 +30,7 @@ export const apiKeys = mysqlTable("api_keys", {
 		.references(() => companies.id, { onDelete: "cascade" })
 		.notNull(),
 	/** Permission strings that narrow the creator's role. `[]` means "inherit the role as-is". */
-	scopes: json("scopes").$type<string[]>().notNull().default([]),
+	scopes: json("scopes").$type<string[]>().notNull().default(JSON_EMPTY_ARRAY),
 	expiresAt: timestamp("expires_at"),
 	lastUsedAt: timestamp("last_used_at"),
 	revokedAt: timestamp("revoked_at"),

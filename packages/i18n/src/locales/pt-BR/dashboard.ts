@@ -33,6 +33,8 @@ export const dashboard: Translated<typeof source> = {
 		support: "Suporte",
 		customers: "Clientes",
 		devices: "Aparelhos",
+		models: "Modelos",
+		customerDevices: "Aparelhos de clientes",
 		employees: "Funcionários",
 	},
 	account: {
