@@ -13,6 +13,7 @@ import { emails } from "./emails";
 import { employees } from "./employees";
 import { home } from "./home";
 import { messages } from "./messages";
+import { models } from "./models";
 import { parts } from "./parts";
 import { permissions } from "./permissions";
 import { roles } from "./roles";
@@ -35,6 +36,7 @@ export const ptBR: Translated<typeof en> = {
 	employees,
 	home,
 	messages,
+	models,
 	parts,
 	permissions,
 	roles,

@@ -16,6 +16,7 @@ const routeNames: Record<string, StaticTranslationKey> = {
 	support: "dashboard.nav.support",
 	customers: "dashboard.nav.customers",
 	devices: "dashboard.nav.devices",
+	models: "dashboard.nav.models",
 	employees: "dashboard.nav.employees",
 };
 

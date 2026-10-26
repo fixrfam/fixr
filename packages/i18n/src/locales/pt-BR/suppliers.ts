@@ -10,7 +10,7 @@ export const suppliers: Translated<typeof source> = {
 			"Preencha os campos abaixo para cadastrar um novo fornecedor.",
 	},
 	table: {
-		search: "Busque por fornecedor, CNPJ, contato, telefone, email ou peça...",
+		search: "Busque por nome, CNPJ ou contato...",
 		create: "Novo fornecedor",
 		headers: {
 			name: "Nome",

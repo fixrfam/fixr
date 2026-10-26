@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { cookies } from "next/headers";
 import "../globals.css";
 import { ApiDowntimeBanner } from "@/components/home/api-downtime-banner";
 import Footer from "@/components/home/layout/footer";
@@ -7,6 +8,7 @@ import Header from "@/components/home/layout/header";
 import { I18nProvider } from "@/components/i18n-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
+import { getSession } from "@/lib/auth/utils";
 import { SessionProvider } from "@/lib/hooks/use-session";
 import { getLocale, getTranslator } from "@/lib/i18n/server";
 
@@ -49,6 +51,8 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const locale = await getLocale();
+	// Read on the server so the header shows the session on first paint.
+	const session = getSession(await cookies());
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
@@ -62,7 +66,7 @@ export default async function RootLayout({
 				className={`${inter.variable} ${cal.variable} font-(family-name:--font-inter) antialiased`}
 			>
 				<I18nProvider locale={locale}>
-					<SessionProvider>
+					<SessionProvider session={session}>
 						<ThemeProvider
 							attribute="class"
 							defaultTheme="system"

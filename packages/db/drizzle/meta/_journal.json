@@ -131,8 +131,15 @@
     {
       "idx": 18,
       "version": "5",
-      "when": 1792791175736,
-      "tag": "0018_service_order_items",
+      "when": 1792881763103,
+      "tag": "0018_tidb_json_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1792975757715,
+      "tag": "0019_service_order_items",
       "breakpoints": true
     }
   ]

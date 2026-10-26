@@ -60,6 +60,8 @@ export const common = {
 		login: "Log in",
 		logout: "Log out",
 		register: "Sign up",
+		goToDashboard: "Go to dashboard",
+		signedInAs: "Signed in as {{name}}",
 	},
 	logo: {
 		fixr: "Fixr logo",
@@ -72,5 +74,17 @@ export const common = {
 		email: "Email",
 		password: "Password",
 		optional: "optional",
+	},
+	clipboard: {
+		copy: "Copy {{label}}",
+		copied: "{{label}} copied",
+		failed: "We couldn't copy it. Select the text and copy it manually.",
+	},
+	upload: {
+		tooLarge: "The image must be at most 5 MB.",
+		invalidType: "Pick a PNG, JPG or WebP image.",
+		tooMany: "Pick a single image.",
+		formats: "PNG, JPG or WebP up to 5 MB",
+		browse: "Browse files",
 	},
 } as const;

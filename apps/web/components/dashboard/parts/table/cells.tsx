@@ -15,7 +15,7 @@ function formatDuration(minutes: number) {
 	return `${hours}h ${rest}min`;
 }
 
-const STOCK_STATUS_STYLES: Record<StockStatusId, string> = {
+export const STOCK_STATUS_STYLES: Record<StockStatusId, string> = {
 	in_stock:
 		"border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
 	low_stock:

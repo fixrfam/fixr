@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "a813cd91-c216-40c5-925c-78cfba64e515",
+  "id": "b1f24c01-12ef-4407-91c6-b5121ffd657b",
   "prevId": "6f9f383a-3c78-44c6-895b-246bfcae3a33",
   "tables": {
     "api_keys": {
@@ -55,7 +55,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "expires_at": {
           "name": "expires_at",
@@ -1398,122 +1398,6 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "service_order_items": {
-      "name": "service_order_items",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "service_order_id": {
-          "name": "service_order_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "item_type": {
-          "name": "item_type",
-          "type": "enum('part','service')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "part_id": {
-          "name": "part_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "service_id": {
-          "name": "service_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(120)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "decimal(10, 2)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "service_order_items_service_order_id_service_orders_id_fk": {
-          "name": "service_order_items_service_order_id_service_orders_id_fk",
-          "tableFrom": "service_order_items",
-          "tableTo": "service_orders",
-          "columnsFrom": ["service_order_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "service_order_items_part_id_parts_id_fk": {
-          "name": "service_order_items_part_id_parts_id_fk",
-          "tableFrom": "service_order_items",
-          "tableTo": "parts",
-          "columnsFrom": ["part_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "service_order_items_service_id_services_id_fk": {
-          "name": "service_order_items_service_id_services_id_fk",
-          "tableFrom": "service_order_items",
-          "tableTo": "services",
-          "columnsFrom": ["service_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "service_order_items_id": {
-          "name": "service_order_items_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
     "service_orders": {
       "name": "service_orders",
       "columns": {
@@ -1768,7 +1652,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "test_instructions": {
           "name": "test_instructions",
@@ -1776,7 +1660,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "test_parameters": {
           "name": "test_parameters",
@@ -1784,7 +1668,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "('[]')"
+          "default": "(json_array())"
         },
         "created_at": {
           "name": "created_at",

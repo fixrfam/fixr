@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "@fixr/i18n/react";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import {
 	Cropper,
@@ -62,12 +61,17 @@ function CropperControls({
 	);
 }
 
-/**
- * Avatar-cropping step with a circle crop area (1:1 aspect ratio)
- * and zoom/rotation adjustment controls.
- */
+/** How the crop area is drawn: a circle for avatars, a rectangle for logos. */
+export interface CropShape {
+	shape: "circle" | "rectangle";
+	aspectRatio: number;
+}
+
+/** Cropping step with zoom/rotation adjustment controls. */
 interface CropStepProps {
 	imageUrl: string;
+	alt: string;
+	crop: CropShape;
 	zoom: number;
 	rotation: number;
 	onZoomChange: (zoom: number) => void;
@@ -80,28 +84,28 @@ interface CropStepProps {
 
 export function CropStep({
 	imageUrl,
+	alt,
+	crop,
 	zoom,
 	rotation,
 	onZoomChange,
 	onRotationChange,
 	onCropAreaChange,
 }: CropStepProps) {
-	const { t } = useTranslation();
-
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex items-center justify-center">
 				<Cropper
-					aspectRatio={1}
+					aspectRatio={crop.aspectRatio}
 					className="h-[50dvh] w-full overflow-hidden rounded-xl"
 					onCropAreaChange={onCropAreaChange}
 					onRotationChange={onRotationChange}
 					onZoomChange={onZoomChange}
 					rotation={rotation}
-					shape="circle"
+					shape={crop.shape}
 					zoom={zoom}
 				>
-					<CropperImage alt={t("account.avatar.alt")} src={imageUrl} />
+					<CropperImage alt={alt} src={imageUrl} />
 					<CropperArea />
 				</Cropper>
 			</div>

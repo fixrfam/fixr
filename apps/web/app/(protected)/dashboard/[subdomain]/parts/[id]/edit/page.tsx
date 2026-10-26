@@ -6,15 +6,14 @@ import { notFound, useParams, useRouter } from "next/navigation";
 import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
 import { NewPartForm } from "@/components/dashboard/parts/forms/new-part-form";
-import { useInventory } from "@/components/dashboard/parts/store";
+import { usePart } from "@/components/dashboard/parts/store";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditPartPage() {
 	const router = useRouter();
 	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string; id: string }>();
-	const { parts, isPending } = useInventory();
-	const part = parts.find((item) => item.id === params.id);
+	const { data: part, isPending } = usePart(params.id);
 
 	if (isPending) {
 		return <Skeleton className="h-96 w-full max-w-2xl" />;
