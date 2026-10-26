@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Devices has sub sections; models is the one that exists today. */
+/** Devices has two sections; the catalog of models opens first. */
 export default async function DevicesPage({
 	params,
 }: {

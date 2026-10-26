@@ -16,9 +16,10 @@ import {
 	Smartphone,
 	User,
 } from "lucide-react";
-import { type ComponentPropsWithoutRef, useState } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -29,31 +30,43 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { formatCpf, formatPhone } from "@/lib/format";
+import type { CustomerRow } from "@/lib/services/customers";
 import { cn } from "@/lib/utils";
+import { useCreateCustomer, useUpdateCustomer } from "./store";
 
-export function NewClientForm({
-	onCustomerCreated,
+/**
+ * Registers a customer or, with `customer`, edits one. Answers with the saved
+ * record so the caller can pick it (e.g. on a new service order).
+ */
+export function CustomerForm({
+	customer,
+	onSaved,
 	cols = 1,
 	className,
 	...props
 }: {
-	onCustomerCreated: (cpf: string) => void;
+	customer?: CustomerRow;
+	onSaved?: (customer: CustomerRow) => void;
 	cols?: number;
-} & ComponentPropsWithoutRef<"form">) {
+} & Omit<ComponentPropsWithoutRef<"form">, "onSubmit">) {
 	const { t } = useTranslation();
-	const [loading, setLoading] = useState(false);
+	const createCustomer = useCreateCustomer();
+	const updateCustomer = useUpdateCustomer(customer?.id ?? "");
+	const toastError = useApiErrorToast();
+	const saving = createCustomer.isPending || updateCustomer.isPending;
 
 	const form = useForm<z.infer<typeof createClientSchema>>({
 		resolver: zodResolver(createClientSchema),
 		defaultValues: {
-			name: "",
-			email: "",
-			cpf: "",
-			phone: "",
-			alternativePhone: "",
-			address: "",
-			state: "",
-			city: "",
+			name: customer?.name ?? "",
+			email: customer?.email ?? "",
+			cpf: formatCpf(customer?.cpf),
+			phone: formatPhone(customer?.phone),
+			alternativePhone: formatPhone(customer?.alternativePhone),
+			address: customer?.address ?? "",
+			state: customer?.state ?? "",
+			city: customer?.city ?? "",
 		},
 		mode: "all",
 	});
@@ -62,30 +75,26 @@ export function NewClientForm({
 	const phoneMask = useMaskito({ options: { mask: phone } });
 	const altPhoneMask = useMaskito({ options: { mask: phone } });
 
-	function onSubmit(values: z.infer<typeof createClientSchema>) {
-		setLoading(true);
-
-		const formattedData = {
+	async function onSubmit(values: z.infer<typeof createClientSchema>) {
+		const body = {
 			...values,
 			cpf: unmask.cpf(values.cpf),
-			phone: unmask.phone(values.phone),
+			phone: unmask.phone(values.phone) ?? "",
 			alternativePhone: values.alternativePhone
-				? unmask.phone(values.alternativePhone)
-				: null,
+				? (unmask.phone(values.alternativePhone) ?? "")
+				: "",
 		};
 
 		try {
+			const saved = customer
+				? await updateCustomer.mutateAsync(body)
+				: await createCustomer.mutateAsync(body);
 			toast.success({
-				text: t("clients.form.success"),
+				text: t(customer ? "clients.form.updated" : "clients.form.success"),
 			});
-
-			onCustomerCreated(formattedData.cpf);
-		} catch {
-			toast.error({
-				text: t("clients.form.error"),
-			});
-		} finally {
-			setLoading(false);
+			onSaved?.(saved);
+		} catch (error) {
+			toastError(error);
 		}
 	}
 
@@ -265,9 +274,9 @@ export function NewClientForm({
 						)}
 					/>
 				</div>
-				<Button className="mt-4 w-full" disabled={loading} type="submit">
-					{t("clients.form.submit")}{" "}
-					{loading ? <Loader2 className="animate-spin" /> : <User />}
+				<Button className="mt-4 w-full" disabled={saving} type="submit">
+					{t(customer ? "clients.form.save" : "clients.form.submit")}{" "}
+					{saving ? <Loader2 className="animate-spin" /> : <User />}
 				</Button>
 			</form>
 		</Form>

@@ -157,7 +157,7 @@ export const sidebarSections: readonly SidebarSection[] = [
 						href: "/devices/customers",
 						type: "route",
 						icon: "UserRound",
-						permission: permissions.customers.read,
+						permission: permissions.devices.read,
 					},
 				],
 			},
