@@ -164,12 +164,18 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		email: "novo@fixr.test",
 	},
 	"POST /companies/:subdomain/service-orders": {
-		clientId: createId(),
-		deviceBrandId: createId(),
-		deviceCategoryId: createId(),
-		deviceModel: "iPhone",
+		deviceId: createId(),
 		reportedDefect: "Tela",
 	},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId": {},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/status": {
+		status: "ready",
+	},
+	"POST /companies/:subdomain/devices": {
+		clientId: createId(),
+		modelId: createId(),
+	},
+	"PATCH /companies/:subdomain/devices/:deviceId": {},
 	"POST /companies/:subdomain/models": { name: "Model", makerId: "x" },
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },

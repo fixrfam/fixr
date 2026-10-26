@@ -40,3 +40,12 @@ export function formatCnpj(value: string | null | undefined) {
 	}
 	return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
 }
+
+/** Format stored CPF digits as `123.456.789-09`. Other values pass through. */
+export function formatCpf(value: string | null | undefined) {
+	const digits = (value ?? "").replace(NON_DIGITS, "");
+	if (digits.length !== 11) {
+		return value ?? "";
+	}
+	return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}

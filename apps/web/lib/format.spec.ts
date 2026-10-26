@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCnpj, formatDate, formatPhone } from "./format";
+import { formatCnpj, formatCpf, formatDate, formatPhone } from "./format";
 
 describe("formatDate", () => {
 	it("formats Date, ISO string and timestamp inputs", () => {
@@ -45,5 +45,13 @@ describe("formatCnpj", () => {
 
 	it("passes other values through", () => {
 		expect(formatCnpj("123")).toBe("123");
+	});
+});
+
+describe("formatCpf", () => {
+	it("formats stored digits and passes anything else through", () => {
+		expect(formatCpf("52998224725")).toBe("529.982.247-25");
+		expect(formatCpf("123")).toBe("123");
+		expect(formatCpf(null)).toBe("");
 	});
 });

@@ -15,13 +15,15 @@ export const router = {
 export const navigation = {
 	params: { subdomain: "fixr" } as Record<string, string>,
 	pathname: "/dashboard/fixr/home",
+	/** Query string `useSearchParams` reads; reset it in specs that change it. */
+	searchParams: new URLSearchParams(),
 };
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => router,
 	useParams: () => navigation.params,
 	usePathname: () => navigation.pathname,
-	useSearchParams: () => new URLSearchParams(),
+	useSearchParams: () => navigation.searchParams,
 	redirect: vi.fn(),
 }));
 

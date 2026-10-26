@@ -25,6 +25,7 @@ const clientDetailSchema = z.object({
 	serviceOrders: z.array(
 		z.object({
 			id: z.string(),
+			deviceId: z.string(),
 			deviceModel: z.string(),
 			status: serviceOrderStatuses,
 			createdAt: z.coerce.date(),

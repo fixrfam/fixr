@@ -131,22 +131,50 @@
     {
       "idx": 18,
       "version": "5",
-      "when": 1792791175736,
-      "tag": "0018_service_order_items",
+      "when": 1792881763103,
+      "tag": "0018_tidb_json_defaults",
       "breakpoints": true
     },
     {
       "idx": 19,
       "version": "5",
-      "when": 1792792222517,
-      "tag": "0019_estimates",
+      "when": 1792975757715,
+      "tag": "0019_service_order_items",
       "breakpoints": true
     },
     {
       "idx": 20,
       "version": "5",
-      "when": 1792814418571,
-      "tag": "0020_estimate_approval",
+      "when": 1792976005375,
+      "tag": "0020_devices",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1792976010260,
+      "tag": "0021_backfill_devices",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1792976058737,
+      "tag": "0022_service_order_device",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1792979147584,
+      "tag": "0023_estimates",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1792979474591,
+      "tag": "0024_estimate_approval",
       "breakpoints": true
     }
   ]

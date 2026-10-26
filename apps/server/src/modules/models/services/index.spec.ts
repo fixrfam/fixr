@@ -258,7 +258,7 @@ describe("ModelsService.listModels", () => {
 		});
 	});
 
-	it("maps flat rows, defaults status and attaches the primary image url", async () => {
+	it("maps flat rows, keeps an unknown status empty and attaches the primary image url", async () => {
 		const withImage = flatRecord({
 			categoryId: "c1",
 			categoryName: "Phone",
@@ -284,7 +284,7 @@ describe("ModelsService.listModels", () => {
 			pagination: Record<string, unknown>;
 		};
 		expect(records[0]).toMatchObject({
-			status: "Available",
+			status: null,
 			maker: { id: "m1", name: "Samsung", slug: "samsung" },
 			category: { id: "c1", name: "Phone", slug: "phone" },
 			imageUrl: "https://signed/key-1",
@@ -325,7 +325,7 @@ describe("ModelsService.getModelBySlug", () => {
 		expect(repo.queryModelBySlug).toHaveBeenCalledWith("galaxy-s24", companyId);
 		expect(reply.state.body).toMatchObject({
 			code: "get_model_success",
-			data: { status: "Available", imageUrl: "https://signed/k2" },
+			data: { status: null, imageUrl: "https://signed/k2" },
 		});
 	});
 

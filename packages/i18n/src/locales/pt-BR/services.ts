@@ -14,7 +14,7 @@ export const services: Translated<typeof source> = {
 		notFound: "Não encontramos este serviço.",
 	},
 	table: {
-		search: "Busque por serviço, descrição, categoria, peça ou fornecedor...",
+		search: "Busque por nome ou descrição...",
 		create: "Novo serviço",
 		noCategory: "Sem categoria",
 		noParts: "Sem peças",

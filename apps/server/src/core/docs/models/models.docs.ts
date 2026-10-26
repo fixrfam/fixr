@@ -3,112 +3,15 @@ import {
 	createModelBodySchema,
 	createModelImageBodySchema,
 	getModelsQuerySchema,
+	modelDetailSchema,
+	modelImageSchema,
+	modelListItemSchema,
 	patchModelBodySchema,
 } from "@fixr/schemas/models";
 import { paginatedDataSchema } from "@fixr/schemas/utils";
 import type { FastifySchema } from "fastify";
 import { z } from "zod";
 import { zodResponseSchema } from "../types";
-
-const modelListRecordSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	slug: z.string(),
-	imageUrl: z.string().nullable(),
-	status: z.string().nullable(),
-	price: z.string().nullable(),
-	released: z.string().nullable(),
-	maker: z.object({
-		id: z.string(),
-		name: z.string(),
-		slug: z.string(),
-	}),
-	category: z
-		.object({
-			id: z.string(),
-			name: z.string(),
-			slug: z.string(),
-		})
-		.nullable(),
-});
-
-const modelImageRecordSchema = z.object({
-	id: z.string(),
-	modelId: z.string(),
-	uploadId: z.string(),
-	presignedUrl: z.string().nullable(),
-	isPrimary: z.boolean(),
-	variant: z.string().nullable(),
-	position: z.number(),
-	createdAt: z.coerce.date(),
-});
-
-const modelDetailRecordSchema = z.object({
-	id: z.string(),
-	makerId: z.string(),
-	name: z.string(),
-	slug: z.string(),
-	url: z.string(),
-	imageUrl: z.string().nullable(),
-	categoryId: z.string().nullable(),
-	announced: z.string().nullable(),
-	status: z.string().nullable(),
-	dimensions: z.string().nullable(),
-	weight: z.string().nullable(),
-	build: z.string().nullable(),
-	sim: z.string().nullable(),
-	displayType: z.string().nullable(),
-	displaySize: z.string().nullable(),
-	displayResolution: z.string().nullable(),
-	displayProtection: z.string().nullable(),
-	os: z.string().nullable(),
-	chipset: z.string().nullable(),
-	cpu: z.string().nullable(),
-	gpu: z.string().nullable(),
-	cardSlot: z.string().nullable(),
-	internalMemory: z.string().nullable(),
-	mainCamera: z.string().nullable(),
-	mainCameraFeatures: z.string().nullable(),
-	mainCameraVideo: z.string().nullable(),
-	selfieCamera: z.string().nullable(),
-	selfieFeatures: z.string().nullable(),
-	selfieVideo: z.string().nullable(),
-	battery: z.string().nullable(),
-	batteryCharging: z.string().nullable(),
-	networkTech: z.string().nullable(),
-	sensors: z.string().nullable(),
-	colors: z.string().nullable(),
-	colorsHex: z.string().nullable(),
-	modelsText: z.string().nullable(),
-	price: z.string().nullable(),
-	dimensionsWidth: z.number().nullable(),
-	dimensionsHeight: z.number().nullable(),
-	dimensionsThickness: z.number().nullable(),
-	weightGrams: z.number().nullable(),
-	displaySizeInches: z.number().nullable(),
-	displaySizeRatio: z.string().nullable(),
-	displayResWidth: z.number().nullable(),
-	displayResHeight: z.number().nullable(),
-	displayResPpi: z.number().nullable(),
-	released: z.string().nullable(),
-	meta: z.string().nullable(),
-	companyId: z.string().nullable(),
-	createdAt: z.coerce.date(),
-	maker: z.object({
-		id: z.string(),
-		name: z.string(),
-		slug: z.string(),
-		url: z.string(),
-	}),
-	category: z
-		.object({
-			id: z.string(),
-			name: z.string(),
-			slug: z.string(),
-		})
-		.nullable(),
-	images: z.array(modelImageRecordSchema),
-});
 
 const modelDetailParamsSchema = z
 	.object({
@@ -126,11 +29,11 @@ const listModelsSchema: FastifySchema = {
 Returns base (global) models plus company-specific models.
 
 Optional filters (query string):
-- \`query\`: fulltext search on name, model variants, chipset, CPU, internal memory, OS
+- \`query\`: every word must appear in the name, brand, model numbers, chipset or CPU
 - \`makerId\`: filter by brand (cuid2)
 - \`categoryId\`: filter by category (cuid2)
 - \`status\`: release status: Available, Discontinued, Cancelled, Rumored
-- \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\` | \`name\`): pagination (see API pagination docs)
+- \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\` | \`name\`): pagination (see API pagination docs). \`newer\` and \`older\` order by release date.
 `,
 	params: getCompanyNestedDataSchema,
 	querystring: getModelsQuerySchema,
@@ -140,7 +43,7 @@ Optional filters (query string):
 			error: null,
 			message: "Models successfully retrieved.",
 			code: "list_models_success",
-			data: paginatedDataSchema(modelListRecordSchema),
+			data: paginatedDataSchema(modelListItemSchema),
 		}).describe("Models retrieved successfully."),
 		416: zodResponseSchema({
 			status: 416,
@@ -175,7 +78,7 @@ Returns all spec fields, related maker and category, and model images with presi
 			error: null,
 			message: "Model retrieved successfully.",
 			code: "get_model_success",
-			data: modelDetailRecordSchema,
+			data: modelDetailSchema,
 		}).describe("Model retrieved successfully."),
 		404: zodResponseSchema({
 			status: 404,
@@ -251,7 +154,7 @@ Returns the full model detail with presigned image URLs.
 			error: null,
 			message: "Model updated successfully.",
 			code: "patch_model_success",
-			data: modelDetailRecordSchema,
+			data: modelDetailSchema,
 		}).describe("Model updated successfully."),
 		404: zodResponseSchema({
 			status: 404,
@@ -322,7 +225,7 @@ Provide the \`uploadId\` returned from the presign upload endpoint. Returns the 
 			error: null,
 			message: "Model image created successfully.",
 			code: "create_model_image_success",
-			data: modelImageRecordSchema,
+			data: modelImageSchema,
 		}).describe("Model image created."),
 		404: zodResponseSchema({
 			status: 404,
