@@ -28,6 +28,8 @@ export interface DomainEvents {
 		deviceId: string;
 		from: ServiceOrderStatus;
 		to: ServiceOrderStatus;
+		/** Who moved it; null when the system did (e.g. an approved estimate). */
+		employeeId: string | null;
 	};
 }
 

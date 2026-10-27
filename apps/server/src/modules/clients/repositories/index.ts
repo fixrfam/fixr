@@ -76,6 +76,7 @@ export class ClientsRepository {
 		return await db
 			.select({
 				id: serviceOrders.id,
+				number: serviceOrders.number,
 				deviceId: serviceOrders.deviceId,
 				deviceModel: models.name,
 				status: serviceOrders.status,

@@ -63,10 +63,52 @@ export const patchServiceOrderSchema = z.object({
 	observations,
 });
 
-/** @description Body schema for moving a service order to another status */
+/**
+ * @description Body schema for moving a service order to another status. The
+ * note shows next to the change in the order's history.
+ */
 export const changeServiceOrderStatusSchema = z.object({
 	status: serviceOrderStatuses,
+	note: z
+		.string()
+		.trim()
+		.max(500, {
+			message: i18nMessage("validation.serviceOrder.statusNoteMax", {
+				count: 500,
+			}),
+		})
+		.optional()
+		.nullable(),
 });
+
+/** @description Body schema for attaching photos to an open service order */
+export const addServiceOrderPhotosSchema = z.object({
+	photos: z
+		.array(createServiceOrderPhotoSchema)
+		.min(1, { message: i18nMessage("validation.serviceOrder.photosRequired") })
+		.max(20, {
+			message: i18nMessage("validation.serviceOrder.photosMax", { count: 20 }),
+		}),
+});
+
+/**
+ * How people refer to an order: the company's subdomain and the order's
+ * number, e.g. `ACME-12`.
+ */
+export function formatServiceOrderCode(subdomain: string, number: number) {
+	return `${subdomain.toUpperCase()}-${number}`;
+}
+
+const ORDER_CODE = /^#?(?:[a-z0-9-]+-)?#?(\d{1,9})$/i;
+
+/**
+ * The order number in a search like `ACME-12`, `#12` or `12`, so typing the
+ * code someone read out finds the order. Null for anything else.
+ */
+export function parseServiceOrderNumber(search: string) {
+	const match = ORDER_CODE.exec(search.trim());
+	return match ? Number(match[1]) : null;
+}
 
 /** @description Kind of catalog item used on a service order */
 export const serviceOrderItemTypes = z.enum(["part", "service"]);
@@ -106,6 +148,11 @@ export const patchServiceOrderItemSchema = z.object({
 /** @description Params schema for routes that target a service order */
 export const serviceOrderIdParamsSchema = z.object({
 	serviceOrderId: z.string().cuid2(),
+});
+
+/** @description Params schema for routes that target a photo of a service order */
+export const serviceOrderPhotoParamsSchema = serviceOrderIdParamsSchema.extend({
+	photoId: z.string().cuid2(),
 });
 
 /** @description Params schema for routes that target an item of a service order */

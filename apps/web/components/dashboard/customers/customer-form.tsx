@@ -7,23 +7,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
 import {
-	Building,
 	IdCard,
 	Loader2,
-	Mail,
+	type LucideIcon,
 	MapPin,
 	PhoneIcon,
-	Smartphone,
 	User,
 } from "lucide-react";
-import type { ComponentPropsWithoutRef } from "react";
-import { useForm } from "react-hook-form";
+import type {
+	ComponentPropsWithoutRef,
+	HTMLAttributes,
+	ReactNode,
+	RefCallback,
+} from "react";
+import { type Control, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -98,187 +102,206 @@ export function CustomerForm({
 		}
 	}
 
+	const split = cols === 2 && "sm:grid-cols-2";
+
 	return (
 		<Form {...form}>
 			<form
-				className={cn("space-y-3", className)}
-				onSubmit={form.handleSubmit(onSubmit)}
+				className={cn("grid gap-6", className)}
+				onSubmit={(e) => {
+					// Opened over other forms (a new order): keep their submit out of it.
+					e.stopPropagation();
+					form.handleSubmit(onSubmit)(e);
+				}}
 				{...props}
 			>
-				<div
-					className={cn(
-						"grid grid-cols-1 gap-4",
-						cols === 2 && "md:grid-cols-2"
-					)}
+				<FormSection
+					hint={t("clients.form.identityHint")}
+					icon={IdCard}
+					title={t("clients.form.identitySection")}
 				>
-					<FormField
+					<TextField
 						control={form.control}
+						description={t("clients.form.nameDescription")}
+						label={t("clients.form.nameLabel")}
 						name="name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<User className="inline-block size-3.5" />{" "}
-									{t("clients.form.nameLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.namePlaceholder")}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
+						placeholder={t("clients.form.namePlaceholder")}
 					/>
-					<FormField
+					<div className={cn("grid gap-4", split)}>
+						<TextField
+							control={form.control}
+							description={t("clients.form.documentDescription")}
+							inputMode="numeric"
+							label={t("clients.form.documentLabel")}
+							maskRef={cpfMask}
+							name="cpf"
+							onInput={(value) => form.setValue("cpf", value)}
+							placeholder={t("clients.form.documentPlaceholder")}
+						/>
+						<TextField
+							control={form.control}
+							description={t("clients.form.emailDescription")}
+							inputMode="email"
+							label={t("clients.form.emailLabel")}
+							name="email"
+							placeholder={t("clients.form.emailPlaceholder")}
+						/>
+					</div>
+				</FormSection>
+
+				<FormSection
+					hint={t("clients.form.contactHint")}
+					icon={PhoneIcon}
+					title={t("clients.form.contactSection")}
+				>
+					<div className={cn("grid gap-4", split)}>
+						<TextField
+							control={form.control}
+							description={t("clients.form.phoneDescription")}
+							inputMode="tel"
+							label={t("clients.form.phoneLabel")}
+							maskRef={phoneMask}
+							name="phone"
+							onInput={(value) => form.setValue("phone", value)}
+							placeholder={t("clients.form.phonePlaceholder")}
+						/>
+						<TextField
+							control={form.control}
+							description={t("clients.form.alternativePhoneDescription")}
+							inputMode="tel"
+							label={t("clients.form.alternativePhoneLabel")}
+							maskRef={altPhoneMask}
+							name="alternativePhone"
+							onInput={(value) => form.setValue("alternativePhone", value)}
+							placeholder={t("clients.form.alternativePhonePlaceholder")}
+						/>
+					</div>
+				</FormSection>
+
+				<FormSection
+					hint={t("clients.form.addressHint")}
+					icon={MapPin}
+					title={t("clients.form.addressSection")}
+				>
+					<TextField
 						control={form.control}
-						name="email"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Mail className="inline-block size-3.5" />{" "}
-									{t("clients.form.emailLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.emailPlaceholder")}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name="phone"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<PhoneIcon className="inline-block size-3.5" />{" "}
-									{t("clients.form.phoneLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.phonePlaceholder")}
-										{...field}
-										onInput={(e) =>
-											form.setValue("phone", e.currentTarget.value)
-										}
-										ref={phoneMask}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name="alternativePhone"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Smartphone className="inline-block size-3.5" />{" "}
-									{t("clients.form.alternativePhoneLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.phonePlaceholder")}
-										{...field}
-										onInput={(e) =>
-											form.setValue("alternativePhone", e.currentTarget.value)
-										}
-										ref={altPhoneMask}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name="cpf"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<IdCard className="inline-block size-3.5" />{" "}
-									{t("clients.form.documentLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.documentPlaceholder")}
-										{...field}
-										onInput={(e) => form.setValue("cpf", e.currentTarget.value)}
-										ref={cpfMask}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
+						description={t("clients.form.addressDescription")}
+						label={t("clients.form.addressLabel")}
 						name="address"
-						render={({ field }) => (
-							<FormItem className="col-span-full">
-								<FormLabel>
-									<MapPin className="inline-block size-3.5" />{" "}
-									{t("clients.form.addressLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.addressPlaceholder")}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
+						placeholder={t("clients.form.addressPlaceholder")}
 					/>
-					<FormField
-						control={form.control}
-						name="state"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Building className="inline-block size-3.5" />{" "}
-									{t("clients.form.stateLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.statePlaceholder")}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
+					<div
+						className={cn(
+							"grid gap-4",
+							cols === 2 && "sm:grid-cols-[1fr_9rem]"
 						)}
-					/>
-					<FormField
-						control={form.control}
-						name="city"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									<Building className="inline-block size-3.5" />{" "}
-									{t("clients.form.cityLabel")}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={t("clients.form.cityPlaceholder")}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-				<Button className="mt-4 w-full" disabled={saving} type="submit">
-					{t(customer ? "clients.form.save" : "clients.form.submit")}{" "}
+					>
+						<TextField
+							control={form.control}
+							description={t("clients.form.cityDescription")}
+							label={t("clients.form.cityLabel")}
+							name="city"
+							placeholder={t("clients.form.cityPlaceholder")}
+						/>
+						<TextField
+							control={form.control}
+							description={t("clients.form.stateDescription")}
+							label={t("clients.form.stateLabel")}
+							maxLength={2}
+							name="state"
+							placeholder={t("clients.form.statePlaceholder")}
+						/>
+					</div>
+				</FormSection>
+
+				<Button className="w-full" disabled={saving} size="lg" type="submit">
+					{t(customer ? "clients.form.save" : "clients.form.submit")}
 					{saving ? <Loader2 className="animate-spin" /> : <User />}
 				</Button>
 			</form>
 		</Form>
+	);
+}
+
+type Values = z.infer<typeof createClientSchema>;
+
+/** A group of fields under its icon, title and what it's for. */
+function FormSection({
+	icon: Icon,
+	title,
+	hint,
+	children,
+}: {
+	icon: LucideIcon;
+	title: string;
+	hint: string;
+	children: ReactNode;
+}) {
+	return (
+		<fieldset className="m-0 grid min-w-0 gap-4 border-0 p-0 [&+&]:border-t [&+&]:pt-6">
+			<legend className="sr-only">{title}</legend>
+			<div aria-hidden className="flex items-center gap-3">
+				<span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+					<Icon className="size-4" />
+				</span>
+				<div className="grid gap-0.5">
+					<p className="font-medium text-sm leading-none">{title}</p>
+					<p className="text-muted-foreground text-xs">{hint}</p>
+				</div>
+			</div>
+			{children}
+		</fieldset>
+	);
+}
+
+/** One text field: label with its icon, input, what it's for, and the error. */
+function TextField({
+	control,
+	name,
+	label,
+	placeholder,
+	description,
+	maskRef,
+	onInput,
+	inputMode,
+	maxLength,
+}: {
+	control: Control<Values>;
+	name: keyof Values;
+	label: string;
+	placeholder: string;
+	description: string;
+	/** Maskito's ref, for masked inputs (CPF, phones). */
+	maskRef?: RefCallback<HTMLElement>;
+	/** Masked inputs report what the mask typed. */
+	onInput?: (value: string) => void;
+	inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
+	maxLength?: number;
+}) {
+	return (
+		<FormField
+			control={control}
+			name={name}
+			render={({ field }) => (
+				<FormItem className="gap-2">
+					<FormLabel>{label}</FormLabel>
+					<FormControl>
+						<Input
+							inputMode={inputMode}
+							maxLength={maxLength}
+							placeholder={placeholder}
+							{...field}
+							onInput={
+								onInput ? (e) => onInput(e.currentTarget.value) : undefined
+							}
+							ref={maskRef ?? field.ref}
+							value={field.value ?? ""}
+						/>
+					</FormControl>
+					<FormDescription className="text-xs">{description}</FormDescription>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
 	);
 }

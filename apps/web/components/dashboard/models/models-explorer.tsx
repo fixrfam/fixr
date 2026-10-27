@@ -11,7 +11,7 @@ import {
 	parseAsStringLiteral,
 	useQueryStates,
 } from "nuqs";
-import { useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import {
 	FilterSelect,
 	SortSelect,
@@ -34,6 +34,7 @@ import {
 	CATEGORY_ICONS,
 	isCatalogCategory,
 } from "./format";
+import { AddModelPrompt } from "./new-model-form";
 import { useMakers, useModelCategories, useModelsPage } from "./store";
 
 /** URL state of the explorer: page, search, filters and order. */
@@ -48,6 +49,45 @@ export const modelsParsers = {
 	),
 };
 
+export interface ModelsParams {
+	page: number;
+	perPage: number;
+	q: string;
+	category: string | null;
+	maker: string | null;
+	sort: "newer" | "older" | "name";
+}
+
+/** Merges changes into the params; `null` goes back to the defaults. */
+export type SetModelsParams = (changes: Partial<ModelsParams> | null) => void;
+
+const DEFAULT_PARAMS: ModelsParams = {
+	page: 1,
+	perPage: 20,
+	q: "",
+	category: null,
+	maker: null,
+	sort: "newer",
+};
+
+/** Explorer state kept in the component, for a browser inside a dialog. */
+export function useLocalModelsParams(perPage = 10) {
+	const [params, setState] = useState<ModelsParams>({
+		...DEFAULT_PARAMS,
+		perPage,
+	});
+	const setParams: SetModelsParams = useCallback(
+		(changes) =>
+			setState((current) =>
+				changes === null
+					? { ...DEFAULT_PARAMS, perPage }
+					: { ...current, ...changes }
+			),
+		[perPage]
+	);
+	return [params, setParams] as const;
+}
+
 function CategoryChips({
 	value,
 	onChange,
@@ -56,6 +96,8 @@ function CategoryChips({
 	onChange: (slug: string | null) => void;
 }) {
 	const { t } = useTranslation();
+	// Unique per browser, so two of them on screen don't share the highlight.
+	const chipId = useId();
 	const chips = [null, ...CATALOG_CATEGORIES];
 
 	return (
@@ -86,7 +128,7 @@ function CategoryChips({
 						{active && (
 							<motion.span
 								className="absolute inset-0 rounded-full bg-primary"
-								layoutId="models-category-chip"
+								layoutId={`${chipId}-category-chip`}
 								transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
 							/>
 						)}
@@ -117,14 +159,56 @@ function useMakerOptions() {
 	};
 }
 
+/** The device catalog page: the browser with its state in the URL. */
 export function ModelsExplorer() {
-	const { t } = useTranslation();
 	const router = useRouter();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const [params, setParams] = useQueryStates(modelsParsers, {
 		history: "replace",
 		clearOnDefault: true,
 	});
+	const hrefOf = useCallback(
+		(model: Pick<ModelListItem, "slug">) =>
+			`/dashboard/${subdomain}/devices/models/${model.slug}`,
+		[subdomain]
+	);
+
+	return (
+		<ModelsBrowser
+			footer={
+				<AddModelPrompt
+					onCreated={(model) => router.push(hrefOf(model))}
+					search={params.q}
+				/>
+			}
+			hrefOf={hrefOf}
+			onSelect={(model) => router.push(hrefOf(model))}
+			params={params}
+			setParams={setParams}
+		/>
+	);
+}
+
+/**
+ * Search, brand and category filters, order and the table of the device
+ * catalog. The state comes from outside: the URL on the catalog page, the
+ * component in a picker. `hrefOf` links each model; `onSelect` runs on a row
+ * click; `footer` goes under the results line (e.g. "add a model").
+ */
+export function ModelsBrowser({
+	params,
+	setParams,
+	onSelect,
+	hrefOf,
+	footer,
+}: {
+	params: ModelsParams;
+	setParams: SetModelsParams;
+	onSelect: (model: ModelListItem) => void;
+	hrefOf?: (model: ModelListItem) => string;
+	footer?: ReactNode;
+}) {
+	const { t } = useTranslation();
 	const makers = useMakerOptions();
 	const categories = useModelCategories();
 
@@ -160,11 +244,6 @@ export function ModelsExplorer() {
 	});
 	useOutOfRangePage(query, params, setPagination);
 
-	const hrefOf = useCallback(
-		(model: ModelListItem) =>
-			`/dashboard/${subdomain}/devices/models/${model.slug}`,
-		[subdomain]
-	);
 	const columns = useModelColumns(hrefOf);
 	const rows = useMemo(() => query.data?.records ?? [], [query.data]);
 
@@ -255,6 +334,7 @@ export function ModelsExplorer() {
 					</Button>
 				)}
 			</div>
+			{footer}
 
 			{query.isPending || waiting ? (
 				<Skeleton className="h-96 w-full rounded-md" />
@@ -265,7 +345,7 @@ export function ModelsExplorer() {
 						"w-full transition-opacity",
 						query.isPlaceholderData && "opacity-60"
 					)}
-					onRowClick={(row) => router.push(hrefOf(row.original))}
+					onRowClick={(row) => onSelect(row.original)}
 					table={table}
 				/>
 			)}

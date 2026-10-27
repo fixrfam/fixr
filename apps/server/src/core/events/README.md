@@ -14,7 +14,8 @@ ServiceOrdersService.changeStatus
   └─ inTransaction(tx)
        └─ moveServiceOrder(tx, ...)
             ├─ ServiceOrdersRepository.updateStatus(tx, ...)
-            └─ emit "serviceOrder.statusChanged" { from, to, ... }
+            ├─ ServiceOrdersRepository.insertStatusHistory(tx, ...)
+            └─ emit "serviceOrder.statusChanged" { from, to, employeeId, ... }
             ├─ devices.followServiceOrder   → DevicesRepository.updateDevice(..., tx)
             └─ (inventory.consumeParts      → later)
 ```
@@ -46,10 +47,16 @@ Keep this table up to date: it is the map of what happens when.
 ## Changing a service order's status
 
 Always through `moveServiceOrder` (`modules/service-orders/services/move-status.ts`).
-It locks the order, updates it and emits `serviceOrder.statusChanged` in the
-caller's transaction, so the effects of a status change run no matter who
-moves the order: the API (`ServiceOrdersService.changeStatus`) or an effect of
-another event. Writing `service_orders.status` anywhere else skips them.
+It locks the order, updates it, records the change in the order's history
+(`service_order_history`: who moved it, or nobody when the system did,
+and the optional note) and emits `serviceOrder.statusChanged` in the caller's
+transaction, so the history and the effects of a status change happen no
+matter who moves the order: the API (`ServiceOrdersService.changeStatus`) or an
+effect of another event. Writing `service_orders.status` anywhere else skips
+them.
+
+The history is the service orders module's own data, so it's written there
+and not by an effect (see "When not to use it").
 
 ## Adding an event
 

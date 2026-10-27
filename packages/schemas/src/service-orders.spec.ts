@@ -1,9 +1,12 @@
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
 import {
+	addServiceOrderPhotosSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
+	formatServiceOrderCode,
 	getServiceOrdersQuerySchema,
+	parseServiceOrderNumber,
 	patchServiceOrderSchema,
 	serviceOrderStatuses,
 } from "./service-orders";
@@ -145,5 +148,58 @@ describe("changeServiceOrderStatusSchema", () => {
 		expect(issuePaths(changeServiceOrderStatusSchema, { status: "x" })).toEqual(
 			["status"]
 		);
+	});
+});
+
+describe("service order codes", () => {
+	it("formats the subdomain and the number", () => {
+		expect(formatServiceOrderCode("acme", 12)).toBe("ACME-12");
+		expect(formatServiceOrderCode("acme-repairs", 3)).toBe("ACME-REPAIRS-3");
+	});
+
+	it.each([
+		["ACME-12", 12],
+		["acme-repairs-3", 3],
+		["#12", 12],
+		["12", 12],
+		[" 7 ", 7],
+	])("reads the number in %j", (search, number) => {
+		expect(parseServiceOrderNumber(search)).toBe(number);
+	});
+
+	it.each([
+		"iPhone 12",
+		"Maria",
+		"",
+		"ACME-",
+	])("finds no number in %j", (search) => {
+		expect(parseServiceOrderNumber(search)).toBeNull();
+	});
+});
+
+describe("status notes and photos", () => {
+	it("accepts a status change with or without a note", () => {
+		expect(
+			changeServiceOrderStatusSchema.safeParse({
+				status: "fixing",
+				note: "Started",
+			}).success
+		).toBe(true);
+		expect(
+			issuePaths(changeServiceOrderStatusSchema, {
+				status: "fixing",
+				note: "x".repeat(501),
+			})
+		).toEqual(["note"]);
+	});
+
+	it("needs between 1 and 20 photos", () => {
+		expect(issuePaths(addServiceOrderPhotosSchema, { photos: [] })).toEqual([
+			"photos",
+		]);
+		expect(
+			addServiceOrderPhotosSchema.safeParse({ photos: [{ uploadId: "u" }] })
+				.success
+		).toBe(true);
 	});
 });
