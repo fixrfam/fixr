@@ -1,6 +1,11 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import {
+	coveredDialogClass,
+	DialogLayer,
+	useDialogLayer,
+} from "@/components/dashboard/dialog-stack"
 import { useMediaQuery } from "@/lib/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 import {
@@ -56,6 +61,11 @@ export function ResponsiveDialogDrawer({
 	const isDesktop = useMediaQuery("(min-width: 768px)")
 
 	const isControlled = open !== undefined
+	// Dialogs opened from inside it (e.g. a new customer) stack over it.
+	const { covered, layer } = useDialogLayer(
+		isControlled ? open : true,
+		isDesktop ? "dialog" : "drawer"
+	)
 
 	function handleOpenChange(next: boolean) {
 		if (isControlled) {
@@ -77,8 +87,10 @@ export function ResponsiveDialogDrawer({
 				<DialogContent
 					className={cn(
 						"w-full! max-w-3xl! max-h-[calc(100dvh-5rem)] overflow-y-auto",
+						coveredDialogClass,
 						className
 					)}
+					data-covered={covered}
 					onEscapeKeyDown={guardDismiss}
 					onInteractOutside={guardDismiss}
 					showCloseButton={dismissible}
@@ -100,7 +112,7 @@ export function ResponsiveDialogDrawer({
 							</div>
 						</div>
 					</DialogHeader>
-					{children}
+					<DialogLayer layer={layer}>{children}</DialogLayer>
 				</DialogContent>
 			</Dialog>
 		)
@@ -132,7 +144,9 @@ export function ResponsiveDialogDrawer({
 						</DrawerDescription>
 					</div>
 				</div>
-				<div className="overflow-auto px-4 pb-6">{children}</div>
+				<div className="overflow-auto px-4 pb-6">
+					<DialogLayer layer={layer}>{children}</DialogLayer>
+				</div>
 			</DrawerContent>
 		</Drawer>
 	)

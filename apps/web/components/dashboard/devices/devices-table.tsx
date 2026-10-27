@@ -6,6 +6,8 @@ import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringLiteral } from "nuqs";
 import { useMemo, useState } from "react";
+import { CustomerAvatar } from "@/components/dashboard/customers/customer-avatar";
+import { ModelImage } from "@/components/dashboard/models/model-image";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
 	useCatalogParams,
@@ -45,11 +47,21 @@ const columnHelper = createColumnHelper<DeviceRow>();
 /** The device's model, brand and identifiers. */
 export function DeviceCell({ device }: { device: DeviceRow }) {
 	return (
-		<div className="flex flex-col">
-			<span className="font-medium">{device.model.name}</span>
-			<span className="text-2xs text-muted-foreground">
-				{[device.maker.name, device.category?.name].filter(Boolean).join(" · ")}
-			</span>
+		<div className="flex items-center gap-2.5">
+			<ModelImage
+				alt={device.model.name}
+				category={device.category?.slug}
+				className="size-10"
+				src={device.model.imageUrl}
+			/>
+			<div className="flex min-w-0 flex-col">
+				<span className="font-medium">{device.model.name}</span>
+				<span className="text-2xs text-muted-foreground">
+					{[device.maker.name, device.category?.name]
+						.filter(Boolean)
+						.join(" · ")}
+				</span>
+			</div>
 		</div>
 	);
 }
@@ -77,13 +89,16 @@ function useDeviceColumns({
 				header: t("devices.table.headers.owner"),
 				cell: ({ row }) => (
 					<DashLink
-						className="flex flex-col hover:underline"
+						className="flex items-center gap-2.5 hover:underline"
 						href={`/customers/${row.original.client.id}`}
 						subdomain={subdomain}
 					>
-						<span>{row.original.client.name}</span>
-						<span className="text-2xs text-muted-foreground tabular-nums">
-							{formatCpf(row.original.client.cpf)}
+						<CustomerAvatar customer={row.original.client} />
+						<span className="flex flex-col">
+							<span>{row.original.client.name}</span>
+							<span className="text-2xs text-muted-foreground tabular-nums">
+								{formatCpf(row.original.client.cpf)}
+							</span>
 						</span>
 					</DashLink>
 				),

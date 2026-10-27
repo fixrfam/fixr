@@ -2,17 +2,18 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { dbMock, repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
+const { repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
 	emit: vi.fn(),
 	moveServiceOrder: vi.fn(),
-	dbMock: {} as ReturnType<
-		typeof import("@/test/helpers/query-builder-mock").createDbMock
-	>,
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		queryEmployeeByUserId: vi.fn(),
 		queryDeviceOfCompany: vi.fn(),
-		createWithPhotos: vi.fn(),
+		create: vi.fn(),
+		queryPhotoUploads: vi.fn(),
+		insertPhotos: vi.fn(),
+		queryPhoto: vi.fn(),
+		deletePhoto: vi.fn(),
 		queryServiceOrderOfCompany: vi.fn(),
 		queryServiceOrderDetail: vi.fn(),
 		updateServiceOrder: vi.fn(),
@@ -27,15 +28,14 @@ const { dbMock, repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
 	pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
 }));
 
-vi.mock("@fixr/db/connection", async (importOriginal) => {
-	const { createDbMock } = await import("@/test/helpers/query-builder-mock");
-	Object.assign(dbMock, createDbMock());
-	return { ...(await importOriginal<object>()), db: dbMock.db };
-});
 vi.mock("../repositories", () => ({
 	ServiceOrdersRepository: repo,
 	serviceOrdersListJoins: ["JOINS"],
 	serviceOrdersListSelect: {},
+}));
+// Signing image URLs needs R2: records keep their model as is.
+vi.mock("../../../core/lib/model-image", () => ({
+	withModelImageUrl: async (record: unknown) => record,
 }));
 vi.mock("../../../core/lib/pagination", () => pagination);
 vi.mock("../../../core/lib/transaction", () => ({
@@ -65,7 +65,6 @@ const noCompany = { ...userJwt, company: undefined };
 
 afterEach(() => {
 	vi.clearAllMocks();
-	dbMock.reset();
 });
 
 describe("ServiceOrdersService.getCompanyServiceOrders", () => {
@@ -206,17 +205,8 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 			id: data.deviceId,
 			clientId,
 		});
-		repo.createWithPhotos.mockImplementation(
-			async ({ companyId: cid, employeeId }) => ({
-				serviceOrder: {
-					id: "so1",
-					companyId: cid,
-					employeeId,
-					status: "pending",
-				},
-				photos: [],
-			})
-		);
+		repo.create.mockResolvedValue({ id: "so1", number: 7 });
+		repo.queryPhotoUploads.mockResolvedValue([]);
 	});
 
 	const create = (
@@ -243,7 +233,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 			data.deviceId,
 			companyId
 		);
-		expect(repo.createWithPhotos).toHaveBeenCalledWith("TX", {
+		expect(repo.create).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
 			clientId,
@@ -258,7 +248,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		expect(reply.state.statusCode).toBe(201);
 		expect(reply.state.body).toMatchObject({
 			code: "create_service_order_success",
-			data: { id: "so1", status: "pending", photos: [] },
+			data: { id: "so1", number: 7 },
 		});
 	});
 
@@ -279,7 +269,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 				response: asReply(reply),
 			})
 		).rejects.toMatchObject({ code: "not_allowed" });
-		expect(repo.createWithPhotos).not.toHaveBeenCalled();
+		expect(repo.create).not.toHaveBeenCalled();
 	});
 
 	it("rejects when the caller's employee record belongs to another company", async () => {
@@ -299,32 +289,23 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		await expect(create().promise).rejects.toMatchObject({
 			code: "service_order_device_not_found",
 		});
-		expect(repo.createWithPhotos).not.toHaveBeenCalled();
+		expect(repo.create).not.toHaveBeenCalled();
 	});
 
-	it("rejects a photo upload that does not exist", async () => {
-		dbMock.queue([]);
-
-		await expect(
-			create({ photos: [{ uploadId: "missing" }] }).promise
-		).rejects.toMatchObject({ code: "upload_not_found" });
-	});
-
-	it("rejects a photo uploaded by another company", async () => {
-		dbMock.queue([{ id: "up", companyId: createId() }]);
-
+	it("rejects a photo upload that is missing, used or from another company", async () => {
 		await expect(
 			create({ photos: [{ uploadId: "up" }] }).promise
 		).rejects.toMatchObject({ code: "upload_not_found" });
-		expect(repo.createWithPhotos).not.toHaveBeenCalled();
+		expect(repo.queryPhotoUploads).toHaveBeenCalledWith(["up"], companyId);
+		expect(repo.create).not.toHaveBeenCalled();
 	});
 
 	it("accepts photos uploaded by the same company", async () => {
-		dbMock.queue([{ id: "up", companyId }]);
+		repo.queryPhotoUploads.mockResolvedValue([{ id: "up" }]);
 
 		await create({ photos: [{ uploadId: "up" }] }).promise;
 
-		expect(repo.createWithPhotos).toHaveBeenCalled();
+		expect(repo.create).toHaveBeenCalled();
 	});
 });
 
@@ -455,8 +436,10 @@ describe("ServiceOrdersService detail, edit and status", () => {
 	const serviceOrderId = createId();
 	const deviceId = createId();
 	const detail = { id: serviceOrderId, status: "ready", photos: [] };
+	const employee = { id: createId(), companyId };
 
 	beforeEach(() => {
+		repo.queryEmployeeByUserId.mockResolvedValue(employee);
 		repo.queryServiceOrderOfCompany.mockResolvedValue({
 			id: serviceOrderId,
 			deviceId,
@@ -518,12 +501,17 @@ describe("ServiceOrdersService detail, edit and status", () => {
 	});
 
 	it("moves the order through moveServiceOrder, in a transaction", async () => {
-		const { reply, promise } = call("changeStatus", { status: "ready" });
+		const { reply, promise } = call("changeStatus", {
+			status: "ready",
+			note: "Tested",
+		});
 		await promise;
 
 		expect(moveServiceOrder).toHaveBeenCalledWith("TX", expect.any(Function), {
 			serviceOrderId,
 			to: "ready",
+			employeeId: employee.id,
+			note: "Tested",
 		});
 		expect(reply.state.body).toMatchObject({
 			code: "change_service_order_status_success",
@@ -548,5 +536,69 @@ describe("ServiceOrdersService detail, edit and status", () => {
 			call("changeStatus", { status: "ready" }).promise
 		).rejects.toMatchObject({ code: "service_order_not_found" });
 		expect(moveServiceOrder).not.toHaveBeenCalled();
+	});
+});
+
+describe("ServiceOrdersService photos", () => {
+	const serviceOrderId = createId();
+	const employee = { id: createId(), companyId };
+	const base = { userJwt, subdomain: "fixr", serviceOrderId };
+
+	beforeEach(() => {
+		repo.queryServiceOrderOfCompany.mockResolvedValue({ id: serviceOrderId });
+		repo.queryServiceOrderDetail.mockResolvedValue({ id: serviceOrderId });
+		repo.queryEmployeeByUserId.mockResolvedValue(employee);
+		repo.queryPhotoUploads.mockResolvedValue([{ id: "up" }]);
+	});
+
+	it("attaches the uploads in a transaction, by the caller", async () => {
+		const reply = createFakeReply();
+		const photos = [{ uploadId: "up" }];
+
+		await ServiceOrdersService.addPhotos({
+			...base,
+			data: { photos },
+			response: asReply(reply),
+		});
+
+		expect(repo.insertPhotos).toHaveBeenCalledWith("TX", {
+			serviceOrderId,
+			employeeId: employee.id,
+			photos,
+		});
+		expect(reply.state.statusCode).toBe(201);
+	});
+
+	it("rejects an upload that can't be attached", async () => {
+		repo.queryPhotoUploads.mockResolvedValue([]);
+
+		await expect(
+			ServiceOrdersService.addPhotos({
+				...base,
+				data: { photos: [{ uploadId: "up" }] },
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "upload_not_found" });
+		expect(repo.insertPhotos).not.toHaveBeenCalled();
+	});
+
+	it("removes a photo of the order only", async () => {
+		repo.queryPhoto.mockResolvedValue(null);
+
+		await expect(
+			ServiceOrdersService.deletePhoto({
+				...base,
+				photoId: "ph",
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "service_order_photo_not_found" });
+
+		repo.queryPhoto.mockResolvedValue({ id: "ph" });
+		await ServiceOrdersService.deletePhoto({
+			...base,
+			photoId: "ph",
+			response: asReply(createFakeReply()),
+		});
+		expect(repo.deletePhoto).toHaveBeenCalledWith("ph");
 	});
 });

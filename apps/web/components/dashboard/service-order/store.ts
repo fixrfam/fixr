@@ -1,6 +1,12 @@
 "use client";
 
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
+import {
+	keepPreviousData,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	useInvalidateRepairs,
 	useSubdomain,
@@ -9,6 +15,7 @@ import {
 	type ServiceOrderListParams,
 	type ServiceOrderStatus,
 	serviceOrdersApi,
+	uploadServiceOrderPhoto,
 } from "@/lib/services/service-orders";
 
 export const serviceOrderKeys = {
@@ -60,8 +67,43 @@ export function useChangeServiceOrderStatus(id: string) {
 	const subdomain = useSubdomain();
 	const invalidate = useInvalidateRepairs();
 	return useMutation({
-		mutationFn: (status: ServiceOrderStatus) =>
-			serviceOrdersApi.changeStatus(subdomain, id, status),
+		mutationFn: (change: {
+			status: ServiceOrderStatus;
+			note?: string | null;
+		}) => serviceOrdersApi.changeStatus(subdomain, id, change),
 		onSuccess: invalidate,
 	});
+}
+
+/** Upload the files to R2, then attach them to the order. */
+export function useAddServiceOrderPhotos(id: string) {
+	const subdomain = useSubdomain();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (files: File[]) => {
+			const uploadIds = await Promise.all(files.map(uploadServiceOrderPhoto));
+			return serviceOrdersApi.addPhotos(subdomain, id, {
+				photos: uploadIds.map((uploadId) => ({ uploadId })),
+			});
+		},
+		onSuccess: (order) =>
+			queryClient.setQueryData(serviceOrderKeys.detail(subdomain, id), order),
+	});
+}
+
+export function useDeleteServiceOrderPhoto(id: string) {
+	const subdomain = useSubdomain();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (photoId: string) =>
+			serviceOrdersApi.deletePhoto(subdomain, id, photoId),
+		onSuccess: (order) =>
+			queryClient.setQueryData(serviceOrderKeys.detail(subdomain, id), order),
+	});
+}
+
+/** How people refer to an order of this company, e.g. `ACME-12`. */
+export function useOrderCode() {
+	const subdomain = useSubdomain();
+	return (number: number) => formatServiceOrderCode(subdomain, number);
 }

@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCpf, formatPhone } from "@/lib/format";
 import type { CustomerRow } from "@/lib/services/customers";
 import { cn } from "@/lib/utils";
+import { CustomerAvatar } from "./customer-avatar";
 import { useCustomersPage, useSubdomain } from "./store";
 
 const customerFilters = {};
@@ -33,8 +34,11 @@ function useCustomerColumns() {
 		() => [
 			columnHelper.accessor("name", {
 				header: t("clients.table.headers.name"),
-				cell: ({ getValue }) => (
-					<span className="font-medium">{getValue()}</span>
+				cell: ({ row }) => (
+					<div className="flex items-center gap-2.5">
+						<CustomerAvatar customer={row.original} />
+						<span className="font-medium">{row.original.name}</span>
+					</div>
 				),
 				meta: { label: t("clients.table.headers.name") },
 			}),

@@ -443,7 +443,9 @@ export class PortalService {
 			estimate,
 			answer.status === "approved"
 				? answer
-				: { status: "rejected", rejectionReason: answer.reason || null }
+				: { status: "rejected", rejectionReason: answer.reason || null },
+			// The customer answered: nobody of the shop moved the order.
+			null
 		);
 		if (!recorded) {
 			throw new AppError("ESTIMATE_ALREADY_ANSWERED");

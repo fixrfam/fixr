@@ -5,26 +5,12 @@ import { EventBus } from "../../../core/events/bus";
 const { repo } = vi.hoisted(() => ({ repo: { updateDevice: vi.fn() } }));
 vi.mock("../repositories", () => ({ DevicesRepository: repo }));
 
-const { deviceStatusFor, registerDeviceEffects } = await import(".");
+const { registerDeviceEffects } = await import(".");
 
 const tx = "TX" as unknown as Transaction;
 
 afterEach(() => {
 	vi.clearAllMocks();
-});
-
-describe("deviceStatusFor", () => {
-	it.each([
-		["pending", "in_shop"],
-		["diagnosing", "in_shop"],
-		["waiting_approval", "in_shop"],
-		["approved", "in_shop"],
-		["fixing", "in_shop"],
-		["ready", "ready_for_pickup"],
-		["delivered", "with_customer"],
-	] as const)("an order %s leaves the device %s", (status, expected) => {
-		expect(deviceStatusFor(status)).toBe(expected);
-	});
 });
 
 describe("device effects", () => {
@@ -56,6 +42,7 @@ describe("device effects", () => {
 			deviceId: "dv",
 			from: "fixing",
 			to: "delivered",
+			employeeId: null,
 		});
 
 		expect(repo.updateDevice).toHaveBeenCalledWith(

@@ -13,6 +13,9 @@ import {
 	modelMakers,
 	models,
 	parts,
+	serviceOrderHistory,
+	serviceOrderSequences,
+	serviceOrderStatusValues,
 	serviceOrders,
 	serviceParts,
 	services,
@@ -292,7 +295,12 @@ async function seedServiceOrders(
 ) {
 	const deviceIds = new Map<string, string>();
 	const latestOrder = new Map<string, number>();
-	for (const [index, order] of SERVICE_ORDERS.entries()) {
+	const lastNumber = new Map<string, number>();
+	// Oldest first, so each company's numbers follow the order they were opened.
+	const byAge = [...SERVICE_ORDERS.entries()].sort(
+		([, a], [, b]) => b.daysAgo - a.daysAgo
+	);
+	for (const [index, order] of byAge) {
 		const companyId = companyIds.get(order.company) as string;
 		const clientId = clientIds.get(
 			`${order.company}:${order.client}`
@@ -321,10 +329,16 @@ async function seedServiceOrders(
 				.set({ status: deviceStatusFor(order.status) })
 				.where(eq(devices.id, deviceId));
 		}
+		const number = (lastNumber.get(companyId) ?? 0) + 1;
+		lastNumber.set(companyId, number);
+		const serviceOrderId = createId();
+		const employeeId = employeeIds.get(order.technician) as string;
 		await tx.insert(serviceOrders).values({
+			id: serviceOrderId,
 			companyId,
+			number,
 			clientId,
-			employeeId: employeeIds.get(order.technician) as string,
+			employeeId,
 			deviceId,
 			reportedDefect: order.defect,
 			observations: order.observations,
@@ -332,7 +346,41 @@ async function seedServiceOrders(
 			createdAt,
 			updatedAt: createdAt,
 		});
+		await tx
+			.insert(serviceOrderHistory)
+			.values(statusHistory(serviceOrderId, employeeId, order, createdAt));
 	}
+	for (const [companyId, number] of lastNumber) {
+		await tx
+			.insert(serviceOrderSequences)
+			.values({ companyId, lastNumber: number });
+	}
+}
+
+/**
+ * The order walked the lifecycle step by step up to its status, spread over
+ * its first days (at most until now), so the demo timeline has entries.
+ */
+function statusHistory(
+	serviceOrderId: string,
+	employeeId: string,
+	order: (typeof SERVICE_ORDERS)[number],
+	createdAt: Date
+) {
+	const path = serviceOrderStatusValues.slice(
+		0,
+		serviceOrderStatusValues.indexOf(order.status) + 1
+	);
+	const span = Math.min(order.daysAgo, 3) * DAY_MS;
+	return path.map((toStatus, step) => ({
+		serviceOrderId,
+		fromStatus: step === 0 ? null : path[step - 1],
+		toStatus,
+		employeeId,
+		createdAt: new Date(
+			createdAt.getTime() + (span * step) / Math.max(path.length - 1, 1)
+		),
+	}));
 }
 
 function deviceStatusFor(status: (typeof SERVICE_ORDERS)[number]["status"]) {

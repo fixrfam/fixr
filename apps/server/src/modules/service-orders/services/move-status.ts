@@ -14,6 +14,8 @@ type ServiceOrderStatus = z.infer<typeof serviceOrderStatuses>;
  *
  * @param emit - `events.emit` bound to `tx`, or an effect's `context.emit`
  * @param onlyFrom - move only an order currently in one of these statuses
+ * @param employeeId - who moved it (none when the system did, e.g. the
+ * customer approved an estimate); recorded in the order's history with `note`
  * @returns whether the status changed (the same status, or one outside
  * `onlyFrom`, changes nothing)
  */
@@ -24,10 +26,14 @@ export async function moveServiceOrder(
 		serviceOrderId,
 		to,
 		onlyFrom,
+		employeeId = null,
+		note = null,
 	}: {
 		serviceOrderId: string;
 		to: ServiceOrderStatus;
 		onlyFrom?: readonly ServiceOrderStatus[];
+		employeeId?: string | null;
+		note?: string | null;
 	}
 ) {
 	const current = await ServiceOrdersRepository.queryStatusForUpdate(
@@ -43,12 +49,20 @@ export async function moveServiceOrder(
 	}
 
 	await ServiceOrdersRepository.updateStatus(tx, serviceOrderId, to);
+	await ServiceOrdersRepository.insertStatusHistory(tx, {
+		serviceOrderId,
+		fromStatus: current.status,
+		toStatus: to,
+		employeeId,
+		note,
+	});
 	await emit("serviceOrder.statusChanged", {
 		serviceOrderId,
 		companyId: current.companyId,
 		deviceId: current.deviceId,
 		from: current.status,
 		to,
+		employeeId,
 	});
 	return true;
 }

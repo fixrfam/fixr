@@ -253,6 +253,8 @@ export class EstimatesRepository {
 	static async queryPdfContext(estimateId: string) {
 		const [row] = await db
 			.select({
+				serviceOrderNumber: serviceOrders.number,
+				subdomain: companies.subdomain,
 				company: {
 					name: companies.name,
 					cnpj: companies.cnpj,

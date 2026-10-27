@@ -2,7 +2,11 @@ import type { Transaction } from "@fixr/db/connection";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { repo } = vi.hoisted(() => ({
-	repo: { queryStatusForUpdate: vi.fn(), updateStatus: vi.fn() },
+	repo: {
+		queryStatusForUpdate: vi.fn(),
+		updateStatus: vi.fn(),
+		insertStatusHistory: vi.fn(),
+	},
 }));
 vi.mock("../repositories", () => ({ ServiceOrdersRepository: repo }));
 
@@ -24,21 +28,31 @@ afterEach(() => {
 });
 
 describe("moveServiceOrder", () => {
-	it("updates the status and emits the change in the same transaction", async () => {
+	it("updates the status, records it and emits the change in the same transaction", async () => {
 		const moved = await moveServiceOrder(tx, emit, {
 			serviceOrderId: "so",
 			to: "fixing",
+			employeeId: "em",
+			note: "Started the repair",
 		});
 
 		expect(moved).toBe(true);
 		expect(repo.queryStatusForUpdate).toHaveBeenCalledWith(tx, "so");
 		expect(repo.updateStatus).toHaveBeenCalledWith(tx, "so", "fixing");
+		expect(repo.insertStatusHistory).toHaveBeenCalledWith(tx, {
+			serviceOrderId: "so",
+			fromStatus: "pending",
+			toStatus: "fixing",
+			employeeId: "em",
+			note: "Started the repair",
+		});
 		expect(emit).toHaveBeenCalledWith("serviceOrder.statusChanged", {
 			serviceOrderId: "so",
 			companyId: "co",
 			deviceId: "dv",
 			from: "pending",
 			to: "fixing",
+			employeeId: "em",
 		});
 	});
 
@@ -56,6 +70,7 @@ describe("moveServiceOrder", () => {
 
 		expect(moved).toBe(false);
 		expect(repo.updateStatus).not.toHaveBeenCalled();
+		expect(repo.insertStatusHistory).not.toHaveBeenCalled();
 		expect(emit).not.toHaveBeenCalled();
 	});
 

@@ -3,6 +3,7 @@ import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
 	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -10,6 +11,7 @@ import {
 	patchServiceOrderSchema,
 	serviceOrderIdParamsSchema,
 	serviceOrderItemParamsSchema,
+	serviceOrderPhotoParamsSchema,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import { serviceOrdersDocs } from "../../../core/docs/service-orders.docs";
@@ -141,6 +143,59 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 				subdomain,
 				serviceOrderId,
 				data,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:serviceOrderId/photos",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.addServiceOrderPhotosSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = addServiceOrderPhotosSchema.parse(request.body);
+
+			await ServiceOrdersController.addPhotos({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/:serviceOrderId/photos/:photoId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.deleteServiceOrderPhotoSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, photoId } = serviceOrderPhotoParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.deletePhoto({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				photoId,
 				response,
 			});
 		})

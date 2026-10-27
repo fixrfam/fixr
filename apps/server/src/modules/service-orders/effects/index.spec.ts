@@ -10,7 +10,12 @@ vi.mock("../services/move-status", () => ({ moveServiceOrder }));
 const { BEFORE_APPROVAL, registerServiceOrderEffects } = await import(".");
 
 const tx = "TX" as unknown as Transaction;
-const estimate = { estimateId: "es", serviceOrderId: "so", companyId: "co" };
+const estimate = {
+	estimateId: "es",
+	serviceOrderId: "so",
+	companyId: "co",
+	employeeId: "em",
+};
 
 afterEach(() => {
 	vi.clearAllMocks();
@@ -33,6 +38,20 @@ describe("service order effects", () => {
 			serviceOrderId: "so",
 			to,
 			onlyFrom: BEFORE_APPROVAL,
+			employeeId: "em",
 		});
+	});
+
+	it("records an answer from the customer's link as nobody's", async () => {
+		await bus().emit(tx, "estimate.approved", {
+			...estimate,
+			employeeId: null,
+		});
+
+		expect(moveServiceOrder).toHaveBeenCalledWith(
+			tx,
+			expect.any(Function),
+			expect.objectContaining({ employeeId: null })
+		);
 	});
 });

@@ -1,5 +1,5 @@
-import { db } from "@fixr/db/connection";
-import { devices, serviceOrders } from "@fixr/db/schema";
+import { db, eq, sql } from "@fixr/db/connection";
+import { devices, serviceOrderSequences, serviceOrders } from "@fixr/db/schema";
 import type { deviceStatuses } from "@fixr/schemas/devices";
 import type { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import { createId } from "@paralleldrive/cuid2";
@@ -73,8 +73,21 @@ export async function makeServiceOrder(input: {
 			})
 		).id;
 
+	// Same sequence the API uses, so orders made here and through it never collide.
+	await db
+		.insert(serviceOrderSequences)
+		.values({ companyId: input.companyId, lastNumber: 1 })
+		.onDuplicateKeyUpdate({
+			set: { lastNumber: sql`${serviceOrderSequences.lastNumber} + 1` },
+		});
+	const [{ lastNumber }] = await db
+		.select({ lastNumber: serviceOrderSequences.lastNumber })
+		.from(serviceOrderSequences)
+		.where(eq(serviceOrderSequences.companyId, input.companyId));
+
 	const serviceOrder = {
 		id: createId(),
+		number: lastNumber,
 		companyId: input.companyId,
 		clientId: input.clientId,
 		employeeId: input.employeeId,
