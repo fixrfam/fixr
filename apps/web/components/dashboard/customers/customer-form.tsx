@@ -7,14 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
 import {
-	Building,
 	IdCard,
 	Loader2,
 	type LucideIcon,
-	Mail,
 	MapPin,
 	PhoneIcon,
-	Smartphone,
 	User,
 } from "lucide-react";
 import type {
@@ -118,11 +115,14 @@ export function CustomerForm({
 				}}
 				{...props}
 			>
-				<FormSection title={t("clients.form.identitySection")}>
+				<FormSection
+					hint={t("clients.form.identityHint")}
+					icon={IdCard}
+					title={t("clients.form.identitySection")}
+				>
 					<TextField
 						control={form.control}
 						description={t("clients.form.nameDescription")}
-						icon={User}
 						label={t("clients.form.nameLabel")}
 						name="name"
 						placeholder={t("clients.form.namePlaceholder")}
@@ -131,7 +131,6 @@ export function CustomerForm({
 						<TextField
 							control={form.control}
 							description={t("clients.form.documentDescription")}
-							icon={IdCard}
 							inputMode="numeric"
 							label={t("clients.form.documentLabel")}
 							maskRef={cpfMask}
@@ -142,7 +141,6 @@ export function CustomerForm({
 						<TextField
 							control={form.control}
 							description={t("clients.form.emailDescription")}
-							icon={Mail}
 							inputMode="email"
 							label={t("clients.form.emailLabel")}
 							name="email"
@@ -151,12 +149,15 @@ export function CustomerForm({
 					</div>
 				</FormSection>
 
-				<FormSection title={t("clients.form.contactSection")}>
+				<FormSection
+					hint={t("clients.form.contactHint")}
+					icon={PhoneIcon}
+					title={t("clients.form.contactSection")}
+				>
 					<div className={cn("grid gap-4", split)}>
 						<TextField
 							control={form.control}
 							description={t("clients.form.phoneDescription")}
-							icon={PhoneIcon}
 							inputMode="tel"
 							label={t("clients.form.phoneLabel")}
 							maskRef={phoneMask}
@@ -167,7 +168,6 @@ export function CustomerForm({
 						<TextField
 							control={form.control}
 							description={t("clients.form.alternativePhoneDescription")}
-							icon={Smartphone}
 							inputMode="tel"
 							label={t("clients.form.alternativePhoneLabel")}
 							maskRef={altPhoneMask}
@@ -178,11 +178,14 @@ export function CustomerForm({
 					</div>
 				</FormSection>
 
-				<FormSection title={t("clients.form.addressSection")}>
+				<FormSection
+					hint={t("clients.form.addressHint")}
+					icon={MapPin}
+					title={t("clients.form.addressSection")}
+				>
 					<TextField
 						control={form.control}
 						description={t("clients.form.addressDescription")}
-						icon={MapPin}
 						label={t("clients.form.addressLabel")}
 						name="address"
 						placeholder={t("clients.form.addressPlaceholder")}
@@ -196,7 +199,6 @@ export function CustomerForm({
 						<TextField
 							control={form.control}
 							description={t("clients.form.cityDescription")}
-							icon={Building}
 							label={t("clients.form.cityLabel")}
 							name="city"
 							placeholder={t("clients.form.cityPlaceholder")}
@@ -204,7 +206,6 @@ export function CustomerForm({
 						<TextField
 							control={form.control}
 							description={t("clients.form.stateDescription")}
-							icon={Building}
 							label={t("clients.form.stateLabel")}
 							maxLength={2}
 							name="state"
@@ -224,19 +225,30 @@ export function CustomerForm({
 
 type Values = z.infer<typeof createClientSchema>;
 
-/** A titled group of fields. */
+/** A group of fields under its icon, title and what it's for. */
 function FormSection({
+	icon: Icon,
 	title,
+	hint,
 	children,
 }: {
+	icon: LucideIcon;
 	title: string;
+	hint: string;
 	children: ReactNode;
 }) {
 	return (
-		<fieldset className="m-0 grid min-w-0 gap-4 border-0 p-0">
-			<legend className="mb-4 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-				{title}
-			</legend>
+		<fieldset className="m-0 grid min-w-0 gap-4 border-0 p-0 [&+&]:border-t [&+&]:pt-6">
+			<legend className="sr-only">{title}</legend>
+			<div aria-hidden className="flex items-center gap-3">
+				<span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+					<Icon className="size-4" />
+				</span>
+				<div className="grid gap-0.5">
+					<p className="font-medium text-sm leading-none">{title}</p>
+					<p className="text-muted-foreground text-xs">{hint}</p>
+				</div>
+			</div>
 			{children}
 		</fieldset>
 	);
@@ -247,7 +259,6 @@ function TextField({
 	control,
 	name,
 	label,
-	icon: Icon,
 	placeholder,
 	description,
 	maskRef,
@@ -258,7 +269,6 @@ function TextField({
 	control: Control<Values>;
 	name: keyof Values;
 	label: string;
-	icon: LucideIcon;
 	placeholder: string;
 	description: string;
 	/** Maskito's ref, for masked inputs (CPF, phones). */
@@ -274,10 +284,7 @@ function TextField({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="gap-2">
-					<FormLabel className="gap-1.5">
-						<Icon className="size-3.5 text-muted-foreground" />
-						{label}
-					</FormLabel>
+					<FormLabel>{label}</FormLabel>
 					<FormControl>
 						<Input
 							inputMode={inputMode}

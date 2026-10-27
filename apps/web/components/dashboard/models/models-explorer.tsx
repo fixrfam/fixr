@@ -34,6 +34,7 @@ import {
 	CATEGORY_ICONS,
 	isCatalogCategory,
 } from "./format";
+import { AddModelPrompt } from "./new-model-form";
 import { useMakers, useModelCategories, useModelsPage } from "./store";
 
 /** URL state of the explorer: page, search, filters and order. */
@@ -167,13 +168,19 @@ export function ModelsExplorer() {
 		clearOnDefault: true,
 	});
 	const hrefOf = useCallback(
-		(model: ModelListItem) =>
+		(model: Pick<ModelListItem, "slug">) =>
 			`/dashboard/${subdomain}/devices/models/${model.slug}`,
 		[subdomain]
 	);
 
 	return (
 		<ModelsBrowser
+			footer={
+				<AddModelPrompt
+					onCreated={(model) => router.push(hrefOf(model))}
+					search={params.q}
+				/>
+			}
 			hrefOf={hrefOf}
 			onSelect={(model) => router.push(hrefOf(model))}
 			params={params}

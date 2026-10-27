@@ -76,5 +76,8 @@ export const clients: Translated<typeof source> = {
 		identitySection: "Identificação",
 		contactSection: "Contato",
 		addressSection: "Endereço",
+		identityHint: "Quem é o cliente.",
+		contactHint: "Como a loja fala com ele.",
+		addressHint: "Onde ele mora, para retiradas e notas.",
 	},
 } as const;

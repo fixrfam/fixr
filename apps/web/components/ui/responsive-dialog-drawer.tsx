@@ -62,7 +62,10 @@ export function ResponsiveDialogDrawer({
 
 	const isControlled = open !== undefined
 	// Dialogs opened from inside it (e.g. a new customer) stack over it.
-	const { covered, layer } = useDialogLayer(isControlled ? open : true)
+	const { covered, layer } = useDialogLayer(
+		isControlled ? open : true,
+		isDesktop ? "dialog" : "drawer"
+	)
 
 	function handleOpenChange(next: boolean) {
 		if (isControlled) {

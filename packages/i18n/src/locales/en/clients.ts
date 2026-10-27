@@ -73,5 +73,8 @@ export const clients = {
 		identitySection: "Identification",
 		contactSection: "Contact",
 		addressSection: "Address",
+		identityHint: "Who the customer is.",
+		contactHint: "How the shop reaches them.",
+		addressHint: "Where they live, for pickups and invoices.",
 	},
 } as const;
