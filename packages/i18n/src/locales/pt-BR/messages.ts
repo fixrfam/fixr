@@ -115,7 +115,7 @@ export const messages: Translated<typeof source> = {
 			title: "Aparelho não encontrado",
 			description: "Este aparelho não existe ou foi removido.",
 		},
-		device_client_not_found: {
+		device_customer_not_found: {
 			title: "Cliente não encontrado",
 			description: "Escolha um dos clientes da loja.",
 		},

@@ -56,6 +56,12 @@ function Header({
 						</Text>
 					</View>
 					<View style={{ flexDirection: "row" }}>
+						<Text style={{ flex: 1 }}>{t("estimates.pdf.serviceOrder")}</Text>
+						<Text style={{ color: "#000", flex: 1.5 }}>
+							{data.serviceOrderCode}
+						</Text>
+					</View>
+					<View style={{ flexDirection: "row" }}>
 						<Text style={{ flex: 1 }}>{t("estimates.pdf.issuedAt")}</Text>
 						<Text style={{ color: "#000", flex: 1.5, fontWeight: 600 }}>
 							{format.date(data.issuedAt)}

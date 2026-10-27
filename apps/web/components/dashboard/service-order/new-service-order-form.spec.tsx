@@ -1,3 +1,4 @@
+import { createTranslator } from "@fixr/i18n";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -7,6 +8,7 @@ import { device, serveRepairs, serviceOrder } from "@/test/msw/repairs";
 import { renderWithQuery as render } from "@/test/query";
 import { NewServiceOrderForm } from "./new-service-order-form";
 
+const { t } = createTranslator("pt-BR");
 let api: ReturnType<typeof serveRepairs>;
 
 beforeEach(() => {
@@ -62,5 +64,46 @@ describe("NewServiceOrderForm", () => {
 			await screen.findByText("Escolha o aparelho que será consertado.")
 		).toBeInTheDocument();
 		expect(api.writes).toHaveLength(0);
+	});
+
+	it("registers a customer in place and picks them", async () => {
+		const user = userEvent.setup();
+		render(<NewServiceOrderForm />);
+
+		await user.click(
+			screen.getByRole("button", { name: t("serviceOrders.form.newCustomer") })
+		);
+
+		expect(
+			await screen.findByText(t("serviceOrders.form.newCustomerHint"))
+		).toBeInTheDocument();
+		expect(
+			screen.getByPlaceholderText(t("customers.form.namePlaceholder"))
+		).toBeInTheDocument();
+	});
+
+	it("offers the inline forms only to who can register", () => {
+		render(<NewServiceOrderForm />, { role: "technician" });
+
+		expect(
+			screen.queryByRole("button", {
+				name: t("serviceOrders.form.newCustomer"),
+			})
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the customer's devices as cards to pick", async () => {
+		navigation.searchParams = new URLSearchParams({
+			customerId: device.customerId,
+		});
+		const user = userEvent.setup();
+		render(<NewServiceOrderForm />);
+
+		const card = await screen.findByRole("button", {
+			name: new RegExp(device.model.name),
+		});
+		await user.click(card);
+
+		expect(card).toHaveAttribute("aria-pressed", "true");
 	});
 });

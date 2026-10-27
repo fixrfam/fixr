@@ -4,6 +4,7 @@ import type { EstimatePdfData } from "./types";
 
 const data: EstimatePdfData = {
 	number: 7,
+	serviceOrderCode: "ACME-12",
 	issuedAt: new Date("2026-10-01T12:00:00Z"),
 	validUntil: new Date("2026-10-31T12:00:00Z"),
 	discountPercentage: 10,

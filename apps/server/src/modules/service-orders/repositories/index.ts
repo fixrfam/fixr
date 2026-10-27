@@ -9,6 +9,7 @@ import {
 	lte,
 	or,
 	type SQL,
+	sql,
 	type Transaction,
 } from "@fixr/db/connection";
 import {
@@ -19,20 +20,28 @@ import {
 	modelMakers,
 	models,
 	parts,
+	serviceOrderHistory,
 	serviceOrderImages,
 	serviceOrderItems,
+	serviceOrderSequences,
 	serviceOrders,
 	services,
 	uploads,
 } from "@fixr/db/schema";
-import type {
-	createServiceOrderSchema,
-	getServiceOrdersQuerySchema,
-	serviceOrderItemTypes,
-	serviceOrderStatuses,
+import {
+	type createServiceOrderPhotoSchema,
+	type createServiceOrderSchema,
+	type getServiceOrdersQuerySchema,
+	parseServiceOrderNumber,
+	type serviceOrderItemTypes,
+	type serviceOrderStatuses,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
+import { modelImageKey } from "../../../core/lib/model-image";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
+
+type ServiceOrderStatus = z.infer<typeof serviceOrderStatuses>;
+type PhotoInput = z.infer<typeof createServiceOrderPhotoSchema>;
 
 export type ServiceOrderItemInsert = typeof serviceOrderItems.$inferInsert;
 
@@ -44,6 +53,7 @@ function endOfDay(date: Date) {
 
 export const serviceOrdersListSelect = {
 	id: serviceOrders.id,
+	number: serviceOrders.number,
 	companyId: serviceOrders.companyId,
 	customerId: serviceOrders.customerId,
 	employeeId: serviceOrders.employeeId,
@@ -67,9 +77,18 @@ export const serviceOrdersListSelect = {
 		serialNumber: devices.serialNumber,
 		status: devices.status,
 	},
-	model: { id: models.id, name: models.name, slug: models.slug },
+	model: {
+		id: models.id,
+		name: models.name,
+		slug: models.slug,
+		imageKey: modelImageKey,
+	},
 	deviceMaker: { id: modelMakers.id, name: modelMakers.name },
-	deviceCategory: { id: modelCategories.id, name: modelCategories.name },
+	deviceCategory: {
+		id: modelCategories.id,
+		name: modelCategories.name,
+		slug: modelCategories.slug,
+	},
 };
 
 export const serviceOrdersListJoins = [
@@ -162,8 +181,11 @@ export class ServiceOrdersRepository {
 			conditions.push(lte(serviceOrders.createdAt, endOfDay(filters.dateTo)));
 		}
 		if (filters.query) {
+			// `ACME-12`, `#12` or `12` also find order number 12.
+			const number = parseServiceOrderNumber(filters.query);
 			conditions.push(
 				or(
+					...(number === null ? [] : [eq(serviceOrders.number, number)]),
 					like(models.name, `%${filters.query}%`),
 					like(modelMakers.name, `%${filters.query}%`),
 					like(devices.imei, `%${filters.query}%`),
@@ -176,9 +198,44 @@ export class ServiceOrdersRepository {
 		return and(...conditions);
 	}
 
-	/** Insert the order and its photos. Runs in the caller's transaction, which also emits `serviceOrder.opened`. */
+	/** Uploads of service order photos that belong to the company and aren't attached yet. */
+	static async queryPhotoUploads(uploadIds: string[], companyId: string) {
+		return await db
+			.select({ id: uploads.id })
+			.from(uploads)
+			.where(
+				and(
+					inArray(uploads.id, uploadIds),
+					eq(uploads.companyId, companyId),
+					eq(uploads.purpose, "service_order"),
+					eq(uploads.status, "pending")
+				)
+			);
+	}
+
+	/**
+	 * The company's next order number. The upsert locks the company's row of
+	 * the sequence until the transaction ends, so concurrent orders queue up
+	 * instead of sharing a number.
+	 */
+	static async nextNumber(tx: Transaction, companyId: string) {
+		await tx
+			.insert(serviceOrderSequences)
+			.values({ companyId, lastNumber: 1 })
+			.onDuplicateKeyUpdate({
+				set: { lastNumber: sql`${serviceOrderSequences.lastNumber} + 1` },
+			});
+		const [sequence] = await tx
+			.select({ lastNumber: serviceOrderSequences.lastNumber })
+			.from(serviceOrderSequences)
+			.where(eq(serviceOrderSequences.companyId, companyId))
+			.limit(1);
+		return sequence.lastNumber;
+	}
+
+	/** Insert the order, its first history entry and its photos. Runs in the caller's transaction, which also emits `serviceOrder.opened`. */
 	@InvalidateCache({ patterns: ["service-orders:*"] })
-	static async createWithPhotos(
+	static async create(
 		tx: Transaction,
 		{
 			companyId,
@@ -192,10 +249,12 @@ export class ServiceOrdersRepository {
 			data: z.infer<typeof createServiceOrderSchema>;
 		}
 	) {
-		const [serviceOrderId] = await tx
+		const number = await ServiceOrdersRepository.nextNumber(tx, companyId);
+		const [{ id }] = await tx
 			.insert(serviceOrders)
 			.values({
 				companyId,
+				number,
 				customerId,
 				employeeId,
 				deviceId: data.deviceId,
@@ -204,49 +263,90 @@ export class ServiceOrdersRepository {
 			})
 			.$returningId();
 
-		if (data.photos.length > 0) {
-			const uploadIds = data.photos.map((p) => p.uploadId);
-			const uploadRecords = await tx
-				.select()
-				.from(uploads)
-				.where(inArray(uploads.id, uploadIds));
+		await ServiceOrdersRepository.insertStatusHistory(tx, {
+			serviceOrderId: id,
+			fromStatus: null,
+			toStatus: "pending",
+			employeeId,
+		});
+		await ServiceOrdersRepository.insertPhotos(tx, {
+			serviceOrderId: id,
+			employeeId,
+			photos: data.photos,
+		});
 
-			const uploadMap = new Map(uploadRecords.map((u) => [u.id, u]));
+		return { id, number };
+	}
 
-			await tx.insert(serviceOrderImages).values(
-				data.photos.map((photo) => {
-					const upload = uploadMap.get(photo.uploadId)!;
-					return {
-						serviceOrderId: serviceOrderId.id,
-						employeeId,
-						uploadId: photo.uploadId,
-						imageUrl: upload.url,
-						fileName: upload.fileName,
-						sizeInBytes: upload.sizeInBytes,
-						contentType: upload.contentType,
-						description: photo.description ?? null,
-					};
-				})
-			);
-
-			await tx
-				.update(uploads)
-				.set({ status: "completed" })
-				.where(inArray(uploads.id, uploadIds));
+	/** Attach uploaded photos to an order and mark the uploads as used. */
+	@InvalidateCache({ patterns: ["service-orders:*"] })
+	static async insertPhotos(
+		tx: Transaction,
+		{
+			serviceOrderId,
+			employeeId,
+			photos,
+		}: { serviceOrderId: string; employeeId: string; photos: PhotoInput[] }
+	) {
+		if (photos.length === 0) {
+			return;
 		}
+		await tx.insert(serviceOrderImages).values(
+			photos.map((photo) => ({
+				serviceOrderId,
+				employeeId,
+				uploadId: photo.uploadId,
+				description: photo.description ?? null,
+			}))
+		);
+		await tx
+			.update(uploads)
+			.set({ status: "completed" })
+			.where(
+				inArray(
+					uploads.id,
+					photos.map((photo) => photo.uploadId)
+				)
+			);
+	}
 
-		const [serviceOrder] = await tx
-			.select()
-			.from(serviceOrders)
-			.where(eq(serviceOrders.id, serviceOrderId.id))
-			.limit(1);
-
-		const photos = await tx
-			.select()
+	static async queryPhoto(serviceOrderId: string, photoId: string) {
+		const [photo] = await db
+			.select({ id: serviceOrderImages.id })
 			.from(serviceOrderImages)
-			.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId.id));
+			.where(
+				and(
+					eq(serviceOrderImages.id, photoId),
+					eq(serviceOrderImages.serviceOrderId, serviceOrderId)
+				)
+			)
+			.limit(1);
+		return photo ?? null;
+	}
 
-		return { serviceOrder, photos };
+	@InvalidateCache({ patterns: ["service-orders:*"] })
+	static async deletePhoto(photoId: string) {
+		await db
+			.delete(serviceOrderImages)
+			.where(eq(serviceOrderImages.id, photoId));
+	}
+
+	/** Record a status the order went through. Runs in the transaction that moved it. */
+	static async insertStatusHistory(
+		tx: Transaction,
+		values: {
+			serviceOrderId: string;
+			fromStatus: ServiceOrderStatus | null;
+			toStatus: ServiceOrderStatus;
+			employeeId?: string | null;
+			note?: string | null;
+		}
+	) {
+		await tx.insert(serviceOrderHistory).values({
+			...values,
+			employeeId: values.employeeId ?? null,
+			note: values.note || null,
+		});
 	}
 
 	/** One order of the company with its customer, device, technician and photos. */
@@ -275,12 +375,40 @@ export class ServiceOrdersRepository {
 			return null;
 		}
 
-		const photos = await db
-			.select()
-			.from(serviceOrderImages)
-			.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId));
+		const [photos, history] = await Promise.all([
+			db
+				.select({
+					id: serviceOrderImages.id,
+					imageUrl: uploads.url,
+					fileName: uploads.fileName,
+					description: serviceOrderImages.description,
+					createdAt: serviceOrderImages.createdAt,
+				})
+				.from(serviceOrderImages)
+				.innerJoin(uploads, eq(uploads.id, serviceOrderImages.uploadId))
+				.where(eq(serviceOrderImages.serviceOrderId, serviceOrderId))
+				.orderBy(serviceOrderImages.createdAt, serviceOrderImages.id),
+			db
+				.select({
+					id: serviceOrderHistory.id,
+					from: serviceOrderHistory.fromStatus,
+					to: serviceOrderHistory.toStatus,
+					note: serviceOrderHistory.note,
+					createdAt: serviceOrderHistory.createdAt,
+					employee: { id: employees.id, name: employees.name },
+				})
+				.from(serviceOrderHistory)
+				.leftJoin(employees, eq(employees.id, serviceOrderHistory.employeeId))
+				.where(eq(serviceOrderHistory.serviceOrderId, serviceOrderId))
+				// The opening first, even when a backfilled change shares its time.
+				.orderBy(
+					serviceOrderHistory.createdAt,
+					sql`${serviceOrderHistory.fromStatus} IS NOT NULL`,
+					serviceOrderHistory.id
+				),
+		]);
 
-		return { ...serviceOrder, photos };
+		return { ...serviceOrder, photos, history };
 	}
 
 	static async updateServiceOrder(

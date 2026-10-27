@@ -4,6 +4,7 @@ import {
 	createDeviceSchema,
 	deviceIdParamsSchema,
 	deviceStatuses,
+	deviceStatusFor,
 	getDevicesQuerySchema,
 	patchDeviceSchema,
 } from "./devices";
@@ -78,5 +79,19 @@ describe("getDevicesQuerySchema and deviceIdParamsSchema", () => {
 		expect(issuePaths(deviceIdParamsSchema, { deviceId: "Nope!" })).toEqual([
 			"deviceId",
 		]);
+	});
+});
+
+describe("deviceStatusFor", () => {
+	it.each([
+		["pending", "in_shop"],
+		["diagnosing", "in_shop"],
+		["waiting_approval", "in_shop"],
+		["approved", "in_shop"],
+		["fixing", "in_shop"],
+		["ready", "ready_for_pickup"],
+		["delivered", "with_customer"],
+	] as const)("an order %s leaves the device %s", (status, expected) => {
+		expect(deviceStatusFor(status)).toBe(expected);
 	});
 });

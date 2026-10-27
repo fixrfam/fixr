@@ -46,7 +46,10 @@ export function PortalHome() {
 										<PortalStatusBadge status={order.status} />
 									</div>
 									<p className="truncate text-muted-foreground text-sm">
-										{order.company.name} ·{" "}
+										<span className="font-medium text-foreground tabular-nums">
+											{order.code}
+										</span>{" "}
+										· {order.company.name} ·{" "}
 										{t("portal.list.openedAt", {
 											date: format.date(order.createdAt),
 										})}

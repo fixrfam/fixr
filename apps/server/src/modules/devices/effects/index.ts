@@ -1,18 +1,6 @@
-import type { serviceOrderStatuses } from "@fixr/schemas/service-orders";
-import type { z } from "zod";
+import { deviceStatusFor } from "@fixr/schemas/devices";
 import type { EventBus } from "../../../core/events/bus";
-import type { DeviceStatus } from "../../../core/events/catalog";
 import { DevicesRepository } from "../repositories";
-
-/** Where a device is while its service order is in a status. */
-export function deviceStatusFor(
-	status: z.infer<typeof serviceOrderStatuses>
-): DeviceStatus {
-	if (status === "delivered") {
-		return "with_customer";
-	}
-	return status === "ready" ? "ready_for_pickup" : "in_shop";
-}
 
 /**
  * A device follows its service orders: it is in the shop from the moment an

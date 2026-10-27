@@ -77,8 +77,13 @@ describe("DeviceFormDialog", () => {
 			/>
 		);
 
-		await user.click(screen.getByRole("combobox", { name: "Modelo" }));
-		await user.click(await screen.findByRole("option", { name: /iPhone 13/ }));
+		// The model comes from the catalog browser, stacked over the form.
+		await user.click(
+			screen.getByRole("button", {
+				name: /Escolha um modelo|Busque no catálogo|Modelo/,
+			})
+		);
+		await user.click(await screen.findByText(device.model.name));
 		await user.type(screen.getByRole("textbox", { name: "IMEI" }), "123");
 		await user.click(
 			screen.getByRole("button", { name: "Cadastrar aparelho" })

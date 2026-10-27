@@ -8,6 +8,7 @@ import type {
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
+import { withModelImageUrl } from "../../../core/lib/model-image";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
@@ -50,7 +51,7 @@ export class DevicesService {
 		if (!device) {
 			throw new AppError("DEVICE_NOT_FOUND");
 		}
-		return device;
+		return withModelImageUrl(device);
 	}
 
 	private static async assertUsableModel(modelId: string, companyId: string) {
@@ -116,7 +117,14 @@ export class DevicesService {
 				error: null,
 				code: "list_devices_success",
 				message: "Devices retrieved successfully.",
-				data: paginatedData({ records, pagination }),
+				data: paginatedData({
+					records: await Promise.all(
+						(records as { model: { imageKey: string | null } }[]).map(
+							withModelImageUrl
+						)
+					),
+					pagination,
+				}),
 			})
 		);
 	}
@@ -166,7 +174,7 @@ export class DevicesService {
 			companyId
 		);
 		if (!customer) {
-			throw new AppError("DEVICE_CLIENT_NOT_FOUND");
+			throw new AppError("DEVICE_CUSTOMER_NOT_FOUND");
 		}
 		await DevicesService.assertUsableModel(data.modelId, companyId);
 
@@ -174,10 +182,7 @@ export class DevicesService {
 			...emptyToNull(data),
 			companyId,
 		});
-		const device = await DevicesRepository.queryDeviceOfCompany(
-			deviceId,
-			companyId
-		);
+		const device = await DevicesService.queryOwnDevice(deviceId, companyId);
 
 		return response.status(201).send(
 			apiResponse({
@@ -213,10 +218,7 @@ export class DevicesService {
 			await DevicesRepository.updateDevice(deviceId, emptyToNull(data));
 		}
 
-		const device = await DevicesRepository.queryDeviceOfCompany(
-			deviceId,
-			companyId
-		);
+		const device = await DevicesService.queryOwnDevice(deviceId, companyId);
 
 		return response.status(200).send(
 			apiResponse({

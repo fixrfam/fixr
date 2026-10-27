@@ -1,5 +1,10 @@
-import { db, eq } from "@fixr/db/connection";
-import { estimates, serviceOrderItems, serviceOrders } from "@fixr/db/schema";
+import { db, desc, eq } from "@fixr/db/connection";
+import {
+	estimates,
+	serviceOrderHistory,
+	serviceOrderItems,
+	serviceOrders,
+} from "@fixr/db/schema";
 import { createEmailQueue } from "@fixr/mail/queue";
 import { afterAll, describe, expect, it } from "vitest";
 import { redis } from "@/src/config/redis";
@@ -98,6 +103,20 @@ async function serviceOrderStatus(id: string) {
 	return row?.status;
 }
 
+/** The order's latest history entry: where it went and who moved it. */
+async function lastMove(id: string) {
+	const [row] = await db
+		.select({
+			to: serviceOrderHistory.toStatus,
+			employeeId: serviceOrderHistory.employeeId,
+		})
+		.from(serviceOrderHistory)
+		.where(eq(serviceOrderHistory.serviceOrderId, id))
+		.orderBy(desc(serviceOrderHistory.createdAt))
+		.limit(1);
+	return row;
+}
+
 describe("POST /companies/:subdomain/estimates/:estimateId/send", () => {
 	it("queues the email with the PDF and moves the order to waiting approval", async () => {
 		const ctx = await setup();
@@ -113,6 +132,11 @@ describe("POST /companies/:subdomain/estimates/:estimateId/send", () => {
 		expect(await serviceOrderStatus(ctx.serviceOrder.id)).toBe(
 			"waiting_approval"
 		);
+		// The order's history names who sent it.
+		expect(await lastMove(ctx.serviceOrder.id)).toEqual({
+			to: "waiting_approval",
+			employeeId: ctx.employee.id,
+		});
 
 		const jobs = await queue.getJobs(["waiting", "delayed", "prioritized"]);
 		const job = jobs.find(
@@ -240,6 +264,11 @@ describe("/estimate-links/:token", () => {
 		});
 		expect(response.json().data.respondedAt).not.toBeNull();
 		expect(await serviceOrderStatus(ctx.serviceOrder.id)).toBe("approved");
+		// The customer approved: nobody of the shop moved the order.
+		expect(await lastMove(ctx.serviceOrder.id)).toEqual({
+			to: "approved",
+			employeeId: null,
+		});
 		expect(again.statusCode).toBe(409);
 		expect(again.json().code).toBe("estimate_already_answered");
 	});

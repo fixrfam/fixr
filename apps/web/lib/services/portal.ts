@@ -28,6 +28,8 @@ export type PortalServiceOrderStatus =
 
 export interface PortalServiceOrderSummary {
 	id: string;
+	/** How the shop refers to the order, e.g. `ACME-12`. */
+	code: string;
 	status: PortalServiceOrderStatus;
 	deviceMaker: string;
 	deviceModel: string;
@@ -51,6 +53,8 @@ export interface PortalEstimate {
 
 export interface PortalServiceOrder {
 	id: string;
+	/** How the shop refers to the order, e.g. `ACME-12`. */
+	code: string;
 	status: PortalServiceOrderStatus;
 	deviceMaker: string;
 	deviceModel: string;

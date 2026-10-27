@@ -93,7 +93,7 @@ describe("POST /companies/:subdomain/devices", () => {
 		});
 
 		expect(response.statusCode).toBe(400);
-		expect(response.json().code).toBe("device_client_not_found");
+		expect(response.json().code).toBe("device_customer_not_found");
 	});
 
 	it("is not allowed for a technician", async () => {

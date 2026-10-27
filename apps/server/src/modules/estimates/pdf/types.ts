@@ -1,6 +1,8 @@
 /** Everything the estimate PDF prints, already resolved from the database. */
 export interface EstimatePdfData {
 	number: number;
+	/** The order it's for, as people refer to it (e.g. `ACME-12`). */
+	serviceOrderCode: string;
 	issuedAt: Date;
 	validUntil: Date;
 	discountPercentage: number;

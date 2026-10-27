@@ -27,15 +27,16 @@ export const deviceRecordSchema = z.object({
 		cpf: z.string(),
 		phone: z.string().nullable(),
 	}),
-	model: relation.extend({ slug: z.string() }),
+	model: relation.extend({ slug: z.string(), imageUrl: z.string().nullable() }),
 	maker: relation,
-	category: relation.nullable(),
+	category: relation.extend({ slug: z.string() }).nullable(),
 });
 
 const deviceDetailSchema = deviceRecordSchema.extend({
 	serviceOrders: z.array(
 		z.object({
 			id: z.string(),
+			number: z.number().int(),
 			status: serviceOrderStatuses,
 			reportedDefect: z.string(),
 			createdAt: z.coerce.date(),
@@ -52,11 +53,11 @@ const deviceNotFound = notFoundError("device_not_found", "Device not found.");
 const invalidReference = zodResponseSchema({
 	status: 400,
 	error: "Bad Request",
-	code: "device_client_not_found",
+	code: "device_customer_not_found",
 	message: "The customer does not exist in this company.",
 	data: null,
 }).describe(
-	"The customer (`device_client_not_found`) or the model (`device_model_not_found`) can't be used by this company."
+	"The customer (`device_customer_not_found`) or the model (`device_model_not_found`) can't be used by this company."
 );
 
 const listDevicesSchema: FastifySchema = {

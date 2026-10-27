@@ -113,7 +113,7 @@ export const messages = {
 			title: "Device not found",
 			description: "This device does not exist or was removed.",
 		},
-		device_client_not_found: {
+		device_customer_not_found: {
 			title: "Customer not found",
 			description: "Pick one of the shop's customers.",
 		},

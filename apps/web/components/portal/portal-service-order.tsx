@@ -207,6 +207,10 @@ export function PortalServiceOrder({ id }: { id: string }) {
 						})}
 					</h1>
 					<p className="text-muted-foreground text-sm">
+						<span className="font-medium text-foreground tabular-nums">
+							{order.code}
+						</span>{" "}
+						·{" "}
 						{t("portal.list.openedAt", { date: format.date(order.createdAt) })}
 					</p>
 				</div>

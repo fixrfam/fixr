@@ -26,6 +26,7 @@ export interface CustomerRow {
 export interface CustomerDetail extends CustomerRow {
 	serviceOrders: {
 		id: string;
+		number: number;
 		deviceId: string;
 		deviceModel: string;
 		status: z.infer<typeof serviceOrderStatuses>;

@@ -21,6 +21,7 @@ import {
 } from "@fixr/db/schema";
 import type { deviceStatuses } from "@fixr/schemas/devices";
 import type { z } from "zod";
+import { modelImageKey } from "../../../core/lib/model-image";
 import { InvalidateCache } from "../../../shared/infra/cache";
 
 /** How many of the device's latest service orders the detail route returns. */
@@ -45,9 +46,18 @@ export const deviceSelect = {
 		cpf: customers.cpf,
 		phone: customers.phone,
 	},
-	model: { id: models.id, name: models.name, slug: models.slug },
+	model: {
+		id: models.id,
+		name: models.name,
+		slug: models.slug,
+		imageKey: modelImageKey,
+	},
 	maker: { id: modelMakers.id, name: modelMakers.name },
-	category: { id: modelCategories.id, name: modelCategories.name },
+	category: {
+		id: modelCategories.id,
+		name: modelCategories.name,
+		slug: modelCategories.slug,
+	},
 };
 
 /** @description Joins behind `deviceSelect` */
@@ -185,6 +195,7 @@ export class DevicesRepository {
 		return await db
 			.select({
 				id: serviceOrders.id,
+				number: serviceOrders.number,
 				status: serviceOrders.status,
 				reportedDefect: serviceOrders.reportedDefect,
 				createdAt: serviceOrders.createdAt,

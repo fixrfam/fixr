@@ -1,4 +1,5 @@
 import type { Translator } from "@fixr/i18n";
+import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
 import {
 	ClipboardList,
 	FileUser,
@@ -8,6 +9,9 @@ import {
 	User,
 	Wrench,
 } from "lucide-react";
+import { CopyableValue } from "@/components/dashboard/copyable-value";
+import { CustomerAvatar } from "@/components/dashboard/customers/customer-avatar";
+import { ModelImage } from "@/components/dashboard/models/model-image";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
@@ -21,7 +25,6 @@ import { ServiceOrderProgress } from "@/components/dashboard/service-order/widge
 import { formatCpf, formatPhone } from "@/lib/format";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import type { ServiceOrderDetail } from "@/lib/services/service-orders";
-import { orderNumber } from "../order-number";
 import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import type { CardId } from "./utils/constants";
 
@@ -39,10 +42,36 @@ export function getCards(
 				icon={ClipboardList}
 				title={t("serviceOrders.cards.summaryTitle")}
 			>
+				<DashLink
+					className="mb-3 flex items-center gap-3 rounded-lg border bg-muted/20 p-2.5 transition-colors hover:border-primary/50"
+					href={`/devices/models/${order.model.slug}`}
+					subdomain={subdomain}
+				>
+					<ModelImage
+						alt={order.model.name}
+						category={order.deviceCategory?.slug}
+						className="size-14"
+						src={order.model.imageUrl}
+					/>
+					<div className="min-w-0">
+						<p className="truncate font-medium text-sm">{order.model.name}</p>
+						<p className="truncate text-muted-foreground text-xs">
+							{[order.deviceMaker.name, order.deviceCategory?.name]
+								.filter(Boolean)
+								.join(" · ")}
+						</p>
+					</div>
+				</DashLink>
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.number")}
-						value={`#${orderNumber(order.id)}`}
+						value={
+							<CopyableValue
+								className="font-semibold tabular-nums"
+								label={t("serviceOrders.fields.number")}
+								value={formatServiceOrderCode(subdomain, order.number)}
+							/>
+						}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.status")}
@@ -126,10 +155,11 @@ export function getCards(
 						label={t("serviceOrders.fields.name")}
 						value={
 							<DashLink
-								className="hover:underline"
+								className="inline-flex items-center gap-2 hover:underline"
 								href={`/customers/${order.customer.id}`}
 								subdomain={subdomain}
 							>
+								<CustomerAvatar className="size-5" customer={order.customer} />
 								{order.customer.name}
 							</DashLink>
 						}
@@ -175,7 +205,10 @@ export function getCards(
 				icon={ImageIcon}
 				title={t("serviceOrders.cards.imagesTitle")}
 			>
-				<ServiceOrderImageGrid images={order.photos} />
+				<ServiceOrderImageGrid
+					images={order.photos}
+					serviceOrderId={order.id}
+				/>
 			</ServiceOrderDetailsCard>
 		),
 	};

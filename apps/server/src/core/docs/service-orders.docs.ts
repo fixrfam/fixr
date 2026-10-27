@@ -1,5 +1,4 @@
 import {
-	serviceOrderImageSelectSchema,
 	serviceOrderItemSelectSchema,
 	serviceOrderSelectSchema,
 } from "@fixr/db/schema";
@@ -7,6 +6,7 @@ import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import { deviceStatuses } from "@fixr/schemas/devices";
 import {
 	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -22,8 +22,9 @@ import { z } from "zod";
 import { companyScopedErrors, notFoundError } from "./responses";
 import { zodResponseSchema } from "./types";
 
-const createServiceOrderResponseDataSchema = serviceOrderSelectSchema.extend({
-	photos: z.array(serviceOrderImageSelectSchema),
+const createServiceOrderResponseDataSchema = z.object({
+	id: z.string(),
+	number: z.number().int(),
 });
 
 const relation = z.object({ id: z.string(), name: z.string() });
@@ -42,13 +43,32 @@ const serviceOrderListRecordSchema = z.object({
 		serialNumber: z.string().nullable(),
 		status: deviceStatuses,
 	}),
-	model: relation.extend({ slug: z.string() }),
+	model: relation.extend({ slug: z.string(), imageUrl: z.string().nullable() }),
 	deviceMaker: relation,
-	deviceCategory: relation.nullable(),
+	deviceCategory: relation.extend({ slug: z.string() }).nullable(),
 });
 
 const serviceOrderDetailSchema = serviceOrderListRecordSchema.extend({
-	photos: z.array(serviceOrderImageSelectSchema),
+	photos: z.array(
+		z.object({
+			id: z.string(),
+			imageUrl: z.string(),
+			fileName: z.string(),
+			description: z.string().nullable(),
+			createdAt: z.coerce.date(),
+		})
+	),
+	/** Every status the order went through, oldest first; the first entry is its opening. */
+	history: z.array(
+		z.object({
+			id: z.string(),
+			from: serviceOrderStatuses.nullable(),
+			to: serviceOrderStatuses,
+			note: z.string().nullable(),
+			createdAt: z.coerce.date(),
+			employee: relation.nullable(),
+		})
+	),
 });
 
 const getCompanyServiceOrdersSchema: FastifySchema = {
@@ -106,7 +126,7 @@ const createServiceOrderSchemaDoc: FastifySchema = {
 	description: `
 **Creates a new service order for the authenticated company**
 
-The order is opened for a customer's device (\`deviceId\`, see \`/companies/:subdomain/devices\`); its owner becomes the order's customer and the device moves to \`in_shop\`.
+The order gets the company's next number (\`number\`, shown as \`<SUBDOMAIN>-<number>\`, e.g. \`ACME-12\`) and is opened for a customer's device (\`deviceId\`, see \`/companies/:subdomain/devices\`); its owner becomes the order's customer and the device moves to \`in_shop\`.
 
 The \`company_id\` and \`employee_id\` are inferred from the authenticated employee session (\`req.user\`).
 Photo uploads are assumed to have been completed beforehand via pre-signed URLs; this endpoint only persists metadata.
@@ -241,6 +261,8 @@ const changeServiceOrderStatusSchemaDoc: FastifySchema = {
 - \`ready\`: the device is \`ready_for_pickup\`
 - \`delivered\`: the device is \`with_customer\`
 - any other status: the device is \`in_shop\`
+
+The change, with who made it and the optional \`note\`, is added to the order's \`history\`.
 `,
 	params: serviceOrderParams,
 	body: changeServiceOrderStatusSchema,
@@ -354,7 +376,62 @@ const deleteServiceOrderItemSchema: FastifySchema = {
 	security: [{ JWT: [] }],
 };
 
+const photoNotFound = notFoundError(
+	"service_order_photo_not_found",
+	"Photo not found in this service order."
+);
+
+const addServiceOrderPhotosSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Add photos to a service order",
+	description: `
+**Attaches photos to an open service order**, e.g. taken during the repair. Upload each file first through \`POST /uploads/service-orders/presign\` and send the upload ids.
+`,
+	params: serviceOrderParams,
+	body: addServiceOrderPhotosSchema,
+	response: {
+		201: zodResponseSchema({
+			status: 201,
+			error: null,
+			message: "Photos added to the service order.",
+			code: "add_service_order_photos_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Photos added to the service order."),
+		400: zodResponseSchema({
+			status: 400,
+			error: "Bad Request",
+			code: "upload_not_found",
+			message:
+				"One or more uploads were not found or do not belong to this company.",
+			data: null,
+		}).describe("An upload is missing, already used or from another company."),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
+const deleteServiceOrderPhotoSchema: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Remove a photo from a service order",
+	params: serviceOrderParams.extend({ photoId: z.string().cuid2() }),
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Photo removed from the service order.",
+			code: "delete_service_order_photo_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Photo removed from the service order."),
+		...companyScopedErrors,
+		404: z.union([serviceOrderNotFound, photoNotFound]),
+	},
+	security: [{ JWT: [] }],
+};
+
 export const serviceOrdersDocs = {
+	addServiceOrderPhotosSchema: addServiceOrderPhotosSchemaDoc,
+	deleteServiceOrderPhotoSchema,
 	getCompanyServiceOrdersSchema,
 	createServiceOrderSchema: createServiceOrderSchemaDoc,
 	getServiceOrderSchema,

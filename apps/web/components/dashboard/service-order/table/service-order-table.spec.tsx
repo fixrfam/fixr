@@ -29,7 +29,7 @@ describe("ServiceOrdersTable", () => {
 		render(<ServiceOrdersTable subdomain="fixr" />);
 
 		const [row] = await bodyRows();
-		expect(row).toHaveTextContent("#ABC1".slice(0, 1));
+		expect(row).toHaveTextContent("FIXR-12");
 		expect(row).toHaveTextContent(serviceOrder.model.name);
 		expect(row).toHaveTextContent("Em reparo");
 		expect(api.listQueries[0]?.params).toMatchObject({

@@ -14,7 +14,8 @@ ServiceOrdersService.changeStatus
   └─ inTransaction(tx)
        └─ moveServiceOrder(tx, ...)
             ├─ ServiceOrdersRepository.updateStatus(tx, ...)
-            └─ emit "serviceOrder.statusChanged" { from, to, ... }
+            ├─ ServiceOrdersRepository.insertStatusHistory(tx, ...)
+            └─ emit "serviceOrder.statusChanged" { from, to, employeeId, ... }
             ├─ devices.followServiceOrder   → DevicesRepository.updateDevice(..., tx)
             └─ (inventory.consumeParts      → later)
 
@@ -46,8 +47,8 @@ EstimatesService (customer approves)
 | Event | Emitted by | When | Effects |
 | --- | --- | --- | --- |
 | `serviceOrder.opened` | `ServiceOrdersService.createServiceOrder` | A service order was opened for a device | `devices.checkIn`: the device is `in_shop` |
-| `estimate.sent` | `EstimatesService` (send by email, or staff marks as sent) | An estimate was sent to the customer | `serviceOrders.awaitApproval`: the order goes to `waiting_approval` if it wasn't answered yet |
-| `estimate.approved` | `EstimatesService.recordAnswer` (staff, emailed link or customer portal) | An estimate was approved | `serviceOrders.approve`: the order goes to `approved` if it wasn't answered yet |
+| `estimate.sent` | `EstimatesService` (send by email, or staff marks as sent) | An estimate was sent to the customer | `serviceOrders.awaitApproval`: the order goes to `waiting_approval` if it wasn't answered yet, recorded as moved by who sent it |
+| `estimate.approved` | `EstimatesService.recordAnswer` (staff, emailed link or customer portal) | An estimate was approved | `serviceOrders.approve`: the order goes to `approved` if it wasn't answered yet, by the staff member or, from the customer's link or portal, by nobody |
 | `serviceOrder.statusChanged` | `moveServiceOrder` (used by `ServiceOrdersService.changeStatus`) | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop` |
 
 Keep this table up to date: it is the map of what happens when.
@@ -55,10 +56,16 @@ Keep this table up to date: it is the map of what happens when.
 ## Changing a service order's status
 
 Always through `moveServiceOrder` (`modules/service-orders/services/move-status.ts`).
-It locks the order, updates it and emits `serviceOrder.statusChanged` in the
-caller's transaction, so the effects of a status change run no matter who
-moves the order: the API (`ServiceOrdersService.changeStatus`) or an effect of
-another event. Writing `service_orders.status` anywhere else skips them.
+It locks the order, updates it, records the change in the order's history
+(`service_order_history`: who moved it, or nobody when the system did,
+and the optional note) and emits `serviceOrder.statusChanged` in the caller's
+transaction, so the history and the effects of a status change happen no
+matter who moves the order: the API (`ServiceOrdersService.changeStatus`) or an
+effect of another event. Writing `service_orders.status` anywhere else skips
+them.
+
+The history is the service orders module's own data, so it's written there
+and not by an effect (see "When not to use it").
 
 ## Adding an event
 
@@ -72,7 +79,7 @@ another event. Writing `service_orders.status` anywhere else skips them.
    ```ts
    await inTransaction(async (tx) => {
    	await EstimatesRepository.approve(tx, estimateId);
-   	await events.emit(tx, "estimate.approved", { estimateId, serviceOrderId, companyId });
+   	await events.emit(tx, "estimate.approved", { estimateId, serviceOrderId, companyId, employeeId });
    });
    ```
 

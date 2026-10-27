@@ -2,6 +2,8 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { ExternalLink } from "lucide-react";
+import { CustomerAvatar } from "@/components/dashboard/customers/customer-avatar";
+import { ModelImage } from "@/components/dashboard/models/model-image";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderStatusBadge } from "@/components/dashboard/service-order/service-order-status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -12,21 +14,22 @@ import type {
 	ServiceOrderRow,
 	ServiceOrderStatus,
 } from "@/lib/services/service-orders";
-import { orderNumber } from "../order-number";
+import { useOrderCode } from "../store";
 
 export function OrderNumberCell({
-	id,
+	number,
 	createdAt,
 }: {
-	id: string;
+	number: number;
 	createdAt: string;
 }) {
 	const { format } = useTranslation();
+	const orderCode = useOrderCode();
 
 	return (
 		<div className="flex flex-col">
-			<span className="font-semibold tabular-nums">
-				#{orderNumber(id)} <ExternalLink className="inline-block size-3.5" />
+			<span className="whitespace-nowrap font-semibold tabular-nums">
+				{orderCode(number)} <ExternalLink className="inline-block size-3.5" />
 			</span>
 			<span className="text-muted-foreground text-xs">
 				{format.date(createdAt)}
@@ -41,30 +44,41 @@ export function CustomerCell({
 	customer: ServiceOrderRow["customer"];
 }) {
 	return (
-		<div className="flex flex-col">
-			<span className="font-medium">{customer.name}</span>
-			<span className="text-muted-foreground text-xs">
-				{formatPhone(customer.phone)}
-			</span>
-			<span className="text-muted-foreground text-xs tabular-nums">
-				{formatCpf(customer.cpf)}
-			</span>
+		<div className="flex items-center gap-2.5">
+			<CustomerAvatar customer={customer} />
+			<div className="flex min-w-0 flex-col">
+				<span className="font-medium">{customer.name}</span>
+				<span className="text-muted-foreground text-xs">
+					{formatPhone(customer.phone)}
+				</span>
+				<span className="text-muted-foreground text-xs tabular-nums">
+					{formatCpf(customer.cpf)}
+				</span>
+			</div>
 		</div>
 	);
 }
 
 export function DeviceCell({ order }: { order: ServiceOrderRow }) {
 	return (
-		<div className="flex flex-col">
-			<span className="font-medium">{order.model.name}</span>
-			<span className="text-muted-foreground text-xs">
-				{order.deviceMaker.name}
-			</span>
-			{order.device.imei && (
-				<span className="text-muted-foreground text-xs tabular-nums">
-					{order.device.imei}
+		<div className="flex items-center gap-2.5">
+			<ModelImage
+				alt={order.model.name}
+				category={order.deviceCategory?.slug}
+				className="size-10"
+				src={order.model.imageUrl}
+			/>
+			<div className="flex min-w-0 flex-col">
+				<span className="font-medium">{order.model.name}</span>
+				<span className="text-muted-foreground text-xs">
+					{order.deviceMaker.name}
 				</span>
-			)}
+				{order.device.imei && (
+					<span className="text-muted-foreground text-xs tabular-nums">
+						{order.device.imei}
+					</span>
+				)}
+			</div>
 		</div>
 	);
 }

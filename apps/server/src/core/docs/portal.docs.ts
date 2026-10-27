@@ -55,6 +55,8 @@ const totalsSchema = z.object({
 
 const serviceOrderSummary = z.object({
 	id: z.string(),
+	/** How the shop refers to the order, e.g. `ACME-12`. */
+	code: z.string(),
 	status: serviceOrderStatus,
 	deviceMaker: z.string(),
 	deviceModel: z.string(),
@@ -66,6 +68,8 @@ const serviceOrderSummary = z.object({
 
 const serviceOrderDetail = z.object({
 	id: z.string(),
+	/** How the shop refers to the order, e.g. `ACME-12`. */
+	code: z.string(),
 	status: serviceOrderStatus,
 	deviceMaker: z.string(),
 	deviceModel: z.string(),

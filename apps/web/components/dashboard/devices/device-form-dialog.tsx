@@ -4,7 +4,7 @@ import { useTranslation } from "@fixr/i18n/react";
 import { createDeviceSchema } from "@fixr/schemas/devices";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -12,15 +12,9 @@ import {
 	CustomerPicker,
 	type PickedCustomer,
 } from "@/components/dashboard/customers/customer-picker";
+import { StackedDialog } from "@/components/dashboard/dialog-stack";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import {
 	Form,
 	FormControl,
@@ -55,53 +49,59 @@ export function DeviceFormDialog({
 	device,
 	customer,
 	onSaved,
+	compact,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	device?: DeviceRow;
 	customer?: PickedCustomer;
 	onSaved?: (device: DeviceRow) => void;
+	/** See {@link DeviceForm}. */
+	compact?: boolean;
 }) {
 	const { t } = useTranslation();
 
 	return (
-		<Dialog onOpenChange={onOpenChange} open={open}>
-			<DialogContent className="sm:max-w-lg">
-				<DialogHeader>
-					<DialogTitle>
-						{t(device ? "devices.form.editTitle" : "devices.form.createTitle")}
-					</DialogTitle>
-					<DialogDescription>
-						{t(
-							device
-								? "devices.form.editDescription"
-								: "devices.form.createDescription"
-						)}
-					</DialogDescription>
-				</DialogHeader>
-				{open && (
-					<DeviceForm
-						customer={customer}
-						device={device}
-						onSaved={(saved) => {
-							onOpenChange(false);
-							onSaved?.(saved);
-						}}
-					/>
-				)}
-			</DialogContent>
-		</Dialog>
+		<StackedDialog
+			description={t(
+				device
+					? "devices.form.editDescription"
+					: "devices.form.createDescription"
+			)}
+			icon={<Smartphone />}
+			onOpenChange={onOpenChange}
+			open={open}
+			title={t(device ? "devices.form.editTitle" : "devices.form.createTitle")}
+		>
+			{open && (
+				<DeviceForm
+					compact={compact}
+					customer={customer}
+					device={device}
+					onSaved={(saved) => {
+						onOpenChange(false);
+						onSaved?.(saved);
+					}}
+				/>
+			)}
+		</StackedDialog>
 	);
 }
 
-function DeviceForm({
+/**
+ * The device fields. `compact` (inline on a new service order, which fixes
+ * the owner and checks the device in) leaves out the owner and the status.
+ */
+export function DeviceForm({
 	device,
 	customer,
 	onSaved,
+	compact = false,
 }: {
 	device?: DeviceRow;
 	customer?: PickedCustomer;
 	onSaved: (device: DeviceRow) => void;
+	compact?: boolean;
 }) {
 	const { t } = useTranslation();
 	const createDevice = useCreateDevice();
@@ -118,6 +118,8 @@ function DeviceForm({
 					id: device.model.id,
 					name: device.model.name,
 					maker: device.maker.name,
+					imageUrl: device.model.imageUrl,
+					category: device.category?.slug,
 				}
 			: null
 	);
@@ -151,28 +153,37 @@ function DeviceForm({
 
 	return (
 		<Form {...form}>
-			<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-				<FormField
-					control={form.control}
-					name="customerId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel htmlFor="device-owner">
-								{t("devices.form.customerLabel")}
-							</FormLabel>
-							<CustomerPicker
-								disabled={Boolean(device || customer)}
-								id="device-owner"
-								onChange={(picked) => {
-									setOwner(picked);
-									field.onChange(picked.id);
-								}}
-								value={owner}
-							/>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+			<form
+				className="grid gap-4"
+				onSubmit={(e) => {
+					// Opened over other forms (a new order): keep their submit out of it.
+					e.stopPropagation();
+					form.handleSubmit(onSubmit)(e);
+				}}
+			>
+				{!compact && (
+					<FormField
+						control={form.control}
+						name="customerId"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel htmlFor="device-owner">
+									{t("devices.form.customerLabel")}
+								</FormLabel>
+								<CustomerPicker
+									disabled={Boolean(device || customer)}
+									id="device-owner"
+									onChange={(picked) => {
+										setOwner(picked);
+										field.onChange(picked.id);
+									}}
+									value={owner}
+								/>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				)}
 				<FormField
 					control={form.control}
 					name="modelId"
@@ -229,30 +240,32 @@ function DeviceForm({
 						)}
 					/>
 				</div>
-				<FormField
-					control={form.control}
-					name="status"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>{t("devices.form.statusLabel")}</FormLabel>
-							<Select onValueChange={field.onChange} value={field.value}>
-								<FormControl>
-									<SelectTrigger className="w-full">
-										<SelectValue />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{DEVICE_STATUSES.map((status) => (
-										<SelectItem key={status} value={status}>
-											{t(`devices.status.${status}`)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				{!compact && (
+					<FormField
+						control={form.control}
+						name="status"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>{t("devices.form.statusLabel")}</FormLabel>
+								<Select onValueChange={field.onChange} value={field.value}>
+									<FormControl>
+										<SelectTrigger className="w-full">
+											<SelectValue />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{DEVICE_STATUSES.map((status) => (
+											<SelectItem key={status} value={status}>
+												{t(`devices.status.${status}`)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				)}
 				<FormField
 					control={form.control}
 					name="notes"

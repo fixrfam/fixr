@@ -42,16 +42,11 @@ function SpecCell({
 	);
 }
 
-function DeviceCell({ model, href }: { model: ModelListItem; href: string }) {
+function DeviceCell({ model, href }: { model: ModelListItem; href?: string }) {
 	const { t } = useTranslation();
 	const year = releaseYear(model);
-
-	return (
-		<Link
-			className="flex min-w-0 items-center gap-3 focus-visible:outline-none"
-			href={href}
-			onClick={(event) => event.stopPropagation()}
-		>
+	const content = (
+		<>
 			<ModelImage
 				alt={t("models.details.imageAlt", { name: model.name })}
 				category={model.category?.slug}
@@ -81,6 +76,20 @@ function DeviceCell({ model, href }: { model: ModelListItem; href: string }) {
 					{model.maker.name}
 				</p>
 			</div>
+		</>
+	);
+
+	// Without a link (picking a model), the row itself is the action.
+	if (!href) {
+		return <div className="flex min-w-0 items-center gap-3">{content}</div>;
+	}
+	return (
+		<Link
+			className="flex min-w-0 items-center gap-3 focus-visible:outline-none"
+			href={href}
+			onClick={(event) => event.stopPropagation()}
+		>
+			{content}
 		</Link>
 	);
 }
@@ -109,7 +118,7 @@ function ColorsCell({ colorsHex }: { colorsHex: string | null }) {
 }
 
 export function useModelColumns(
-	hrefOf: (model: ModelListItem) => string
+	hrefOf?: (model: ModelListItem) => string
 ): ColumnDef<ModelListItem>[] {
 	const { t, locale } = useTranslation();
 
@@ -124,7 +133,7 @@ export function useModelColumns(
 			columnHelper.accessor("name", {
 				header: device,
 				cell: ({ row }) => (
-					<DeviceCell href={hrefOf(row.original)} model={row.original} />
+					<DeviceCell href={hrefOf?.(row.original)} model={row.original} />
 				),
 				enableHiding: false,
 				meta: { label: device },
