@@ -21,6 +21,10 @@ vi.mock("../repositories", () => ({
 	deviceJoins: ["JOINS"],
 	deviceSelect: {},
 }));
+// Signing image URLs needs R2: records keep their model as is.
+vi.mock("../../../core/lib/model-image", () => ({
+	withModelImageUrl: async (record: unknown) => record,
+}));
 vi.mock("../../../core/lib/pagination", async (importOriginal) => ({
 	...(await importOriginal<object>()),
 	...pagination,

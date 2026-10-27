@@ -11,7 +11,6 @@ import {
 	Plus,
 	Smartphone,
 	Trash2,
-	UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,11 +21,13 @@ import { DeviceFormDialog } from "@/components/dashboard/devices/device-form-dia
 import { DeviceStatusBadge } from "@/components/dashboard/devices/device-status-badge";
 import { useCustomerDevices } from "@/components/dashboard/devices/store";
 import { Heading } from "@/components/dashboard/heading";
+import { ModelImage } from "@/components/dashboard/models/model-image";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { ServiceOrderStatusBadge } from "@/components/dashboard/service-order/service-order-status-badge";
+import { useOrderCode } from "@/components/dashboard/service-order/store";
 import {
 	ServiceOrderKeyValueItem,
 	ServiceOrderKeyValueList,
@@ -53,6 +54,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCpf, formatPhone } from "@/lib/format";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import type { DeviceRow } from "@/lib/services/devices";
+import { CustomerAvatar } from "./customer-avatar";
 import { CustomerForm } from "./customer-form";
 import { useCustomer, useDeleteCustomer, useSubdomain } from "./store";
 
@@ -66,6 +68,7 @@ export function CustomerDetails({ id }: { id: string }) {
 	const customerQuery = useCustomer(id);
 	const { devices, loading: devicesLoading } = useCustomerDevices(id);
 	const deleteCustomer = useDeleteCustomer();
+	const orderCode = useOrderCode();
 
 	const [editing, setEditing] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
@@ -105,11 +108,13 @@ export function CustomerDetails({ id }: { id: string }) {
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<Heading
-					description={t("clients.detail.description")}
-					Icon={UserRound}
-					title={customer.name}
-				/>
+				<div className="flex items-center gap-4">
+					<CustomerAvatar className="size-12" customer={customer} />
+					<Heading
+						description={t("clients.detail.description")}
+						title={customer.name}
+					/>
+				</div>
 				<div className="flex flex-wrap gap-2">
 					{ability.can(permissions.serviceOrders.create) && (
 						<Button asChild>
@@ -218,7 +223,10 @@ export function CustomerDetails({ id }: { id: string }) {
 									>
 										<div className="min-w-0">
 											<p className="truncate font-medium text-2xs">
-												{order.deviceModel}
+												<span className="tabular-nums">
+													{orderCode(order.number)}
+												</span>{" "}
+												· {order.deviceModel}
 											</p>
 											<p className="text-2xs text-muted-foreground">
 												{format.date(order.createdAt)}
@@ -327,13 +335,23 @@ function CustomerDevicesList({
 					className="flex items-center justify-between gap-2 py-2"
 					key={device.id}
 				>
-					<div className="min-w-0">
-						<p className="truncate font-medium text-2xs">{device.model.name}</p>
-						<p className="truncate text-2xs text-muted-foreground tabular-nums">
-							{device.imei ??
-								device.serialNumber ??
-								t("devices.table.noIdentifiers")}
-						</p>
+					<div className="flex min-w-0 items-center gap-2.5">
+						<ModelImage
+							alt={device.model.name}
+							category={device.category?.slug}
+							className="size-10"
+							src={device.model.imageUrl}
+						/>
+						<div className="min-w-0">
+							<p className="truncate font-medium text-2xs">
+								{device.model.name}
+							</p>
+							<p className="truncate text-2xs text-muted-foreground tabular-nums">
+								{device.imei ??
+									device.serialNumber ??
+									t("devices.table.noIdentifiers")}
+							</p>
+						</div>
 					</div>
 					<div className="flex shrink-0 items-center gap-1">
 						<DeviceStatusBadge status={device.status} />

@@ -66,6 +66,8 @@ export const validation = {
 		notesMax: "The notes exceed {{count}} characters.",
 	},
 	serviceOrder: {
+		statusNoteMax: "The note can have up to {{count}} characters.",
+		photosRequired: "Add at least one photo.",
 		deviceRequired: "Pick the device being repaired.",
 		itemInvalid: "Pick an item from the catalog.",
 		itemQuantityRequired: "Enter the quantity.",

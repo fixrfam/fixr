@@ -27,7 +27,7 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				cell: ({ row }) => (
 					<OrderNumberCell
 						createdAt={row.original.createdAt}
-						id={row.original.id}
+						number={row.original.number}
 					/>
 				),
 				meta: { label: t("serviceOrders.table.columns.order") },

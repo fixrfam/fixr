@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { formatCpf } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { CustomerAvatar } from "./customer-avatar";
 import { useCustomerSearch } from "./store";
 
 const CPF_LIKE = /^[\d.\s-]+$/;
@@ -62,10 +63,18 @@ export function CustomerPicker({
 					type="button"
 					variant="outline"
 				>
-					<span className={cn("truncate", !value && "text-muted-foreground")}>
-						{value
-							? `${value.name} · ${formatCpf(value.cpf)}`
-							: t("devices.form.customerPlaceholder")}
+					<span
+						className={cn(
+							"flex min-w-0 items-center gap-2",
+							!value && "text-muted-foreground"
+						)}
+					>
+						{value && <CustomerAvatar className="size-5" customer={value} />}
+						<span className="truncate">
+							{value
+								? `${value.name} · ${formatCpf(value.cpf)}`
+								: t("devices.form.customerPlaceholder")}
+						</span>
 					</span>
 					<ChevronsUpDown className="size-3.5 opacity-50" />
 				</Button>
@@ -100,6 +109,7 @@ export function CustomerPicker({
 											value?.id === customer.id ? "opacity-100" : "opacity-0"
 										)}
 									/>
+									<CustomerAvatar className="size-6" customer={customer} />
 									<span className="truncate">{customer.name}</span>
 									<span className="ml-auto text-muted-foreground text-xs tabular-nums">
 										{formatCpf(customer.cpf)}

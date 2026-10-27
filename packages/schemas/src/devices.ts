@@ -1,5 +1,6 @@
 import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
+import type { serviceOrderStatuses } from "./service-orders";
 import { getPaginatedDataSchema } from "./utils";
 
 /** @description Where a customer's device is right now */
@@ -53,3 +54,17 @@ export const getDevicesQuerySchema = getPaginatedDataSchema.extend({
 export const deviceIdParamsSchema = z.object({
 	deviceId: z.string().cuid2(),
 });
+
+/**
+ * Where a device is while its service order is in a status: in the shop
+ * during the repair, waiting for pickup when it's ready, back with the
+ * customer once delivered.
+ */
+export function deviceStatusFor(
+	status: z.infer<typeof serviceOrderStatuses>
+): z.infer<typeof deviceStatuses> {
+	if (status === "delivered") {
+		return "with_customer";
+	}
+	return status === "ready" ? "ready_for_pickup" : "in_shop";
+}

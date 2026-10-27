@@ -27,15 +27,16 @@ export const deviceRecordSchema = z.object({
 		cpf: z.string(),
 		phone: z.string().nullable(),
 	}),
-	model: relation.extend({ slug: z.string() }),
+	model: relation.extend({ slug: z.string(), imageUrl: z.string().nullable() }),
 	maker: relation,
-	category: relation.nullable(),
+	category: relation.extend({ slug: z.string() }).nullable(),
 });
 
 const deviceDetailSchema = deviceRecordSchema.extend({
 	serviceOrders: z.array(
 		z.object({
 			id: z.string(),
+			number: z.number().int(),
 			status: serviceOrderStatuses,
 			reportedDefect: z.string(),
 			createdAt: z.coerce.date(),

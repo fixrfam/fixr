@@ -1,8 +1,9 @@
-import { asc, db, desc, inArray } from "@fixr/db/connection";
-import { serviceOrders as serviceOrdersTable, uploads } from "@fixr/db/schema";
+import { asc, desc } from "@fixr/db/connection";
+import { serviceOrders as serviceOrdersTable } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -13,6 +14,7 @@ import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
+import { withModelImageUrl } from "../../../core/lib/model-image";
 import { itemTotals, lineTotal } from "../../../core/lib/money";
 import {
 	getPaginatedCount,
@@ -127,7 +129,11 @@ export class ServiceOrdersService {
 				message: "Company service orders successfully retrieved.",
 				code: "get_company_service_orders_success",
 				data: paginatedData({
-					records,
+					records: await Promise.all(
+						(records as { model: { imageKey: string | null } }[]).map(
+							withModelImageUrl
+						)
+					),
 					pagination: {
 						total_records: totalRecords,
 						total_pages,
@@ -178,37 +184,22 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_DEVICE_NOT_FOUND");
 		}
 
-		if (data.photos.length > 0) {
-			const uploadIds = data.photos.map((p) => p.uploadId);
-			const foundUploads = await db
-				.select()
-				.from(uploads)
-				.where(inArray(uploads.id, uploadIds));
+		await ServiceOrdersService.assertPhotoUploads(data.photos, companyId);
 
-			const foundMap = new Map(foundUploads.map((u) => [u.id, u]));
-
-			for (const uploadId of uploadIds) {
-				const upload = foundMap.get(uploadId);
-				if (!upload || upload.companyId !== companyId) {
-					throw new AppError("SERVICE_ORDER_UPLOAD_NOT_FOUND");
-				}
-			}
-		}
-
-		const { serviceOrder, photos } = await inTransaction(async (tx) => {
-			const created = await ServiceOrdersRepository.createWithPhotos(tx, {
+		const created = await inTransaction(async (tx) => {
+			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
 				clientId: device.clientId,
 				data,
 			});
 			await events.emit(tx, "serviceOrder.opened", {
-				serviceOrderId: created.serviceOrder.id,
+				serviceOrderId: order.id,
 				companyId,
 				deviceId: device.id,
 				employeeId: employee.id,
 			});
-			return created;
+			return order;
 		});
 
 		return response.status(201).send(
@@ -217,12 +208,41 @@ export class ServiceOrdersService {
 				error: null,
 				code: "create_service_order_success",
 				message: "Service order created successfully.",
-				data: {
-					...serviceOrder,
-					photos,
-				},
+				data: created,
 			})
 		);
+	}
+
+	/** Every upload must be a pending service order photo of the company. */
+	private static async assertPhotoUploads(
+		photos: { uploadId: string }[],
+		companyId: string
+	) {
+		if (photos.length === 0) {
+			return;
+		}
+		const uploadIds = [...new Set(photos.map((photo) => photo.uploadId))];
+		const found = await ServiceOrdersRepository.queryPhotoUploads(
+			uploadIds,
+			companyId
+		);
+		if (found.length !== uploadIds.length) {
+			throw new AppError("SERVICE_ORDER_UPLOAD_NOT_FOUND");
+		}
+	}
+
+	/** The caller's employee record in the company. */
+	private static async resolveEmployee(
+		userJwt: z.infer<typeof jwtPayload>,
+		companyId: string
+	) {
+		const employee = await ServiceOrdersRepository.queryEmployeeByUserId(
+			userJwt.id
+		);
+		if (!employee || employee.companyId !== companyId) {
+			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
+		}
+		return employee;
 	}
 
 	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
@@ -262,7 +282,7 @@ export class ServiceOrdersService {
 		if (!serviceOrder) {
 			throw new AppError("SERVICE_ORDER_NOT_FOUND");
 		}
-		return serviceOrder;
+		return withModelImageUrl(serviceOrder);
 	}
 
 	static async getServiceOrder({
@@ -341,6 +361,10 @@ export class ServiceOrdersService {
 	}) {
 		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
 		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
 
 		await inTransaction((tx) =>
 			moveServiceOrder(
@@ -349,6 +373,8 @@ export class ServiceOrdersService {
 				{
 					serviceOrderId,
 					to: data.status,
+					employeeId: employee.id,
+					note: data.note,
 				}
 			)
 		);
@@ -359,6 +385,83 @@ export class ServiceOrdersService {
 				error: null,
 				code: "change_service_order_status_success",
 				message: "Service order status updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/** Attach photos taken after the order was opened. */
+	static async addPhotos({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof addServiceOrderPhotosSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+		await ServiceOrdersService.assertPhotoUploads(data.photos, companyId);
+
+		await inTransaction((tx) =>
+			ServiceOrdersRepository.insertPhotos(tx, {
+				serviceOrderId,
+				employeeId: employee.id,
+				photos: data.photos,
+			})
+		);
+
+		return response.status(201).send(
+			apiResponse({
+				status: 201,
+				error: null,
+				code: "add_service_order_photos_success",
+				message: "Photos added to the service order.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	static async deletePhoto({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		photoId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		photoId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const photo = await ServiceOrdersRepository.queryPhoto(
+			serviceOrderId,
+			photoId
+		);
+		if (!photo) {
+			throw new AppError("SERVICE_ORDER_PHOTO_NOT_FOUND");
+		}
+		await ServiceOrdersRepository.deletePhoto(photoId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "delete_service_order_photo_success",
+				message: "Photo removed from the service order.",
 				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
 			})
 		);

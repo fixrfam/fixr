@@ -9,6 +9,7 @@ const statusChanged = {
 	deviceId: "dv",
 	from: "fixing" as const,
 	to: "ready" as const,
+	employeeId: "em",
 };
 
 describe("EventBus", () => {

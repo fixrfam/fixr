@@ -2,6 +2,7 @@ import type { serviceOrderItemSelectSchema } from "@fixr/db/schema";
 import type { deviceStatuses } from "@fixr/schemas/devices";
 import type {
 	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
 	createServiceOrderSchema,
 	patchServiceOrderItemSchema,
 	patchServiceOrderSchema,
@@ -10,6 +11,7 @@ import type {
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import type { z } from "zod";
 import { axios } from "../auth/axios";
+import { shrinkImage } from "../images/shrink-image";
 
 export type ServiceOrderItem = z.infer<typeof serviceOrderItemSelectSchema> & {
 	total: number;
@@ -61,6 +63,8 @@ interface Relation {
 /** A service order with its customer, technician and device, as lists show it. */
 export interface ServiceOrderRow {
 	id: string;
+	/** Sequential per company; people see it as `<SUBDOMAIN>-<number>`. */
+	number: number;
 	clientId: string;
 	employeeId: string;
 	deviceId: string;
@@ -81,9 +85,9 @@ export interface ServiceOrderRow {
 		serialNumber: string | null;
 		status: z.infer<typeof deviceStatuses>;
 	};
-	model: Relation & { slug: string };
+	model: Relation & { slug: string; imageUrl: string | null };
 	deviceMaker: Relation;
-	deviceCategory: Relation | null;
+	deviceCategory: (Relation & { slug: string }) | null;
 }
 
 export interface ServiceOrderPhoto {
@@ -91,10 +95,24 @@ export interface ServiceOrderPhoto {
 	imageUrl: string;
 	fileName: string;
 	description: string | null;
+	createdAt: string;
+}
+
+/** A status the order went through. The first entry (no `from`) is its opening. */
+export interface ServiceOrderHistoryEntry {
+	id: string;
+	from: ServiceOrderStatus | null;
+	to: ServiceOrderStatus;
+	note: string | null;
+	createdAt: string;
+	/** Null when the system moved it (e.g. the customer approved an estimate). */
+	employee: Relation | null;
 }
 
 export interface ServiceOrderDetail extends ServiceOrderRow {
 	photos: ServiceOrderPhoto[];
+	/** Oldest first. */
+	history: ServiceOrderHistoryEntry[];
 }
 
 export interface ServiceOrderListParams {
@@ -132,7 +150,10 @@ export const serviceOrdersApi = {
 	create: (
 		subdomain: string,
 		values: z.input<typeof createServiceOrderSchema>
-	) => send<{ id: string }>(axios.post(ordersUrl(subdomain), values)),
+	) =>
+		send<{ id: string; number: number }>(
+			axios.post(ordersUrl(subdomain), values)
+		),
 	update: (
 		subdomain: string,
 		id: string,
@@ -141,9 +162,25 @@ export const serviceOrdersApi = {
 		send<ServiceOrderDetail>(
 			axios.patch(`${ordersUrl(subdomain)}/${id}`, values)
 		),
-	changeStatus: (subdomain: string, id: string, status: ServiceOrderStatus) =>
+	changeStatus: (
+		subdomain: string,
+		id: string,
+		change: { status: ServiceOrderStatus; note?: string | null }
+	) =>
 		send<ServiceOrderDetail>(
-			axios.patch(`${ordersUrl(subdomain)}/${id}/status`, { status })
+			axios.patch(`${ordersUrl(subdomain)}/${id}/status`, change)
+		),
+	addPhotos: (
+		subdomain: string,
+		id: string,
+		values: z.input<typeof addServiceOrderPhotosSchema>
+	) =>
+		send<ServiceOrderDetail>(
+			axios.post(`${ordersUrl(subdomain)}/${id}/photos`, values)
+		),
+	deletePhoto: (subdomain: string, id: string, photoId: string) =>
+		send<ServiceOrderDetail>(
+			axios.delete(`${ordersUrl(subdomain)}/${id}/photos/${photoId}`)
 		),
 };
 
@@ -155,9 +192,11 @@ interface PresignedUpload {
 
 /**
  * Upload a picture of the device straight to R2 through a presigned URL and
- * return its upload id, which the new service order then attaches.
+ * return its upload id, which a new or open service order then attaches.
+ * Photos are shrunk first: phone pictures easily pass the 10 MB limit.
  */
-export async function uploadServiceOrderPhoto(file: File) {
+export async function uploadServiceOrderPhoto(original: File) {
+	const file = await shrinkImage(original);
 	const presign = await send<PresignedUpload>(
 		axios.post("/uploads/service-orders/presign", {
 			fileName: file.name,

@@ -77,6 +77,7 @@ export const estimates = {
 	pdf: {
 		title: "Estimate",
 		number: "Estimate number",
+		serviceOrder: "Service order",
 		issuedAt: "Issue date",
 		validUntil: "Valid until",
 		issuer: "Issuer",

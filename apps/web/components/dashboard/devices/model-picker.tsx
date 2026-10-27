@@ -1,34 +1,41 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import type { ModelListItem } from "@fixr/schemas/models";
+import { ChevronsUpDown, Smartphone } from "lucide-react";
 import { useState } from "react";
-import { useModelsPage } from "@/components/dashboard/models/store";
+import { StackedDialog } from "@/components/dashboard/dialog-stack";
+import { ModelImage } from "@/components/dashboard/models/model-image";
+import {
+	ModelsBrowser,
+	useLocalModelsParams,
+} from "@/components/dashboard/models/models-explorer";
+import { AddModelPrompt } from "@/components/dashboard/models/new-model-form";
 import { Button } from "@/components/ui/button";
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from "@/components/ui/command";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-
-const MODEL_PICKER_SIZE = 20;
 
 export interface PickedModel {
 	id: string;
 	name: string;
 	maker: string;
+	imageUrl?: string | null;
+	category?: string | null;
 }
 
-/** Search the device catalog (shared and company models) and pick a model. */
+function toPicked(model: ModelListItem): PickedModel {
+	return {
+		id: model.id,
+		name: model.name,
+		maker: model.maker.name,
+		imageUrl: model.imageUrl,
+		category: model.category?.slug,
+	};
+}
+
+/**
+ * The model of a device. Opens the device catalog over the current dialog,
+ * with the search, filters and specs of the catalog page; who can register
+ * devices can also add a model that isn't there yet.
+ */
 export function ModelPicker({
 	value,
 	onChange,
@@ -40,76 +47,78 @@ export function ModelPicker({
 }) {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
-	const [search, setSearch] = useState("");
-	const query = useModelsPage({
-		page: 1,
-		perPage: MODEL_PICKER_SIZE,
-		query: search.trim(),
-		sort: "newer",
-	});
-	const models = query.data?.records ?? [];
 
 	return (
-		<Popover onOpenChange={setOpen} open={open}>
-			<PopoverTrigger asChild>
-				<Button
-					aria-expanded={open}
-					className="w-full justify-between font-normal"
-					id={id}
-					role="combobox"
-					type="button"
-					variant="outline"
-				>
-					<span className={cn("truncate", !value && "text-muted-foreground")}>
-						{value ? value.name : t("devices.form.modelPlaceholder")}
-					</span>
-					<ChevronsUpDown className="size-3.5 opacity-50" />
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent
-				align="start"
-				className="w-(--radix-popover-trigger-width) p-0"
+		<>
+			<Button
+				aria-haspopup="dialog"
+				className="h-14 w-full justify-between gap-3 px-2.5 font-normal"
+				id={id}
+				onClick={() => setOpen(true)}
+				type="button"
+				variant="outline"
 			>
-				<Command shouldFilter={false}>
-					<CommandInput
-						onValueChange={setSearch}
-						placeholder={t("devices.form.modelPlaceholder")}
-						value={search}
+				<span className="flex min-w-0 items-center gap-3">
+					<ModelImage
+						alt={value?.name ?? ""}
+						category={value?.category}
+						className="size-10"
+						src={value?.imageUrl}
 					/>
-					<CommandList>
-						{!query.isFetching && (
-							<CommandEmpty>{t("devices.form.modelEmpty")}</CommandEmpty>
-						)}
-						<CommandGroup>
-							{models.map((model) => (
-								<CommandItem
-									key={model.id}
-									onSelect={() => {
-										onChange({
-											id: model.id,
-											name: model.name,
-											maker: model.maker.name,
-										});
-										setOpen(false);
-									}}
-									value={model.id}
-								>
-									<Check
-										className={cn(
-											"size-3.5",
-											value?.id === model.id ? "opacity-100" : "opacity-0"
-										)}
-									/>
-									<span className="truncate">{model.name}</span>
-									<span className="ml-auto text-muted-foreground text-xs">
-										{model.maker.name}
-									</span>
-								</CommandItem>
-							))}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
+					{value ? (
+						<span className="min-w-0 text-left">
+							<span className="block truncate font-medium">{value.name}</span>
+							<span className="block truncate text-muted-foreground text-xs">
+								{value.maker}
+							</span>
+						</span>
+					) : (
+						<span className="truncate text-muted-foreground">
+							{t("devices.form.modelPlaceholder")}
+						</span>
+					)}
+				</span>
+				<ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+			</Button>
+			<ModelBrowserDialog
+				onOpenChange={setOpen}
+				onPick={(model) => {
+					onChange(model);
+					setOpen(false);
+				}}
+				open={open}
+			/>
+		</>
+	);
+}
+
+function ModelBrowserDialog({
+	open,
+	onOpenChange,
+	onPick,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	onPick: (model: PickedModel) => void;
+}) {
+	const { t } = useTranslation();
+	const [params, setParams] = useLocalModelsParams();
+
+	return (
+		<StackedDialog
+			className="sm:max-w-5xl"
+			description={t("devices.form.modelBrowseDescription")}
+			icon={<Smartphone />}
+			onOpenChange={onOpenChange}
+			open={open}
+			title={t("devices.form.modelBrowseTitle")}
+		>
+			<ModelsBrowser
+				footer={<AddModelPrompt onCreated={onPick} search={params.q} />}
+				onSelect={(model) => onPick(toPicked(model))}
+				params={params}
+				setParams={setParams}
+			/>
+		</StackedDialog>
 	);
 }

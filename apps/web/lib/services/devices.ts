@@ -27,14 +27,15 @@ export interface DeviceRow {
 	createdAt: string;
 	updatedAt: string;
 	client: Relation & { cpf: string; phone: string | null };
-	model: Relation & { slug: string };
+	model: Relation & { slug: string; imageUrl: string | null };
 	maker: Relation;
-	category: Relation | null;
+	category: (Relation & { slug: string }) | null;
 }
 
 export interface DeviceDetail extends DeviceRow {
 	serviceOrders: {
 		id: string;
+		number: number;
 		status: z.infer<typeof serviceOrderStatuses>;
 		reportedDefect: string;
 		createdAt: string;
