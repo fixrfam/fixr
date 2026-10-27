@@ -158,6 +158,8 @@ export class PortalRepository {
 		return await db
 			.select({
 				id: serviceOrders.id,
+				number: serviceOrders.number,
+				subdomain: companies.subdomain,
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,
 				deviceModel: models.name,
@@ -186,6 +188,8 @@ export class PortalRepository {
 		const [serviceOrder] = await db
 			.select({
 				id: serviceOrders.id,
+				number: serviceOrders.number,
+				subdomain: companies.subdomain,
 				companyId: serviceOrders.companyId,
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,

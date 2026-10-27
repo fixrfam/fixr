@@ -3,6 +3,7 @@ import { env } from "@fixr/env/server";
 import type { Locale } from "@fixr/i18n";
 import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import type { jwtPayload } from "@fixr/schemas/auth";
+import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
@@ -310,8 +311,9 @@ export class PortalService {
 				error: null,
 				code: "portal_service_orders_success",
 				message: "Service orders retrieved.",
-				data: rows.map((row) => ({
+				data: rows.map(({ number, subdomain, ...row }) => ({
 					...row,
+					code: formatServiceOrderCode(subdomain, number),
 					pendingEstimate: Boolean(Number(row.pendingEstimate)),
 				})),
 			})
@@ -338,10 +340,11 @@ export class PortalService {
 			estimateRows.map((row) => row.id)
 		);
 		const now = Date.now();
-		const { companyId: _companyId, ...rest } = serviceOrder;
+		const { companyId: _companyId, number, subdomain, ...rest } = serviceOrder;
 
 		return {
 			...rest,
+			code: formatServiceOrderCode(subdomain, number),
 			items: items.map((item) => ({ ...item, total: lineTotal(item) })),
 			estimates: estimateRows.map((row) => ({
 				...row,

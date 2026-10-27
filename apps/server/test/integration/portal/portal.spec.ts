@@ -204,6 +204,9 @@ describe("client portal", () => {
 			deviceModel: "iPhone 13",
 			pendingEstimate: false,
 		});
+		// Each shop's order code, the one the customer quotes when calling.
+		expect(response.json().data[0].code).toMatch(/^[A-Z0-9-]+-\d+$/);
+		expect(response.json().data[0]).not.toHaveProperty("subdomain");
 	});
 
 	it("shows a service order with its items, without internal notes", async () => {
