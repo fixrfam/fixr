@@ -344,7 +344,11 @@ export class EstimatesService {
 			});
 		}
 
-		await EstimatesService.applyStatus(estimate, status);
+		const employee = await EstimatesRepository.queryEmployee(
+			userJwt.id,
+			companyId
+		);
+		await EstimatesService.applyStatus(estimate, status, employee?.id ?? null);
 
 		return response.status(200).send(
 			apiResponse({
@@ -360,7 +364,8 @@ export class EstimatesService {
 	/** Mark the estimate as sent and announce it: the service order waits for approval. */
 	private static markSent(
 		estimate: EstimateRow,
-		values: { publicTokenHash: string | null; sentTo: string | null }
+		values: { publicTokenHash: string | null; sentTo: string | null },
+		employeeId: string | null
 	) {
 		return inTransaction(async (tx) => {
 			await EstimatesRepository.markSent(tx, estimate.id, values);
@@ -368,6 +373,7 @@ export class EstimatesService {
 				estimateId: estimate.id,
 				serviceOrderId: estimate.serviceOrderId,
 				companyId: estimate.companyId,
+				employeeId,
 			});
 		});
 	}
@@ -382,7 +388,8 @@ export class EstimatesService {
 		estimate: EstimateRow,
 		answer:
 			| { status: "approved" }
-			| { status: "rejected"; rejectionReason: string | null }
+			| { status: "rejected"; rejectionReason: string | null },
+		employeeId: string | null
 	) {
 		return inTransaction(async (tx) => {
 			const recorded = await EstimatesRepository.recordAnswer(
@@ -395,6 +402,7 @@ export class EstimatesService {
 					estimateId: estimate.id,
 					serviceOrderId: estimate.serviceOrderId,
 					companyId: estimate.companyId,
+					employeeId,
 				});
 			}
 			return recorded;
@@ -407,7 +415,8 @@ export class EstimatesService {
 	 */
 	private static async applyStatus(
 		estimate: EstimateRow,
-		status: EstimateStatus
+		status: EstimateStatus,
+		employeeId: string | null
 	) {
 		if (status === "draft") {
 			await EstimatesRepository.updateEstimate(estimate.id, {
@@ -417,16 +426,18 @@ export class EstimatesService {
 			return;
 		}
 		if (status === "sent") {
-			await EstimatesService.markSent(estimate, {
-				publicTokenHash: null,
-				sentTo: null,
-			});
+			await EstimatesService.markSent(
+				estimate,
+				{ publicTokenHash: null, sentTo: null },
+				employeeId
+			);
 			return;
 		}
 
 		const recorded = await EstimatesService.recordAnswer(
 			estimate,
-			status === "approved" ? { status } : { status, rejectionReason: null }
+			status === "approved" ? { status } : { status, rejectionReason: null },
+			employeeId
 		);
 		if (!recorded) {
 			throw new AppError("ESTIMATE_INVALID_TRANSITION", {
@@ -482,10 +493,15 @@ export class EstimatesService {
 		}
 
 		const token = randomBytes(TOKEN_BYTES).toString("base64url");
-		await EstimatesService.markSent(estimate, {
-			publicTokenHash: hashToken(token),
-			sentTo: recipient,
-		});
+		const employee = await EstimatesRepository.queryEmployee(
+			userJwt.id,
+			companyId
+		);
+		await EstimatesService.markSent(
+			estimate,
+			{ publicTokenHash: hashToken(token), sentTo: recipient },
+			employee?.id ?? null
+		);
 
 		const { format } = createTranslator(locale);
 		await queueEmail(createEmailQueue(redis), {
@@ -634,7 +650,9 @@ export class EstimatesService {
 			estimate,
 			answer.status === "approved"
 				? answer
-				: { status: "rejected", rejectionReason: answer.reason || null }
+				: { status: "rejected", rejectionReason: answer.reason || null },
+			// The customer answered: nobody of the shop moved the order.
+			null
 		);
 		if (!recorded) {
 			throw new AppError("ESTIMATE_ALREADY_ANSWERED");

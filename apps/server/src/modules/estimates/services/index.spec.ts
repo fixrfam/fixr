@@ -257,6 +257,8 @@ describe("EstimatesService.updateStatus", () => {
 describe("EstimatesService.sendEstimate", () => {
 	const future = new Date(Date.now() + 86_400_000);
 	const context = {
+		serviceOrderNumber: 12,
+		subdomain: "fixr",
 		company: {
 			name: "Central",
 			cnpj: "12345678000190",
@@ -373,6 +375,8 @@ describe("EstimatesService.answerEstimate", () => {
 	beforeEach(() => {
 		repo.queryByTokenHash.mockResolvedValue(sent);
 		repo.queryPdfContext.mockResolvedValue({
+			serviceOrderNumber: 12,
+			subdomain: "fixr",
 			company: { name: "Central" },
 			device: { maker: "Samsung", model: "S21", reportedDefect: "Tela" },
 		});
