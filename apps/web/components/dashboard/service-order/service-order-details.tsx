@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashLink } from "./dash-link";
 import { ServiceOrderDetailsLayout } from "./layout";
-import { orderNumber } from "./order-number";
-import { useServiceOrder } from "./store";
+import { useOrderCode, useServiceOrder } from "./store";
 
 export function ServiceOrderDetails({
 	id,
@@ -20,6 +19,7 @@ export function ServiceOrderDetails({
 	const { t } = useTranslation();
 	const query = useServiceOrder(id);
 	const order = query.data;
+	const orderCode = useOrderCode();
 
 	return (
 		<div className="space-y-6">
@@ -42,9 +42,11 @@ export function ServiceOrderDetails({
 						<>
 							<Wrench className="mr-2.5 inline-block size-6.5 -translate-y-1 fill-primary text-primary" />
 							{t("serviceOrders.detail.title")}{" "}
-							<span className="font-(family-name:--font-inter) font-medium">
-								#{orderNumber(id)}
-							</span>
+							{order && (
+								<span className="font-(family-name:--font-inter) font-medium">
+									{orderCode(order.number)}
+								</span>
+							)}
 						</>
 					}
 				/>

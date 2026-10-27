@@ -40,13 +40,19 @@ export const device: DeviceRow = {
 		id: "cmodel0000000000000000001",
 		name: "Apple iPhone 13",
 		slug: "apple-iphone-13",
+		imageUrl: null,
 	},
 	maker: { id: "cmaker0000000000000000001", name: "Apple" },
-	category: { id: "ccategory0000000000000001", name: "Smartphone" },
+	category: {
+		id: "ccategory0000000000000001",
+		name: "Smartphone",
+		slug: "smartphones",
+	},
 };
 
 export const serviceOrder: ServiceOrderDetail = {
 	id: "cserviceorder00000000abc1",
+	number: 12,
 	clientId: customer.id,
 	employeeId: "cemployee0000000000000001",
 	deviceId: device.id,
@@ -73,6 +79,24 @@ export const serviceOrder: ServiceOrderDetail = {
 	deviceMaker: device.maker,
 	deviceCategory: device.category,
 	photos: [],
+	history: [
+		{
+			id: "chistory00000000000000001",
+			from: null,
+			to: "pending",
+			note: null,
+			createdAt: NOW,
+			employee: { id: "cemployee0000000000000001", name: "Téo Técnico" },
+		},
+		{
+			id: "chistory00000000000000002",
+			from: "pending",
+			to: "fixing",
+			note: "Troca da tela iniciada",
+			createdAt: NOW,
+			employee: { id: "cemployee0000000000000001", name: "Téo Técnico" },
+		},
+	],
 };
 
 const modelListItem = {
@@ -139,6 +163,7 @@ export function serveRepairs() {
 					serviceOrders: [
 						{
 							id: serviceOrder.id,
+							number: serviceOrder.number,
 							deviceId: device.id,
 							deviceModel: device.model.name,
 							status: serviceOrder.status,
@@ -192,10 +217,40 @@ export function serveRepairs() {
 		),
 		http.post(apiUrl(`${base}/service-orders`), async ({ request }) => {
 			await record(request);
-			return HttpResponse.json(envelope({ id: serviceOrder.id }), {
-				status: 201,
-			});
+			return HttpResponse.json(
+				envelope({ id: serviceOrder.id, number: serviceOrder.number }),
+				{ status: 201 }
+			);
 		}),
+		http.post(
+			apiUrl(`${base}/service-orders/:id/photos`),
+			async ({ request }) => {
+				await record(request);
+				return HttpResponse.json(envelope(serviceOrder), { status: 201 });
+			}
+		),
+		http.delete(
+			apiUrl(`${base}/service-orders/:id/photos/:photoId`),
+			async ({ request }) => {
+				await record(request);
+				return HttpResponse.json(envelope(serviceOrder));
+			}
+		),
+		http.post(apiUrl(`${base}/models`), async ({ request }) => {
+			const body = await record(request);
+			return HttpResponse.json(
+				envelope({ id: "cmodel0000000000000000099", slug: "new", ...body }),
+				{ status: 201 }
+			);
+		}),
+		http.get(apiUrl(`${base}/makers`), () =>
+			page([
+				{ id: device.maker.id, name: "Apple", slug: "apple", deviceCount: 1 },
+			])
+		),
+		http.get(apiUrl(`${base}/categories`), () =>
+			HttpResponse.json(envelope([device.category]))
+		),
 		http.patch(
 			apiUrl(`${base}/service-orders/:id/status`),
 			async ({ request }) => {

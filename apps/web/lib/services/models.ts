@@ -1,5 +1,10 @@
-import type { ModelDetail, ModelListItem } from "@fixr/schemas/models";
+import type {
+	createModelBodySchema,
+	ModelDetail,
+	ModelListItem,
+} from "@fixr/schemas/models";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
+import type { z } from "zod";
 import { axios } from "../auth/axios";
 
 export type ModelSort = "newer" | "older" | "name";
@@ -62,4 +67,14 @@ export const modelsApi = {
 		get<ModelCategory[]>(`/companies/${subdomain}/categories`),
 	listMakers: (subdomain: string, params: MakerListParams) =>
 		get<PaginatedData<ModelMaker>>(`/companies/${subdomain}/makers`, params),
+	/** Adds a model of the company's own (shared catalog models are read-only). */
+	create: async (
+		subdomain: string,
+		values: z.input<typeof createModelBodySchema>
+	) => {
+		const response = await axios.post<
+			ApiResponse<{ id: string; name: string; slug: string }>
+		>(`/companies/${subdomain}/models`, values);
+		return response.data.data as { id: string; name: string; slug: string };
+	},
 };
