@@ -9,6 +9,7 @@ import type {
 	getEstimatesQuerySchema,
 	patchEstimateSchema,
 } from "@fixr/schemas/estimates";
+import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
@@ -387,6 +388,10 @@ export class EstimatesService {
 		const pdf = await renderEstimatePdf(
 			{
 				number: estimate.number,
+				serviceOrderCode: formatServiceOrderCode(
+					context.subdomain,
+					context.serviceOrderNumber
+				),
 				issuedAt: estimate.createdAt,
 				validUntil: estimate.validUntil,
 				discountPercentage: estimate.discountPercentage,

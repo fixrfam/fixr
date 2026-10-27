@@ -252,6 +252,8 @@ describe("EstimatesService.getEstimate", () => {
 describe("EstimatesService.buildPdf", () => {
 	it("passes the company, client, device and totals to the renderer", async () => {
 		repo.queryPdfContext.mockResolvedValue({
+			serviceOrderNumber: 12,
+			subdomain: "fixr",
 			company: {
 				name: "Fixr",
 				cnpj: "1",
@@ -275,6 +277,7 @@ describe("EstimatesService.buildPdf", () => {
 		expect(pdf.renderEstimatePdf).toHaveBeenCalledWith(
 			expect.objectContaining({
 				number: 3,
+				serviceOrderCode: "FIXR-12",
 				company: expect.objectContaining({ name: "Fixr", logo: null }),
 				client: { name: "Maria", cpf: "1" },
 				device: { maker: "Apple", model: "iPhone", reportedDefect: "Tela" },

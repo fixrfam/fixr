@@ -42,6 +42,7 @@ export const estimates: Translated<typeof source> = {
 	pdf: {
 		title: "Orçamento",
 		number: "Número do orçamento",
+		serviceOrder: "Ordem de serviço",
 		issuedAt: "Data do orçamento",
 		validUntil: "Válido até",
 		issuer: "Emissor",
