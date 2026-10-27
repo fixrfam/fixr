@@ -65,6 +65,8 @@ export const validation: Translated<typeof source> = {
 		notesMax: "As observações excedem {{count}} caracteres.",
 	},
 	serviceOrder: {
+		statusNoteMax: "A observação pode ter até {{count}} caracteres.",
+		photosRequired: "Adicione ao menos uma foto.",
 		deviceRequired: "Escolha o aparelho que será consertado.",
 		itemInvalid: "Escolha um item do catálogo.",
 		itemQuantityRequired: "Informe a quantidade.",

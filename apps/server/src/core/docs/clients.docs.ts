@@ -25,6 +25,7 @@ const clientDetailSchema = z.object({
 	serviceOrders: z.array(
 		z.object({
 			id: z.string(),
+			number: z.number().int(),
 			deviceId: z.string(),
 			deviceModel: z.string(),
 			status: serviceOrderStatuses,

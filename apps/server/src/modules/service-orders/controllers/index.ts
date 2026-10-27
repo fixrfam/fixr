@@ -1,6 +1,7 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -64,6 +65,26 @@ export class ServiceOrdersController {
 			data,
 			response,
 		});
+	}
+
+	static addPhotos(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof addServiceOrderPhotosSchema>;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.addPhotos(params);
+	}
+
+	static deletePhoto(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		photoId: string;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.deletePhoto(params);
 	}
 
 	static getServiceOrder(params: {

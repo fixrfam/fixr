@@ -42,6 +42,11 @@ export const serviceOrdersErrors = defineErrors({
 		message: "Item not found in this service order.",
 		status: 404,
 	},
+	SERVICE_ORDER_PHOTO_NOT_FOUND: {
+		code: "service_order_photo_not_found",
+		message: "Photo not found in this service order.",
+		status: 404,
+	},
 	SERVICE_ORDER_CATALOG_ITEM_NOT_FOUND: {
 		code: "service_order_catalog_item_not_found",
 		message: "The part or service does not exist in this company.",
