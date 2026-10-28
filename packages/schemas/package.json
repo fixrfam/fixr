@@ -47,6 +47,10 @@
       "types": "./src/companies.ts",
       "default": "./src/companies.ts"
     },
+    "./estimates": {
+      "types": "./src/estimates.ts",
+      "default": "./src/estimates.ts"
+    },
     "./employees": {
       "types": "./src/employees.ts",
       "default": "./src/employees.ts"

@@ -4,6 +4,7 @@ export * from "./columns";
 export * from "./companies";
 export * from "./devices";
 export * from "./employees";
+export * from "./estimates";
 export * from "./model-categories";
 export * from "./model-images";
 export * from "./model-makers";

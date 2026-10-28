@@ -1,0 +1,70 @@
+import type { Translated } from "../../types";
+import type { estimates as source } from "../en/estimates";
+
+export const estimates: Translated<typeof source> = {
+	page: {
+		title: "Orçamentos",
+		description: "Propostas enviadas aos seus clientes para aprovação.",
+	},
+	table: {
+		empty: "Nenhum orçamento ainda. Crie um a partir de uma ordem de serviço.",
+		allStatuses: "Todos os status",
+		headers: {
+			number: "Número",
+			client: "Cliente",
+			status: "Status",
+			total: "Total",
+			validUntil: "Válido até",
+			actions: "Ações",
+		},
+		noClient: "Sem cliente",
+		previous: "Anterior",
+		next: "Próxima",
+		pageOf: "Página {{page}} de {{total}}",
+	},
+	actions: {
+		create: "Gerar orçamento",
+		creating: "Gerando orçamento...",
+		openPdf: "Abrir PDF",
+		send: "Marcar como enviado",
+		approve: "Marcar como aprovado",
+		reject: "Marcar como recusado",
+		reopen: "Voltar para rascunho",
+		delete: "Excluir",
+		menu: "Ações do orçamento {{number}}",
+	},
+	status: {
+		draft: "Rascunho",
+		sent: "Enviado",
+		approved: "Aprovado",
+		rejected: "Recusado",
+	},
+	pdf: {
+		title: "Orçamento",
+		number: "Número do orçamento",
+		serviceOrder: "Ordem de serviço",
+		issuedAt: "Data do orçamento",
+		validUntil: "Válido até",
+		issuer: "Emissor",
+		client: "Cliente",
+		device: "Aparelho",
+		reportedDefect: "Defeito relatado",
+		headers: {
+			item: "Item",
+			type: "Tipo",
+			unitPrice: "Valor",
+			quantity: "Qtd",
+			total: "Total",
+		},
+		part: "Peça",
+		service: "Serviço",
+		notes: "Notas",
+		terms:
+			"Este orçamento é válido até {{date}} e deve ser aprovado formalmente para que os serviços possam ser realizados. Quaisquer alterações solicitadas podem impactar os valores apresentados.",
+		subtotal: "Subtotal",
+		discount: "Desconto ({{percentage}}%)",
+		total: "Valor a pagar",
+		cnpj: "CNPJ {{cnpj}}",
+		fileName: "orcamento-{{number}}.pdf",
+	},
+};

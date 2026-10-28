@@ -7,6 +7,7 @@ import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
 import { devicesErrors } from "../../modules/devices/errors";
 import { employeesErrors } from "../../modules/employees/errors";
+import { estimatesErrors } from "../../modules/estimates/errors";
 import { makersErrors } from "../../modules/makers/errors";
 import { modelsErrors } from "../../modules/models/errors";
 import { partsErrors } from "../../modules/parts/errors";
@@ -24,6 +25,7 @@ export const errors = defineErrors({
 	...credentialsErrors,
 	...companiesErrors,
 	...employeesErrors,
+	...estimatesErrors,
 	...categoriesErrors,
 	...makersErrors,
 	...modelsErrors,

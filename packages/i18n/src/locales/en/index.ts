@@ -10,6 +10,7 @@ import { dataTable } from "./data-table";
 import { devices } from "./devices";
 import { emails } from "./emails";
 import { employees } from "./employees";
+import { estimates } from "./estimates";
 import { home } from "./home";
 import { messages } from "./messages";
 import { models } from "./models";
@@ -35,6 +36,7 @@ export const en = {
 	devices,
 	emails,
 	employees,
+	estimates,
 	home,
 	messages,
 	models,
