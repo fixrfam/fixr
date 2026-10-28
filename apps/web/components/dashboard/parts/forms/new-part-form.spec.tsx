@@ -1,6 +1,6 @@
 import { createTranslator } from "@fixr/i18n";
 import { mockParts, mockSuppliers } from "@fixr/mock";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -149,6 +149,66 @@ describe("NewPartForm", () => {
 		).toBeInTheDocument();
 		expect(api.writes).toHaveLength(0);
 		expect(toast.success).not.toHaveBeenCalled();
+	});
+
+	it("registers a supplier without leaving the form and picks it", async () => {
+		const user = userEvent.setup();
+		const onSuccess = vi.fn();
+		render(<NewPartForm onSuccess={onSuccess} />);
+
+		await enter(user, label("parts.form.skuLabel"), "BAT-TEST");
+		await enter(user, label("parts.form.nameLabel"), "Bateria de teste");
+		await user.click(screen.getByRole("button", { name: "Baterias" }));
+		await user.click(
+			screen.getByRole("button", { name: t("parts.form.newSupplier") })
+		);
+		const dialog = await screen.findByRole("dialog", {
+			name: t("parts.form.newSupplier"),
+		});
+		const field = (key: Parameters<typeof t>[0]) =>
+			within(dialog).getByRole("textbox", {
+				name: new RegExp(t(key as never), "i"),
+			});
+		await enter(user, field("suppliers.form.nameLabel"), "Peças & Cia");
+		await enter(user, field("suppliers.form.cnpjLabel"), "11222333000181");
+		await enter(user, field("suppliers.form.contactLabel"), "Ana");
+		await enter(user, field("suppliers.form.phoneLabel"), "11999998888");
+		await enter(user, field("suppliers.form.emailLabel"), "compras@pecas.test");
+		await user.click(
+			within(dialog).getByRole("button", { name: t("suppliers.form.submit") })
+		);
+
+		await waitFor(() =>
+			expect(
+				screen.queryByRole("dialog", { name: t("parts.form.newSupplier") })
+			).not.toBeInTheDocument()
+		);
+		expect(screen.getByRole("combobox")).toHaveTextContent("Peças & Cia");
+		// Saving the supplier didn't submit the part.
+		expect(api.writes).toHaveLength(1);
+		const supplierId = api.catalog.suppliers.at(-1)!.id;
+
+		await enter(user, label("parts.form.costPriceLabel"), "100");
+		await enter(user, label("parts.form.salePriceLabel"), "180");
+		await enter(user, label("parts.form.stockLabel"), "3");
+		await enter(user, label("parts.form.minStockLabel"), "1");
+		await user.click(
+			screen.getByRole("button", { name: t("parts.form.submit") })
+		);
+
+		await waitFor(() => expect(onSuccess).toHaveBeenCalled());
+		expect(api.writes.at(-1)).toMatchObject({
+			path: "/companies/fixr/parts",
+			body: expect.objectContaining({ supplierId }),
+		});
+	});
+
+	it("hides the new supplier shortcut from roles that can't register one", () => {
+		render(<NewPartForm />, { role: "financial" });
+
+		expect(
+			screen.queryByRole("button", { name: t("parts.form.newSupplier") })
+		).not.toBeInTheDocument();
 	});
 
 	describe("editing", () => {

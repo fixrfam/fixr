@@ -8,7 +8,7 @@ import {
 	EditCell,
 	LinkedItemsCell,
 	NameCell,
-	PriceCell,
+	ServicePriceCell,
 } from "@/components/dashboard/parts/table/cells";
 import type { ServiceTableRow } from "@/components/dashboard/parts/table/data";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
@@ -74,14 +74,15 @@ export function useServiceColumns(
 				cell: ({ getValue }) => <DurationCell minutes={getValue()} />,
 				meta: { label: t("services.table.headers.duration") },
 			}),
-			serviceColumnHelper.accessor("price", {
+			serviceColumnHelper.accessor("totalPrice", {
+				id: "price",
 				header: ({ column }) => (
 					<DataTableColumnHeader
 						column={column}
 						label={t("services.table.headers.price")}
 					/>
 				),
-				cell: ({ getValue }) => <PriceCell value={getValue()} />,
+				cell: ({ row }) => <ServicePriceCell service={row.original} />,
 				meta: { label: t("services.table.headers.price") },
 			}),
 			serviceColumnHelper.accessor((row) => row.partIds.length, {

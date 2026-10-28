@@ -4,6 +4,7 @@ CREATE TABLE `estimate_items` (
 	`item_type` enum('part','service') NOT NULL,
 	`part_id` varchar(25),
 	`service_id` varchar(25),
+	`parent_item_id` varchar(25),
 	`name` varchar(120) NOT NULL,
 	`quantity` int NOT NULL,
 	`unit_price` decimal(10, 2) NOT NULL,
@@ -31,6 +32,7 @@ CREATE TABLE `estimates` (
 ALTER TABLE `estimate_items` ADD CONSTRAINT `estimate_items_estimate_id_estimates_id_fk` FOREIGN KEY (`estimate_id`) REFERENCES `estimates`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `estimate_items` ADD CONSTRAINT `estimate_items_part_id_parts_id_fk` FOREIGN KEY (`part_id`) REFERENCES `parts`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `estimate_items` ADD CONSTRAINT `estimate_items_service_id_services_id_fk` FOREIGN KEY (`service_id`) REFERENCES `services`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `estimate_items` ADD CONSTRAINT `estimate_items_parent_item_id_estimate_items_id_fk` FOREIGN KEY (`parent_item_id`) REFERENCES `estimate_items`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `estimates` ADD CONSTRAINT `estimates_company_id_companies_id_fk` FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `estimates` ADD CONSTRAINT `estimates_service_order_id_service_orders_id_fk` FOREIGN KEY (`service_order_id`) REFERENCES `service_orders`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `estimates` ADD CONSTRAINT `estimates_client_id_clients_id_fk` FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint

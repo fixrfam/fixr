@@ -13,6 +13,7 @@ import type {
 	patchEstimateSchema,
 } from "@fixr/schemas/estimates";
 import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
+import { createId } from "@paralleldrive/cuid2";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
@@ -58,6 +59,37 @@ const TRANSITIONS: Record<EstimateStatus, EstimateStatus[]> = {
 
 function isExpired(estimate: { validUntil: Date }) {
 	return estimate.validUntil.getTime() < Date.now();
+}
+
+/**
+ * The order's items as estimate items: each service followed by the parts it
+ * uses (kept under it through new ids), so `position` is the reading order.
+ */
+function copyItems(
+	items: Awaited<ReturnType<typeof EstimatesRepository.queryServiceOrderItems>>
+) {
+	const newIds = new Map(items.map((item) => [item.id, createId()]));
+	const isPartOfService = (item: (typeof items)[number]) =>
+		Boolean(item.parentItemId && newIds.has(item.parentItemId));
+	const ordered = items
+		.filter((item) => !isPartOfService(item))
+		.flatMap((item) => [
+			item,
+			...items.filter((part) => part.parentItemId === item.id),
+		]);
+
+	return ordered.map((item) => ({
+		id: newIds.get(item.id),
+		parentItemId: isPartOfService(item)
+			? (newIds.get(item.parentItemId as string) ?? null)
+			: null,
+		type: item.type,
+		partId: item.partId,
+		serviceId: item.serviceId,
+		name: item.name,
+		quantity: item.quantity,
+		unitPrice: item.unitPrice,
+	}));
 }
 
 function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
@@ -251,14 +283,7 @@ export class EstimatesService {
 					new Date(Date.now() + DEFAULT_VALIDITY_DAYS * DAY_MS),
 				notes: data.notes ?? null,
 			},
-			items.map((item) => ({
-				type: item.type,
-				partId: item.partId,
-				serviceId: item.serviceId,
-				name: item.name,
-				quantity: item.quantity,
-				unitPrice: item.unitPrice,
-			}))
+			copyItems(items)
 		);
 
 		return response.status(201).send(

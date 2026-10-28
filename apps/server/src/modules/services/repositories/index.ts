@@ -77,6 +77,25 @@ export class ServicesRepository {
 		return byService;
 	}
 
+	/**
+	 * Current sale price of each given part. Not cached: a part's price
+	 * changes in the parts module, which doesn't clear the services' cache.
+	 */
+	static async queryPartPrices(partIds: string[]) {
+		const prices = new Map<string, number>();
+		if (partIds.length === 0) {
+			return prices;
+		}
+		const rows = await db
+			.select({ id: parts.id, salePrice: parts.salePrice })
+			.from(parts)
+			.where(inArray(parts.id, partIds));
+		for (const row of rows) {
+			prices.set(row.id, row.salePrice);
+		}
+		return prices;
+	}
+
 	@Cached({ ttl: 3600, key: "services:id" })
 	static async queryServiceById(
 		serviceId: string

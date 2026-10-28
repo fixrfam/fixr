@@ -517,7 +517,11 @@ export class ServiceOrdersService {
 		});
 	}
 
-	/** Add a catalog part or service, snapshotting its name and (by default) its current price. */
+	/**
+	 * Add a catalog part or service, snapshotting its name and (by default) its
+	 * current price. A service brings the parts it uses along (see
+	 * {@link ServiceOrdersService.addServiceWithParts}).
+	 */
 	static async addItem({
 		userJwt,
 		subdomain,
@@ -543,21 +547,110 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_CATALOG_ITEM_NOT_FOUND");
 		}
 
-		await ServiceOrdersRepository.insertItem({
-			serviceOrderId,
-			type: data.type,
-			partId: data.type === "part" ? catalogItem.id : null,
-			serviceId: data.type === "service" ? catalogItem.id : null,
-			name: catalogItem.name,
-			quantity: data.quantity,
-			unitPrice: data.unitPrice ?? catalogItem.price,
-		});
+		if (data.type === "part") {
+			await ServiceOrdersRepository.insertItem({
+				serviceOrderId,
+				type: "part",
+				partId: catalogItem.id,
+				serviceId: null,
+				name: catalogItem.name,
+				quantity: data.quantity,
+				unitPrice: data.unitPrice ?? catalogItem.price,
+			});
+		} else {
+			await ServiceOrdersService.addServiceWithParts({
+				serviceOrderId,
+				companyId,
+				service: catalogItem,
+				quantity: data.quantity,
+				unitPrice: data.unitPrice ?? catalogItem.price,
+			});
+		}
 
 		return ServiceOrdersService.sendItems(response, {
 			status: 201,
 			code: "add_service_order_item_success",
 			message: "Item added to the service order.",
 			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	/**
+	 * Add a service line and, under it, the parts the service uses, so the
+	 * order charges them too. A part the order already has on its own line
+	 * moves under the service instead of being charged twice: the whole line
+	 * when it has no more units than the service needs, otherwise only the
+	 * units the service needs (at the price that line had).
+	 */
+	private static async addServiceWithParts({
+		serviceOrderId,
+		companyId,
+		service,
+		quantity,
+		unitPrice,
+	}: {
+		serviceOrderId: string;
+		companyId: string;
+		service: { id: string; name: string };
+		quantity: number;
+		unitPrice: number;
+	}) {
+		const serviceParts = await ServiceOrdersRepository.queryServiceParts(
+			service.id,
+			companyId
+		);
+
+		await inTransaction(async (tx) => {
+			const parentItemId = await ServiceOrdersRepository.insertItem(
+				{
+					serviceOrderId,
+					type: "service",
+					partId: null,
+					serviceId: service.id,
+					name: service.name,
+					quantity,
+					unitPrice,
+				},
+				tx
+			);
+			const loose = await ServiceOrdersRepository.queryLoosePartItems(
+				tx,
+				serviceOrderId,
+				serviceParts.map((part) => part.id)
+			);
+
+			for (const part of serviceParts) {
+				const existing = loose.find((item) => item.partId === part.id);
+
+				if (existing && existing.quantity <= quantity) {
+					await ServiceOrdersRepository.updateItem(
+						existing.id,
+						{ parentItemId, quantity },
+						tx
+					);
+					continue;
+				}
+
+				if (existing) {
+					await ServiceOrdersRepository.updateItem(
+						existing.id,
+						{ quantity: existing.quantity - quantity },
+						tx
+					);
+				}
+				await ServiceOrdersRepository.insertItem(
+					{
+						serviceOrderId,
+						parentItemId,
+						type: "part",
+						partId: part.id,
+						name: existing?.name ?? part.name,
+						quantity,
+						unitPrice: existing?.unitPrice ?? part.price,
+					},
+					tx
+				);
+			}
 		});
 	}
 
