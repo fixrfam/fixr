@@ -34,6 +34,7 @@ import {
 	type PublicEstimate as Estimate,
 	estimateLinksApi,
 } from "@/lib/services/estimates";
+import { cn } from "@/lib/utils";
 
 const REASON_MAX = 500;
 
@@ -270,10 +271,19 @@ export function PublicEstimate({ token }: { token: string }) {
 						</TableHeader>
 						<TableBody>
 							{estimate.items.map((item, index) => (
-								<TableRow key={`${item.name}-${index}`}>
-									<TableCell>{item.name}</TableCell>
+								<TableRow
+									className={cn(
+										item.nested && "border-t-0 text-muted-foreground"
+									)}
+									key={`${item.name}-${index}`}
+								>
+									<TableCell className={cn(item.nested && "pl-8")}>
+										{item.name}
+									</TableCell>
 									<TableCell className="text-muted-foreground">
-										{t(`estimates.pdf.${item.type}`)}
+										{item.nested
+											? t("estimates.public.servicePart")
+											: t(`estimates.pdf.${item.type}`)}
 									</TableCell>
 									<TableCell className="text-right tabular-nums">
 										{item.quantity}

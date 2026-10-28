@@ -598,8 +598,11 @@ export class EstimatesService {
 			},
 			client: record.client ? { name: record.client.name } : null,
 			device: context.device,
+			// Items are stored in reading order: a part a service uses comes right
+			// after it, flagged instead of pointing at an internal id.
 			items: record.items.map((item) => ({
 				type: item.type,
+				nested: Boolean(item.parentItemId),
 				name: item.name,
 				quantity: item.quantity,
 				unitPrice: item.unitPrice,

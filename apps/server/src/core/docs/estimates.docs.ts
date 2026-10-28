@@ -312,6 +312,8 @@ const publicEstimateSchema = z.object({
 	items: z.array(
 		z.object({
 			type: z.enum(["part", "service"]),
+			/** A part the service listed right before it uses. */
+			nested: z.boolean(),
 			name: z.string(),
 			quantity: z.number(),
 			unitPrice: z.number(),
