@@ -57,6 +57,7 @@ export const estimates: Translated<typeof source> = {
 		validUntil: "Válido até {{date}}",
 		device: "Aparelho",
 		items: "Itens",
+		servicePart: "Peça usada no serviço acima",
 		notes: "Observações",
 		downloadPdf: "Baixar PDF",
 		approve: "Aprovar orçamento",
