@@ -16,6 +16,7 @@ import { messages } from "./messages";
 import { models } from "./models";
 import { parts } from "./parts";
 import { permissions } from "./permissions";
+import { portal } from "./portal";
 import { roles } from "./roles";
 import { serviceOrders } from "./service-orders";
 import { services } from "./services";
@@ -42,6 +43,7 @@ export const en = {
 	models,
 	parts,
 	permissions,
+	portal,
 	roles,
 	serviceOrders,
 	services,

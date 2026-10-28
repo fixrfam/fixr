@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatCnpj, formatCpf, formatDate, formatPhone } from "./format";
+import {
+	deviceName,
+	formatCnpj,
+	formatCpf,
+	formatDate,
+	formatPhone,
+} from "./format";
 
 describe("formatDate", () => {
 	it("formats Date, ISO string and timestamp inputs", () => {
@@ -53,5 +59,12 @@ describe("formatCpf", () => {
 		expect(formatCpf("52998224725")).toBe("529.982.247-25");
 		expect(formatCpf("123")).toBe("123");
 		expect(formatCpf(null)).toBe("");
+	});
+});
+
+describe("deviceName", () => {
+	it("shows the maker once", () => {
+		expect(deviceName("Apple", "Apple iPhone 13")).toBe("Apple iPhone 13");
+		expect(deviceName("Apple", "iPhone 13")).toBe("Apple iPhone 13");
 	});
 });

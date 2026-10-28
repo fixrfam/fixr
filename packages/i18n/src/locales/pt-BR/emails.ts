@@ -19,6 +19,16 @@ export const emails: Translated<typeof source> = {
 			"Altere a senha padrão no painel de conta após o primeiro acesso.",
 		footer: "Se você não reconhece essa empresa, por favor, ignore este email.",
 	},
+	portalAccess: {
+		subject: "Suas ordens de serviço na {{company}}",
+		subjectSelf: "Seu link para acompanhar suas ordens de serviço",
+		preview: "Acompanhe suas ordens de serviço e orçamentos.",
+		greeting: "Olá, <i>{{name}}</i>!",
+		heading: "Acompanhe suas ordens de serviço.",
+		body: "Use o botão abaixo para ver o status das suas ordens de serviço e responder orçamentos. <b>Não compartilhe este link</b>: ele dá acesso ao seu histórico.",
+		cta: "Ver minhas ordens de serviço",
+		footer: "Se você não esperava este email, por favor, ignore-o.",
+	},
 	estimate: {
 		subject: "Orçamento #{{number}} da {{company}}",
 		preview: "A {{company}} enviou o orçamento #{{number}}.",

@@ -1,4 +1,3 @@
-import { createHash, randomBytes } from "node:crypto";
 import { APP_NAME } from "@fixr/constants/app";
 import { asc, desc } from "@fixr/db/connection";
 import { estimates } from "@fixr/db/schema";
@@ -20,7 +19,12 @@ import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
+import { inReadingOrder } from "../../../core/lib/item-order";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
+import {
+	generateOpaqueToken,
+	hashOpaqueToken,
+} from "../../../core/lib/opaque-token";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
@@ -54,14 +58,6 @@ const TRANSITIONS: Record<EstimateStatus, EstimateStatus[]> = {
 	rejected: ["draft"],
 };
 
-/** Bytes of entropy in a public link token (encoded as 43 base64url chars). */
-const TOKEN_BYTES = 32;
-
-/** Links are looked up by the token's hash; the token itself is never stored. */
-function hashToken(token: string) {
-	return createHash("sha256").update(token).digest("hex");
-}
-
 function isExpired(estimate: { validUntil: Date }) {
 	return estimate.validUntil.getTime() < Date.now();
 }
@@ -74,20 +70,10 @@ function copyItems(
 	items: Awaited<ReturnType<typeof EstimatesRepository.queryServiceOrderItems>>
 ) {
 	const newIds = new Map(items.map((item) => [item.id, createId()]));
-	const isPartOfService = (item: (typeof items)[number]) =>
-		Boolean(item.parentItemId && newIds.has(item.parentItemId));
-	const ordered = items
-		.filter((item) => !isPartOfService(item))
-		.flatMap((item) => [
-			item,
-			...items.filter((part) => part.parentItemId === item.id),
-		]);
 
-	return ordered.map((item) => ({
+	return inReadingOrder(items).map(({ item, nested }) => ({
 		id: newIds.get(item.id),
-		parentItemId: isPartOfService(item)
-			? (newIds.get(item.parentItemId as string) ?? null)
-			: null,
+		parentItemId: nested ? (newIds.get(item.parentItemId ?? "") ?? null) : null,
 		type: item.type,
 		partId: item.partId,
 		serviceId: item.serviceId,
@@ -388,7 +374,7 @@ export class EstimatesService {
 
 	/** Mark the estimate as sent and announce it: the service order waits for approval. */
 	private static markSent(
-		estimate: EstimateRow,
+		estimate: Pick<EstimateRow, "id" | "serviceOrderId" | "companyId">,
 		values: { publicTokenHash: string | null; sentTo: string | null },
 		employeeId: string | null
 	) {
@@ -407,10 +393,12 @@ export class EstimatesService {
 	 * Record the customer's answer and, for an approval, announce it: the
 	 * service order is approved.
 	 *
+	 * The one way to answer an estimate (staff, the emailed link or the portal).
+	 *
 	 * @returns whether the answer was recorded (only a sent estimate is answered)
 	 */
-	private static recordAnswer(
-		estimate: EstimateRow,
+	static recordAnswer(
+		estimate: Pick<EstimateRow, "id" | "serviceOrderId" | "companyId">,
 		answer:
 			| { status: "approved" }
 			| { status: "rejected"; rejectionReason: string | null },
@@ -517,14 +505,14 @@ export class EstimatesService {
 			throw new AppError("ESTIMATE_NO_RECIPIENT");
 		}
 
-		const token = randomBytes(TOKEN_BYTES).toString("base64url");
+		const token = generateOpaqueToken();
 		const employee = await EstimatesRepository.queryEmployee(
 			userJwt.id,
 			companyId
 		);
 		await EstimatesService.markSent(
 			estimate,
-			{ publicTokenHash: hashToken(token), sentTo: recipient },
+			{ publicTokenHash: hashOpaqueToken(token), sentTo: recipient },
 			employee?.id ?? null
 		);
 
@@ -560,7 +548,7 @@ export class EstimatesService {
 	/** Estimate behind a public link, or an error when the link is not valid. */
 	private static async queryByToken(token: string) {
 		const estimate = await EstimatesRepository.queryByTokenHash(
-			hashToken(token)
+			hashOpaqueToken(token)
 		);
 		if (!estimate) {
 			throw new AppError("ESTIMATE_LINK_INVALID");

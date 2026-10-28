@@ -11,6 +11,7 @@ import { estimatesErrors } from "../../modules/estimates/errors";
 import { makersErrors } from "../../modules/makers/errors";
 import { modelsErrors } from "../../modules/models/errors";
 import { partsErrors } from "../../modules/parts/errors";
+import { portalErrors } from "../../modules/portal/errors";
 import { serviceOrdersErrors } from "../../modules/service-orders/errors";
 import { servicesErrors } from "../../modules/services/errors";
 import { suppliersErrors } from "../../modules/suppliers/errors";
@@ -33,6 +34,7 @@ export const errors = defineErrors({
 	...devicesErrors,
 	...serviceOrdersErrors,
 	...partsErrors,
+	...portalErrors,
 	...servicesErrors,
 	...suppliersErrors,
 	...tokensErrors,

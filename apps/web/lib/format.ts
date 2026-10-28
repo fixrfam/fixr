@@ -49,3 +49,10 @@ export function formatCpf(value: string | null | undefined) {
 	}
 	return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
+
+/** A device's name. Catalog models usually start with the maker ("Apple iPhone 13"), so it shows once. */
+export function deviceName(maker: string, model: string) {
+	return model.toLowerCase().startsWith(maker.toLowerCase())
+		? model
+		: `${maker} ${model}`;
+}

@@ -12,6 +12,7 @@ import {
 	Send,
 	Trash2,
 	Undo2,
+	UserRoundCheck,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -45,6 +46,7 @@ import {
 	type EstimateStatus,
 	estimatesApi,
 } from "@/lib/services/estimates";
+import { SendPortalAccessDialog } from "../customers/send-portal-access-dialog";
 import { EstimateStatusBadge } from "./estimate-status-badge";
 import { SendEstimateDialog } from "./send-estimate-dialog";
 import {
@@ -86,7 +88,10 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 	const canSend =
 		ability.can(permissions.estimates.sendToCustomer) &&
 		(estimate.status === "draft" || estimate.status === "sent");
+	const canSendPortalAccess =
+		ability.can(permissions.customers.update) && estimate.client !== null;
 	const [sending, setSending] = useState(false);
+	const [sendingPortal, setSendingPortal] = useState(false);
 
 	return (
 		<>
@@ -113,6 +118,12 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 							{estimate.status === "sent"
 								? t("estimates.actions.resendToClient")
 								: t("estimates.actions.sendToClient")}
+						</DropdownMenuItem>
+					) : null}
+					{canSendPortalAccess ? (
+						<DropdownMenuItem onSelect={() => setSendingPortal(true)}>
+							<UserRoundCheck className="size-4" />
+							{t("portal.shopActions.sendAccess")}
 						</DropdownMenuItem>
 					) : null}
 					{canUpdate
@@ -150,6 +161,13 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 					estimate={estimate}
 					onOpenChange={setSending}
 					open={sending}
+				/>
+			) : null}
+			{sendingPortal && estimate.client ? (
+				<SendPortalAccessDialog
+					client={estimate.client}
+					onOpenChange={setSendingPortal}
+					open={sendingPortal}
 				/>
 			) : null}
 		</>

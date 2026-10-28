@@ -4,7 +4,8 @@ import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { rejectEstimateSchema } from "@fixr/schemas/estimates";
 import { toast } from "@pheralb/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, FileDown, Loader2, X } from "lucide-react";
+import { Check, FileDown, LayoutList, Loader2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EstimateStatusBadge } from "@/components/dashboard/estimates/estimate-status-badge";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
@@ -34,6 +35,7 @@ import {
 	type PublicEstimate as Estimate,
 	estimateLinksApi,
 } from "@/lib/services/estimates";
+import { portalApi } from "@/lib/services/portal";
 import { cn } from "@/lib/utils";
 
 const REASON_MAX = 500;
@@ -78,7 +80,7 @@ function StatusNotice({ estimate }: { estimate: Estimate }) {
 	return null;
 }
 
-function RejectDialog({
+export function RejectDialog({
 	number,
 	open,
 	pending,
@@ -147,7 +149,14 @@ export function PublicEstimate({ token }: { token: string }) {
 	const toastError = useApiErrorToast();
 	const queryClient = useQueryClient();
 	const [rejecting, setRejecting] = useState(false);
+	const router = useRouter();
 	const queryKey = ["estimate-link", token];
+
+	const openPortal = useMutation({
+		mutationFn: () => portalApi.openFromEstimate(token),
+		onSuccess: () => router.push("/portal"),
+		onError: toastError,
+	});
 
 	const {
 		data: estimate,
@@ -341,16 +350,26 @@ export function PublicEstimate({ token }: { token: string }) {
 			) : null}
 
 			<footer className="flex flex-col-reverse gap-2 md:flex-row md:justify-between">
-				<Button asChild variant="outline">
-					<a
-						href={estimateLinksApi.pdfUrl(token)}
-						rel="noopener"
-						target="_blank"
+				<div className="flex flex-col gap-2 md:flex-row">
+					<Button asChild variant="outline">
+						<a
+							href={estimateLinksApi.pdfUrl(token)}
+							rel="noopener"
+							target="_blank"
+						>
+							<FileDown className="size-4" />
+							{t("estimates.public.downloadPdf")}
+						</a>
+					</Button>
+					<Button
+						disabled={openPortal.isPending}
+						onClick={() => openPortal.mutate()}
+						variant="ghost"
 					>
-						<FileDown className="size-4" />
-						{t("estimates.public.downloadPdf")}
-					</a>
-				</Button>
+						<LayoutList className="size-4" />
+						{t("portal.fromEstimate")}
+					</Button>
+				</div>
 				{canAnswer ? (
 					<div className="flex flex-col-reverse gap-2 md:flex-row">
 						<Button

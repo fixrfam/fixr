@@ -110,6 +110,26 @@ describe("email senders", () => {
 		]);
 	});
 
+	it.each([
+		["Central", "Suas ordens de serviço na Central"],
+		[null, "Seu link para acompanhar suas ordens de serviço"],
+	] as const)("sendPortalAccessEmail names the shop when it sent the link (%s)", async (companyName, subject) => {
+		send.mockResolvedValue({ data: { id: "e4" }, error: null });
+
+		await emails.sendPortalAccessEmail({
+			to: "maria@fixr.test",
+			appName: "Fixr",
+			clientName: "Maria",
+			companyName,
+			ctaUrl: "https://fixr.test/portal/tok3n",
+			locale: "pt-BR",
+		});
+
+		const [message] = send.mock.calls[0]!;
+		expect(message.subject).toBe(subject);
+		expect(message.html).toContain("https://fixr.test/portal/tok3n");
+	});
+
 	it("throws when Resend reports an error (so the worker retries)", async () => {
 		send.mockResolvedValue({ data: null, error: { message: "rate limited" } });
 

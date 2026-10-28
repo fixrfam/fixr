@@ -47,6 +47,10 @@ import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
 import { partsRoutes } from "./modules/parts/routes";
+import {
+	clientPortalAccessRoutes,
+	portalRoutes,
+} from "./modules/portal/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
 import { servicesRoutes } from "./modules/services/routes";
 import { suppliersRoutes } from "./modules/suppliers/routes";
@@ -114,6 +118,11 @@ const OPENAPI_TAGS = [
 		name: "Estimates",
 		description:
 			"Estimates (orçamentos) built from service orders, with PDF generation.",
+	},
+	{
+		name: "Client portal",
+		description:
+			"Passwordless area where clients follow their service orders, opened from emailed links.",
 	},
 	{
 		name: "Parts",
@@ -308,6 +317,10 @@ export async function buildApp(
 		prefix: "/companies/:subdomain/models",
 	});
 	await app.register(estimateLinksRoutes, { prefix: "/estimate-links" });
+	await app.register(portalRoutes, { prefix: "/portal" });
+	await app.register(clientPortalAccessRoutes, {
+		prefix: "/companies/:subdomain/clients",
+	});
 	await app.register(estimatesRoutes, {
 		prefix: "/companies/:subdomain/estimates",
 	});

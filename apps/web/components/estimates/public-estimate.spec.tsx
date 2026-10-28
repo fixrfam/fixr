@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
-import { toast } from "@/test/mocks";
+import { router, toast } from "@/test/mocks";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
 import { renderWithQuery } from "@/test/query";
@@ -181,5 +181,26 @@ describe("PublicEstimate", () => {
 		expect(
 			await screen.findByRole("heading", { name: "Orçamento indisponível" })
 		).toBeInTheDocument();
+	});
+
+	it("goes to the client's portal from the estimate", async () => {
+		serve();
+		let body: unknown;
+		server.use(
+			http.post(apiUrl("/portal/session/estimate"), async ({ request }) => {
+				body = await request.json();
+				return HttpResponse.json(envelope(null));
+			})
+		);
+
+		renderWithQuery(<PublicEstimate token={TOKEN} />);
+		await userEvent.click(
+			await screen.findByRole("button", {
+				name: /Ver todas as minhas ordens de serviço/,
+			})
+		);
+
+		await waitFor(() => expect(router.push).toHaveBeenCalledWith("/portal"));
+		expect(body).toEqual({ token: TOKEN });
 	});
 });

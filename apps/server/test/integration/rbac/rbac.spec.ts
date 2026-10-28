@@ -74,6 +74,10 @@ const PUBLIC_ROUTES = new Set([
 	"GET /estimate-links/:token/pdf", // estimate link token from the email
 	"POST /estimate-links/:token/approve", // estimate link token from the email
 	"POST /estimate-links/:token/reject", // estimate link token from the email
+	"POST /portal/session", // portal link token from the email
+	"POST /portal/session/estimate", // estimate link token from the email
+	"DELETE /portal/session", // only ends the caller's own portal session
+	"POST /portal/access", // Turnstile-protected, same answer for any email
 ]);
 
 /** Authenticated routes that intentionally have no RBAC permission. */
@@ -86,6 +90,30 @@ const AUTH_ONLY_ROUTES = new Map([
 		"POST /companies",
 		"internal admin panel, authenticated through Clerk (authenticateAdmin)",
 	],
+	[
+		"GET /portal/me",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"GET /portal/service-orders",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"GET /portal/service-orders/:serviceOrderId",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"GET /portal/estimates/:estimateId/pdf",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"POST /portal/estimates/:estimateId/approve",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"POST /portal/estimates/:estimateId/reject",
+		"client portal session: the client only sees their own service orders",
+	],
 ]);
 
 /** Routes whose guard is a custom preHandler; verified dynamically below. */
@@ -96,6 +124,7 @@ const AUTH_MIDDLEWARES = new Set([
 	"authenticateEmployee",
 	"authenticateEmployeeOrApiKey",
 	"authenticateAdmin",
+	"authenticatePortal",
 ]);
 
 const guardedRoutes = routes
@@ -190,6 +219,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		city: "São Paulo",
 	},
 	"PATCH /companies/:subdomain/clients/:clientId": {},
+	"POST /companies/:subdomain/clients/:clientId/portal-access": {},
 	"PATCH /companies/:subdomain": {},
 	"POST /companies/:subdomain/estimates": { serviceOrderId: createId() },
 	"PATCH /companies/:subdomain/estimates/:estimateId": {},

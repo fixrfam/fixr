@@ -4,6 +4,7 @@ import { renderEmail as renderDeletion } from "./account-deletion";
 import { renderEmail as renderEstimate } from "./estimate";
 import { renderEmail as renderInvite } from "./invite";
 import { renderEmail as renderPasswordReset } from "./password-reset";
+import { renderEmail as renderPortalAccess } from "./portal-access";
 import { renderEmail as renderVerification } from "./verification";
 
 const linkProps = {
@@ -117,5 +118,28 @@ describe("estimate email", () => {
 		const html = await renderEstimate({ ...props, locale: "pt-BR" });
 
 		expect(html).toContain(createTranslator("pt-BR").t("emails.estimate.cta"));
+	});
+});
+
+describe("portal access email", () => {
+	const props = {
+		clientName: "Maria",
+		companyName: "Assistência Central",
+		ctaUrl: "https://fixr.test/portal/tok3n",
+	};
+
+	it("renders the portal link", async () => {
+		const html = await renderPortalAccess(props);
+
+		expect(html).toContain("https://fixr.test/portal/tok3n");
+		expect(html).toContain("Maria");
+	});
+
+	it("renders in Portuguese for a pt-BR recipient", async () => {
+		const html = await renderPortalAccess({ ...props, locale: "pt-BR" });
+
+		expect(html).toContain(
+			createTranslator("pt-BR").t("emails.portalAccess.cta")
+		);
 	});
 });

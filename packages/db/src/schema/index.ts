@@ -11,6 +11,7 @@ export * from "./model-makers";
 export * from "./models";
 export * from "./one-time-tokens";
 export * from "./parts";
+export * from "./portal";
 export * from "./refresh-tokens";
 export * from "./service-order-history";
 export * from "./service-order-items";
