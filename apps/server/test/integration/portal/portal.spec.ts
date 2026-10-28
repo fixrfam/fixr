@@ -218,12 +218,23 @@ describe("client portal", () => {
 			.update(serviceOrders)
 			.set({ observations: "cliente difícil" })
 			.where(eq(serviceOrders.id, shop.serviceOrder.id));
+		const [serviceLine] = await db
+			.insert(serviceOrderItems)
+			.values({
+				serviceOrderId: shop.serviceOrder.id,
+				type: "service",
+				name: "Troca de tela",
+				quantity: 1,
+				unitPrice: 150,
+			})
+			.$returningId();
 		await db.insert(serviceOrderItems).values({
 			serviceOrderId: shop.serviceOrder.id,
-			type: "service",
-			name: "Troca de tela",
+			parentItemId: serviceLine!.id,
+			type: "part",
+			name: "Tela OLED",
 			quantity: 1,
-			unitPrice: 150,
+			unitPrice: 890,
 		});
 		const cookie = await signIn(shop);
 
@@ -236,10 +247,16 @@ describe("client portal", () => {
 		expect(response.json().data).toMatchObject({
 			id: shop.serviceOrder.id,
 			company: { name: shop.company.name },
-			items: [{ name: "Troca de tela", total: 150 }],
+			items: [
+				{ name: "Troca de tela", total: 150, nested: false },
+				{ name: "Tela OLED", total: 890, nested: true },
+			],
 			estimates: [],
 		});
 		expect(JSON.stringify(response.json())).not.toContain("cliente difícil");
+		// The order's internal item ids stay out of the portal.
+		expect(response.json().data.items[0]).not.toHaveProperty("id");
+		expect(response.json().data.items[1]).not.toHaveProperty("parentItemId");
 	});
 
 	it("hides service orders outside the client's scope", async () => {

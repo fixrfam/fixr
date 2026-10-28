@@ -19,6 +19,7 @@ import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
+import { inReadingOrder } from "../../../core/lib/item-order";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	generateOpaqueToken,
@@ -69,20 +70,10 @@ function copyItems(
 	items: Awaited<ReturnType<typeof EstimatesRepository.queryServiceOrderItems>>
 ) {
 	const newIds = new Map(items.map((item) => [item.id, createId()]));
-	const isPartOfService = (item: (typeof items)[number]) =>
-		Boolean(item.parentItemId && newIds.has(item.parentItemId));
-	const ordered = items
-		.filter((item) => !isPartOfService(item))
-		.flatMap((item) => [
-			item,
-			...items.filter((part) => part.parentItemId === item.id),
-		]);
 
-	return ordered.map((item) => ({
+	return inReadingOrder(items).map(({ item, nested }) => ({
 		id: newIds.get(item.id),
-		parentItemId: isPartOfService(item)
-			? (newIds.get(item.parentItemId as string) ?? null)
-			: null,
+		parentItemId: nested ? (newIds.get(item.parentItemId ?? "") ?? null) : null,
 		type: item.type,
 		partId: item.partId,
 		serviceId: item.serviceId,

@@ -47,7 +47,16 @@ const detail = {
 	},
 	items: [
 		{
+			type: "service",
+			nested: false,
+			name: "Troca de tela",
+			quantity: 1,
+			unitPrice: 150,
+			total: 150,
+		},
+		{
 			type: "part",
+			nested: true,
 			name: "Tela OLED",
 			quantity: 1,
 			unitPrice: 500,
@@ -176,6 +185,10 @@ describe("PortalServiceOrder", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Tela quebrada")).toBeInTheDocument();
 		expect(screen.getByText(/\(11\) 98765-4321/)).toBeInTheDocument();
+		// The part the service uses reads as part of it.
+		expect(screen.getByText("Tela OLED").closest("tr")).toHaveTextContent(
+			"Peça usada no serviço acima"
+		);
 		expect(screen.getByRole("link", { name: /Abrir PDF/ })).toHaveAttribute(
 			"href",
 			apiUrl("/portal/estimates/est-1/pdf")

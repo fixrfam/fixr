@@ -8,6 +8,7 @@ import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { AppError } from "../../../core/lib/app-error";
+import { inReadingOrder } from "../../../core/lib/item-order";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	generateOpaqueToken,
@@ -345,7 +346,15 @@ export class PortalService {
 		return {
 			...rest,
 			code: formatServiceOrderCode(subdomain, number),
-			items: items.map((item) => ({ ...item, total: lineTotal(item) })),
+			// Reading order, the parts of a service flagged to show under it; the
+			// order's internal ids stay out of the portal.
+			items: inReadingOrder(items).map(
+				({ item: { id: _id, parentItemId: _parent, ...item }, nested }) => ({
+					...item,
+					nested,
+					total: lineTotal(item),
+				})
+			),
 			estimates: estimateRows.map((row) => ({
 				...row,
 				expired: row.validUntil.getTime() < now,

@@ -25,6 +25,7 @@ import {
 	portalApi,
 	type PortalServiceOrder as ServiceOrder,
 } from "@/lib/services/portal";
+import { cn } from "@/lib/utils";
 import { portalServiceOrdersKey } from "./portal-home";
 import { PortalStatusBadge } from "./portal-status-badge";
 import { useRedirectWithoutSession } from "./use-portal-session";
@@ -279,11 +280,18 @@ export function PortalServiceOrder({ id }: { id: string }) {
 							</TableHeader>
 							<TableBody>
 								{order.items.map((item, index) => (
-									<TableRow key={`${item.name}-${index}`}>
-										<TableCell>
+									<TableRow
+										className={cn(
+											item.nested && "border-t-0 text-muted-foreground"
+										)}
+										key={`${item.name}-${index}`}
+									>
+										<TableCell className={cn(item.nested && "pl-8")}>
 											{item.name}
 											<span className="block text-muted-foreground text-xs">
-												{t(`estimates.pdf.${item.type}`)}
+												{item.nested
+													? t("portal.detail.servicePart")
+													: t(`estimates.pdf.${item.type}`)}
 											</span>
 										</TableCell>
 										<TableCell className="text-right tabular-nums">

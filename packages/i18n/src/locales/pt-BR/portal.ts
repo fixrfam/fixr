@@ -20,6 +20,7 @@ export const portal: Translated<typeof source> = {
 		reportedDefect: "Defeito relatado",
 		items: "Peças e serviços",
 		noItems: "A assistência ainda não adicionou peças ou serviços.",
+		servicePart: "Peça usada no serviço acima",
 		estimates: "Orçamentos",
 		noEstimates: "Nenhum orçamento enviado ainda.",
 		estimateNumber: "Orçamento #{{number}}",
