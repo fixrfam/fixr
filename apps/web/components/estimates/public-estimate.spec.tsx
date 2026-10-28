@@ -36,7 +36,16 @@ const estimate = {
 	},
 	items: [
 		{
+			type: "service",
+			nested: false,
+			name: "Troca de tela",
+			quantity: 1,
+			unitPrice: 0,
+			total: 0,
+		},
+		{
 			type: "part",
+			nested: true,
 			name: "Tela OLED",
 			quantity: 1,
 			unitPrice: 500,
@@ -62,7 +71,9 @@ describe("PublicEstimate", () => {
 		expect(
 			screen.getByText("Emitido por Central Assistência")
 		).toBeInTheDocument();
-		expect(screen.getByText("Tela OLED")).toBeInTheDocument();
+		expect(screen.getByText("Tela OLED").closest("tr")).toHaveTextContent(
+			"Peça usada no serviço acima"
+		);
 		expect(screen.getByText("Garantia de 90 dias")).toBeInTheDocument();
 		expect(screen.getByText(/450,00/)).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /Baixar PDF/ })).toHaveAttribute(

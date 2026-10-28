@@ -25,7 +25,7 @@ afterAll(async () => {
 });
 
 /** A financial employee with a draft estimate of a priced service order. */
-async function setup({ customerEmail = true } = {}) {
+async function setup({ customerEmail = true, withServicePart = false } = {}) {
 	const session = await createEmployeeSession(app, { role: "financial" });
 	const { company, employee } = session;
 	const [customer, maker, category] = await Promise.all([
@@ -45,13 +45,26 @@ async function setup({ customerEmail = true } = {}) {
 		deviceCategoryId: category.id,
 		deviceModel: "iPhone 13",
 	});
-	await db.insert(serviceOrderItems).values({
-		serviceOrderId: serviceOrder.id,
-		type: "service",
-		name: "Troca de tela",
-		quantity: 1,
-		unitPrice: 150,
-	});
+	const [serviceLine] = await db
+		.insert(serviceOrderItems)
+		.values({
+			serviceOrderId: serviceOrder.id,
+			type: "service",
+			name: "Troca de tela",
+			quantity: 1,
+			unitPrice: 150,
+		})
+		.$returningId();
+	if (withServicePart) {
+		await db.insert(serviceOrderItems).values({
+			serviceOrderId: serviceOrder.id,
+			parentItemId: serviceLine!.id,
+			type: "part",
+			name: "Tela OLED",
+			quantity: 1,
+			unitPrice: 890,
+		});
+	}
 	const base = `/companies/${company.subdomain}/estimates`;
 	const created = await authedInject(app, session.token, {
 		method: "POST",
@@ -231,6 +244,21 @@ describe("/estimate-links/:token", () => {
 		});
 		expect(JSON.stringify(data)).not.toContain(ctx.estimateId);
 		expect(JSON.stringify(data)).not.toContain(ctx.company.id);
+	});
+
+	it("shows the parts a service uses right after it, flagged", async () => {
+		const ctx = await setup({ withServicePart: true });
+		const token = await sendAndGetToken(ctx);
+
+		const response = await app.inject({ url: `/estimate-links/${token}` });
+
+		const data = response.json().data;
+		expect(data.items).toMatchObject([
+			{ name: "Troca de tela", nested: false },
+			{ name: "Tela OLED", nested: true },
+		]);
+		expect(data.items[1]).not.toHaveProperty("parentItemId");
+		expect(data.totals.total).toBe(1040);
 	});
 
 	it("serves the PDF", async () => {

@@ -69,8 +69,11 @@ export interface PortalServiceOrder {
 		address: string | null;
 		logoUrl: string | null;
 	};
+	/** In reading order: the parts a service uses come right after it. */
 	items: {
 		type: "part" | "service";
+		/** A part the service above uses. */
+		nested: boolean;
 		name: string;
 		quantity: number;
 		unitPrice: number;

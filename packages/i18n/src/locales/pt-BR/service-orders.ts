@@ -97,7 +97,9 @@ export const serviceOrders: Translated<typeof source> = {
 		increase: "Aumentar quantidade de {{name}}",
 		remove: "Remover {{name}}",
 		partsTotal: "Peças",
-		servicesTotal: "Serviços",
+		servicesTotal: "Mão de obra",
+		serviceParts: "Peças usadas em {{name}}",
+		serviceWithParts: "Serviço com peças",
 		total: "Total",
 		unavailable:
 			"Os itens só ficam disponíveis para ordens de serviço salvas no sistema.",

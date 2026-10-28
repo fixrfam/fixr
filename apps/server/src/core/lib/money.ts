@@ -17,6 +17,11 @@ export function lineTotal({
 	return fromCents(toCents(unitPrice) * quantity);
 }
 
+/** Sum of amounts, rounded to cents. */
+export function sumMoney(values: number[]) {
+	return fromCents(values.reduce((cents, value) => cents + toCents(value), 0));
+}
+
 /** Subtotals per item type and the overall total of a list of priced items. */
 export function itemTotals(
 	items: { type: "part" | "service"; unitPrice: number; quantity: number }[]

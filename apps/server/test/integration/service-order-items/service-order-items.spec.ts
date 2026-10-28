@@ -136,6 +136,92 @@ describe("service order items", () => {
 		});
 	});
 
+	it("adds the parts a service uses under its line and charges them", async () => {
+		const { token, url, part, company } = await setup();
+		const screenSwap = await makeService({
+			companyId: company.id,
+			name: "Troca de tela com peça",
+			price: 150,
+			partIds: [part.id],
+		});
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url,
+			payload: { type: "service", itemId: screenSwap.id },
+		});
+
+		const { items, totals } = response.json().data;
+		const serviceLine = items.find(
+			(item: { type: string }) => item.type === "service"
+		);
+		expect(items).toHaveLength(2);
+		expect(items).toContainEqual(
+			expect.objectContaining({
+				type: "part",
+				partId: part.id,
+				parentItemId: serviceLine.id,
+				unitPrice: 890.5,
+			})
+		);
+		expect(serviceLine.parentItemId).toBeNull();
+		expect(totals).toEqual({ parts: 890.5, services: 150, total: 1040.5 });
+	});
+
+	it("moves a part already on the order under the service instead of charging it twice", async () => {
+		const { token, url, part, company } = await setup();
+		const screenSwap = await makeService({
+			companyId: company.id,
+			price: 150,
+			partIds: [part.id],
+		});
+		await authedInject(app, token, {
+			method: "POST",
+			url,
+			payload: { type: "part", itemId: part.id, unitPrice: 800 },
+		});
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url,
+			payload: { type: "service", itemId: screenSwap.id },
+		});
+
+		const { items, totals } = response.json().data;
+		expect(items).toHaveLength(2);
+		expect(items).toContainEqual(
+			expect.objectContaining({
+				partId: part.id,
+				parentItemId: expect.any(String),
+				unitPrice: 800,
+			})
+		);
+		expect(totals.total).toBe(950);
+	});
+
+	it("removes the service's parts with the service", async () => {
+		const { token, url, part, company } = await setup();
+		const screenSwap = await makeService({
+			companyId: company.id,
+			partIds: [part.id],
+		});
+		const added = await authedInject(app, token, {
+			method: "POST",
+			url,
+			payload: { type: "service", itemId: screenSwap.id },
+		});
+		const serviceLine = added
+			.json()
+			.data.items.find((item: { type: string }) => item.type === "service");
+
+		const removed = await authedInject(app, token, {
+			method: "DELETE",
+			url: `${url}/${serviceLine.id}`,
+		});
+
+		expect(removed.json().data.items).toEqual([]);
+	});
+
 	it("refuses a part of another company", async () => {
 		const { token, url } = await setup();
 		const other = await makeCompany();

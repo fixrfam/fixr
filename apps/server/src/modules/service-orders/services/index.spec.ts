@@ -22,6 +22,8 @@ const { repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
 		queryItem: vi.fn(),
 		queryCatalogItem: vi.fn(),
 		insertItem: vi.fn(),
+		queryServiceParts: vi.fn(async (): Promise<unknown[]> => []),
+		queryLoosePartItems: vi.fn(async (): Promise<unknown[]> => []),
 		updateItem: vi.fn(),
 		deleteItem: vi.fn(),
 	},
@@ -398,8 +400,136 @@ describe("ServiceOrdersService items", () => {
 		});
 
 		expect(repo.insertItem).toHaveBeenCalledWith(
-			expect.objectContaining({ serviceId, partId: null, unitPrice: 99 })
+			expect.objectContaining({ serviceId, partId: null, unitPrice: 99 }),
+			"TX"
 		);
+	});
+
+	describe("adding a service that uses parts", () => {
+		const serviceId = createId();
+		const screenId = createId();
+		const batteryId = createId();
+		const serviceItemId = createId();
+
+		beforeEach(() => {
+			repo.queryCatalogItem.mockResolvedValue({
+				id: serviceId,
+				name: "Troca de tela",
+				price: 150,
+			});
+			repo.queryServiceParts.mockResolvedValue([
+				{ id: screenId, name: "Tela", price: 890 },
+				{ id: batteryId, name: "Bateria", price: 200 },
+			]);
+			repo.insertItem.mockResolvedValueOnce(serviceItemId);
+		});
+
+		async function addService(quantity = 1) {
+			await ServiceOrdersService.addItem({
+				...base,
+				data: { type: "service", itemId: serviceId, quantity },
+				response: asReply(createFakeReply()),
+			});
+		}
+
+		it("adds the parts under the service line, in the same transaction", async () => {
+			await addService();
+
+			expect(repo.queryServiceParts).toHaveBeenCalledWith(serviceId, companyId);
+			expect(repo.queryLoosePartItems).toHaveBeenCalledWith(
+				"TX",
+				serviceOrderId,
+				[screenId, batteryId]
+			);
+			expect(repo.insertItem).toHaveBeenNthCalledWith(
+				1,
+				expect.objectContaining({
+					type: "service",
+					serviceId,
+					unitPrice: 150,
+				}),
+				"TX"
+			);
+			expect(repo.insertItem).toHaveBeenNthCalledWith(
+				2,
+				{
+					serviceOrderId,
+					parentItemId: serviceItemId,
+					type: "part",
+					partId: screenId,
+					name: "Tela",
+					quantity: 1,
+					unitPrice: 890,
+				},
+				"TX"
+			);
+			expect(repo.insertItem).toHaveBeenNthCalledWith(
+				3,
+				expect.objectContaining({
+					parentItemId: serviceItemId,
+					partId: batteryId,
+					unitPrice: 200,
+				}),
+				"TX"
+			);
+		});
+
+		it("moves a part the order already has under the service instead of charging it twice", async () => {
+			const looseScreenId = createId();
+			repo.queryLoosePartItems.mockResolvedValueOnce([
+				{
+					id: looseScreenId,
+					partId: screenId,
+					name: "Tela",
+					quantity: 1,
+					unitPrice: 850,
+				},
+			]);
+
+			await addService();
+
+			expect(repo.updateItem).toHaveBeenCalledWith(
+				looseScreenId,
+				{ parentItemId: serviceItemId, quantity: 1 },
+				"TX"
+			);
+			expect(repo.insertItem).toHaveBeenCalledTimes(2);
+			expect(repo.insertItem).not.toHaveBeenCalledWith(
+				expect.objectContaining({ partId: screenId }),
+				"TX"
+			);
+		});
+
+		it("takes only the units the service needs from a bigger line, at that line's price", async () => {
+			const looseScreenId = createId();
+			repo.queryLoosePartItems.mockResolvedValueOnce([
+				{
+					id: looseScreenId,
+					partId: screenId,
+					name: "Tela original",
+					quantity: 3,
+					unitPrice: 850,
+				},
+			]);
+
+			await addService(2);
+
+			expect(repo.updateItem).toHaveBeenCalledWith(
+				looseScreenId,
+				{ quantity: 1 },
+				"TX"
+			);
+			expect(repo.insertItem).toHaveBeenCalledWith(
+				expect.objectContaining({
+					parentItemId: serviceItemId,
+					partId: screenId,
+					name: "Tela original",
+					quantity: 2,
+					unitPrice: 850,
+				}),
+				"TX"
+			);
+		});
 	});
 
 	it("rejects a catalog item outside the company", async () => {

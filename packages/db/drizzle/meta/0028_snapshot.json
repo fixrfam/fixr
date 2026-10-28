@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "389faa6b-35b4-4db3-a5cb-ce2403927a94",
-  "prevId": "c3ff89ec-c509-49a2-b981-37b9932adaae",
+  "id": "c1165500-3937-4d75-b200-c2879d157be1",
+  "prevId": "0247c390-43cc-4e9c-8177-fd5f826f6f4c",
   "tables": {
     "api_keys": {
       "name": "api_keys",
@@ -679,6 +679,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "parent_item_id": {
+          "name": "parent_item_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(120)",
@@ -736,6 +743,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "estimate_items_parent_item_id_estimate_items_id_fk": {
+          "name": "estimate_items_parent_item_id_estimate_items_id_fk",
+          "tableFrom": "estimate_items",
+          "tableTo": "estimate_items",
+          "columnsFrom": ["parent_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1660,211 +1676,6 @@
       },
       "checkConstraint": {}
     },
-    "portal_links": {
-      "name": "portal_links",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cpf": {
-          "name": "cpf",
-          "type": "varchar(11)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "company_id": {
-          "name": "company_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "client_id": {
-          "name": "client_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "last_used_at": {
-          "name": "last_used_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "revoked_at": {
-          "name": "revoked_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "portal_links_client_idx": {
-          "name": "portal_links_client_idx",
-          "columns": ["client_id"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "portal_links_company_id_companies_id_fk": {
-          "name": "portal_links_company_id_companies_id_fk",
-          "tableFrom": "portal_links",
-          "tableTo": "companies",
-          "columnsFrom": ["company_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "portal_links_client_id_clients_id_fk": {
-          "name": "portal_links_client_id_clients_id_fk",
-          "tableFrom": "portal_links",
-          "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "portal_links_id": {
-          "name": "portal_links_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {
-        "portal_links_token_hash_unique": {
-          "name": "portal_links_token_hash_unique",
-          "columns": ["token_hash"]
-        }
-      },
-      "checkConstraint": {}
-    },
-    "portal_sessions": {
-      "name": "portal_sessions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "portal_link_id": {
-          "name": "portal_link_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "cpf": {
-          "name": "cpf",
-          "type": "varchar(11)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "client_id": {
-          "name": "client_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "portal_sessions_portal_link_id_portal_links_id_fk": {
-          "name": "portal_sessions_portal_link_id_portal_links_id_fk",
-          "tableFrom": "portal_sessions",
-          "tableTo": "portal_links",
-          "columnsFrom": ["portal_link_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "portal_sessions_client_id_clients_id_fk": {
-          "name": "portal_sessions_client_id_clients_id_fk",
-          "tableFrom": "portal_sessions",
-          "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "portal_sessions_id": {
-          "name": "portal_sessions_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {
-        "portal_sessions_token_hash_unique": {
-          "name": "portal_sessions_token_hash_unique",
-          "columns": ["token_hash"]
-        }
-      },
-      "checkConstraint": {}
-    },
     "refresh_tokens": {
       "name": "refresh_tokens",
       "columns": {
@@ -2145,6 +1956,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "parent_item_id": {
+          "name": "parent_item_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(120)",
@@ -2211,6 +2029,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "service_order_items_parent_item_id_service_order_items_id_fk": {
+          "name": "service_order_items_parent_item_id_service_order_items_id_fk",
+          "tableFrom": "service_order_items",
+          "tableTo": "service_order_items",
+          "columnsFrom": ["parent_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

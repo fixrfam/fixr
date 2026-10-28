@@ -60,6 +60,21 @@ describe("renderEstimatePdf", () => {
 		).toBeGreaterThan(1);
 	});
 
+	it("renders the parts of a service under it", async () => {
+		const pdf = await renderEstimatePdf(
+			{
+				...data,
+				items: [
+					{ ...data.items[1]!, parentItemId: null },
+					{ ...data.items[0]!, parentItemId: "service-line" },
+				],
+			},
+			"pt-BR"
+		);
+
+		expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
+	});
+
 	it("renders without a customer", async () => {
 		const pdf = await renderEstimatePdf({ ...data, customer: null }, "pt-BR");
 

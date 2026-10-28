@@ -17,6 +17,7 @@ export const portal = {
 		reportedDefect: "Reported defect",
 		items: "Parts and services",
 		noItems: "The shop has not added parts or services yet.",
+		servicePart: "Part used in the service above",
 		estimates: "Estimates",
 		noEstimates: "No estimate sent yet.",
 		estimateNumber: "Estimate #{{number}}",

@@ -230,6 +230,8 @@ export class PortalRepository {
 	static async queryServiceOrderItems(serviceOrderId: string) {
 		return await db
 			.select({
+				id: serviceOrderItems.id,
+				parentItemId: serviceOrderItems.parentItemId,
 				type: serviceOrderItems.type,
 				name: serviceOrderItems.name,
 				quantity: serviceOrderItems.quantity,
@@ -237,7 +239,7 @@ export class PortalRepository {
 			})
 			.from(serviceOrderItems)
 			.where(eq(serviceOrderItems.serviceOrderId, serviceOrderId))
-			.orderBy(serviceOrderItems.createdAt);
+			.orderBy(serviceOrderItems.createdAt, serviceOrderItems.id);
 	}
 
 	/** Estimates the customer was sent (drafts stay internal to the shop). */

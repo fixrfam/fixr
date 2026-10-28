@@ -86,6 +86,40 @@ describe("POST /companies/:subdomain/estimates", () => {
 		});
 	});
 
+	it("keeps the parts a service uses under it and charges them", async () => {
+		const ctx = await setup({ withItems: false });
+		const [serviceLine] = await db
+			.insert(serviceOrderItems)
+			.values({
+				serviceOrderId: ctx.serviceOrder.id,
+				type: "service",
+				name: "Troca de tela",
+				quantity: 1,
+				unitPrice: 150,
+				createdAt: new Date(),
+			})
+			.$returningId();
+		// Added to the order before the service, then moved under it.
+		await db.insert(serviceOrderItems).values({
+			serviceOrderId: ctx.serviceOrder.id,
+			parentItemId: serviceLine!.id,
+			type: "part",
+			name: "Tela OLED",
+			quantity: 1,
+			unitPrice: 890.5,
+			createdAt: new Date(Date.now() - 2000),
+		});
+
+		const response = await createEstimate(ctx);
+
+		const { items, totals } = response.json().data;
+		expect(items).toMatchObject([
+			{ name: "Troca de tela", parentItemId: null },
+			{ name: "Tela OLED", parentItemId: items[0].id },
+		]);
+		expect(totals.total).toBe(1040.5);
+	});
+
 	it("numbers estimates sequentially per company", async () => {
 		const ctx = await setup();
 		const other = await setup();

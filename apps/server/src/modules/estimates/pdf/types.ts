@@ -34,6 +34,8 @@ export interface EstimatePdfData {
 	items: {
 		name: string;
 		type: "part" | "service";
+		/** Set on a part a service uses: printed under that service. */
+		parentItemId?: string | null;
 		quantity: number;
 		unitPrice: number;
 		total: number;

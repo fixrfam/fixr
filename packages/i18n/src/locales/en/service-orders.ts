@@ -92,7 +92,9 @@ export const serviceOrders = {
 		increase: "Increase quantity of {{name}}",
 		remove: "Remove {{name}}",
 		partsTotal: "Parts",
-		servicesTotal: "Services",
+		servicesTotal: "Labor",
+		serviceParts: "Parts used by {{name}}",
+		serviceWithParts: "Service with parts",
 		total: "Total",
 		unavailable:
 			"Items are only available for service orders saved in the system.",

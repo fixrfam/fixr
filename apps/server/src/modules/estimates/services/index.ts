@@ -13,11 +13,13 @@ import type {
 	patchEstimateSchema,
 } from "@fixr/schemas/estimates";
 import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
+import { createId } from "@paralleldrive/cuid2";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
+import { inReadingOrder } from "../../../core/lib/item-order";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	generateOpaqueToken,
@@ -58,6 +60,27 @@ const TRANSITIONS: Record<EstimateStatus, EstimateStatus[]> = {
 
 function isExpired(estimate: { validUntil: Date }) {
 	return estimate.validUntil.getTime() < Date.now();
+}
+
+/**
+ * The order's items as estimate items: each service followed by the parts it
+ * uses (kept under it through new ids), so `position` is the reading order.
+ */
+function copyItems(
+	items: Awaited<ReturnType<typeof EstimatesRepository.queryServiceOrderItems>>
+) {
+	const newIds = new Map(items.map((item) => [item.id, createId()]));
+
+	return inReadingOrder(items).map(({ item, nested }) => ({
+		id: newIds.get(item.id),
+		parentItemId: nested ? (newIds.get(item.parentItemId ?? "") ?? null) : null,
+		type: item.type,
+		partId: item.partId,
+		serviceId: item.serviceId,
+		name: item.name,
+		quantity: item.quantity,
+		unitPrice: item.unitPrice,
+	}));
 }
 
 function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
@@ -251,14 +274,7 @@ export class EstimatesService {
 					new Date(Date.now() + DEFAULT_VALIDITY_DAYS * DAY_MS),
 				notes: data.notes ?? null,
 			},
-			items.map((item) => ({
-				type: item.type,
-				partId: item.partId,
-				serviceId: item.serviceId,
-				name: item.name,
-				quantity: item.quantity,
-				unitPrice: item.unitPrice,
-			}))
+			copyItems(items)
 		);
 
 		return response.status(201).send(
@@ -570,8 +586,11 @@ export class EstimatesService {
 			},
 			customer: record.customer ? { name: record.customer.name } : null,
 			device: context.device,
+			// Items are stored in reading order: a part a service uses comes right
+			// after it, flagged instead of pointing at an internal id.
 			items: record.items.map((item) => ({
 				type: item.type,
+				nested: Boolean(item.parentItemId),
 				name: item.name,
 				quantity: item.quantity,
 				unitPrice: item.unitPrice,

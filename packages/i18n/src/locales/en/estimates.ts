@@ -54,6 +54,7 @@ export const estimates = {
 		validUntil: "Valid until {{date}}",
 		device: "Device",
 		items: "Items",
+		servicePart: "Part used in the service above",
 		notes: "Notes",
 		downloadPdf: "Download PDF",
 		approve: "Approve estimate",
