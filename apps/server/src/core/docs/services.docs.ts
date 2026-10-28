@@ -19,6 +19,10 @@ import { zodResponseSchema } from "./types";
 const serviceRecordSchema = z.object({
 	...serviceSelectSchema.shape,
 	partIds: z.array(z.string()),
+	/** Current sale price of the linked parts, summed. */
+	partsPrice: z.number(),
+	/** `price` (labor) plus `partsPrice`: what an order charges for the service. */
+	totalPrice: z.number(),
 });
 
 const serviceParams = getCompanyNestedDataSchema.extend(
