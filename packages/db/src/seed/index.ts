@@ -7,11 +7,15 @@ import { db } from "../connection";
 import {
 	clients,
 	companies,
+	devices,
 	employees,
 	modelCategories,
 	modelMakers,
 	models,
 	parts,
+	serviceOrderHistory,
+	serviceOrderSequences,
+	serviceOrderStatusValues,
 	serviceOrders,
 	serviceParts,
 	services,
@@ -194,7 +198,7 @@ async function seed() {
 		}
 
 		const makerIds = new Map<string, string>();
-		const modelCategory = new Map<string, string>();
+		const modelIds = new Map<string, string>();
 		for (const maker of MAKERS) {
 			const makerId = createId();
 			makerIds.set(maker.slug, makerId);
@@ -207,8 +211,10 @@ async function seed() {
 			});
 			for (const model of maker.models) {
 				const slug = `${maker.slug}-${slugify(model.name)}`;
-				modelCategory.set(`${maker.slug}:${model.name}`, model.category);
+				const modelId = createId();
+				modelIds.set(`${maker.slug}:${model.name}`, modelId);
 				await tx.insert(models).values({
+					id: modelId,
 					makerId,
 					name: `${maker.name} ${model.name}`,
 					slug,
@@ -263,25 +269,127 @@ async function seed() {
 			cpfs: CLIENTS.map(() => cpf(documentSeq++)),
 		});
 
-		for (const [index, order] of SERVICE_ORDERS.entries()) {
-			const category = modelCategory.get(`${order.maker}:${order.model}`);
-			const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
-			await tx.insert(serviceOrders).values({
-				companyId: companyIds.get(order.company) as string,
-				clientId: clientIds.get(`${order.company}:${order.client}`) as string,
-				employeeId: employeeIds.get(order.technician) as string,
-				deviceMakerId: makerIds.get(order.maker) as string,
-				deviceCategoryId: categoryIds.get(category as string) as string,
-				deviceModel: order.model,
+		await seedServiceOrders(tx, {
+			companyIds,
+			clientIds,
+			employeeIds,
+			modelIds,
+		});
+	});
+}
+
+/** One device per customer and model; the latest order says where it is. */
+async function seedServiceOrders(
+	tx: Transaction,
+	{
+		companyIds,
+		clientIds,
+		employeeIds,
+		modelIds,
+	}: {
+		companyIds: Map<string, string>;
+		clientIds: Map<string, string>;
+		employeeIds: Map<string, string>;
+		modelIds: Map<string, string>;
+	}
+) {
+	const deviceIds = new Map<string, string>();
+	const latestOrder = new Map<string, number>();
+	const lastNumber = new Map<string, number>();
+	// Oldest first, so each company's numbers follow the order they were opened.
+	const byAge = [...SERVICE_ORDERS.entries()].sort(
+		([, a], [, b]) => b.daysAgo - a.daysAgo
+	);
+	for (const [index, order] of byAge) {
+		const companyId = companyIds.get(order.company) as string;
+		const clientId = clientIds.get(
+			`${order.company}:${order.client}`
+		) as string;
+		const createdAt = new Date(Date.now() - order.daysAgo * DAY_MS);
+		const deviceKey = `${clientId}:${order.maker}:${order.model}`;
+		let deviceId = deviceIds.get(deviceKey);
+		if (!deviceId) {
+			deviceId = createId();
+			deviceIds.set(deviceKey, deviceId);
+			await tx.insert(devices).values({
+				id: deviceId,
+				companyId,
+				clientId,
+				modelId: modelIds.get(`${order.maker}:${order.model}`) as string,
 				imei: `35${String(209_900_000_000 + index).padStart(13, "0")}`,
-				reportedDefect: order.defect,
-				observations: order.observations,
-				status: order.status,
 				createdAt,
-				updatedAt: createdAt,
 			});
 		}
-	});
+		if (
+			order.daysAgo <= (latestOrder.get(deviceId) ?? Number.POSITIVE_INFINITY)
+		) {
+			latestOrder.set(deviceId, order.daysAgo);
+			await tx
+				.update(devices)
+				.set({ status: deviceStatusFor(order.status) })
+				.where(eq(devices.id, deviceId));
+		}
+		const number = (lastNumber.get(companyId) ?? 0) + 1;
+		lastNumber.set(companyId, number);
+		const serviceOrderId = createId();
+		const employeeId = employeeIds.get(order.technician) as string;
+		await tx.insert(serviceOrders).values({
+			id: serviceOrderId,
+			companyId,
+			number,
+			clientId,
+			employeeId,
+			deviceId,
+			reportedDefect: order.defect,
+			observations: order.observations,
+			status: order.status,
+			createdAt,
+			updatedAt: createdAt,
+		});
+		await tx
+			.insert(serviceOrderHistory)
+			.values(statusHistory(serviceOrderId, employeeId, order, createdAt));
+	}
+	for (const [companyId, number] of lastNumber) {
+		await tx
+			.insert(serviceOrderSequences)
+			.values({ companyId, lastNumber: number });
+	}
+}
+
+/**
+ * The order walked the lifecycle step by step up to its status, spread over
+ * its first days (at most until now), so the demo timeline has entries.
+ */
+function statusHistory(
+	serviceOrderId: string,
+	employeeId: string,
+	order: (typeof SERVICE_ORDERS)[number],
+	createdAt: Date
+) {
+	const path = serviceOrderStatusValues.slice(
+		0,
+		serviceOrderStatusValues.indexOf(order.status) + 1
+	);
+	const span = Math.min(order.daysAgo, 3) * DAY_MS;
+	return path.map((toStatus, step) => ({
+		serviceOrderId,
+		fromStatus: step === 0 ? null : path[step - 1],
+		toStatus,
+		employeeId,
+		createdAt: new Date(
+			createdAt.getTime() + (span * step) / Math.max(path.length - 1, 1)
+		),
+	}));
+}
+
+function deviceStatusFor(status: (typeof SERVICE_ORDERS)[number]["status"]) {
+	if (status === "delivered") {
+		return "with_customer" as const;
+	}
+	return status === "ready"
+		? ("ready_for_pickup" as const)
+		: ("in_shop" as const);
 }
 
 function printCredentials() {

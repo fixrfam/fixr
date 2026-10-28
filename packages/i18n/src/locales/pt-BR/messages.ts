@@ -14,6 +14,46 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		client_not_found: {
+			title: "Cliente não encontrado",
+			description: "Este cliente não existe ou foi removido.",
+		},
+		client_cpf_conflict: {
+			title: "CPF já cadastrado",
+			description: "Outro cliente da loja já tem este CPF.",
+		},
+		client_phone_invalid: {
+			title: "Telefone inválido",
+			description: "O telefone deve ter 10 ou 11 dígitos.",
+		},
+		device_not_found: {
+			title: "Aparelho não encontrado",
+			description: "Este aparelho não existe ou foi removido.",
+		},
+		device_client_not_found: {
+			title: "Cliente não encontrado",
+			description: "Escolha um dos clientes da loja.",
+		},
+		device_model_not_found: {
+			title: "Modelo não encontrado",
+			description: "Escolha um modelo do catálogo.",
+		},
+		service_order_device_not_found: {
+			title: "Aparelho não encontrado",
+			description: "Escolha um dos aparelhos do cliente.",
+		},
+		service_order_catalog_item_not_found: {
+			title: "Item não encontrado",
+			description: "Esta peça ou serviço não está mais no catálogo.",
+		},
+		service_order_item_not_found: {
+			title: "Item não encontrado",
+			description: "Este item já foi removido da ordem.",
+		},
+		service_order_not_found: {
+			title: "Ordem de serviço não encontrada",
+			description: "Esta ordem de serviço não existe ou foi removida.",
+		},
 		part_stock_insufficient: {
 			title: "Estoque insuficiente",
 			description: "O ajuste deixaria o estoque abaixo de zero.",

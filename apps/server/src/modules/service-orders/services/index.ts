@@ -1,23 +1,33 @@
-import { asc, db, desc, inArray } from "@fixr/db/connection";
-import { serviceOrders as serviceOrdersTable, uploads } from "@fixr/db/schema";
+import { asc, desc } from "@fixr/db/connection";
+import { serviceOrders as serviceOrdersTable } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
-	createServiceOrderMockSchema,
+	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderItemSchema,
+	patchServiceOrderSchema,
 } from "@fixr/schemas/service-orders";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
+import { withModelImageUrl } from "../../../core/lib/model-image";
+import { itemTotals, lineTotal } from "../../../core/lib/money";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
+import { inTransaction } from "../../../core/lib/transaction";
 import {
 	ServiceOrdersRepository,
 	serviceOrdersListJoins,
 	serviceOrdersListSelect,
 } from "../repositories";
+import { moveServiceOrder } from "./move-status";
 
 export class ServiceOrdersService {
 	static async getCompanyServiceOrders({
@@ -77,7 +87,8 @@ export class ServiceOrdersService {
 			getPaginatedCount({
 				table: serviceOrdersTable,
 				where: filter,
-				joins: query ? serviceOrdersListJoins : undefined,
+				// Search and the category filter read joined tables.
+				joins: serviceOrdersListJoins,
 			}),
 		]);
 
@@ -118,7 +129,11 @@ export class ServiceOrdersService {
 				message: "Company service orders successfully retrieved.",
 				code: "get_company_service_orders_success",
 				data: paginatedData({
-					records,
+					records: await Promise.all(
+						(records as { model: { imageKey: string | null } }[]).map(
+							withModelImageUrl
+						)
+					),
 					pagination: {
 						total_records: totalRecords,
 						total_pages,
@@ -139,7 +154,7 @@ export class ServiceOrdersService {
 	}: {
 		userJwt: z.infer<typeof jwtPayload>;
 		subdomain: string;
-		data: z.infer<typeof createServiceOrderMockSchema>;
+		data: z.infer<typeof createServiceOrderSchema>;
 		response: FastifyReply;
 	}) {
 		if (!userJwt.company) {
@@ -160,46 +175,32 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
 		}
 
-		const [client, deviceMaker, deviceCategory] = await Promise.all([
-			ServiceOrdersRepository.queryClientById(data.clientId),
-			ServiceOrdersRepository.queryDeviceMakerById(data.deviceBrandId),
-			ServiceOrdersRepository.queryDeviceCategoryById(data.deviceCategoryId),
-		]);
-
-		// Clients are company-scoped: another company's (or a deleted) client doesn't exist here.
-		if (!client || client.companyId !== companyId || client.deletedAt) {
-			throw new AppError("SERVICE_ORDER_CLIENT_NOT_FOUND");
-		}
-		if (!deviceMaker) {
-			throw new AppError("SERVICE_ORDER_DEVICE_BRAND_NOT_FOUND");
-		}
-		if (!deviceCategory) {
-			throw new AppError("SERVICE_ORDER_DEVICE_CATEGORY_NOT_FOUND");
+		// Devices are company-scoped: another company's (or a deleted) device doesn't exist here.
+		const device = await ServiceOrdersRepository.queryDeviceOfCompany(
+			data.deviceId,
+			companyId
+		);
+		if (!device) {
+			throw new AppError("SERVICE_ORDER_DEVICE_NOT_FOUND");
 		}
 
-		if (data.photos.length > 0) {
-			const uploadIds = data.photos.map((p) => p.uploadId);
-			const foundUploads = await db
-				.select()
-				.from(uploads)
-				.where(inArray(uploads.id, uploadIds));
+		await ServiceOrdersService.assertPhotoUploads(data.photos, companyId);
 
-			const foundMap = new Map(foundUploads.map((u) => [u.id, u]));
-
-			for (const uploadId of uploadIds) {
-				const upload = foundMap.get(uploadId);
-				if (!upload || upload.companyId !== companyId) {
-					throw new AppError("SERVICE_ORDER_UPLOAD_NOT_FOUND");
-				}
-			}
-		}
-
-		const { serviceOrder, photos } =
-			await ServiceOrdersRepository.createWithPhotos({
+		const created = await inTransaction(async (tx) => {
+			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
+				clientId: device.clientId,
 				data,
 			});
+			await events.emit(tx, "serviceOrder.opened", {
+				serviceOrderId: order.id,
+				companyId,
+				deviceId: device.id,
+				employeeId: employee.id,
+			});
+			return order;
+		});
 
 		return response.status(201).send(
 			apiResponse({
@@ -207,11 +208,521 @@ export class ServiceOrdersService {
 				error: null,
 				code: "create_service_order_success",
 				message: "Service order created successfully.",
-				data: {
-					...serviceOrder,
-					photos,
-				},
+				data: created,
 			})
 		);
+	}
+
+	/** Every upload must be a pending service order photo of the company. */
+	private static async assertPhotoUploads(
+		photos: { uploadId: string }[],
+		companyId: string
+	) {
+		if (photos.length === 0) {
+			return;
+		}
+		const uploadIds = [...new Set(photos.map((photo) => photo.uploadId))];
+		const found = await ServiceOrdersRepository.queryPhotoUploads(
+			uploadIds,
+			companyId
+		);
+		if (found.length !== uploadIds.length) {
+			throw new AppError("SERVICE_ORDER_UPLOAD_NOT_FOUND");
+		}
+	}
+
+	/** The caller's employee record in the company. */
+	private static async resolveEmployee(
+		userJwt: z.infer<typeof jwtPayload>,
+		companyId: string
+	) {
+		const employee = await ServiceOrdersRepository.queryEmployeeByUserId(
+			userJwt.id
+		);
+		if (!employee || employee.companyId !== companyId) {
+			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
+		}
+		return employee;
+	}
+
+	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
+	private static resolveCompanyId(
+		userJwt: z.infer<typeof jwtPayload>,
+		subdomain: string
+	) {
+		if (!userJwt.company) {
+			throw new AppError("SERVICE_ORDER_COMPANY_NOT_FOUND");
+		}
+		if (userJwt.company.subdomain !== subdomain) {
+			throw new AppError("SERVICE_ORDER_NOT_ALLOWED");
+		}
+		return userJwt.company.id;
+	}
+
+	private static async assertOwnServiceOrder(
+		serviceOrderId: string,
+		companyId: string
+	) {
+		const serviceOrder =
+			await ServiceOrdersRepository.queryServiceOrderOfCompany(
+				serviceOrderId,
+				companyId
+			);
+		if (!serviceOrder) {
+			throw new AppError("SERVICE_ORDER_NOT_FOUND");
+		}
+		return serviceOrder;
+	}
+
+	private static async queryDetail(serviceOrderId: string, companyId: string) {
+		const serviceOrder = await ServiceOrdersRepository.queryServiceOrderDetail(
+			serviceOrderId,
+			companyId
+		);
+		if (!serviceOrder) {
+			throw new AppError("SERVICE_ORDER_NOT_FOUND");
+		}
+		return withModelImageUrl(serviceOrder);
+	}
+
+	static async getServiceOrder({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "get_service_order_success",
+				message: "Service order retrieved successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/** Edit the reported issue and the notes. */
+	static async patchServiceOrder({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof patchServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		if (Object.keys(data).length > 0) {
+			await ServiceOrdersRepository.updateServiceOrder(serviceOrderId, data);
+		}
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "patch_service_order_success",
+				message: "Service order updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/**
+	 * Move the order to another status and emit `serviceOrder.statusChanged`,
+	 * whose effects (e.g. the device following the order) run in the same
+	 * transaction. Setting the current status again changes nothing.
+	 */
+	static async changeStatus({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof changeServiceOrderStatusSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+
+		await inTransaction((tx) =>
+			moveServiceOrder(
+				tx,
+				(event, payload) => events.emit(tx, event, payload),
+				{
+					serviceOrderId,
+					to: data.status,
+					employeeId: employee.id,
+					note: data.note,
+				}
+			)
+		);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "change_service_order_status_success",
+				message: "Service order status updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/** Attach photos taken after the order was opened. */
+	static async addPhotos({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof addServiceOrderPhotosSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+		await ServiceOrdersService.assertPhotoUploads(data.photos, companyId);
+
+		await inTransaction((tx) =>
+			ServiceOrdersRepository.insertPhotos(tx, {
+				serviceOrderId,
+				employeeId: employee.id,
+				photos: data.photos,
+			})
+		);
+
+		return response.status(201).send(
+			apiResponse({
+				status: 201,
+				error: null,
+				code: "add_service_order_photos_success",
+				message: "Photos added to the service order.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	static async deletePhoto({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		photoId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		photoId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const photo = await ServiceOrdersRepository.queryPhoto(
+			serviceOrderId,
+			photoId
+		);
+		if (!photo) {
+			throw new AppError("SERVICE_ORDER_PHOTO_NOT_FOUND");
+		}
+		await ServiceOrdersRepository.deletePhoto(photoId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "delete_service_order_photo_success",
+				message: "Photo removed from the service order.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/** The order's items with their line totals, plus subtotals per type and the total. */
+	private static async itemsWithTotals(serviceOrderId: string) {
+		const items = await ServiceOrdersRepository.queryItems(serviceOrderId);
+		return {
+			items: items.map((item) => ({ ...item, total: lineTotal(item) })),
+			totals: itemTotals(items),
+		};
+	}
+
+	private static sendItems(
+		response: FastifyReply,
+		{
+			status,
+			code,
+			message,
+			data,
+		}: {
+			status: 200 | 201;
+			code: string;
+			message: string;
+			data: Awaited<ReturnType<typeof ServiceOrdersService.itemsWithTotals>>;
+		}
+	) {
+		return response
+			.status(status)
+			.send(apiResponse({ status, error: null, code, message, data }));
+	}
+
+	static async listItems({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "list_service_order_items_success",
+			message: "Service order items retrieved successfully.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	/**
+	 * Add a catalog part or service, snapshotting its name and (by default) its
+	 * current price. A service brings the parts it uses along (see
+	 * {@link ServiceOrdersService.addServiceWithParts}).
+	 */
+	static async addItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof addServiceOrderItemSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const catalogItem = await ServiceOrdersRepository.queryCatalogItem(
+			data.type,
+			data.itemId,
+			companyId
+		);
+		if (!catalogItem) {
+			throw new AppError("SERVICE_ORDER_CATALOG_ITEM_NOT_FOUND");
+		}
+
+		if (data.type === "part") {
+			await ServiceOrdersRepository.insertItem({
+				serviceOrderId,
+				type: "part",
+				partId: catalogItem.id,
+				serviceId: null,
+				name: catalogItem.name,
+				quantity: data.quantity,
+				unitPrice: data.unitPrice ?? catalogItem.price,
+			});
+		} else {
+			await ServiceOrdersService.addServiceWithParts({
+				serviceOrderId,
+				companyId,
+				service: catalogItem,
+				quantity: data.quantity,
+				unitPrice: data.unitPrice ?? catalogItem.price,
+			});
+		}
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 201,
+			code: "add_service_order_item_success",
+			message: "Item added to the service order.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	/**
+	 * Add a service line and, under it, the parts the service uses, so the
+	 * order charges them too. A part the order already has on its own line
+	 * moves under the service instead of being charged twice: the whole line
+	 * when it has no more units than the service needs, otherwise only the
+	 * units the service needs (at the price that line had).
+	 */
+	private static async addServiceWithParts({
+		serviceOrderId,
+		companyId,
+		service,
+		quantity,
+		unitPrice,
+	}: {
+		serviceOrderId: string;
+		companyId: string;
+		service: { id: string; name: string };
+		quantity: number;
+		unitPrice: number;
+	}) {
+		const serviceParts = await ServiceOrdersRepository.queryServiceParts(
+			service.id,
+			companyId
+		);
+
+		await inTransaction(async (tx) => {
+			const parentItemId = await ServiceOrdersRepository.insertItem(
+				{
+					serviceOrderId,
+					type: "service",
+					partId: null,
+					serviceId: service.id,
+					name: service.name,
+					quantity,
+					unitPrice,
+				},
+				tx
+			);
+			const loose = await ServiceOrdersRepository.queryLoosePartItems(
+				tx,
+				serviceOrderId,
+				serviceParts.map((part) => part.id)
+			);
+
+			for (const part of serviceParts) {
+				const existing = loose.find((item) => item.partId === part.id);
+
+				if (existing && existing.quantity <= quantity) {
+					await ServiceOrdersRepository.updateItem(
+						existing.id,
+						{ parentItemId, quantity },
+						tx
+					);
+					continue;
+				}
+
+				if (existing) {
+					await ServiceOrdersRepository.updateItem(
+						existing.id,
+						{ quantity: existing.quantity - quantity },
+						tx
+					);
+				}
+				await ServiceOrdersRepository.insertItem(
+					{
+						serviceOrderId,
+						parentItemId,
+						type: "part",
+						partId: part.id,
+						name: existing?.name ?? part.name,
+						quantity,
+						unitPrice: existing?.unitPrice ?? part.price,
+					},
+					tx
+				);
+			}
+		});
+	}
+
+	static async patchItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		itemId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		itemId: string;
+		data: z.infer<typeof patchServiceOrderItemSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const item = await ServiceOrdersRepository.queryItem(
+			serviceOrderId,
+			itemId
+		);
+		if (!item) {
+			throw new AppError("SERVICE_ORDER_ITEM_NOT_FOUND");
+		}
+
+		if (Object.keys(data).length > 0) {
+			await ServiceOrdersRepository.updateItem(itemId, data);
+		}
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "patch_service_order_item_success",
+			message: "Service order item updated.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
+	}
+
+	static async deleteItem({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		itemId,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		itemId: string;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+
+		const item = await ServiceOrdersRepository.queryItem(
+			serviceOrderId,
+			itemId
+		);
+		if (!item) {
+			throw new AppError("SERVICE_ORDER_ITEM_NOT_FOUND");
+		}
+
+		await ServiceOrdersRepository.deleteItem(itemId);
+
+		return ServiceOrdersService.sendItems(response, {
+			status: 200,
+			code: "delete_service_order_item_success",
+			message: "Item removed from the service order.",
+			data: await ServiceOrdersService.itemsWithTotals(serviceOrderId),
+		});
 	}
 }

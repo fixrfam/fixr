@@ -15,6 +15,46 @@ export const messages = {
 		},
 	},
 	codes: {
+		client_not_found: {
+			title: "Customer not found",
+			description: "This customer does not exist or was removed.",
+		},
+		client_cpf_conflict: {
+			title: "CPF already registered",
+			description: "Another customer of the shop already has this CPF.",
+		},
+		client_phone_invalid: {
+			title: "Invalid phone",
+			description: "Phone numbers must have 10 or 11 digits.",
+		},
+		device_not_found: {
+			title: "Device not found",
+			description: "This device does not exist or was removed.",
+		},
+		device_client_not_found: {
+			title: "Customer not found",
+			description: "Pick one of the shop's customers.",
+		},
+		device_model_not_found: {
+			title: "Model not found",
+			description: "Pick a model from the catalog.",
+		},
+		service_order_device_not_found: {
+			title: "Device not found",
+			description: "Pick one of the customer's devices.",
+		},
+		service_order_catalog_item_not_found: {
+			title: "Item not found",
+			description: "This part or service is no longer in the catalog.",
+		},
+		service_order_item_not_found: {
+			title: "Item not found",
+			description: "This item was already removed from the order.",
+		},
+		service_order_not_found: {
+			title: "Service order not found",
+			description: "This service order does not exist or was removed.",
+		},
 		part_stock_insufficient: {
 			title: "Not enough stock",
 			description: "The adjustment would leave the stock below zero.",

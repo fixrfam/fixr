@@ -7,6 +7,7 @@ import { common } from "./common";
 import { company } from "./company";
 import { dashboard } from "./dashboard";
 import { dataTable } from "./data-table";
+import { devices } from "./devices";
 import { emails } from "./emails";
 import { employees } from "./employees";
 import { home } from "./home";
@@ -31,6 +32,7 @@ export const en = {
 	company,
 	dashboard,
 	dataTable,
+	devices,
 	emails,
 	employees,
 	home,

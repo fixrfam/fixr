@@ -2,13 +2,23 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { partCategories } from "@fixr/mock";
+import { permissions } from "@fixr/permissions";
 import { createPartSchema } from "@fixr/schemas/parts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
-import { Check, ChevronsUpDown, Loader2, Plus, Save } from "lucide-react";
+import {
+	Check,
+	ChevronsUpDown,
+	Factory,
+	Loader2,
+	Plus,
+	Save,
+} from "lucide-react";
 import { type ComponentPropsWithoutRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
+import { StackedDialog } from "@/components/dashboard/dialog-stack";
+import { NewSupplierForm } from "@/components/dashboard/suppliers/forms/new-supplier-form";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -40,6 +50,7 @@ import type { PartRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
 import {
 	PICKER_PAGE_SIZE,
+	useCatalogAbility,
 	useCreatePart,
 	useSuppliersPage,
 	useUpdatePart,
@@ -124,6 +135,8 @@ export function NewPartForm({
 	const updatePart = useUpdatePart();
 	const toastError = useApiErrorToast();
 	const saving = createPart.isPending || updatePart.isPending;
+	const canAddSupplier = useCatalogAbility().can(permissions.suppliers.create);
+	const [addingSupplier, setAddingSupplier] = useState(false);
 
 	// A part saved with a category outside the list keeps it as an option.
 	const categories: string[] =
@@ -278,71 +291,86 @@ export function NewPartForm({
 							return (
 								<FormItem className="col-span-full">
 									<FormLabel>{t("parts.form.supplierLabel")}</FormLabel>
-									<Popover>
-										<PopoverTrigger asChild>
-											<FormControl>
-												<Button
-													className={cn(
-														"w-full justify-between font-normal",
-														!selected && "text-muted-foreground"
-													)}
-													role="combobox"
-													type="button"
-													variant="outline"
-												>
-													{selected?.name ??
-														t("parts.form.supplierPlaceholder")}
-													<ChevronsUpDown className="size-4 opacity-50" />
-												</Button>
-											</FormControl>
-										</PopoverTrigger>
-										<PopoverContent
-											align="start"
-											className="w-(--radix-popover-trigger-width) p-0"
-										>
-											{/* The API searches; the list shows what it answers. */}
-											<Command shouldFilter={false}>
-												<CommandInput
-													onValueChange={supplierPicker.onSearchChange}
-													placeholder={t("parts.form.supplierSearch")}
-												/>
-												<CommandList>
-													<CommandEmpty>
-														{supplierPicker.loading
-															? t("dataTable.filters.loading")
-															: t("parts.form.supplierEmpty")}
-													</CommandEmpty>
-													<CommandGroup>
-														{suppliers.map((supplier) => (
-															<CommandItem
-																key={supplier.id}
-																onSelect={() => {
-																	supplierPicker.pick(supplier);
-																	field.onChange(supplier.id);
-																}}
-																value={supplier.name}
-															>
-																<Check
-																	className={cn(
-																		"size-4",
-																		field.value === supplier.id
-																			? "opacity-100"
-																			: "opacity-0"
-																	)}
-																/>
-																<span className="flex-1 truncate">
-																	{supplier.name}
-																</span>
-																<span className="text-muted-foreground text-xs tabular-nums">
-																	{formatCnpj(supplier.cnpj)}
-																</span>
-															</CommandItem>
-														))}
-													</CommandGroup>
-												</CommandList>
-											</Command>
-										</PopoverContent>
-									</Popover>
+									<div className="flex gap-2">
+										<Popover>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button
+														className={cn(
+															"min-w-0 flex-1 justify-between font-normal",
+															!selected && "text-muted-foreground"
+														)}
+														role="combobox"
+														type="button"
+														variant="outline"
+													>
+														{selected?.name ??
+															t("parts.form.supplierPlaceholder")}
+														<ChevronsUpDown className="size-4 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+											<PopoverContent
+												align="start"
+												className="w-(--radix-popover-trigger-width) p-0"
+											>
+												{/* The API searches; the list shows what it answers. */}
+												<Command shouldFilter={false}>
+													<CommandInput
+														onValueChange={supplierPicker.onSearchChange}
+														placeholder={t("parts.form.supplierSearch")}
+													/>
+													<CommandList>
+														<CommandEmpty>
+															{supplierPicker.loading
+																? t("dataTable.filters.loading")
+																: t("parts.form.supplierEmpty")}
+														</CommandEmpty>
+														<CommandGroup>
+															{suppliers.map((supplier) => (
+																<CommandItem
+																	key={supplier.id}
+																	onSelect={() => {
+																		supplierPicker.pick(supplier);
+																		field.onChange(supplier.id);
+																	}}
+																	value={supplier.name}
+																>
+																	<Check
+																		className={cn(
+																			"size-4",
+																			field.value === supplier.id
+																				? "opacity-100"
+																				: "opacity-0"
+																		)}
+																	/>
+																	<span className="flex-1 truncate">
+																		{supplier.name}
+																	</span>
+																	<span className="text-muted-foreground text-xs tabular-nums">
+																		{formatCnpj(supplier.cnpj)}
+																	</span>
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+										{canAddSupplier && (
+											<Button
+												className="shrink-0"
+												onClick={() => setAddingSupplier(true)}
+												type="button"
+												variant="outline"
+											>
+												<Plus />
+												<span className="max-sm:sr-only">
+													{t("parts.form.newSupplier")}
+												</span>
+											</Button>
+										)}
+									</div>
 									<FormDescription>
 										{t("parts.form.supplierDescription")}
 									</FormDescription>
@@ -456,6 +484,27 @@ export function NewPartForm({
 					</Button>
 				)}
 			</form>
+
+			{/* Outside the part's <form>: the supplier's submit never reaches it. */}
+			<StackedDialog
+				className="sm:max-w-2xl"
+				description={t("parts.form.newSupplierHint")}
+				icon={<Factory />}
+				onOpenChange={setAddingSupplier}
+				open={addingSupplier}
+				title={t("parts.form.newSupplier")}
+			>
+				<NewSupplierForm
+					onSuccess={(supplier) => {
+						supplierPicker.pick(supplier);
+						form.setValue("supplierId", supplier.id, {
+							shouldDirty: true,
+							shouldValidate: true,
+						});
+						setAddingSupplier(false);
+					}}
+				/>
+			</StackedDialog>
 		</Form>
 	);
 }

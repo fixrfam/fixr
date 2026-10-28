@@ -1,6 +1,11 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import {
 	type MakerListParams,
@@ -69,5 +74,17 @@ export function useMakers(query: string) {
 		queryFn: () => modelsApi.listMakers(subdomain, params),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60 * 1000,
+	});
+}
+
+/** Adds a company model; every list of models refreshes to show it. */
+export function useCreateModel() {
+	const subdomain = useSubdomain();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (values: Parameters<typeof modelsApi.create>[1]) =>
+			modelsApi.create(subdomain, values),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: modelKeys.all(subdomain) }),
 	});
 }

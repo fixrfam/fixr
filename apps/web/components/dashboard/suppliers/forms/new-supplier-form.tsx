@@ -30,14 +30,15 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import type { SupplierRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
 
 export function NewSupplierForm({
 	onSuccess,
 	className,
 	...props
-}: ComponentPropsWithoutRef<"form"> & {
-	onSuccess?: () => void;
+}: Omit<ComponentPropsWithoutRef<"form">, "onSubmit"> & {
+	onSuccess?: (supplier: SupplierRow) => void;
 }) {
 	const { t } = useTranslation();
 	const createSupplier = useCreateSupplier();
@@ -60,13 +61,13 @@ export function NewSupplierForm({
 
 	async function onSubmit(values: z.infer<typeof createSupplierSchema>) {
 		try {
-			await createSupplier.mutateAsync({
+			const supplier = await createSupplier.mutateAsync({
 				...values,
 				cnpj: unmask.cnpj(values.cnpj),
 				phone: unmask.phone(values.phone) ?? "",
 			});
 			toast.success({ text: t("suppliers.form.created") });
-			onSuccess?.();
+			onSuccess?.(supplier);
 		} catch (error) {
 			toastError(error);
 		}

@@ -160,12 +160,18 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		email: "novo@fixr.test",
 	},
 	"POST /companies/:subdomain/service-orders": {
-		clientId: createId(),
-		deviceBrandId: createId(),
-		deviceCategoryId: createId(),
-		deviceModel: "iPhone",
+		deviceId: createId(),
 		reportedDefect: "Tela",
 	},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId": {},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/status": {
+		status: "ready",
+	},
+	"POST /companies/:subdomain/devices": {
+		clientId: createId(),
+		modelId: createId(),
+	},
+	"PATCH /companies/:subdomain/devices/:deviceId": {},
 	"POST /companies/:subdomain/models": { name: "Model", makerId: "x" },
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },
@@ -181,6 +187,15 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	},
 	"PATCH /companies/:subdomain/clients/:clientId": {},
 	"PATCH /companies/:subdomain": {},
+	"POST /companies/:subdomain/service-orders/:serviceOrderId/photos": {
+		photos: [{ uploadId: "x" }],
+	},
+	"POST /companies/:subdomain/service-orders/:serviceOrderId/items": {
+		type: "part",
+		itemId: createId(),
+	},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/items/:itemId":
+		{},
 	"POST /companies/:subdomain/suppliers": {
 		name: "Fornecedor",
 		cnpj: "11222333000181",

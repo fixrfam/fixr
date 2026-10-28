@@ -7,6 +7,7 @@ const { repo, pagination } = vi.hoisted(() => ({
 		buildListFilter: vi.fn(() => "FILTER"),
 		buildOrder: vi.fn(() => "ORDER"),
 		queryPartIdsByServiceIds: vi.fn(),
+		queryPartPrices: vi.fn(async () => new Map()),
 		queryServiceById: vi.fn(),
 		queryPartIdsOfCompany: vi.fn(),
 		insertService: vi.fn(),
@@ -44,6 +45,7 @@ const service = {
 	id: createId(),
 	companyId,
 	name: "Troca de tela",
+	price: 150,
 	partIds: [partId],
 };
 const body = {
@@ -61,10 +63,56 @@ afterEach(() => {
 	vi.clearAllMocks();
 });
 
+describe("service pricing", () => {
+	it("adds the sale price of the linked parts to the labor price", async () => {
+		const otherPartId = createId();
+		repo.queryServiceById.mockResolvedValue({
+			...service,
+			price: 100.1,
+			partIds: [partId, otherPartId],
+		});
+		repo.queryPartPrices.mockResolvedValueOnce(
+			new Map([
+				[partId, 0.2],
+				[otherPartId, 49.9],
+			])
+		);
+		const reply = createFakeReply();
+
+		await ServicesService.getService({
+			userJwt,
+			subdomain: "fixr",
+			serviceId: service.id,
+			response: asReply(reply),
+		});
+
+		expect(repo.queryPartPrices).toHaveBeenCalledWith([partId, otherPartId]);
+		expect(reply.state.body).toMatchObject({
+			data: { price: 100.1, partsPrice: 50.1, totalPrice: 150.2 },
+		});
+	});
+
+	it("prices a service without parts at its labor price", async () => {
+		repo.queryServiceById.mockResolvedValue({ ...service, partIds: [] });
+		const reply = createFakeReply();
+
+		await ServicesService.getService({
+			userJwt,
+			subdomain: "fixr",
+			serviceId: service.id,
+			response: asReply(reply),
+		});
+
+		expect(reply.state.body).toMatchObject({
+			data: { partsPrice: 0, totalPrice: 150 },
+		});
+	});
+});
+
 describe("ServicesService.listServices", () => {
 	it("attaches the linked part ids to each record", async () => {
 		pagination.getPaginatedRecords.mockResolvedValue([
-			{ id: service.id, companyId, name: service.name },
+			{ id: service.id, companyId, name: service.name, price: 150 },
 		]);
 		pagination.getPaginatedCount.mockResolvedValue(1);
 		repo.queryPartIdsByServiceIds.mockResolvedValue(

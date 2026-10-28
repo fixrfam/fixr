@@ -25,6 +25,7 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError, z } from "zod";
 import { apiDescription } from "./core/docs/main";
+import { registerEffects } from "./core/events";
 import type { FastifyTypedInstance } from "./core/interfaces/fastify";
 import { AppError } from "./core/lib/app-error";
 import { bindJWT } from "./core/lib/jwt";
@@ -36,6 +37,7 @@ import { categoriesRoutes } from "./modules/categories/routes";
 import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
+import { devicesRoutes } from "./modules/devices/routes";
 import { employeesRoutes } from "./modules/employees/routes";
 import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
@@ -94,6 +96,11 @@ const OPENAPI_TAGS = [
 	{
 		name: "Clients",
 		description: "Manage the company's clients (customers).",
+	},
+	{
+		name: "Customer Devices",
+		description:
+			"The customers' devices: a catalog model owned by a customer, with where it is now.",
 	},
 	{
 		name: "Service Orders",
@@ -203,6 +210,7 @@ export async function buildApp(
 	const { logger = envToLogger.development, docs = true, onRoute } = options;
 
 	registerSchemas();
+	registerEffects();
 
 	const app = fastify({
 		logger,
@@ -274,6 +282,9 @@ export async function buildApp(
 	});
 	await app.register(clientsRoutes, {
 		prefix: "/companies/:subdomain/clients",
+	});
+	await app.register(devicesRoutes, {
+		prefix: "/companies/:subdomain/devices",
 	});
 	await app.register(serviceOrdersRoutes, {
 		prefix: "/companies/:subdomain/service-orders",

@@ -792,11 +792,11 @@ export function AppMockup() {
 			</Card>
 
 			<Card
-				description={t("serviceOrders.cards.partsDescription")}
+				description={t("serviceOrders.items.description")}
 				h={160}
 				icon={Package}
 				index={2}
-				title={t("serviceOrders.cards.partsTitle")}
+				title={t("serviceOrders.items.title")}
 				w={LEFT.w}
 				x={LEFT.x}
 				y={897}

@@ -1,339 +1,346 @@
 "use client";
 
-import { cpf, unmask } from "@fixr/constants/masks";
 import { useTranslation } from "@fixr/i18n/react";
-import { getDevices } from "@fixr/mock";
-import { createOrderServiceSchema } from "@fixr/schemas/service-orders";
+import { permissions } from "@fixr/permissions";
+import { createServiceOrderSchema } from "@fixr/schemas/service-orders";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMaskito } from "@maskito/react";
-import { useQuery } from "@tanstack/react-query";
-import { ImagePlus, Trash2, UserPlus } from "lucide-react";
-import { type ComponentPropsWithoutRef, useMemo, useState } from "react";
+import { toast } from "@pheralb/toast";
+import { Check, Loader2, Plus, UserPlus } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+	type ComponentPropsWithoutRef,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { CustomerForm } from "@/components/dashboard/customers/customer-form";
+import {
+	CustomerPicker,
+	type PickedCustomer,
+} from "@/components/dashboard/customers/customer-picker";
+import {
+	useCustomer,
+	useSubdomain,
+} from "@/components/dashboard/customers/store";
+import { DeviceFormDialog } from "@/components/dashboard/devices/device-form-dialog";
+import { DeviceStatusBadge } from "@/components/dashboard/devices/device-status-badge";
+import {
+	useCustomerDevices,
+	useDevice,
+} from "@/components/dashboard/devices/store";
+import { StackedDialog } from "@/components/dashboard/dialog-stack";
+import { ModelImage } from "@/components/dashboard/models/model-image";
+import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
+import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-
-interface DeviceOption {
-	id: string;
-	marca: string;
-	categoria: string;
-	modelo: string;
-}
-
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import type { DeviceRow } from "@/lib/services/devices";
+import { uploadServiceOrderPhoto } from "@/lib/services/service-orders";
 import { cn } from "@/lib/utils";
-import { NewClientForm } from "../clients/new-client-form";
+import { useCreateServiceOrder } from "./store";
+import { type GalleryPhoto, PhotoGallery } from "./widgets/photo-gallery";
 
-/** Developer-facing: this never reaches the screen, only the console. */
-const IMAGE_READ_ERROR = "Failed to read the image file";
+type Values = z.input<typeof createServiceOrderSchema>;
 
-function fileToDataUrl(file: File): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(String(reader.result));
-		reader.onerror = () => reject(new Error(IMAGE_READ_ERROR));
-		reader.readAsDataURL(file);
-	});
-}
-function getFilePreviewKey(file: File): string {
-	return `${file.name}-${file.size}-${file.lastModified}`;
+const MAX_PHOTOS = 20;
+
+interface LocalPhoto extends GalleryPhoto {
+	file: File;
 }
 
+/** Photos picked before the order exists, previewed from memory. */
+function useLocalPhotos() {
+	const [photos, setPhotos] = useState<LocalPhoto[]>([]);
+	const latest = useRef(photos);
+	latest.current = photos;
+
+	// The previews are object URLs: free them when the form goes away.
+	useEffect(
+		() => () => {
+			for (const photo of latest.current) {
+				URL.revokeObjectURL(photo.src);
+			}
+		},
+		[]
+	);
+
+	return {
+		photos,
+		add: (files: File[]) =>
+			setPhotos((current) => [
+				...current,
+				...files.slice(0, MAX_PHOTOS - current.length).map((file) => ({
+					id: crypto.randomUUID(),
+					src: URL.createObjectURL(file),
+					name: file.name,
+					file,
+				})),
+			]),
+		remove: (id: string) =>
+			setPhotos((current) => {
+				const photo = current.find((item) => item.id === id);
+				if (photo) {
+					URL.revokeObjectURL(photo.src);
+				}
+				return current.filter((item) => item.id !== id);
+			}),
+		clear: () =>
+			setPhotos((current) => {
+				for (const photo of current) {
+					URL.revokeObjectURL(photo.src);
+				}
+				return [];
+			}),
+	};
+}
+
+/** One of the customer's devices, as a card to pick. */
+function DeviceOption({
+	device,
+	selected,
+	onSelect,
+}: {
+	device: DeviceRow;
+	selected: boolean;
+	onSelect: () => void;
+}) {
+	return (
+		<button
+			aria-pressed={selected}
+			className={cn(
+				"relative flex items-center gap-3 rounded-xl border bg-card p-3 text-left transition-[border-color,background-color,box-shadow] active:scale-[0.99]",
+				"hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+				selected && "border-primary bg-primary/5 ring-1 ring-primary"
+			)}
+			onClick={onSelect}
+			type="button"
+		>
+			<ModelImage
+				alt={device.model.name}
+				category={device.category?.slug}
+				className="size-12 rounded-lg"
+				src={device.model.imageUrl}
+			/>
+			<div className="min-w-0 flex-1">
+				<p className="truncate font-medium text-sm">{device.model.name}</p>
+				<p className="truncate text-muted-foreground text-xs tabular-nums">
+					{[device.maker.name, device.imei ?? device.serialNumber]
+						.filter(Boolean)
+						.join(" · ")}
+				</p>
+				<DeviceStatusBadge className="mt-1.5" status={device.status} />
+			</div>
+			<span
+				className={cn(
+					"grid size-5 shrink-0 place-items-center self-start rounded-full border transition-colors",
+					selected
+						? "border-primary bg-primary text-white"
+						: "border-border bg-background"
+				)}
+			>
+				{selected && <Check className="size-3" />}
+			</span>
+		</button>
+	);
+}
+
+/**
+ * Opens a service order for one of a customer's devices. A customer or a
+ * device that isn't registered yet is added in a dialog over this one (for
+ * who can), and comes back picked. `?customerId=` or `?deviceId=` (from a
+ * customer or device page) fill the form in.
+ */
 export function NewServiceOrderForm({
 	className,
+	onCreated,
 	...props
-}: ComponentPropsWithoutRef<"form">) {
+}: Omit<ComponentPropsWithoutRef<"form">, "onSubmit"> & {
+	onCreated?: (id: string) => void;
+}) {
 	const { t } = useTranslation();
-	const form = useForm<z.infer<typeof createOrderServiceSchema>>({
-		resolver: zodResolver(createOrderServiceSchema),
-		defaultValues: {
-			customerCPF: "",
-			deviceIMEI: "",
-			description: "",
-			notes: "",
-			deviceId: "",
-			assigned_to: "",
-			images: [],
-		},
-		mode: "all",
+	const router = useRouter();
+	const subdomain = useSubdomain();
+	const searchParams = useSearchParams();
+	const ability = useCatalogAbility();
+	const createServiceOrder = useCreateServiceOrder();
+	const toastError = useApiErrorToast();
+	const photos = useLocalPhotos();
+
+	const presetDevice = useDevice(searchParams.get("deviceId"));
+	const presetCustomer = useCustomer(searchParams.get("customerId") ?? "");
+	const [customer, setCustomer] = useState<PickedCustomer | null>(null);
+	const [addingCustomer, setAddingCustomer] = useState(false);
+	const [addingDevice, setAddingDevice] = useState(false);
+	const [uploading, setUploading] = useState(false);
+	const { devices, loading: loadingDevices } = useCustomerDevices(customer?.id);
+	const canAddCustomer = ability.can(permissions.customers.create);
+	const canAddDevice = ability.can(permissions.devices.create);
+
+	const form = useForm<Values>({
+		resolver: zodResolver(createServiceOrderSchema),
+		defaultValues: { deviceId: "", reportedDefect: "", observations: "" },
+		mode: "onTouched",
 	});
 
-	const cpfMask = useMaskito({ options: { mask: cpf } });
-
-	const handleCustomerCreated = (cpf: string) => {
-		form.setValue("customerCPF", cpf);
-	};
-
-	const onSubmit = (values: z.infer<typeof createOrderServiceSchema>) => {
-		const formattedValues = {
-			...values,
-			customerCPF: unmask.cpf(values.customerCPF),
-		};
-
-		console.log("Ordem de serviço a ser criada:", formattedValues);
-	};
-
-	const [selectedMarca, setSelectedMarca] = useState("");
-	const [selectedCategoria, setSelectedCategoria] = useState("");
-
-	const { data: devices = [], isLoading: loadingDevices } = useQuery<
-		DeviceOption[]
-	>({
-		queryKey: ["devices"],
-		queryFn: getDevices,
-		//TODO: implementar fetch real para devices
-	});
-
-	const marcas = useMemo(() => {
-		return [...new Set(devices.map((device) => device.marca))];
-	}, [devices]);
-
-	const categorias = useMemo(() => {
-		if (!selectedMarca) {
-			return [];
+	// Fill in what the link that opened the form points to.
+	useEffect(() => {
+		const device = presetDevice.data;
+		if (device) {
+			setCustomer(device.client);
+			form.setValue("deviceId", device.id);
+		} else if (presetCustomer.data) {
+			setCustomer(presetCustomer.data);
 		}
-		return [
-			...new Set(
-				devices
-					.filter((device) => device.marca === selectedMarca)
-					.map((device) => device.categoria)
-			),
-		];
-	}, [devices, selectedMarca]);
+	}, [presetDevice.data, presetCustomer.data, form]);
 
-	const modelos = useMemo(() => {
-		if (!(selectedMarca && selectedCategoria)) {
-			return [];
+	function pickCustomer(picked: PickedCustomer) {
+		setCustomer(picked);
+		setAddingCustomer(false);
+		form.setValue("deviceId", "");
+	}
+
+	async function onSubmit(values: Values) {
+		try {
+			setUploading(photos.photos.length > 0);
+			const uploadIds = await Promise.all(
+				photos.photos.map((photo) => uploadServiceOrderPhoto(photo.file))
+			);
+			setUploading(false);
+			const created = await createServiceOrder.mutateAsync({
+				...values,
+				observations: values.observations?.trim() ? values.observations : null,
+				photos: uploadIds.map((uploadId) => ({ uploadId })),
+			});
+			toast.success({ text: t("serviceOrders.form.created") });
+			if (onCreated) {
+				onCreated(created.id);
+			} else {
+				router.push(`/dashboard/${subdomain}/service-orders/${created.id}`);
+			}
+		} catch (error) {
+			setUploading(false);
+			toastError(error);
 		}
+	}
 
-		return devices.filter(
-			(device) =>
-				device.marca === selectedMarca && device.categoria === selectedCategoria
-		);
-	}, [devices, selectedMarca, selectedCategoria]);
-
-	const modeloPlaceholder = useMemo(() => {
-		if (!(selectedMarca && selectedCategoria)) {
-			return t("serviceOrders.form.modelBlocked");
-		}
-
-		if (loadingDevices) {
-			return t("serviceOrders.form.modelLoading");
-		}
-
-		return t("serviceOrders.form.modelPlaceholder");
-	}, [selectedMarca, selectedCategoria, loadingDevices, t]);
-
-	const selectedImages = form.watch("images") ?? [];
-
-	const { data: previewUrlsByKey = {} } = useQuery<Record<string, string>>({
-		queryKey: ["image-previews", selectedImages.map(getFilePreviewKey)],
-		enabled: selectedImages.length > 0,
-		queryFn: () =>
-			Promise.all(
-				selectedImages.map(async (file) => {
-					const key = getFilePreviewKey(file);
-					const url = await fileToDataUrl(file);
-					return [key, url] as const;
-				})
-			).then((entries) => Object.fromEntries(entries)),
-		staleTime: Number.POSITIVE_INFINITY,
-	});
+	const saving = uploading || createServiceOrder.isPending;
 
 	return (
 		<Form {...form}>
 			<form
-				className={cn("space-y-4", className)}
+				className={cn("grid gap-6", className)}
 				onSubmit={form.handleSubmit(onSubmit)}
 				{...props}
 			>
-				<div className="flex grow gap-4">
-					<div className="flex grow flex-col gap-4">
-						<FormField
-							control={form.control}
-							name="customerCPF"
-							render={({ field }) => (
-								<FormItem className="grow">
-									<FormLabel>
-										{t("serviceOrders.form.clientDocumentLabel")}
-									</FormLabel>
-									<FormControl>
-										<Input
-											placeholder={t(
-												"serviceOrders.form.clientDocumentPlaceholder"
-											)}
-											{...field}
-											onInput={(e) =>
-												form.setValue("customerCPF", e.currentTarget.value)
-											}
-											ref={cpfMask}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</div>
-
-					<Sheet>
-						<SheetTrigger asChild className="mt-5.5">
-							<Button className="shrink-0" type="button">
-								{t("serviceOrders.form.newClient")}{" "}
-								<UserPlus className="size-4" />
-							</Button>
-						</SheetTrigger>
-						<SheetContent>
-							<SheetHeader>
-								<SheetTitle>
-									{t("serviceOrders.form.newClientTitle")}
-								</SheetTitle>
-								<SheetDescription>
-									{t("serviceOrders.form.newClientDescription")}
-								</SheetDescription>
-							</SheetHeader>
-							<NewClientForm
-								className="px-4"
-								onCustomerCreated={handleCustomerCreated}
+				<div className="grid gap-2">
+					<Label htmlFor="order-customer">
+						{t("serviceOrders.form.customerLabel")}
+					</Label>
+					<div className="flex gap-2">
+						<div className="min-w-0 flex-1">
+							<CustomerPicker
+								id="order-customer"
+								onChange={pickCustomer}
+								value={customer}
 							/>
-						</SheetContent>
-					</Sheet>
+						</div>
+						{canAddCustomer && (
+							<Button
+								className="shrink-0"
+								onClick={() => setAddingCustomer(true)}
+								type="button"
+								variant="outline"
+							>
+								<UserPlus />
+								<span className="max-sm:sr-only">
+									{t("serviceOrders.form.newCustomer")}
+								</span>
+							</Button>
+						)}
+					</div>
+					<p className="text-muted-foreground text-xs">
+						{t("serviceOrders.form.customerDescription")}
+					</p>
 				</div>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>{t("serviceOrders.form.issueLabel")}</FormLabel>
-							<FormControl>
-								<Textarea
-									autoCapitalize="off"
-									autoCorrect="off"
-									placeholder={t("serviceOrders.form.issuePlaceholder")}
-									spellCheck={false}
-									{...field}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormItem className="flex-grow">
-					<FormLabel>{t("serviceOrders.form.brandLabel")}</FormLabel>
-					<FormControl>
-						<Select
-							disabled={loadingDevices}
-							onValueChange={(value) => {
-								setSelectedMarca(value);
-								setSelectedCategoria("");
-								form.setValue("deviceId", "", { shouldValidate: true });
-							}}
-							value={selectedMarca}
-						>
-							<SelectTrigger className="w-full">
-								<SelectValue
-									placeholder={
-										loadingDevices
-											? t("serviceOrders.form.brandLoading")
-											: t("serviceOrders.form.brandPlaceholder")
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{marcas.map((marca) => (
-									<SelectItem key={marca} value={marca}>
-										{marca}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</FormControl>
-					<FormMessage />
-				</FormItem>
-
-				<FormItem className="flex-grow">
-					<FormLabel>{t("serviceOrders.form.categoryLabel")}</FormLabel>
-					<FormControl>
-						<Select
-							disabled={!selectedMarca || loadingDevices}
-							onValueChange={(value) => {
-								setSelectedCategoria(value);
-								form.setValue("deviceId", "", { shouldValidate: true });
-							}}
-							value={selectedCategoria}
-						>
-							<SelectTrigger className="w-full">
-								<SelectValue
-									placeholder={
-										loadingDevices
-											? t("serviceOrders.form.categoryLoading")
-											: t("serviceOrders.form.categoryPlaceholder")
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{categorias.map((categoria) => (
-									<SelectItem key={categoria} value={categoria}>
-										{categoria}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</FormControl>
-					<FormMessage />
-				</FormItem>
 
 				<FormField
 					control={form.control}
 					name="deviceId"
 					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>{t("serviceOrders.form.modelLabel")}</FormLabel>
-							<FormControl>
-								<Select
-									disabled={
-										!(selectedMarca && selectedCategoria) || loadingDevices
-									}
-									onValueChange={field.onChange}
-									value={field.value ?? ""}
+						<FormItem className="gap-2">
+							<div className="flex h-8 items-center justify-between gap-2">
+								<FormLabel>{t("serviceOrders.form.deviceLabel")}</FormLabel>
+								{canAddDevice && customer && devices.length > 0 && (
+									<Button
+										onClick={() => setAddingDevice(true)}
+										size="sm"
+										type="button"
+										variant="ghost"
+									>
+										<Plus />
+										{t("serviceOrders.form.newDevice")}
+									</Button>
+								)}
+							</div>
+							<FormDescription className="-mt-1 text-xs">
+								{t("serviceOrders.form.deviceDescription")}
+							</FormDescription>
+							{!customer && (
+								<p className="grid min-h-20 place-items-center rounded-xl border border-dashed px-4 text-center text-muted-foreground text-sm">
+									{t("serviceOrders.form.deviceBlocked")}
+								</p>
+							)}
+							{customer && loadingDevices && devices.length === 0 && (
+								<div className="grid gap-2 sm:grid-cols-2">
+									<Skeleton className="h-[4.75rem] rounded-xl" />
+									<Skeleton className="h-[4.75rem] rounded-xl" />
+								</div>
+							)}
+							{customer && !loadingDevices && devices.length === 0 && (
+								<div className="flex min-h-20 flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-4 text-center sm:flex-row sm:justify-between sm:text-left">
+									<p className="text-muted-foreground text-sm">
+										{t("serviceOrders.form.deviceEmpty")}
+									</p>
+									{canAddDevice && (
+										<Button
+											onClick={() => setAddingDevice(true)}
+											type="button"
+											variant="outline"
+										>
+											<Plus />
+											{t("serviceOrders.form.newDevice")}
+										</Button>
+									)}
+								</div>
+							)}
+							{devices.length > 0 && (
+								<fieldset
+									aria-label={t("serviceOrders.form.deviceSection")}
+									className="m-0 grid max-h-[17rem] min-w-0 gap-2 overflow-y-auto border-0 p-0.5 sm:grid-cols-2"
 								>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder={modeloPlaceholder} />
-									</SelectTrigger>
-									<SelectContent>
-										{modelos.map((modelo) => (
-											<SelectItem key={modelo.id} value={modelo.id}>
-												{modelo.modelo}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</FormControl>
+									{devices.map((device) => (
+										<DeviceOption
+											device={device}
+											key={device.id}
+											onSelect={() => field.onChange(device.id)}
+											selected={field.value === device.id}
+										/>
+									))}
+								</fieldset>
+							)}
 							<FormMessage />
 						</FormItem>
 					)}
@@ -341,16 +348,20 @@ export function NewServiceOrderForm({
 
 				<FormField
 					control={form.control}
-					name="deviceIMEI"
+					name="reportedDefect"
 					render={({ field }) => (
-						<FormItem className="flex-grow">
-							<FormLabel>{t("serviceOrders.form.imeiLabel")}</FormLabel>
+						<FormItem className="gap-2">
+							<FormLabel>{t("serviceOrders.form.issueLabel")}</FormLabel>
 							<FormControl>
-								<Input
-									placeholder={t("serviceOrders.form.imeiPlaceholder")}
+								<Textarea
+									className="min-h-24"
+									placeholder={t("serviceOrders.form.issuePlaceholder")}
 									{...field}
 								/>
 							</FormControl>
+							<FormDescription className="text-xs">
+								{t("serviceOrders.form.issueDescription")}
+							</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -358,115 +369,69 @@ export function NewServiceOrderForm({
 
 				<FormField
 					control={form.control}
-					name="notes"
+					name="observations"
 					render={({ field }) => (
-						<FormItem className="flex-grow">
+						<FormItem className="gap-2">
 							<FormLabel>{t("serviceOrders.form.notesLabel")}</FormLabel>
 							<FormControl>
 								<Textarea
-									autoCapitalize="off"
-									autoCorrect="off"
 									placeholder={t("serviceOrders.form.notesPlaceholder")}
-									spellCheck={false}
 									{...field}
+									value={field.value ?? ""}
 								/>
 							</FormControl>
+							<FormDescription className="text-xs">
+								{t("serviceOrders.form.notesDescription")}
+							</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
 
-				<FormField
-					control={form.control}
-					name="images"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>{t("serviceOrders.form.imagesLabel")}</FormLabel>
-							<FormControl>
-								<div className="space-y-3">
-									<input
-										accept="image/*"
-										className="hidden"
-										id="images-upload"
-										multiple
-										onChange={(e) => {
-											const files = Array.from(e.target.files ?? []);
-											field.onChange(files);
-										}}
-										type="file"
-									/>
-
-									<label
-										className="flex h-9 w-full cursor-pointer items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-muted-foreground text-sm hover:bg-accent hover:text-foreground"
-										htmlFor="images-upload"
-									>
-										<span>
-											{selectedImages.length > 0
-												? t("serviceOrders.form.imagesSelected", {
-														count: selectedImages.length,
-													})
-												: t("serviceOrders.form.imagesPlaceholder")}
-										</span>
-										<ImagePlus className="h-4 w-4" />
-									</label>
-
-									{selectedImages.length > 0 ? (
-										<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-											{selectedImages.map((file) => {
-												const fileKey = getFilePreviewKey(file);
-												const url = previewUrlsByKey[fileKey];
-
-												if (!url) {
-													return null;
-												}
-
-												return (
-													<div
-														className="relative aspect-square overflow-hidden rounded-md border"
-														key={fileKey}
-													>
-														<img
-															alt={file.name}
-															className="h-full w-full object-cover"
-															height={320}
-															src={url}
-															width={320}
-														/>
-
-														<button
-															aria-label={t("serviceOrders.form.imageRemove", {
-																name: file.name,
-															})}
-															className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
-															onClick={() => {
-																const nextFiles = selectedImages.filter(
-																	(currentFile) =>
-																		getFilePreviewKey(currentFile) !== fileKey
-																);
-																field.onChange(nextFiles);
-															}}
-															type="button"
-														>
-															<Trash2 className="h-4 w-4" />
-														</button>
-													</div>
-												);
-											})}
-										</div>
-									) : null}
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="pt-4">
-					<Button className="w-full" type="submit">
-						{t("serviceOrders.form.submit")}
-					</Button>
+				<div className="grid gap-2">
+					<div className="grid gap-1">
+						<Label>{t("serviceOrders.form.imagesLabel")}</Label>
+						<p className="text-muted-foreground text-xs">
+							{t("serviceOrders.form.imagesDescription")}
+						</p>
+					</div>
+					<PhotoGallery
+						max={MAX_PHOTOS}
+						onAdd={photos.add}
+						onRemove={photos.remove}
+						onRemoveAll={photos.clear}
+						photos={photos.photos}
+					/>
 				</div>
+
+				<Button className="w-full" disabled={saving} size="lg" type="submit">
+					{t("serviceOrders.form.submit")}
+					{saving && <Loader2 className="animate-spin" />}
+				</Button>
 			</form>
+
+			{/* Outside the order's <form>: their own submits never reach it. */}
+			<StackedDialog
+				className="sm:max-w-2xl"
+				description={t("serviceOrders.form.newCustomerHint")}
+				icon={<UserPlus />}
+				onOpenChange={setAddingCustomer}
+				open={addingCustomer}
+				title={t("serviceOrders.form.newCustomer")}
+			>
+				<CustomerForm cols={2} onSaved={(saved) => pickCustomer(saved)} />
+			</StackedDialog>
+			{customer && (
+				<DeviceFormDialog
+					compact
+					customer={customer}
+					onOpenChange={setAddingDevice}
+					onSaved={(device) =>
+						form.setValue("deviceId", device.id, { shouldValidate: true })
+					}
+					open={addingDevice}
+				/>
+			)}
 		</Form>
 	);
 }

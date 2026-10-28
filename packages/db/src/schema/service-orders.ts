@@ -1,20 +1,21 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+	int,
 	mysqlEnum,
 	mysqlTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	varchar,
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { clients } from "./clients";
 import { companies } from "./companies";
+import { devices } from "./devices";
 import { employees } from "./employees";
-import { modelCategories } from "./model-categories";
-import { modelMakers } from "./model-makers";
 
-export const serviceOrderStatusEnum = mysqlEnum("status", [
+export const serviceOrderStatusValues = [
 	"pending",
 	"diagnosing",
 	"waiting_approval",
@@ -22,38 +23,53 @@ export const serviceOrderStatusEnum = mysqlEnum("status", [
 	"fixing",
 	"ready",
 	"delivered",
-]);
+] as const;
 
-export const serviceOrders = mysqlTable("service_orders", {
-	id: varchar("id", { length: 25 })
-		.$defaultFn(() => createId())
-		.primaryKey(),
-	companyId: varchar("company_id", { length: 25 })
-		.references(() => companies.id, { onDelete: "cascade" })
-		.notNull(),
-	clientId: varchar("client_id", { length: 25 })
-		.references(() => clients.id, { onDelete: "restrict" })
-		.notNull(),
-	employeeId: varchar("employee_id", { length: 25 })
-		.references(() => employees.id, { onDelete: "restrict" })
-		.notNull(),
-	deviceMakerId: varchar("device_brand_id", { length: 25 })
-		.references(() => modelMakers.id, { onDelete: "restrict" })
-		.notNull(),
-	deviceCategoryId: varchar("device_category_id", { length: 25 })
-		.references(() => modelCategories.id, { onDelete: "restrict" })
-		.notNull(),
-	deviceModel: varchar("device_model", { length: 100 }).notNull(),
-	imei: varchar("imei", { length: 50 }),
-	reportedDefect: text("reported_defect").notNull(),
-	observations: text("observations"),
-	status: serviceOrderStatusEnum.default("pending").notNull(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.defaultNow()
-		.notNull()
-		.$onUpdate(() => new Date()),
-});
+export const serviceOrderStatusEnum = mysqlEnum(
+	"status",
+	serviceOrderStatusValues
+);
+
+export const serviceOrders = mysqlTable(
+	"service_orders",
+	{
+		id: varchar("id", { length: 25 })
+			.$defaultFn(() => createId())
+			.primaryKey(),
+		companyId: varchar("company_id", { length: 25 })
+			.references(() => companies.id, { onDelete: "cascade" })
+			.notNull(),
+		/**
+		 * Sequential per company (1, 2, 3...), shown as `<SUBDOMAIN>-<number>`
+		 * (e.g. `ACME-12`) so people can say and search it.
+		 */
+		number: int("number").notNull(),
+		clientId: varchar("client_id", { length: 25 })
+			.references(() => clients.id, { onDelete: "restrict" })
+			.notNull(),
+		employeeId: varchar("employee_id", { length: 25 })
+			.references(() => employees.id, { onDelete: "restrict" })
+			.notNull(),
+		/** The customer's device being repaired (its model, IMEI and status live there). */
+		deviceId: varchar("device_id", { length: 25 })
+			.references(() => devices.id, { onDelete: "restrict" })
+			.notNull(),
+		reportedDefect: text("reported_defect").notNull(),
+		observations: text("observations"),
+		status: serviceOrderStatusEnum.default("pending").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.notNull()
+			.$onUpdate(() => new Date()),
+	},
+	(table) => [
+		uniqueIndex("service_orders_company_number_idx").on(
+			table.companyId,
+			table.number
+		),
+	]
+);
 
 export const serviceOrderSelectSchema = createSelectSchema(serviceOrders, {
 	createdAt: z.coerce.date(),
