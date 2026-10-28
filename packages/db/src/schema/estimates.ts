@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+	type AnyMySqlColumn,
 	int,
 	mysqlEnum,
 	mysqlTable,
@@ -86,6 +87,11 @@ export const estimateItems = mysqlTable("estimate_items", {
 	serviceId: varchar("service_id", { length: 25 }).references(
 		() => services.id,
 		{ onDelete: "set null" }
+	),
+	/** The service line a part belongs to, as on the service order. */
+	parentItemId: varchar("parent_item_id", { length: 25 }).references(
+		(): AnyMySqlColumn => estimateItems.id,
+		{ onDelete: "cascade" }
 	),
 	name: varchar("name", { length: 120 }).notNull(),
 	quantity: int("quantity").notNull(),

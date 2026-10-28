@@ -231,34 +231,48 @@ function ItemsTable({
 					{t("estimates.pdf.headers.total")}
 				</Text>
 			</View>
-			{data.items.map((item, index) => (
-				<View
-					key={`${index}-${item.name}`}
-					style={{
-						flexDirection: "row",
-						backgroundColor: index % 2 === 0 ? "transparent" : colors.stripe,
-						padding: 10,
-						gap: 17.5,
-						fontSize: 8.5,
-						alignItems: "center",
-					}}
-					wrap={false}
-				>
-					<Text style={{ flex: 3 }}>{item.name}</Text>
-					<Text style={{ flex: 0.75 }}>
-						{item.type === "part"
-							? t("estimates.pdf.part")
-							: t("estimates.pdf.service")}
-					</Text>
-					<Text style={{ flex: 1, textAlign: "right" }}>
-						{format.currency(item.unitPrice)}
-					</Text>
-					<Text style={{ flex: 0.5, textAlign: "right" }}>{item.quantity}</Text>
-					<Text style={{ flex: 1, textAlign: "right", fontWeight: 600 }}>
-						{format.currency(item.total)}
-					</Text>
-				</View>
-			))}
+			{data.items.map((item, index) => {
+				const nested = Boolean(item.parentItemId);
+				// The parts of a service share its stripe, so they read as one block.
+				const group = data.items
+					.slice(0, index + 1)
+					.filter((line) => !line.parentItemId).length;
+
+				return (
+					<View
+						key={`${index}-${item.name}`}
+						style={{
+							flexDirection: "row",
+							backgroundColor: group % 2 === 1 ? "transparent" : colors.stripe,
+							padding: 10,
+							paddingTop: nested ? 2 : 10,
+							gap: 17.5,
+							fontSize: nested ? 7.5 : 8.5,
+							...(nested ? { color: colors.muted } : {}),
+							alignItems: "center",
+						}}
+						wrap={false}
+					>
+						<Text style={{ flex: 3, paddingLeft: nested ? 12 : 0 }}>
+							{item.name}
+						</Text>
+						<Text style={{ flex: 0.75 }}>
+							{item.type === "part"
+								? t("estimates.pdf.part")
+								: t("estimates.pdf.service")}
+						</Text>
+						<Text style={{ flex: 1, textAlign: "right" }}>
+							{format.currency(item.unitPrice)}
+						</Text>
+						<Text style={{ flex: 0.5, textAlign: "right" }}>
+							{item.quantity}
+						</Text>
+						<Text style={{ flex: 1, textAlign: "right", fontWeight: 600 }}>
+							{format.currency(item.total)}
+						</Text>
+					</View>
+				);
+			})}
 		</View>
 	);
 }

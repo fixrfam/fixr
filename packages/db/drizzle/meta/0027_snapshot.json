@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "64f395a7-9f64-4434-a554-f005c4b9f5d9",
+  "id": "0247c390-43cc-4e9c-8177-fd5f826f6f4c",
   "prevId": "b9c7e924-5d38-4ed0-9bfd-2f71e089cc88",
   "tables": {
     "api_keys": {
@@ -679,6 +679,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "parent_item_id": {
+          "name": "parent_item_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(120)",
@@ -736,6 +743,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "estimate_items_parent_item_id_estimate_items_id_fk": {
+          "name": "estimate_items_parent_item_id_estimate_items_id_fk",
+          "tableFrom": "estimate_items",
+          "tableTo": "estimate_items",
+          "columnsFrom": ["parent_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

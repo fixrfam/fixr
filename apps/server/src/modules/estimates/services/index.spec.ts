@@ -123,6 +123,8 @@ describe("EstimatesService.createEstimate", () => {
 			}),
 			[
 				{
+					id: expect.any(String),
+					parentItemId: null,
 					type: "part",
 					partId: null,
 					serviceId: null,
@@ -132,6 +134,45 @@ describe("EstimatesService.createEstimate", () => {
 				},
 			]
 		);
+	});
+
+	it("keeps the parts a service uses under it, right after the service", async () => {
+		const serviceLine = {
+			...item,
+			id: createId(),
+			type: "service" as const,
+			name: "Troca de tela",
+			quantity: 1,
+			unitPrice: 150,
+			parentItemId: null,
+		};
+		// Added before the service, then moved under it.
+		const screen = { ...item, parentItemId: serviceLine.id };
+		const cable = {
+			...item,
+			id: createId(),
+			name: "Cabo",
+			parentItemId: null,
+		};
+		repo.queryServiceOrderOfCompany.mockResolvedValue({
+			id: serviceOrderId,
+			clientId: estimate.clientId,
+		});
+		repo.queryServiceOrderItems.mockResolvedValue([screen, serviceLine, cable]);
+		repo.createWithItems.mockResolvedValue(estimateId);
+
+		await create();
+
+		const [, copied] = repo.createWithItems.mock.calls[0]!;
+		expect(copied.map((line: { name: string }) => line.name)).toEqual([
+			"Troca de tela",
+			"Tela",
+			"Cabo",
+		]);
+		expect(copied[1].parentItemId).toBe(copied[0].id);
+		expect(copied[0].id).not.toBe(serviceLine.id);
+		expect(copied[0].parentItemId).toBeNull();
+		expect(copied[2].parentItemId).toBeNull();
 	});
 
 	it("refuses an order of another company", async () => {
