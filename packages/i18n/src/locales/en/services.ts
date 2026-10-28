@@ -15,6 +15,7 @@ export const services = {
 		create: "New service",
 		noCategory: "No category",
 		noParts: "No parts",
+		priceBreakdown: "{{labor}} labor + {{parts}} parts",
 		editLabel: "Edit {{name}}",
 		headers: {
 			name: "Name",
@@ -35,7 +36,11 @@ export const services = {
 		deviceCategoriesDescription:
 			"The kinds of device this service is performed on.",
 		durationLabel: "Estimated duration (minutes)",
-		priceLabel: "Price (R$)",
+		priceLabel: "Labor price (R$)",
+		priceDescription:
+			"What you charge for the work. The parts are added on top.",
+		totalHint:
+			"Charged on an order: {{labor}} labor + {{parts}} parts = {{total}}",
 		partsLabel: "Linked parts",
 		partsPlaceholder: "Pick the parts used in the service",
 		partsSelected_one: "{{count}} part selected",
@@ -60,6 +65,8 @@ export const services = {
 	details: {
 		duration: "Estimated duration",
 		price: "Price",
+		laborPrice: "Labor",
+		partsPrice: "Parts",
 		deviceCategories: "Device categories",
 		testInstructions: "What to test after the repair",
 		testParameters: "Test parameters",

@@ -47,6 +47,9 @@ export const parts = {
 		supplierSearch: "Search by name or CNPJ...",
 		supplierEmpty: "No suppliers found.",
 		supplierDescription: "Where you buy this part.",
+		newSupplier: "New supplier",
+		newSupplierHint:
+			"Register the supplier; it is picked for this part when saved.",
 		costPriceLabel: "Cost price (R$)",
 		costPriceDescription: "What you pay the supplier per unit.",
 		salePriceLabel: "Sale price (R$)",

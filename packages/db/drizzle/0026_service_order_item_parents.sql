@@ -1,0 +1,2 @@
+ALTER TABLE `service_order_items` ADD `parent_item_id` varchar(25);--> statement-breakpoint
+ALTER TABLE `service_order_items` ADD CONSTRAINT `service_order_items_parent_item_id_service_order_items_id_fk` FOREIGN KEY (`parent_item_id`) REFERENCES `service_order_items`(`id`) ON DELETE cascade ON UPDATE no action;

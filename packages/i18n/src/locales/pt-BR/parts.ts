@@ -50,6 +50,9 @@ export const parts: Translated<typeof source> = {
 		supplierSearch: "Busque por nome ou CNPJ...",
 		supplierEmpty: "Nenhum fornecedor encontrado.",
 		supplierDescription: "De quem você compra esta peça.",
+		newSupplier: "Novo fornecedor",
+		newSupplierHint:
+			"Cadastre o fornecedor; ele é escolhido para esta peça ao salvar.",
 		costPriceLabel: "Preço de custo (R$)",
 		costPriceDescription: "Quanto você paga ao fornecedor por unidade.",
 		salePriceLabel: "Preço de venda (R$)",
