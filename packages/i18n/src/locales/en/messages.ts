@@ -46,11 +46,11 @@ export const messages = {
 		send_estimate_success: {
 			title: "Estimate sent",
 			description:
-				"The client will get an email with the PDF and the approval link.",
+				"The customer will get an email with the PDF and the approval link.",
 		},
 		estimate_no_recipient: {
 			title: "No email to send to",
-			description: "The client has no email. Enter one to send the estimate.",
+			description: "The customer has no email. Enter one to send the estimate.",
 		},
 		estimate_expired: {
 			title: "Estimate expired",
@@ -87,25 +87,25 @@ export const messages = {
 		},
 		send_portal_access_success: {
 			title: "Access sent",
-			description: "The client will get an email with the portal link.",
+			description: "The customer will get an email with the portal link.",
 		},
-		portal_client_no_email: {
+		portal_customer_no_email: {
 			title: "No email",
-			description: "Add the client's email before sending portal access.",
+			description: "Add the customer's email before sending portal access.",
 		},
 		estimate_not_found: {
 			title: "Estimate not found",
 			description: "This estimate does not exist or was removed.",
 		},
-		client_not_found: {
+		customer_not_found: {
 			title: "Customer not found",
 			description: "This customer does not exist or was removed.",
 		},
-		client_cpf_conflict: {
+		customer_cpf_conflict: {
 			title: "CPF already registered",
 			description: "Another customer of the shop already has this CPF.",
 		},
-		client_phone_invalid: {
+		customer_phone_invalid: {
 			title: "Invalid phone",
 			description: "Phone numbers must have 10 or 11 digits.",
 		},
@@ -113,7 +113,7 @@ export const messages = {
 			title: "Device not found",
 			description: "This device does not exist or was removed.",
 		},
-		device_client_not_found: {
+		device_customer_not_found: {
 			title: "Customer not found",
 			description: "Pick one of the shop's customers.",
 		},
@@ -327,7 +327,7 @@ export const messages = {
 		gacc_user_not_found: {
 			title: "Could not access your account",
 			description:
-				"The email linked to your Google account is not registered as an employee or client of any company.",
+				"The email linked to your Google account is not registered as an employee or customer of any company.",
 		},
 		gacc_email_not_verified: {
 			title: "Email not verified",

@@ -211,6 +211,13 @@
       "when": 1793153004618,
       "tag": "0029_client_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1793153729061,
+      "tag": "0030_customers",
+      "breakpoints": true
     }
   ]
 }

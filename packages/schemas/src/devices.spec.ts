@@ -10,7 +10,7 @@ import {
 } from "./devices";
 import { issuePaths } from "./test-utils";
 
-const validDevice = () => ({ clientId: createId(), modelId: createId() });
+const validDevice = () => ({ customerId: createId(), modelId: createId() });
 
 describe("deviceStatuses", () => {
 	it("lists where a device can be", () => {
@@ -29,7 +29,7 @@ describe("createDeviceSchema", () => {
 		).toBe("35693803");
 	});
 
-	it.each(["clientId", "modelId"])("requires %s", (field) => {
+	it.each(["customerId", "modelId"])("requires %s", (field) => {
 		const input: Record<string, unknown> = validDevice();
 		delete input[field];
 
@@ -59,17 +59,17 @@ describe("createDeviceSchema", () => {
 describe("patchDeviceSchema", () => {
 	it("never changes the owner", () => {
 		expect(
-			patchDeviceSchema.parse({ clientId: createId(), status: "in_shop" })
+			patchDeviceSchema.parse({ customerId: createId(), status: "in_shop" })
 		).toEqual({ status: "in_shop" });
 	});
 });
 
 describe("getDevicesQuerySchema and deviceIdParamsSchema", () => {
 	it("parses filters and the page", () => {
-		const clientId = createId();
+		const customerId = createId();
 		expect(
-			getDevicesQuerySchema.parse({ page: "2", clientId, status: "in_shop" })
-		).toMatchObject({ page: 2, clientId, status: "in_shop" });
+			getDevicesQuerySchema.parse({ page: "2", customerId, status: "in_shop" })
+		).toMatchObject({ page: 2, customerId, status: "in_shop" });
 		expect(
 			issuePaths(getDevicesQuerySchema, { page: 1, sort: "name" })
 		).toEqual(["sort"]);

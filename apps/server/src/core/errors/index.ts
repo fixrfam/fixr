@@ -2,9 +2,9 @@ import { accountErrors } from "../../modules/account/errors";
 import { apiKeysErrors } from "../../modules/api-keys/errors";
 import { authErrors } from "../../modules/auth/errors";
 import { categoriesErrors } from "../../modules/categories/errors";
-import { clientsErrors } from "../../modules/clients/errors";
 import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
+import { customersErrors } from "../../modules/customers/errors";
 import { devicesErrors } from "../../modules/devices/errors";
 import { employeesErrors } from "../../modules/employees/errors";
 import { estimatesErrors } from "../../modules/estimates/errors";
@@ -30,7 +30,7 @@ export const errors = defineErrors({
 	...categoriesErrors,
 	...makersErrors,
 	...modelsErrors,
-	...clientsErrors,
+	...customersErrors,
 	...devicesErrors,
 	...serviceOrdersErrors,
 	...partsErrors,

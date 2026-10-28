@@ -28,7 +28,7 @@ async function setup() {
 	]);
 	const serviceOrder = await makeServiceOrder({
 		companyId: company.id,
-		clientId: customer.id,
+		customerId: customer.id,
 		employeeId: employee.id,
 		deviceMakerId: maker.id,
 		deviceCategoryId: category.id,

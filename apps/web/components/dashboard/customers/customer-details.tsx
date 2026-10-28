@@ -86,7 +86,7 @@ export function CustomerDetails({ id }: { id: string }) {
 			<div className="space-y-4">
 				<BackButton className="-translate-x-3" />
 				<p className="text-muted-foreground text-sm">
-					{t("clients.detail.notFound")}
+					{t("customers.detail.notFound")}
 				</p>
 			</div>
 		);
@@ -95,7 +95,7 @@ export function CustomerDetails({ id }: { id: string }) {
 	async function remove() {
 		try {
 			await deleteCustomer.mutateAsync(id);
-			toast.success({ text: t("clients.detail.deleted") });
+			toast.success({ text: t("customers.detail.deleted") });
 			router.push(`/dashboard/${subdomain}/customers`);
 		} catch (error) {
 			toastError(error);
@@ -111,7 +111,7 @@ export function CustomerDetails({ id }: { id: string }) {
 				<div className="flex items-center gap-4">
 					<CustomerAvatar className="size-12" customer={customer} />
 					<Heading
-						description={t("clients.detail.description")}
+						description={t("customers.detail.description")}
 						title={customer.name}
 					/>
 				</div>
@@ -130,13 +130,13 @@ export function CustomerDetails({ id }: { id: string }) {
 					{ability.can(permissions.customers.update) && (
 						<Button onClick={() => setEditing(true)} variant="outline">
 							<Pencil className="size-3.5" />
-							{t("clients.detail.edit")}
+							{t("customers.detail.edit")}
 						</Button>
 					)}
 					{ability.can(permissions.customers.delete) && (
 						<Button onClick={() => setConfirmDelete(true)} variant="ghost">
 							<Trash2 className="size-3.5" />
-							{t("clients.detail.delete")}
+							{t("customers.detail.delete")}
 						</Button>
 					)}
 				</div>
@@ -144,31 +144,31 @@ export function CustomerDetails({ id }: { id: string }) {
 
 			<div className="grid gap-4 lg:grid-cols-3">
 				<ServiceOrderDetailsCard
-					description={t("clients.detail.dataDescription")}
+					description={t("customers.detail.dataDescription")}
 					icon={FileUser}
-					title={t("clients.detail.dataTitle")}
+					title={t("customers.detail.dataTitle")}
 				>
 					<ServiceOrderKeyValueList>
 						<ServiceOrderKeyValueItem
-							label={t("clients.form.documentLabel")}
+							label={t("customers.form.documentLabel")}
 							value={formatCpf(customer.cpf)}
 						/>
 						<ServiceOrderKeyValueItem
-							label={t("clients.form.phoneLabel")}
+							label={t("customers.form.phoneLabel")}
 							value={formatPhone(customer.phone)}
 						/>
 						{customer.alternativePhone && (
 							<ServiceOrderKeyValueItem
-								label={t("clients.form.alternativePhoneLabel")}
+								label={t("customers.form.alternativePhoneLabel")}
 								value={formatPhone(customer.alternativePhone)}
 							/>
 						)}
 						<ServiceOrderKeyValueItem
-							label={t("clients.form.emailLabel")}
+							label={t("customers.form.emailLabel")}
 							value={customer.email}
 						/>
 						<ServiceOrderKeyValueItem
-							label={t("clients.form.addressLabel")}
+							label={t("customers.form.addressLabel")}
 							stacked
 							value={[customer.address, customer.city, customer.state]
 								.filter(Boolean)
@@ -178,9 +178,9 @@ export function CustomerDetails({ id }: { id: string }) {
 				</ServiceOrderDetailsCard>
 
 				<ServiceOrderDetailsCard
-					description={t("clients.detail.devicesDescription")}
+					description={t("customers.detail.devicesDescription")}
 					icon={Smartphone}
-					title={t("clients.detail.devicesTitle")}
+					title={t("customers.detail.devicesTitle")}
 				>
 					<div className="space-y-3">
 						<CustomerDevicesList
@@ -197,20 +197,20 @@ export function CustomerDetails({ id }: { id: string }) {
 								variant="outline"
 							>
 								<Plus className="size-3.5" />
-								{t("clients.detail.addDevice")}
+								{t("customers.detail.addDevice")}
 							</Button>
 						)}
 					</div>
 				</ServiceOrderDetailsCard>
 
 				<ServiceOrderDetailsCard
-					description={t("clients.detail.ordersDescription")}
+					description={t("customers.detail.ordersDescription")}
 					icon={ClipboardList}
-					title={t("clients.detail.ordersTitle")}
+					title={t("customers.detail.ordersTitle")}
 				>
 					{customer.serviceOrders.length === 0 ? (
 						<p className="text-2xs text-muted-foreground">
-							{t("clients.detail.noOrders")}
+							{t("customers.detail.noOrders")}
 						</p>
 					) : (
 						<ul className="divide-y">
@@ -246,9 +246,9 @@ export function CustomerDetails({ id }: { id: string }) {
 			<Sheet onOpenChange={setEditing} open={editing}>
 				<SheetContent className="overflow-y-auto">
 					<SheetHeader>
-						<SheetTitle>{t("clients.detail.editTitle")}</SheetTitle>
+						<SheetTitle>{t("customers.detail.editTitle")}</SheetTitle>
 						<SheetDescription>
-							{t("clients.detail.editDescription")}
+							{t("customers.detail.editDescription")}
 						</SheetDescription>
 					</SheetHeader>
 					<CustomerForm
@@ -263,15 +263,15 @@ export function CustomerDetails({ id }: { id: string }) {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{t("clients.detail.deleteTitle")}
+							{t("customers.detail.deleteTitle")}
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							{t("clients.detail.deleteDescription")}
+							{t("customers.detail.deleteDescription")}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>
-							{t("clients.detail.deleteCancel")}
+							{t("customers.detail.deleteCancel")}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							disabled={deleteCustomer.isPending}
@@ -280,7 +280,7 @@ export function CustomerDetails({ id }: { id: string }) {
 								remove();
 							}}
 						>
-							{t("clients.detail.deleteConfirm")}
+							{t("customers.detail.deleteConfirm")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

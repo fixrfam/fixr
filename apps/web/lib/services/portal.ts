@@ -8,7 +8,7 @@ import { axios } from "../auth/axios";
 import type { EstimateStatus, EstimateTotals } from "./estimates";
 
 /**
- * Client portal requests. Clients are not employees, so this is a separate
+ * Customer portal requests. Customers are not employees, so this is a separate
  * instance without the employee session refresh: the portal session is its
  * own httpOnly cookie, sent with `withCredentials`.
  */
@@ -125,6 +125,6 @@ export const portalApi = {
 		),
 };
 
-/** Shop side: email portal access to one of the company's clients. */
-export const sendPortalAccess = (subdomain: string, clientId: string) =>
-	axios.post(`/companies/${subdomain}/clients/${clientId}/portal-access`);
+/** Shop side: email portal access to one of the company's customers. */
+export const sendPortalAccess = (subdomain: string, customerId: string) =>
+	axios.post(`/companies/${subdomain}/customers/${customerId}/portal-access`);

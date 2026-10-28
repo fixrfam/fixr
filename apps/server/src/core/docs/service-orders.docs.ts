@@ -31,7 +31,7 @@ const relation = z.object({ id: z.string(), name: z.string() });
 
 const serviceOrderListRecordSchema = z.object({
 	...serviceOrderSelectSchema.shape,
-	client: relation.extend({
+	customer: relation.extend({
 		cpf: z.string(),
 		phone: z.string().nullable(),
 		email: z.string().nullable(),
@@ -82,7 +82,7 @@ Optional filters (query string):
 - \`employeeId\`: responsible employee (cuid2)
 - \`status\`: one of: ${serviceOrderStatuses.options.join(", ")}
 - \`dateFrom\` / \`dateTo\`: filter by \`created_at\` (inclusive; ISO date or datetime)
-- \`query\`: search in device model, maker, IMEI, reported defect, or client name
+- \`query\`: search in device model, maker, IMEI, reported defect, or customer name
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`): pagination (see API pagination docs)
 `,
 	params: getCompanyNestedDataSchema,
@@ -126,7 +126,7 @@ const createServiceOrderSchemaDoc: FastifySchema = {
 	description: `
 **Creates a new service order for the authenticated company**
 
-The order gets the company's next number (\`number\`, shown as \`<SUBDOMAIN>-<number>\`, e.g. \`ACME-12\`) and is opened for a customer's device (\`deviceId\`, see \`/companies/:subdomain/devices\`); its owner becomes the order's client and the device moves to \`in_shop\`.
+The order gets the company's next number (\`number\`, shown as \`<SUBDOMAIN>-<number>\`, e.g. \`ACME-12\`) and is opened for a customer's device (\`deviceId\`, see \`/companies/:subdomain/devices\`); its owner becomes the order's customer and the device moves to \`in_shop\`.
 
 The \`company_id\` and \`employee_id\` are inferred from the authenticated employee session (\`req.user\`).
 Photo uploads are assumed to have been completed beforehand via pre-signed URLs; this endpoint only persists metadata.

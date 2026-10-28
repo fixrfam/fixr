@@ -9,7 +9,7 @@ import { makeMaker, makeModel } from "./device";
 /** A customer's device. Without `modelId`, a company model of `makerId` (or a new maker) is created. */
 export async function makeDevice(input: {
 	companyId: string;
-	clientId: string;
+	customerId: string;
 	modelId?: string;
 	makerId?: string;
 	categoryId?: string | null;
@@ -33,7 +33,7 @@ export async function makeDevice(input: {
 	const device = {
 		id: createId(),
 		companyId: input.companyId,
-		clientId: input.clientId,
+		customerId: input.customerId,
 		modelId,
 		imei: input.imei ?? null,
 		serialNumber: input.serialNumber ?? null,
@@ -47,12 +47,12 @@ export async function makeDevice(input: {
 }
 
 /**
- * A service order. Without `deviceId`, a device of the client is created
+ * A service order. Without `deviceId`, a device of the customer is created
  * (its model from `deviceMakerId`, `deviceCategoryId` and `deviceModel`).
  */
 export async function makeServiceOrder(input: {
 	companyId: string;
-	clientId: string;
+	customerId: string;
 	employeeId: string;
 	deviceId?: string;
 	deviceMakerId?: string;
@@ -66,7 +66,7 @@ export async function makeServiceOrder(input: {
 		(
 			await makeDevice({
 				companyId: input.companyId,
-				clientId: input.clientId,
+				customerId: input.customerId,
 				makerId: input.deviceMakerId,
 				categoryId: input.deviceCategoryId,
 				modelName: input.deviceModel,
@@ -89,7 +89,7 @@ export async function makeServiceOrder(input: {
 		id: createId(),
 		number: lastNumber,
 		companyId: input.companyId,
-		clientId: input.clientId,
+		customerId: input.customerId,
 		employeeId: input.employeeId,
 		deviceId,
 		reportedDefect: "Tela quebrada",

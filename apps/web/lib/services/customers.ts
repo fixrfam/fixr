@@ -1,7 +1,7 @@
 import type {
-	createClientSchema,
-	patchClientSchema,
-} from "@fixr/schemas/clients";
+	createCustomerSchema,
+	patchCustomerSchema,
+} from "@fixr/schemas/customers";
 import type { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import type { z } from "zod";
@@ -55,7 +55,7 @@ async function send<T>(request: Promise<{ data: ApiResponse<T> }>) {
 	return response.data.data as T;
 }
 
-const base = (subdomain: string) => `/companies/${subdomain}/clients`;
+const base = (subdomain: string) => `/companies/${subdomain}/customers`;
 
 /** The company's customers. */
 export const customersApi = {
@@ -65,12 +65,12 @@ export const customersApi = {
 		),
 	get: (subdomain: string, id: string) =>
 		send<CustomerDetail>(axios.get(`${base(subdomain)}/${id}`)),
-	create: (subdomain: string, values: z.input<typeof createClientSchema>) =>
+	create: (subdomain: string, values: z.input<typeof createCustomerSchema>) =>
 		send<CustomerRow>(axios.post(base(subdomain), values)),
 	update: (
 		subdomain: string,
 		id: string,
-		values: z.input<typeof patchClientSchema>
+		values: z.input<typeof patchCustomerSchema>
 	) => send<CustomerRow>(axios.patch(`${base(subdomain)}/${id}`, values)),
 	remove: (subdomain: string, id: string) =>
 		send<null>(axios.delete(`${base(subdomain)}/${id}`)),

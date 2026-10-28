@@ -18,7 +18,7 @@ interface Relation {
 /** A customer's device with its owner and catalog model. */
 export interface DeviceRow {
 	id: string;
-	clientId: string;
+	customerId: string;
 	modelId: string;
 	imei: string | null;
 	serialNumber: string | null;
@@ -26,7 +26,7 @@ export interface DeviceRow {
 	status: DeviceStatus;
 	createdAt: string;
 	updatedAt: string;
-	client: Relation & { cpf: string; phone: string | null };
+	customer: Relation & { cpf: string; phone: string | null };
 	model: Relation & { slug: string; imageUrl: string | null };
 	maker: Relation;
 	category: (Relation & { slug: string }) | null;
@@ -46,7 +46,7 @@ export interface DeviceListParams {
 	page: number;
 	perPage: number;
 	query?: string;
-	clientId?: string;
+	customerId?: string;
 	status?: DeviceStatus;
 	sort?: "newer" | "older" | "updated";
 }

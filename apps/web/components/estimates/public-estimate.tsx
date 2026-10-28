@@ -142,7 +142,7 @@ export function RejectDialog({
 	);
 }
 
-/** The estimate as the client sees it, with the approve and reject actions. */
+/** The estimate as the customer sees it, with the approve and reject actions. */
 export function PublicEstimate({ token }: { token: string }) {
 	const { t, format } = useTranslation();
 	const message = useMessage();

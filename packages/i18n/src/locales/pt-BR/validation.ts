@@ -58,7 +58,7 @@ export const validation: Translated<typeof source> = {
 		expirationInPast: "A data de expiração deve ser no futuro.",
 	},
 	device: {
-		clientRequired: "Escolha o cliente dono do aparelho.",
+		customerRequired: "Escolha o cliente dono do aparelho.",
 		modelRequired: "Escolha o modelo do aparelho.",
 		imeiMax: "O IMEI excede {{count}} caracteres.",
 		serialNumberMax: "O número de série excede {{count}} caracteres.",
@@ -75,7 +75,7 @@ export const validation: Translated<typeof source> = {
 		itemQuantityMax: "A quantidade não pode passar de {{count}}.",
 		itemPriceRequired: "Informe o preço.",
 		itemPriceMin: "O preço não pode ser negativo.",
-		clientInvalid: "Cliente inválido.",
+		customerInvalid: "Cliente inválido.",
 		brandInvalid: "Marca do dispositivo inválida.",
 		categoryInvalid: "Categoria do dispositivo inválida.",
 		assigneeInvalid: "Responsável inválido.",

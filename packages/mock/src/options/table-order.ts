@@ -24,7 +24,7 @@ export interface ServiceOrderRow {
 		id: ServiceOrderStatus;
 		label: string;
 	};
-	client: {
+	customer: {
 		name: string;
 		cpf: string;
 		phone: string;
@@ -62,7 +62,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 			id: "in_progress",
 			label: "Reparo em progresso",
 		},
-		client: {
+		customer: {
 			name: "Maria Aparecida",
 			cpf: "123.456.789-00",
 			phone: "(11) 99999-9999",
@@ -142,7 +142,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 			id: "parts_pending",
 			label: "Pendente de peças",
 		},
-		client: {
+		customer: {
 			name: "Carlos Eduardo",
 			cpf: "987.654.321-00",
 			phone: "(21) 98888-8888",
@@ -196,7 +196,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 			id: "finished",
 			label: "Finalizada",
 		},
-		client: {
+		customer: {
 			name: "Fernanda Lima",
 			cpf: "111.222.333-44",
 			phone: "(31) 97777-7777",
@@ -264,7 +264,7 @@ export const mockServiceOrders: ServiceOrderRow[] = [
 			id: "canceled",
 			label: "Cancelada",
 		},
-		client: {
+		customer: {
 			name: "Eduardo Pereira",
 			cpf: "555.666.777-88",
 			phone: "(41) 96666-6666",

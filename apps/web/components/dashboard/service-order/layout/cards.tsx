@@ -144,11 +144,11 @@ export function getCards(
 				</ServiceOrderKeyValueList>
 			</ServiceOrderDetailsCard>
 		),
-		client: (
+		customer: (
 			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.clientDescription")}
+				description={t("serviceOrders.cards.customerDescription")}
 				icon={FileUser}
-				title={t("serviceOrders.cards.clientTitle")}
+				title={t("serviceOrders.cards.customerTitle")}
 			>
 				<ServiceOrderKeyValueList>
 					<ServiceOrderKeyValueItem
@@ -156,26 +156,26 @@ export function getCards(
 						value={
 							<DashLink
 								className="inline-flex items-center gap-2 hover:underline"
-								href={`/customers/${order.client.id}`}
+								href={`/customers/${order.customer.id}`}
 								subdomain={subdomain}
 							>
-								<CustomerAvatar className="size-5" customer={order.client} />
-								{order.client.name}
+								<CustomerAvatar className="size-5" customer={order.customer} />
+								{order.customer.name}
 							</DashLink>
 						}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.document")}
-						value={formatCpf(order.client.cpf)}
+						value={formatCpf(order.customer.cpf)}
 					/>
 					<ServiceOrderKeyValueItem
 						label={t("serviceOrders.fields.phone")}
-						value={formatPhone(order.client.phone)}
+						value={formatPhone(order.customer.phone)}
 					/>
-					{order.client.email && (
+					{order.customer.email && (
 						<ServiceOrderKeyValueItem
 							label={t("serviceOrders.fields.email")}
-							value={order.client.email}
+							value={order.customer.email}
 						/>
 					)}
 				</ServiceOrderKeyValueList>

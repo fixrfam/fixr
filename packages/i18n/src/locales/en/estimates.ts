@@ -1,20 +1,20 @@
 export const estimates = {
 	page: {
 		title: "Estimates",
-		description: "Proposals sent to your clients for approval.",
+		description: "Proposals sent to your customers for approval.",
 	},
 	table: {
 		empty: "No estimates yet. Create one from a service order.",
 		allStatuses: "All statuses",
 		headers: {
 			number: "Number",
-			client: "Client",
+			customer: "Customer",
 			status: "Status",
 			total: "Total",
 			validUntil: "Valid until",
 			actions: "Actions",
 		},
-		noClient: "No client",
+		noCustomer: "No customer",
 		previous: "Previous",
 		next: "Next",
 		pageOf: "Page {{page}} of {{total}}",
@@ -24,8 +24,8 @@ export const estimates = {
 		creating: "Creating estimate...",
 		openPdf: "Open PDF",
 		send: "Mark as sent",
-		sendToClient: "Send to client",
-		resendToClient: "Send again",
+		sendToCustomer: "Send to customer",
+		resendToCustomer: "Send again",
 		approve: "Mark as approved",
 		reject: "Mark as rejected",
 		reopen: "Back to draft",
@@ -41,9 +41,9 @@ export const estimates = {
 	sendDialog: {
 		title: "Send estimate #{{number}}",
 		description:
-			"The client gets an email with the PDF and a link to approve or reject it. Sending again replaces the previous link.",
-		email: "Client email",
-		emailPlaceholder: "client@email.com",
+			"The customer gets an email with the PDF and a link to approve or reject it. Sending again replaces the previous link.",
+		email: "Customer email",
+		emailPlaceholder: "customer@email.com",
 		submit: "Send",
 		sending: "Sending...",
 		cancel: "Cancel",
@@ -82,7 +82,7 @@ export const estimates = {
 		issuedAt: "Issue date",
 		validUntil: "Valid until",
 		issuer: "Issuer",
-		client: "Client",
+		customer: "Customer",
 		device: "Device",
 		reportedDefect: "Reported defect",
 		headers: {

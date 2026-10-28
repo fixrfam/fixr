@@ -3,7 +3,7 @@ import { z } from "zod";
 import { documentSchema } from "./documents";
 import { getPaginatedDataSchema } from "./utils";
 
-export const createClientSchema = z.object({
+export const createCustomerSchema = z.object({
 	name: z
 		.string()
 		.min(1, i18nMessage("validation.name.required"))
@@ -23,15 +23,15 @@ export const createClientSchema = z.object({
 	city: z.string().min(1, i18nMessage("validation.city.required")),
 });
 
-/** @description Body schema for partially updating a client */
-export const patchClientSchema = createClientSchema.partial();
+/** @description Body schema for partially updating a customer */
+export const patchCustomerSchema = createCustomerSchema.partial();
 
-/** @description Query schema for listing clients: pagination and search (name, CPF, phone, e-mail) */
-export const getClientsQuerySchema = getPaginatedDataSchema.extend({
+/** @description Query schema for listing customers: pagination and search (name, CPF, phone, e-mail) */
+export const getCustomersQuerySchema = getPaginatedDataSchema.extend({
 	sort: z.enum(["newer", "older", "name"]).optional(),
 });
 
-/** @description Params schema for routes that target a single client */
-export const clientIdParamsSchema = z.object({
-	clientId: z.string().cuid2(),
+/** @description Params schema for routes that target a single customer */
+export const customerIdParamsSchema = z.object({
+	customerId: z.string().cuid2(),
 });

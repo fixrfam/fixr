@@ -90,14 +90,14 @@ function useDeviceColumns({
 				cell: ({ row }) => (
 					<DashLink
 						className="flex items-center gap-2.5 hover:underline"
-						href={`/customers/${row.original.client.id}`}
+						href={`/customers/${row.original.customer.id}`}
 						subdomain={subdomain}
 					>
-						<CustomerAvatar customer={row.original.client} />
+						<CustomerAvatar customer={row.original.customer} />
 						<span className="flex flex-col">
-							<span>{row.original.client.name}</span>
+							<span>{row.original.customer.name}</span>
 							<span className="text-2xs text-muted-foreground tabular-nums">
-								{formatCpf(row.original.client.cpf)}
+								{formatCpf(row.original.customer.cpf)}
 							</span>
 						</span>
 					</DashLink>

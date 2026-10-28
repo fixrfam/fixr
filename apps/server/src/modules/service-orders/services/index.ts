@@ -190,7 +190,7 @@ export class ServiceOrdersService {
 			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
-				clientId: device.clientId,
+				customerId: device.customerId,
 				data,
 			});
 			await events.emit(tx, "serviceOrder.opened", {

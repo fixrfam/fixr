@@ -29,15 +29,15 @@ describe("CustomerForm", () => {
 		const onSaved = vi.fn();
 		render(<CustomerForm onSaved={onSaved} />);
 
-		await user.type(field(t("clients.form.nameLabel")), "João");
-		await user.type(field(t("clients.form.emailLabel")), "joao@cliente.test");
-		await user.type(field(t("clients.form.phoneLabel")), "11912345678");
-		await user.type(field(t("clients.form.documentLabel")), "52998224725");
-		await user.type(field(t("clients.form.addressLabel")), "Rua B, 2");
-		await user.type(field(t("clients.form.stateLabel")), "SP");
-		await user.type(field(t("clients.form.cityLabel")), "Santos");
+		await user.type(field(t("customers.form.nameLabel")), "João");
+		await user.type(field(t("customers.form.emailLabel")), "joao@cliente.test");
+		await user.type(field(t("customers.form.phoneLabel")), "11912345678");
+		await user.type(field(t("customers.form.documentLabel")), "52998224725");
+		await user.type(field(t("customers.form.addressLabel")), "Rua B, 2");
+		await user.type(field(t("customers.form.stateLabel")), "SP");
+		await user.type(field(t("customers.form.cityLabel")), "Santos");
 		await user.click(
-			screen.getByRole("button", { name: t("clients.form.submit") })
+			screen.getByRole("button", { name: t("customers.form.submit") })
 		);
 
 		await waitFor(() => expect(onSaved).toHaveBeenCalled());
@@ -52,19 +52,19 @@ describe("CustomerForm", () => {
 		const user = userEvent.setup();
 		render(<CustomerForm customer={customer} />);
 
-		expect(field(t("clients.form.documentLabel"))).toHaveValue(
+		expect(field(t("customers.form.documentLabel"))).toHaveValue(
 			"529.982.247-25"
 		);
-		await user.clear(field(t("clients.form.cityLabel")));
-		await user.type(field(t("clients.form.cityLabel")), "Campinas");
+		await user.clear(field(t("customers.form.cityLabel")));
+		await user.type(field(t("customers.form.cityLabel")), "Campinas");
 		await user.click(
-			screen.getByRole("button", { name: t("clients.form.save") })
+			screen.getByRole("button", { name: t("customers.form.save") })
 		);
 
 		await waitFor(() =>
 			expect(api.writes[0]).toMatchObject({
 				method: "PATCH",
-				path: `/companies/fixr/clients/${customer.id}`,
+				path: `/companies/fixr/customers/${customer.id}`,
 				body: { city: "Campinas", cpf: customer.cpf },
 			})
 		);

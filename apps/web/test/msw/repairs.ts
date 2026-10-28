@@ -22,7 +22,7 @@ export const customer: CustomerRow = {
 
 export const device: DeviceRow = {
 	id: "cdevice000000000000000001",
-	clientId: customer.id,
+	customerId: customer.id,
 	modelId: "cmodel0000000000000000001",
 	imei: "356938035643809",
 	serialNumber: null,
@@ -30,7 +30,7 @@ export const device: DeviceRow = {
 	status: "with_customer",
 	createdAt: NOW,
 	updatedAt: NOW,
-	client: {
+	customer: {
 		id: customer.id,
 		name: customer.name,
 		cpf: customer.cpf,
@@ -53,7 +53,7 @@ export const device: DeviceRow = {
 export const serviceOrder: ServiceOrderDetail = {
 	id: "cserviceorder00000000abc1",
 	number: 12,
-	clientId: customer.id,
+	customerId: customer.id,
 	employeeId: "cemployee0000000000000001",
 	deviceId: device.id,
 	reportedDefect: "Tela quebrada",
@@ -61,7 +61,7 @@ export const serviceOrder: ServiceOrderDetail = {
 	status: "fixing",
 	createdAt: NOW,
 	updatedAt: NOW,
-	client: {
+	customer: {
 		id: customer.id,
 		name: customer.name,
 		cpf: customer.cpf,
@@ -152,11 +152,11 @@ export function serveRepairs() {
 	}
 
 	server.use(
-		http.get(apiUrl(`${base}/clients`), ({ request }) => {
+		http.get(apiUrl(`${base}/customers`), ({ request }) => {
 			listed(request);
 			return page([customer]);
 		}),
-		http.get(apiUrl(`${base}/clients/:id`), () =>
+		http.get(apiUrl(`${base}/customers/:id`), () =>
 			HttpResponse.json(
 				envelope({
 					...customer,
@@ -173,13 +173,13 @@ export function serveRepairs() {
 				})
 			)
 		),
-		http.post(apiUrl(`${base}/clients`), async ({ request }) => {
+		http.post(apiUrl(`${base}/customers`), async ({ request }) => {
 			const body = await record(request);
 			return HttpResponse.json(envelope({ ...customer, ...body }), {
 				status: 201,
 			});
 		}),
-		http.patch(apiUrl(`${base}/clients/:id`), async ({ request }) => {
+		http.patch(apiUrl(`${base}/customers/:id`), async ({ request }) => {
 			const body = await record(request);
 			return HttpResponse.json(envelope({ ...customer, ...body }));
 		}),

@@ -65,7 +65,7 @@ export interface ServiceOrderRow {
 	id: string;
 	/** Sequential per company; people see it as `<SUBDOMAIN>-<number>`. */
 	number: number;
-	clientId: string;
+	customerId: string;
 	employeeId: string;
 	deviceId: string;
 	reportedDefect: string;
@@ -73,7 +73,7 @@ export interface ServiceOrderRow {
 	status: ServiceOrderStatus;
 	createdAt: string;
 	updatedAt: string;
-	client: Relation & {
+	customer: Relation & {
 		cpf: string;
 		phone: string | null;
 		email: string | null;

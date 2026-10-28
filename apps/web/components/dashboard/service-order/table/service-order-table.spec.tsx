@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 const bodyRows = async () => {
-	await screen.findByText(serviceOrder.client.name);
+	await screen.findByText(serviceOrder.customer.name);
 	const [, body] = screen.getAllByRole("rowgroup");
 	return within(body!).getAllByRole("row");
 };

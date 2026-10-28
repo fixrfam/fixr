@@ -63,9 +63,9 @@
       "types": "./src/common.ts",
       "default": "./src/common.ts"
     },
-    "./clients": {
-      "types": "./src/clients.ts",
-      "default": "./src/clients.ts"
+    "./customers": {
+      "types": "./src/customers.ts",
+      "default": "./src/customers.ts"
     },
     "./devices": {
       "types": "./src/devices.ts",

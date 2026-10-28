@@ -38,17 +38,21 @@ export function OrderNumberCell({
 	);
 }
 
-export function ClientCell({ client }: { client: ServiceOrderRow["client"] }) {
+export function CustomerCell({
+	customer,
+}: {
+	customer: ServiceOrderRow["customer"];
+}) {
 	return (
 		<div className="flex items-center gap-2.5">
-			<CustomerAvatar customer={client} />
+			<CustomerAvatar customer={customer} />
 			<div className="flex min-w-0 flex-col">
-				<span className="font-medium">{client.name}</span>
+				<span className="font-medium">{customer.name}</span>
 				<span className="text-muted-foreground text-xs">
-					{formatPhone(client.phone)}
+					{formatPhone(customer.phone)}
 				</span>
 				<span className="text-muted-foreground text-xs tabular-nums">
-					{formatCpf(client.cpf)}
+					{formatCpf(customer.cpf)}
 				</span>
 			</div>
 		</div>

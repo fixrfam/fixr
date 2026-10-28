@@ -38,7 +38,7 @@ const { publicTokenHash: _hash, ...estimateShape } = estimateSelectSchema.shape;
 
 const estimateRecordSchema = z.object({
 	...estimateShape,
-	client: z.object({ id: z.string(), name: z.string() }).nullable(),
+	customer: z.object({ id: z.string(), name: z.string() }).nullable(),
 	totals: totalsSchema,
 });
 
@@ -81,7 +81,7 @@ const listEstimatesSchema: FastifySchema = {
 Optional filters (query string):
 - \`status\`: one of ${estimateStatuses.options.join(", ")}
 - \`serviceOrderId\`: estimates of one service order
-- \`query\`: client name or estimate number
+- \`query\`: customer name or estimate number
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`)
 `,
 	params: getCompanyNestedDataSchema,
@@ -103,7 +103,7 @@ Optional filters (query string):
 const getEstimateSchema: FastifySchema = {
 	tags: ["Estimates"],
 	summary: "Get estimate",
-	description: "Estimate with its items, the client and the totals.",
+	description: "Estimate with its items, the customer and the totals.",
 	params: estimateParams,
 	response: {
 		200: detailResponse(
@@ -123,7 +123,7 @@ const getEstimatePdfSchema: FastifySchema = {
 	description: `
 **Renders the estimate as an A4 PDF** (\`application/pdf\`, inline).
 
-Printed in the requester's language (locale cookie, then \`Accept-Language\`), with the company profile (logo, contact data), the client, the device, the items and the totals.
+Printed in the requester's language (locale cookie, then \`Accept-Language\`), with the company profile (logo, contact data), the customer, the device, the items and the totals.
 `,
 	params: estimateParams,
 	response: {
@@ -245,11 +245,11 @@ const expiredError = zodResponseSchema({
 
 const sendEstimateSchemaDoc: FastifySchema = {
 	tags: ["Estimates"],
-	summary: "Send estimate to the client",
+	summary: "Send estimate to the customer",
 	description: `
-**Emails the estimate to the client, with the PDF attached and a link to approve or reject it.**
+**Emails the estimate to the customer, with the PDF attached and a link to approve or reject it.**
 
-- \`email\` defaults to the client's email; it is required when the client has none (\`400 estimate_no_recipient\`).
+- \`email\` defaults to the customer's email; it is required when the customer has none (\`400 estimate_no_recipient\`).
 - Works on a \`draft\` or an already \`sent\` estimate. Sending again issues a new link and the previous one stops working.
 - The estimate becomes \`sent\` and its service order moves to \`waiting_approval\` (only when the order has not gone past that point).
 - The email is queued; the worker delivers it.
@@ -260,14 +260,14 @@ const sendEstimateSchemaDoc: FastifySchema = {
 		200: detailResponse(
 			200,
 			"send_estimate_success",
-			"Estimate sent to the client."
+			"Estimate sent to the customer."
 		),
 		400: zodResponseSchema({
 			status: 400,
 			error: "Bad Request",
 			code: "estimate_no_recipient",
 			message:
-				"The client has no email. Send the estimate to an email address.",
+				"The customer has no email. Send the estimate to an email address.",
 			data: null,
 		}).describe("No email to send to."),
 		409: conflictError(
@@ -303,7 +303,7 @@ const publicEstimateSchema = z.object({
 		website: z.string().nullable(),
 		logoUrl: z.string().nullable(),
 	}),
-	client: z.object({ name: z.string() }).nullable(),
+	customer: z.object({ name: z.string() }).nullable(),
 	device: z.object({
 		maker: z.string(),
 		model: z.string(),
@@ -336,9 +336,9 @@ const getPublicEstimateSchema: FastifySchema = {
 	tags: ["Estimates"],
 	summary: "View estimate from its link",
 	description: `
-**Public: what the client sees when opening the link from the email.**
+**Public: what the customer sees when opening the link from the email.**
 
-No authentication: the token in the URL is the credential. It only exposes the estimate itself (company contact data, client name, device, items and totals), never internal ids.
+No authentication: the token in the URL is the credential. It only exposes the estimate itself (company contact data, customer name, device, items and totals), never internal ids.
 `,
 	params: estimateTokenParamsSchema,
 	response: {
@@ -372,7 +372,7 @@ const approvePublicEstimateSchema: FastifySchema = {
 	tags: ["Estimates"],
 	summary: "Approve estimate from its link",
 	description: `
-**Public: the client approves the estimate.**
+**Public: the customer approves the estimate.**
 
 The estimate becomes \`approved\` and its service order moves to \`approved\` (only when the order has not gone past that point). Only a \`sent\`, unexpired estimate can be answered.
 `,
@@ -387,7 +387,7 @@ const rejectPublicEstimateSchema: FastifySchema = {
 	tags: ["Estimates"],
 	summary: "Reject estimate from its link",
 	description: `
-**Public: the client rejects the estimate**, optionally with a reason the staff sees.
+**Public: the customer rejects the estimate**, optionally with a reason the staff sees.
 
 Only a \`sent\`, unexpired estimate can be answered. The service order keeps its status.
 `,

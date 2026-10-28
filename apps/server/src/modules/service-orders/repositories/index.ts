@@ -13,7 +13,7 @@ import {
 	type Transaction,
 } from "@fixr/db/connection";
 import {
-	clients,
+	customers,
 	devices,
 	employees,
 	modelCategories,
@@ -56,7 +56,7 @@ export const serviceOrdersListSelect = {
 	id: serviceOrders.id,
 	number: serviceOrders.number,
 	companyId: serviceOrders.companyId,
-	clientId: serviceOrders.clientId,
+	customerId: serviceOrders.customerId,
 	employeeId: serviceOrders.employeeId,
 	deviceId: serviceOrders.deviceId,
 	reportedDefect: serviceOrders.reportedDefect,
@@ -64,12 +64,12 @@ export const serviceOrdersListSelect = {
 	status: serviceOrders.status,
 	createdAt: serviceOrders.createdAt,
 	updatedAt: serviceOrders.updatedAt,
-	client: {
-		id: clients.id,
-		name: clients.name,
-		cpf: clients.cpf,
-		phone: clients.phone,
-		email: clients.email,
+	customer: {
+		id: customers.id,
+		name: customers.name,
+		cpf: customers.cpf,
+		phone: customers.phone,
+		email: customers.email,
 	},
 	employee: { id: employees.id, name: employees.name },
 	device: {
@@ -95,8 +95,8 @@ export const serviceOrdersListSelect = {
 export const serviceOrdersListJoins = [
 	{
 		type: "inner" as const,
-		table: clients,
-		on: eq(clients.id, serviceOrders.clientId),
+		table: customers,
+		on: eq(customers.id, serviceOrders.customerId),
 	},
 	{
 		type: "inner" as const,
@@ -139,7 +139,7 @@ export class ServiceOrdersRepository {
 	/** An active device of the company, with its owner. */
 	static async queryDeviceOfCompany(deviceId: string, companyId: string) {
 		const [device] = await db
-			.select({ id: devices.id, clientId: devices.clientId })
+			.select({ id: devices.id, customerId: devices.customerId })
 			.from(devices)
 			.where(
 				and(
@@ -191,7 +191,7 @@ export class ServiceOrdersRepository {
 					like(modelMakers.name, `%${filters.query}%`),
 					like(devices.imei, `%${filters.query}%`),
 					like(serviceOrders.reportedDefect, `%${filters.query}%`),
-					like(clients.name, `%${filters.query}%`)
+					like(customers.name, `%${filters.query}%`)
 				)!
 			);
 		}
@@ -241,12 +241,12 @@ export class ServiceOrdersRepository {
 		{
 			companyId,
 			employeeId,
-			clientId,
+			customerId,
 			data,
 		}: {
 			companyId: string;
 			employeeId: string;
-			clientId: string;
+			customerId: string;
 			data: z.infer<typeof createServiceOrderSchema>;
 		}
 	) {
@@ -256,7 +256,7 @@ export class ServiceOrdersRepository {
 			.values({
 				companyId,
 				number,
-				clientId,
+				customerId,
 				employeeId,
 				deviceId: data.deviceId,
 				reportedDefect: data.reportedDefect,
@@ -358,7 +358,7 @@ export class ServiceOrdersRepository {
 		const [serviceOrder] = await db
 			.select(serviceOrdersListSelect)
 			.from(serviceOrders)
-			.innerJoin(clients, eq(clients.id, serviceOrders.clientId))
+			.innerJoin(customers, eq(customers.id, serviceOrders.customerId))
 			.innerJoin(employees, eq(employees.id, serviceOrders.employeeId))
 			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
 			.innerJoin(models, eq(models.id, devices.modelId))

@@ -11,7 +11,7 @@ import {
 	type SQL,
 } from "@fixr/db/connection";
 import {
-	clients,
+	customers,
 	type DeviceInsert,
 	devices,
 	modelCategories,
@@ -31,7 +31,7 @@ const RECENT_SERVICE_ORDERS = 20;
 export const deviceSelect = {
 	id: devices.id,
 	companyId: devices.companyId,
-	clientId: devices.clientId,
+	customerId: devices.customerId,
 	modelId: devices.modelId,
 	imei: devices.imei,
 	serialNumber: devices.serialNumber,
@@ -40,11 +40,11 @@ export const deviceSelect = {
 	createdAt: devices.createdAt,
 	updatedAt: devices.updatedAt,
 	deletedAt: devices.deletedAt,
-	client: {
-		id: clients.id,
-		name: clients.name,
-		cpf: clients.cpf,
-		phone: clients.phone,
+	customer: {
+		id: customers.id,
+		name: customers.name,
+		cpf: customers.cpf,
+		phone: customers.phone,
 	},
 	model: {
 		id: models.id,
@@ -64,8 +64,8 @@ export const deviceSelect = {
 export const deviceJoins = [
 	{
 		type: "inner" as const,
-		table: clients,
-		on: eq(clients.id, devices.clientId),
+		table: customers,
+		on: eq(customers.id, devices.customerId),
 	},
 	{
 		type: "inner" as const,
@@ -88,7 +88,7 @@ function joined() {
 	return db
 		.select(deviceSelect)
 		.from(devices)
-		.innerJoin(clients, eq(clients.id, devices.clientId))
+		.innerJoin(customers, eq(customers.id, devices.customerId))
 		.innerJoin(models, eq(models.id, devices.modelId))
 		.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
 		.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId));
@@ -106,7 +106,7 @@ export class DevicesRepository {
 		companyId: string,
 		filters: {
 			query?: string;
-			clientId?: string;
+			customerId?: string;
 			status?: z.infer<typeof deviceStatuses>;
 		}
 	) {
@@ -115,8 +115,8 @@ export class DevicesRepository {
 			isNull(devices.deletedAt),
 		];
 
-		if (filters.clientId) {
-			conditions.push(eq(devices.clientId, filters.clientId));
+		if (filters.customerId) {
+			conditions.push(eq(devices.customerId, filters.customerId));
 		}
 		if (filters.status) {
 			conditions.push(eq(devices.status, filters.status));
@@ -127,7 +127,7 @@ export class DevicesRepository {
 				or(
 					like(models.name, pattern),
 					like(modelMakers.name, pattern),
-					like(clients.name, pattern),
+					like(customers.name, pattern),
 					like(devices.imei, pattern),
 					like(devices.serialNumber, pattern)
 				)!
@@ -161,19 +161,19 @@ export class DevicesRepository {
 	}
 
 	/** An active customer of the company. */
-	static async queryClientOfCompany(clientId: string, companyId: string) {
-		const [client] = await db
-			.select({ id: clients.id })
-			.from(clients)
+	static async queryCustomerOfCompany(customerId: string, companyId: string) {
+		const [customer] = await db
+			.select({ id: customers.id })
+			.from(customers)
 			.where(
 				and(
-					eq(clients.id, clientId),
-					eq(clients.companyId, companyId),
-					isNull(clients.deletedAt)
+					eq(customers.id, customerId),
+					eq(customers.companyId, companyId),
+					isNull(customers.deletedAt)
 				)
 			)
 			.limit(1);
-		return client ?? null;
+		return customer ?? null;
 	}
 
 	/** A model the company can use: from the shared catalog or its own. */

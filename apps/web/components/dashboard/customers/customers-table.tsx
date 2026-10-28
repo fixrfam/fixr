@@ -33,52 +33,52 @@ function useCustomerColumns() {
 	return useMemo(
 		() => [
 			columnHelper.accessor("name", {
-				header: t("clients.table.headers.name"),
+				header: t("customers.table.headers.name"),
 				cell: ({ row }) => (
 					<div className="flex items-center gap-2.5">
 						<CustomerAvatar customer={row.original} />
 						<span className="font-medium">{row.original.name}</span>
 					</div>
 				),
-				meta: { label: t("clients.table.headers.name") },
+				meta: { label: t("customers.table.headers.name") },
 			}),
 			columnHelper.accessor("cpf", {
-				header: t("clients.table.headers.cpf"),
+				header: t("customers.table.headers.cpf"),
 				cell: ({ getValue }) => (
 					<CopyableValue
-						label={t("clients.table.headers.cpf")}
+						label={t("customers.table.headers.cpf")}
 						value={formatCpf(getValue())}
 					/>
 				),
-				meta: { label: t("clients.table.headers.cpf") },
+				meta: { label: t("customers.table.headers.cpf") },
 			}),
 			columnHelper.accessor("phone", {
-				header: t("clients.table.headers.phone"),
+				header: t("customers.table.headers.phone"),
 				cell: ({ getValue }) => (
 					<CopyableValue
-						label={t("clients.table.headers.phone")}
+						label={t("customers.table.headers.phone")}
 						value={formatPhone(getValue())}
 					/>
 				),
-				meta: { label: t("clients.table.headers.phone") },
+				meta: { label: t("customers.table.headers.phone") },
 			}),
 			columnHelper.accessor("email", {
-				header: t("clients.table.headers.email"),
+				header: t("customers.table.headers.email"),
 				cell: ({ getValue }) => (
 					<CopyableValue
 						className="text-2xs"
-						label={t("clients.table.headers.email")}
+						label={t("customers.table.headers.email")}
 						value={getValue() ?? ""}
 					/>
 				),
-				meta: { label: t("clients.table.headers.email") },
+				meta: { label: t("customers.table.headers.email") },
 			}),
 			columnHelper.accessor(
 				(row) => [row.city, row.state].filter(Boolean).join(" / "),
 				{
 					id: "city",
-					header: t("clients.table.headers.city"),
-					meta: { label: t("clients.table.headers.city") },
+					header: t("customers.table.headers.city"),
+					meta: { label: t("customers.table.headers.city") },
 				}
 			),
 		],
@@ -120,10 +120,10 @@ export function CustomersTable() {
 			<TableToolbar
 				canCreate={ability.can(permissions.customers.create)}
 				createHref="/customers/new"
-				createLabel={t("clients.table.create")}
+				createLabel={t("customers.table.create")}
 				onClear={reset}
 				onSearchChange={search.setInput}
-				placeholder={t("clients.table.search")}
+				placeholder={t("customers.table.search")}
 				search={search.input}
 			/>
 			<div className="flex items-center justify-end">

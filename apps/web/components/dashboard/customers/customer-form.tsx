@@ -2,7 +2,7 @@
 
 import { cpf, phone, unmask } from "@fixr/constants/masks";
 import { useTranslation } from "@fixr/i18n/react";
-import { createClientSchema } from "@fixr/schemas/clients";
+import { createCustomerSchema } from "@fixr/schemas/customers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMaskito } from "@maskito/react";
 import { toast } from "@pheralb/toast";
@@ -60,8 +60,8 @@ export function CustomerForm({
 	const toastError = useApiErrorToast();
 	const saving = createCustomer.isPending || updateCustomer.isPending;
 
-	const form = useForm<z.infer<typeof createClientSchema>>({
-		resolver: zodResolver(createClientSchema),
+	const form = useForm<z.infer<typeof createCustomerSchema>>({
+		resolver: zodResolver(createCustomerSchema),
 		defaultValues: {
 			name: customer?.name ?? "",
 			email: customer?.email ?? "",
@@ -79,7 +79,7 @@ export function CustomerForm({
 	const phoneMask = useMaskito({ options: { mask: phone } });
 	const altPhoneMask = useMaskito({ options: { mask: phone } });
 
-	async function onSubmit(values: z.infer<typeof createClientSchema>) {
+	async function onSubmit(values: z.infer<typeof createCustomerSchema>) {
 		const body = {
 			...values,
 			cpf: unmask.cpf(values.cpf),
@@ -94,7 +94,7 @@ export function CustomerForm({
 				? await updateCustomer.mutateAsync(body)
 				: await createCustomer.mutateAsync(body);
 			toast.success({
-				text: t(customer ? "clients.form.updated" : "clients.form.success"),
+				text: t(customer ? "customers.form.updated" : "customers.form.success"),
 			});
 			onSaved?.(saved);
 		} catch (error) {
@@ -116,79 +116,79 @@ export function CustomerForm({
 				{...props}
 			>
 				<FormSection
-					hint={t("clients.form.identityHint")}
+					hint={t("customers.form.identityHint")}
 					icon={IdCard}
-					title={t("clients.form.identitySection")}
+					title={t("customers.form.identitySection")}
 				>
 					<TextField
 						control={form.control}
-						description={t("clients.form.nameDescription")}
-						label={t("clients.form.nameLabel")}
+						description={t("customers.form.nameDescription")}
+						label={t("customers.form.nameLabel")}
 						name="name"
-						placeholder={t("clients.form.namePlaceholder")}
+						placeholder={t("customers.form.namePlaceholder")}
 					/>
 					<div className={cn("grid gap-4", split)}>
 						<TextField
 							control={form.control}
-							description={t("clients.form.documentDescription")}
+							description={t("customers.form.documentDescription")}
 							inputMode="numeric"
-							label={t("clients.form.documentLabel")}
+							label={t("customers.form.documentLabel")}
 							maskRef={cpfMask}
 							name="cpf"
 							onInput={(value) => form.setValue("cpf", value)}
-							placeholder={t("clients.form.documentPlaceholder")}
+							placeholder={t("customers.form.documentPlaceholder")}
 						/>
 						<TextField
 							control={form.control}
-							description={t("clients.form.emailDescription")}
+							description={t("customers.form.emailDescription")}
 							inputMode="email"
-							label={t("clients.form.emailLabel")}
+							label={t("customers.form.emailLabel")}
 							name="email"
-							placeholder={t("clients.form.emailPlaceholder")}
+							placeholder={t("customers.form.emailPlaceholder")}
 						/>
 					</div>
 				</FormSection>
 
 				<FormSection
-					hint={t("clients.form.contactHint")}
+					hint={t("customers.form.contactHint")}
 					icon={PhoneIcon}
-					title={t("clients.form.contactSection")}
+					title={t("customers.form.contactSection")}
 				>
 					<div className={cn("grid gap-4", split)}>
 						<TextField
 							control={form.control}
-							description={t("clients.form.phoneDescription")}
+							description={t("customers.form.phoneDescription")}
 							inputMode="tel"
-							label={t("clients.form.phoneLabel")}
+							label={t("customers.form.phoneLabel")}
 							maskRef={phoneMask}
 							name="phone"
 							onInput={(value) => form.setValue("phone", value)}
-							placeholder={t("clients.form.phonePlaceholder")}
+							placeholder={t("customers.form.phonePlaceholder")}
 						/>
 						<TextField
 							control={form.control}
-							description={t("clients.form.alternativePhoneDescription")}
+							description={t("customers.form.alternativePhoneDescription")}
 							inputMode="tel"
-							label={t("clients.form.alternativePhoneLabel")}
+							label={t("customers.form.alternativePhoneLabel")}
 							maskRef={altPhoneMask}
 							name="alternativePhone"
 							onInput={(value) => form.setValue("alternativePhone", value)}
-							placeholder={t("clients.form.alternativePhonePlaceholder")}
+							placeholder={t("customers.form.alternativePhonePlaceholder")}
 						/>
 					</div>
 				</FormSection>
 
 				<FormSection
-					hint={t("clients.form.addressHint")}
+					hint={t("customers.form.addressHint")}
 					icon={MapPin}
-					title={t("clients.form.addressSection")}
+					title={t("customers.form.addressSection")}
 				>
 					<TextField
 						control={form.control}
-						description={t("clients.form.addressDescription")}
-						label={t("clients.form.addressLabel")}
+						description={t("customers.form.addressDescription")}
+						label={t("customers.form.addressLabel")}
 						name="address"
-						placeholder={t("clients.form.addressPlaceholder")}
+						placeholder={t("customers.form.addressPlaceholder")}
 					/>
 					<div
 						className={cn(
@@ -198,24 +198,24 @@ export function CustomerForm({
 					>
 						<TextField
 							control={form.control}
-							description={t("clients.form.cityDescription")}
-							label={t("clients.form.cityLabel")}
+							description={t("customers.form.cityDescription")}
+							label={t("customers.form.cityLabel")}
 							name="city"
-							placeholder={t("clients.form.cityPlaceholder")}
+							placeholder={t("customers.form.cityPlaceholder")}
 						/>
 						<TextField
 							control={form.control}
-							description={t("clients.form.stateDescription")}
-							label={t("clients.form.stateLabel")}
+							description={t("customers.form.stateDescription")}
+							label={t("customers.form.stateLabel")}
 							maxLength={2}
 							name="state"
-							placeholder={t("clients.form.statePlaceholder")}
+							placeholder={t("customers.form.statePlaceholder")}
 						/>
 					</div>
 				</FormSection>
 
 				<Button className="w-full" disabled={saving} size="lg" type="submit">
-					{t(customer ? "clients.form.save" : "clients.form.submit")}
+					{t(customer ? "customers.form.save" : "customers.form.submit")}
 					{saving ? <Loader2 className="animate-spin" /> : <User />}
 				</Button>
 			</form>
@@ -223,7 +223,7 @@ export function CustomerForm({
 	);
 }
 
-type Values = z.infer<typeof createClientSchema>;
+type Values = z.infer<typeof createCustomerSchema>;
 
 /** A group of fields under its icon, title and what it's for. */
 function FormSection({

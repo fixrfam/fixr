@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-/** Without a portal session (401), send the client to ask for a new link. */
+/** Without a portal session (401), send the customer to ask for a new link. */
 export function useRedirectWithoutSession(error: unknown) {
 	const router = useRouter();
 	const unauthorized = isAxiosError(error) && error.response?.status === 401;

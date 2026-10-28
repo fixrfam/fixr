@@ -10,8 +10,8 @@ import {
 	type Transaction,
 } from "@fixr/db/connection";
 import {
-	clients,
 	companies,
+	customers,
 	devices,
 	employees,
 	estimateItems,
@@ -27,12 +27,12 @@ import type { z } from "zod";
 export type EstimateInsert = typeof estimates.$inferInsert;
 export type EstimateItemRow = typeof estimateItems.$inferSelect;
 
-/** Estimate columns plus a summary of its client. */
+/** Estimate columns plus a summary of its customer. */
 export const estimatesListSelect = {
 	id: estimates.id,
 	companyId: estimates.companyId,
 	serviceOrderId: estimates.serviceOrderId,
-	clientId: estimates.clientId,
+	customerId: estimates.customerId,
 	createdBy: estimates.createdBy,
 	number: estimates.number,
 	status: estimates.status,
@@ -45,14 +45,14 @@ export const estimatesListSelect = {
 	rejectionReason: estimates.rejectionReason,
 	createdAt: estimates.createdAt,
 	updatedAt: estimates.updatedAt,
-	clientName: clients.name,
+	customerName: customers.name,
 };
 
 export const estimatesListJoins = [
 	{
 		type: "left" as const,
-		table: clients,
-		on: eq(clients.id, estimates.clientId),
+		table: customers,
+		on: eq(customers.id, estimates.customerId),
 	},
 ];
 
@@ -77,7 +77,7 @@ export class EstimatesRepository {
 			const number = Number.parseInt(filters.query, 10);
 			conditions.push(
 				or(
-					like(clients.name, `%${filters.query}%`),
+					like(customers.name, `%${filters.query}%`),
 					...(Number.isNaN(number) ? [] : [eq(estimates.number, number)])
 				)!
 			);
@@ -90,7 +90,7 @@ export class EstimatesRepository {
 		const [estimate] = await db
 			.select(estimatesListSelect)
 			.from(estimates)
-			.leftJoin(clients, eq(clients.id, estimates.clientId))
+			.leftJoin(customers, eq(customers.id, estimates.customerId))
 			.where(
 				and(eq(estimates.id, estimateId), eq(estimates.companyId, companyId))
 			)
@@ -124,7 +124,7 @@ export class EstimatesRepository {
 		companyId: string
 	) {
 		const [serviceOrder] = await db
-			.select({ id: serviceOrders.id, clientId: serviceOrders.clientId })
+			.select({ id: serviceOrders.id, customerId: serviceOrders.customerId })
 			.from(serviceOrders)
 			.where(
 				and(
@@ -196,7 +196,7 @@ export class EstimatesRepository {
 		const [estimate] = await db
 			.select({ ...estimatesListSelect, companyId: estimates.companyId })
 			.from(estimates)
-			.leftJoin(clients, eq(clients.id, estimates.clientId))
+			.leftJoin(customers, eq(customers.id, estimates.customerId))
 			.where(eq(estimates.publicTokenHash, tokenHash))
 			.limit(1);
 		return estimate ?? null;
@@ -282,21 +282,21 @@ export class EstimatesRepository {
 		return row ?? null;
 	}
 
-	static async queryClient(clientId: string) {
-		const [client] = await db
+	static async queryCustomer(customerId: string) {
+		const [customer] = await db
 			.select({
-				name: clients.name,
-				cpf: clients.cpf,
-				email: clients.email,
-				phone: clients.phone,
-				address: clients.address,
-				city: clients.city,
-				state: clients.state,
+				name: customers.name,
+				cpf: customers.cpf,
+				email: customers.email,
+				phone: customers.phone,
+				address: customers.address,
+				city: customers.city,
+				state: customers.state,
 			})
-			.from(clients)
-			.where(eq(clients.id, clientId))
+			.from(customers)
+			.where(eq(customers.id, customerId))
 			.limit(1);
-		return client ?? null;
+		return customer ?? null;
 	}
 
 	static async queryEmployee(userId: string, companyId: string) {

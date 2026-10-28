@@ -30,8 +30,8 @@ import { useEstimateActions } from "./use-estimate-actions";
 type FormValues = z.input<typeof sendEstimateSchema>;
 
 /**
- * Email the estimate to the client. The address starts with the last one the
- * estimate was sent to; left empty, the API uses the client's email.
+ * Email the estimate to the customer. The address starts with the last one the
+ * estimate was sent to; left empty, the API uses the customer's email.
  */
 export function SendEstimateDialog({
 	estimate,

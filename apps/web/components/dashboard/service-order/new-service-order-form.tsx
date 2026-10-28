@@ -199,7 +199,7 @@ export function NewServiceOrderForm({
 	useEffect(() => {
 		const device = presetDevice.data;
 		if (device) {
-			setCustomer(device.client);
+			setCustomer(device.customer);
 			form.setValue("deviceId", device.id);
 		} else if (presetCustomer.data) {
 			setCustomer(presetCustomer.data);

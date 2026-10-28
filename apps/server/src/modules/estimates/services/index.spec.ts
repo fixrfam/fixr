@@ -15,7 +15,7 @@ const { repo, pdf, queueEmail, emit } = vi.hoisted(() => ({
 		updateEstimate: vi.fn(),
 		deleteEstimate: vi.fn(),
 		queryPdfContext: vi.fn(),
-		queryClient: vi.fn(),
+		queryCustomer: vi.fn(),
 		queryByTokenHash: vi.fn(),
 		markSent: vi.fn(),
 		recordAnswer: vi.fn(async () => true),
@@ -65,8 +65,8 @@ const estimate = {
 	id: estimateId,
 	companyId,
 	serviceOrderId,
-	clientId: createId(),
-	clientName: "Maria",
+	customerId: createId(),
+	customerName: "Maria",
 	createdBy: null,
 	number: 3,
 	status: "draft" as const,
@@ -109,12 +109,12 @@ describe("EstimatesService.createEstimate", () => {
 			response: asReply(createFakeReply()),
 		});
 
-	it("copies the order items with the client and a 30-day validity", async () => {
+	it("copies the order items with the customer and a 30-day validity", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date("2026-10-01T00:00:00Z"));
 		repo.queryServiceOrderOfCompany.mockResolvedValue({
 			id: serviceOrderId,
-			clientId: estimate.clientId,
+			customerId: estimate.customerId,
 		});
 		repo.queryServiceOrderItems.mockResolvedValue([
 			{ ...item, serviceOrderId, createdAt: new Date() },
@@ -129,7 +129,7 @@ describe("EstimatesService.createEstimate", () => {
 			expect.objectContaining({
 				companyId,
 				serviceOrderId,
-				clientId: estimate.clientId,
+				customerId: estimate.customerId,
 				createdBy: "emp",
 				discountPercentage: 0,
 				validUntil: new Date("2026-10-31T00:00:00Z"),
@@ -169,7 +169,7 @@ describe("EstimatesService.createEstimate", () => {
 		};
 		repo.queryServiceOrderOfCompany.mockResolvedValue({
 			id: serviceOrderId,
-			clientId: estimate.clientId,
+			customerId: estimate.customerId,
 		});
 		repo.queryServiceOrderItems.mockResolvedValue([screen, serviceLine, cable]);
 		repo.createWithItems.mockResolvedValue(estimateId);
@@ -231,7 +231,7 @@ describe("EstimatesService.updateStatus", () => {
 		);
 	});
 
-	it("records the approval like the client link does", async () => {
+	it("records the approval like the customer link does", async () => {
 		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "sent" });
 
 		await move("approved");
@@ -272,7 +272,7 @@ describe("EstimatesService.updateStatus", () => {
 		});
 	});
 
-	it("refuses an answer that lost a race with the client", async () => {
+	it("refuses an answer that lost a race with the customer", async () => {
 		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "sent" });
 		repo.recordAnswer.mockResolvedValueOnce(false);
 
@@ -322,7 +322,7 @@ describe("EstimatesService.sendEstimate", () => {
 	beforeEach(() => {
 		repo.queryEstimate.mockResolvedValue({ ...estimate, validUntil: future });
 		repo.queryPdfContext.mockResolvedValue(context);
-		repo.queryClient.mockResolvedValue({
+		repo.queryCustomer.mockResolvedValue({
 			name: "Maria",
 			email: "maria@fixr.test",
 		});
@@ -338,7 +338,7 @@ describe("EstimatesService.sendEstimate", () => {
 		expect(job).toBe("sendEstimateEmail");
 		expect(payload).toMatchObject({
 			to: "maria@fixr.test",
-			clientName: "Maria",
+			customerName: "Maria",
 			companyName: "Central",
 			number: "0003",
 			device: "Samsung S21",
@@ -357,14 +357,14 @@ describe("EstimatesService.sendEstimate", () => {
 		expect(publicTokenHash).not.toContain(token);
 	});
 
-	it("sends to the given email over the client's", async () => {
+	it("sends to the given email over the customer's", async () => {
 		await send("outro@fixr.test");
 
 		expect(queueEmail.mock.calls[0]![1].payload.to).toBe("outro@fixr.test");
 	});
 
 	it("refuses when nobody has an email", async () => {
-		repo.queryClient.mockResolvedValue({ name: "Maria", email: null });
+		repo.queryCustomer.mockResolvedValue({ name: "Maria", email: null });
 
 		await expect(send()).rejects.toMatchObject({
 			code: "estimate_no_recipient",
@@ -495,7 +495,7 @@ describe("EstimatesService.patchEstimate and deleteEstimate", () => {
 });
 
 describe("EstimatesService.getEstimate", () => {
-	it("returns the client summary, line totals and estimate totals", async () => {
+	it("returns the customer summary, line totals and estimate totals", async () => {
 		repo.queryEstimate.mockResolvedValue({
 			...estimate,
 			discountPercentage: 10,
@@ -506,7 +506,7 @@ describe("EstimatesService.getEstimate", () => {
 
 		expect(reply.state.body).toMatchObject({
 			data: {
-				client: { id: estimate.clientId, name: "Maria" },
+				customer: { id: estimate.customerId, name: "Maria" },
 				items: [{ total: 200 }],
 				totals: { subtotal: 200, discount: 20, total: 180 },
 			},
@@ -526,7 +526,7 @@ describe("EstimatesService.getEstimate", () => {
 });
 
 describe("EstimatesService.buildPdf", () => {
-	it("passes the company, client, device and totals to the renderer", async () => {
+	it("passes the company, customer, device and totals to the renderer", async () => {
 		repo.queryPdfContext.mockResolvedValue({
 			serviceOrderNumber: 12,
 			subdomain: "fixr",
@@ -541,7 +541,7 @@ describe("EstimatesService.buildPdf", () => {
 			},
 			device: { maker: "Apple", model: "iPhone", reportedDefect: "Tela" },
 		});
-		repo.queryClient.mockResolvedValue({ name: "Maria", cpf: "1" });
+		repo.queryCustomer.mockResolvedValue({ name: "Maria", cpf: "1" });
 
 		const { fileName } = await EstimatesService.buildPdf(
 			estimateId,
@@ -555,7 +555,7 @@ describe("EstimatesService.buildPdf", () => {
 				number: 3,
 				serviceOrderCode: "FIXR-12",
 				company: expect.objectContaining({ name: "Fixr", logo: null }),
-				client: { name: "Maria", cpf: "1" },
+				customer: { name: "Maria", cpf: "1" },
 				device: { maker: "Apple", model: "iPhone", reportedDefect: "Tela" },
 				totals: expect.objectContaining({ total: 200 }),
 			}),

@@ -193,7 +193,7 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 });
 
 describe("ServiceOrdersService.createServiceOrder", () => {
-	const clientId = createId();
+	const customerId = createId();
 	const data = {
 		deviceId: createId(),
 		reportedDefect: "Tela quebrada",
@@ -205,7 +205,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
 		repo.queryDeviceOfCompany.mockResolvedValue({
 			id: data.deviceId,
-			clientId,
+			customerId,
 		});
 		repo.create.mockResolvedValue({ id: "so1", number: 7 });
 		repo.queryPhotoUploads.mockResolvedValue([]);
@@ -238,7 +238,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		expect(repo.create).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
-			clientId,
+			customerId,
 			data,
 		});
 		expect(emit).toHaveBeenCalledWith("TX", "serviceOrder.opened", {

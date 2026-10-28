@@ -7,7 +7,7 @@ const { repo, pagination } = vi.hoisted(() => ({
 		buildListFilter: vi.fn(() => "FILTER"),
 		buildOrder: vi.fn(() => ["ORDER"]),
 		queryDeviceOfCompany: vi.fn(),
-		queryClientOfCompany: vi.fn(),
+		queryCustomerOfCompany: vi.fn(),
 		queryModelForCompany: vi.fn(),
 		queryRecentServiceOrders: vi.fn(),
 		insertDevice: vi.fn(),
@@ -48,11 +48,11 @@ const userJwt = {
 	},
 };
 const device = { id: createId(), companyId, status: "with_customer" };
-const body = { clientId: createId(), modelId: createId() };
+const body = { customerId: createId(), modelId: createId() };
 
 beforeEach(() => {
 	repo.queryDeviceOfCompany.mockResolvedValue(device);
-	repo.queryClientOfCompany.mockResolvedValue({ id: body.clientId });
+	repo.queryCustomerOfCompany.mockResolvedValue({ id: body.customerId });
 	repo.queryModelForCompany.mockResolvedValue({ id: body.modelId });
 	repo.insertDevice.mockResolvedValue(device.id);
 });
@@ -93,7 +93,7 @@ describe("DevicesService.listDevices", () => {
 
 		expect(repo.buildListFilter).toHaveBeenCalledWith(companyId, {
 			query: undefined,
-			clientId: undefined,
+			customerId: undefined,
 			status: "in_shop",
 		});
 		expect(pagination.getPaginatedCount).toHaveBeenCalledWith(
@@ -158,11 +158,11 @@ describe("DevicesService.createDevice", () => {
 	});
 
 	it("refuses a customer the company doesn't have", async () => {
-		repo.queryClientOfCompany.mockResolvedValue(null);
+		repo.queryCustomerOfCompany.mockResolvedValue(null);
 
 		await expect(
 			call("createDevice", { data: body }).promise
-		).rejects.toMatchObject({ code: "device_client_not_found" });
+		).rejects.toMatchObject({ code: "device_customer_not_found" });
 		expect(repo.insertDevice).not.toHaveBeenCalled();
 	});
 

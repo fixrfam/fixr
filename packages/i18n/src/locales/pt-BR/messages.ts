@@ -90,7 +90,7 @@ export const messages: Translated<typeof source> = {
 			title: "Acesso enviado",
 			description: "O cliente vai receber um email com o link do portal.",
 		},
-		portal_client_no_email: {
+		portal_customer_no_email: {
 			title: "Sem email",
 			description:
 				"Cadastre o email do cliente antes de enviar o acesso ao portal.",
@@ -99,15 +99,15 @@ export const messages: Translated<typeof source> = {
 			title: "Orçamento não encontrado",
 			description: "Este orçamento não existe ou foi removido.",
 		},
-		client_not_found: {
+		customer_not_found: {
 			title: "Cliente não encontrado",
 			description: "Este cliente não existe ou foi removido.",
 		},
-		client_cpf_conflict: {
+		customer_cpf_conflict: {
 			title: "CPF já cadastrado",
 			description: "Outro cliente da loja já tem este CPF.",
 		},
-		client_phone_invalid: {
+		customer_phone_invalid: {
 			title: "Telefone inválido",
 			description: "O telefone deve ter 10 ou 11 dígitos.",
 		},
@@ -115,7 +115,7 @@ export const messages: Translated<typeof source> = {
 			title: "Aparelho não encontrado",
 			description: "Este aparelho não existe ou foi removido.",
 		},
-		device_client_not_found: {
+		device_customer_not_found: {
 			title: "Cliente não encontrado",
 			description: "Escolha um dos clientes da loja.",
 		},

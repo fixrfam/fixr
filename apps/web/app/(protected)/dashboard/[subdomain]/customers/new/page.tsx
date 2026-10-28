@@ -16,9 +16,9 @@ export default function NewCustomerPage() {
 		<div className="space-y-6">
 			<BackButton className="-translate-x-3" />
 			<Heading
-				description={t("clients.page.newDescription")}
+				description={t("customers.page.newDescription")}
 				Icon={UserPlus}
-				title={t("clients.page.newTitle")}
+				title={t("customers.page.newTitle")}
 			/>
 			<CustomerForm
 				className="max-w-2xl"

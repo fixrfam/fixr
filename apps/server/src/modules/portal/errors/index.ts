@@ -1,6 +1,6 @@
 import { defineErrors } from "../../../core/utils/errors";
 
-/** @description Error definitions for the client portal */
+/** @description Error definitions for the customer portal */
 export const portalErrors = defineErrors({
 	PORTAL_UNAUTHORIZED: {
 		code: "portal_unauthorized",
@@ -32,14 +32,14 @@ export const portalErrors = defineErrors({
 		message: "You are not authorized to access this company.",
 		status: 403,
 	},
-	PORTAL_CLIENT_NOT_FOUND: {
-		code: "client_not_found",
-		message: "Client not found.",
+	PORTAL_CUSTOMER_NOT_FOUND: {
+		code: "customer_not_found",
+		message: "Customer not found.",
 		status: 404,
 	},
-	PORTAL_CLIENT_NO_EMAIL: {
-		code: "portal_client_no_email",
-		message: "The client has no email to send the portal access to.",
+	PORTAL_CUSTOMER_NO_EMAIL: {
+		code: "portal_customer_no_email",
+		message: "The customer has no email to send the portal access to.",
 		status: 400,
 	},
 });

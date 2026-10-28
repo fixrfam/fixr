@@ -31,18 +31,18 @@ export function useDevicesPage(
 }
 
 /** The devices of one customer, most recently used first. */
-export function useCustomerDevices(clientId: string | undefined) {
+export function useCustomerDevices(customerId: string | undefined) {
 	const query = useDevicesPage(
 		{
 			page: 1,
 			perPage: DEVICE_PICKER_SIZE,
-			clientId,
+			customerId,
 			sort: "updated",
 		},
-		{ enabled: Boolean(clientId) }
+		{ enabled: Boolean(customerId) }
 	);
 	return {
-		devices: clientId ? (query.data?.records ?? []) : [],
+		devices: customerId ? (query.data?.records ?? []) : [],
 		loading: query.isFetching,
 	};
 }

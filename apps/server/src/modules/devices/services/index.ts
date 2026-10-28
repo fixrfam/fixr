@@ -71,7 +71,7 @@ export class DevicesService {
 		perPage,
 		query,
 		sort,
-		clientId,
+		customerId,
 		status,
 		response,
 	}: {
@@ -83,7 +83,7 @@ export class DevicesService {
 		const PER_PAGE = perPage ?? 10;
 		const filter = DevicesRepository.buildListFilter(companyId, {
 			query,
-			clientId,
+			customerId,
 			status,
 		});
 
@@ -169,12 +169,12 @@ export class DevicesService {
 	}) {
 		const companyId = DevicesService.resolveCompanyId(userJwt, subdomain);
 
-		const client = await DevicesRepository.queryClientOfCompany(
-			data.clientId,
+		const customer = await DevicesRepository.queryCustomerOfCompany(
+			data.customerId,
 			companyId
 		);
-		if (!client) {
-			throw new AppError("DEVICE_CLIENT_NOT_FOUND");
+		if (!customer) {
+			throw new AppError("DEVICE_CUSTOMER_NOT_FOUND");
 		}
 		await DevicesService.assertUsableModel(data.modelId, companyId);
 

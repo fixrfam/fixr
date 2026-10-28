@@ -24,7 +24,7 @@ async function setup({ withItems = true } = {}) {
 	]);
 	const serviceOrder = await makeServiceOrder({
 		companyId: company.id,
-		clientId: customer.id,
+		customerId: customer.id,
 		employeeId: employee.id,
 		deviceMakerId: maker.id,
 		deviceCategoryId: category.id,
@@ -76,7 +76,7 @@ describe("POST /companies/:subdomain/estimates", () => {
 		expect(response.json().data).toMatchObject({
 			number: 1,
 			status: "draft",
-			client: { id: ctx.customer.id, name: "Maria Oliveira" },
+			customer: { id: ctx.customer.id, name: "Maria Oliveira" },
 			createdBy: ctx.employee.id,
 			items: [
 				{ name: "Tela OLED", type: "part", total: 890.5 },
@@ -237,7 +237,7 @@ describe("estimate lifecycle", () => {
 });
 
 describe("GET /companies/:subdomain/estimates", () => {
-	it("lists with totals, filters by status and searches the client", async () => {
+	it("lists with totals, filters by status and searches the customer", async () => {
 		const ctx = await setup();
 		await createEstimate(ctx);
 		const second = (await createEstimate(ctx)).json().data;
@@ -254,7 +254,7 @@ describe("GET /companies/:subdomain/estimates", () => {
 
 		const all = (await list("")).json().data;
 		const sent = (await list("status=sent")).json().data;
-		const byClient = (await list("query=Maria")).json().data;
+		const byCustomer = (await list("query=Maria")).json().data;
 		const byNumber = (await list("query=2")).json().data;
 
 		expect(all.records.map((e: { number: number }) => e.number)).toEqual([
@@ -262,7 +262,7 @@ describe("GET /companies/:subdomain/estimates", () => {
 		]);
 		expect(all.records[0].totals.total).toBe(1040.5);
 		expect(sent.pagination.total_records).toBe(1);
-		expect(byClient.pagination.total_records).toBe(2);
+		expect(byCustomer.pagination.total_records).toBe(2);
 		expect(byNumber.records.map((e: { number: number }) => e.number)).toEqual([
 			2,
 		]);

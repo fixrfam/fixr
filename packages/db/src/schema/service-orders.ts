@@ -10,8 +10,8 @@ import {
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { clients } from "./clients";
 import { companies } from "./companies";
+import { customers } from "./customers";
 import { devices } from "./devices";
 import { employees } from "./employees";
 
@@ -44,8 +44,8 @@ export const serviceOrders = mysqlTable(
 		 * (e.g. `ACME-12`) so people can say and search it.
 		 */
 		number: int("number").notNull(),
-		clientId: varchar("client_id", { length: 25 })
-			.references(() => clients.id, { onDelete: "restrict" })
+		customerId: varchar("customer_id", { length: 25 })
+			.references(() => customers.id, { onDelete: "restrict" })
 			.notNull(),
 		employeeId: varchar("employee_id", { length: 25 })
 			.references(() => employees.id, { onDelete: "restrict" })

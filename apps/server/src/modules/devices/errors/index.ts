@@ -17,8 +17,8 @@ export const devicesErrors = defineErrors({
 		message: "Device not found.",
 		status: 404,
 	},
-	DEVICE_CLIENT_NOT_FOUND: {
-		code: "device_client_not_found",
+	DEVICE_CUSTOMER_NOT_FOUND: {
+		code: "device_customer_not_found",
 		message: "The customer does not exist in this company.",
 		status: 400,
 	},

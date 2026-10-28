@@ -12,7 +12,7 @@ interface PortalParams {
 	response: FastifyReply;
 }
 
-/** @description Client portal request handlers */
+/** @description Customer portal request handlers */
 export class PortalController {
 	static openFromPortalLink(params: { token: string; response: FastifyReply }) {
 		return PortalService.openFromPortalLink(params);
@@ -78,7 +78,7 @@ export class PortalController {
 	static sendAccess(params: {
 		userJwt: UserJwt;
 		subdomain: string;
-		clientId: string;
+		customerId: string;
 		locale: Locale;
 		response: FastifyReply;
 	}) {

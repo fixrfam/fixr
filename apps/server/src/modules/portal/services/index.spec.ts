@@ -13,9 +13,9 @@ const { repo, estimatesRepo, estimatesService, queueEmail } = vi.hoisted(
 			queryActiveLink: vi.fn(),
 			touchLink: vi.fn(),
 			insertSession: vi.fn(),
-			queryClientsByEmail: vi.fn(),
-			queryClient: vi.fn(),
-			queryScopeClients: vi.fn(),
+			queryCustomersByEmail: vi.fn(),
+			queryCustomer: vi.fn(),
+			queryScopeCustomers: vi.fn(),
 			queryEstimate: vi.fn(),
 		},
 		estimatesRepo: {
@@ -62,7 +62,7 @@ afterEach(() => {
 
 describe("PortalService.requestAccess", () => {
 	it("sends one link per CPF registered with the email, normalized", async () => {
-		repo.queryClientsByEmail.mockResolvedValue([
+		repo.queryCustomersByEmail.mockResolvedValue([
 			{ id: "c1", cpf: "111", name: "Maria" },
 			{ id: "c2", cpf: "111", name: "Maria O." },
 			{ id: "c3", cpf: "222", name: "João" },
@@ -75,7 +75,7 @@ describe("PortalService.requestAccess", () => {
 			response: asReply(reply),
 		});
 
-		expect(repo.queryClientsByEmail).toHaveBeenCalledWith("maria@fixr.test");
+		expect(repo.queryCustomersByEmail).toHaveBeenCalledWith("maria@fixr.test");
 		expect(repo.insertLink).toHaveBeenCalledTimes(2);
 		expect(repo.insertLink.mock.calls.map(([link]) => link.cpf)).toEqual([
 			"111",
@@ -88,14 +88,14 @@ describe("PortalService.requestAccess", () => {
 		);
 		expect(payload).toMatchObject({
 			to: "maria@fixr.test",
-			clientName: "Maria",
+			customerName: "Maria",
 			companyName: null,
 		});
 		expect(reply.state.statusCode).toBe(202);
 	});
 
 	it("answers 202 without sending anything for an unknown email", async () => {
-		repo.queryClientsByEmail.mockResolvedValue([]);
+		repo.queryCustomersByEmail.mockResolvedValue([]);
 		const reply = createFakeReply();
 
 		await PortalService.requestAccess({
@@ -110,7 +110,7 @@ describe("PortalService.requestAccess", () => {
 });
 
 describe("PortalService.sendAccess", () => {
-	const client = {
+	const customer = {
 		id: createId(),
 		companyId,
 		cpf: "52998224725",
@@ -122,34 +122,38 @@ describe("PortalService.sendAccess", () => {
 		PortalService.sendAccess({
 			userJwt,
 			subdomain: "central",
-			clientId: client.id,
+			customerId: customer.id,
 			locale: "pt-BR",
 			response: asReply(createFakeReply()),
 		});
 
 	it("revokes the shop's previous links before issuing a new one", async () => {
-		repo.queryClient.mockResolvedValue(client);
+		repo.queryCustomer.mockResolvedValue(customer);
 
 		await send();
 
-		expect(repo.revokeShopLinks).toHaveBeenCalledWith(client.id, companyId);
+		expect(repo.revokeShopLinks).toHaveBeenCalledWith(customer.id, companyId);
 		expect(repo.insertLink).toHaveBeenCalledWith(
 			expect.objectContaining({
-				cpf: client.cpf,
+				cpf: customer.cpf,
 				email: "maria@fixr.test",
 				companyId,
-				clientId: client.id,
+				customerId: customer.id,
 			})
 		);
 		expect(queueEmail.mock.calls[0]![1].payload.companyName).toBe("Central");
 	});
 
 	it.each([
-		["another company's client", { companyId: createId() }, "client_not_found"],
-		["a deleted client", { deletedAt: new Date() }, "client_not_found"],
-		["a client without email", { email: null }, "portal_client_no_email"],
+		[
+			"another company's customer",
+			{ companyId: createId() },
+			"customer_not_found",
+		],
+		["a deleted customer", { deletedAt: new Date() }, "customer_not_found"],
+		["a customer without email", { email: null }, "portal_customer_no_email"],
 	])("refuses %s", async (_name, override, code) => {
-		repo.queryClient.mockResolvedValue({ ...client, ...override });
+		repo.queryCustomer.mockResolvedValue({ ...customer, ...override });
 
 		await expect(send()).rejects.toMatchObject({ code });
 		expect(repo.insertLink).not.toHaveBeenCalled();
@@ -160,7 +164,7 @@ describe("PortalService.sendAccess", () => {
 			PortalService.sendAccess({
 				userJwt,
 				subdomain: "other",
-				clientId: client.id,
+				customerId: customer.id,
 				locale: "pt-BR",
 				response: asReply(createFakeReply()),
 			})
@@ -174,7 +178,7 @@ describe("PortalService sessions", () => {
 			id: "l1",
 			cpf: "111",
 			email: "maria@fixr.test",
-			clientId: "c1",
+			customerId: "c1",
 		});
 		const reply = createFakeReply();
 
@@ -191,7 +195,7 @@ describe("PortalService sessions", () => {
 				portalLinkId: "l1",
 				cpf: "111",
 				email: "maria@fixr.test",
-				clientId: "c1",
+				customerId: "c1",
 			})
 		);
 		expect(repo.touchLink).toHaveBeenCalledWith("l1");
@@ -210,10 +214,10 @@ describe("PortalService sessions", () => {
 
 	it("takes the identity's email from where the estimate was sent", async () => {
 		estimatesRepo.queryByTokenHash.mockResolvedValue({
-			clientId: "c1",
+			customerId: "c1",
 			sentTo: "Outro@Fixr.test",
 		});
-		repo.queryClient.mockResolvedValue({
+		repo.queryCustomer.mockResolvedValue({
 			id: "c1",
 			cpf: "111",
 			deletedAt: null,
@@ -231,15 +235,15 @@ describe("PortalService sessions", () => {
 			expect.objectContaining({
 				cpf: "111",
 				email: "outro@fixr.test",
-				clientId: "c1",
+				customerId: "c1",
 				portalLinkId: null,
 			})
 		);
 	});
 
-	it("refuses an estimate link whose client is gone", async () => {
+	it("refuses an estimate link whose customer is gone", async () => {
 		estimatesRepo.queryByTokenHash.mockResolvedValue({
-			clientId: null,
+			customerId: null,
 			sentTo: "a@fixr.test",
 		});
 
@@ -253,7 +257,7 @@ describe("PortalService sessions", () => {
 });
 
 describe("PortalService.answerEstimate", () => {
-	const identity = { cpf: "111", email: "maria@fixr.test", clientId: "c1" };
+	const identity = { cpf: "111", email: "maria@fixr.test", customerId: "c1" };
 	const answer = () =>
 		PortalService.answerEstimate({
 			identity,
@@ -262,8 +266,8 @@ describe("PortalService.answerEstimate", () => {
 			response: asReply(createFakeReply()),
 		});
 
-	it("refuses an estimate outside the client's scope", async () => {
-		repo.queryScopeClients.mockResolvedValue([{ id: "c1", name: "Maria" }]);
+	it("refuses an estimate outside the customer's scope", async () => {
+		repo.queryScopeCustomers.mockResolvedValue([{ id: "c1", name: "Maria" }]);
 		repo.queryEstimate.mockResolvedValue(null);
 
 		await expect(answer()).rejects.toMatchObject({
@@ -273,7 +277,7 @@ describe("PortalService.answerEstimate", () => {
 	});
 
 	it("refuses an estimate that was already answered", async () => {
-		repo.queryScopeClients.mockResolvedValue([{ id: "c1", name: "Maria" }]);
+		repo.queryScopeCustomers.mockResolvedValue([{ id: "c1", name: "Maria" }]);
 		repo.queryEstimate.mockResolvedValue({
 			id: "e1",
 			status: "approved",
@@ -287,7 +291,7 @@ describe("PortalService.answerEstimate", () => {
 	});
 
 	it("refuses an expired estimate", async () => {
-		repo.queryScopeClients.mockResolvedValue([{ id: "c1", name: "Maria" }]);
+		repo.queryScopeCustomers.mockResolvedValue([{ id: "c1", name: "Maria" }]);
 		repo.queryEstimate.mockResolvedValue({
 			id: "e1",
 			status: "sent",

@@ -12,7 +12,9 @@ export const deviceStatuses = z.enum([
 
 /** @description Body schema for registering a customer's device */
 export const createDeviceSchema = z.object({
-	clientId: z.string().cuid2(i18nMessage("validation.device.clientRequired")),
+	customerId: z
+		.string()
+		.cuid2(i18nMessage("validation.device.customerRequired")),
 	modelId: z.string().cuid2(i18nMessage("validation.device.modelRequired")),
 	imei: z
 		.string()
@@ -40,12 +42,12 @@ export const createDeviceSchema = z.object({
  * device sold to someone else is registered again for the new customer.
  */
 export const patchDeviceSchema = createDeviceSchema
-	.omit({ clientId: true })
+	.omit({ customerId: true })
 	.partial();
 
 /** @description Query schema for listing devices: pagination, search and filters */
 export const getDevicesQuerySchema = getPaginatedDataSchema.extend({
-	clientId: z.string().cuid2().optional(),
+	customerId: z.string().cuid2().optional(),
 	status: deviceStatuses.optional(),
 	sort: z.enum(["newer", "older", "updated"]).optional(),
 });

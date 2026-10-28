@@ -110,7 +110,7 @@ export function DeviceForm({
 	const saving = createDevice.isPending || updateDevice.isPending;
 
 	const [owner, setOwner] = useState<PickedCustomer | null>(
-		device ? device.client : (customer ?? null)
+		device ? device.customer : (customer ?? null)
 	);
 	const [model, setModel] = useState<PickedModel | null>(
 		device
@@ -127,7 +127,7 @@ export function DeviceForm({
 	const form = useForm<Values>({
 		resolver: zodResolver(createDeviceSchema),
 		defaultValues: {
-			clientId: owner?.id ?? "",
+			customerId: owner?.id ?? "",
 			modelId: model?.id ?? "",
 			imei: device?.imei ?? "",
 			serialNumber: device?.serialNumber ?? "",
@@ -138,7 +138,7 @@ export function DeviceForm({
 
 	async function onSubmit(values: Values) {
 		try {
-			const { clientId, ...changes } = values;
+			const { customerId, ...changes } = values;
 			const saved = device
 				? await updateDevice.mutateAsync({ id: device.id, values: changes })
 				: await createDevice.mutateAsync(values);
@@ -164,7 +164,7 @@ export function DeviceForm({
 				{!compact && (
 					<FormField
 						control={form.control}
-						name="clientId"
+						name="customerId"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel htmlFor="device-owner">

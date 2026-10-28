@@ -8,8 +8,8 @@ import {
 } from "drizzle-orm/mysql-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { clients } from "./clients";
 import { companies } from "./companies";
+import { customers } from "./customers";
 import { models } from "./models";
 
 /**
@@ -34,8 +34,8 @@ export const devices = mysqlTable("devices", {
 	companyId: varchar("company_id", { length: 25 })
 		.references(() => companies.id, { onDelete: "cascade" })
 		.notNull(),
-	clientId: varchar("client_id", { length: 25 })
-		.references(() => clients.id, { onDelete: "restrict" })
+	customerId: varchar("customer_id", { length: 25 })
+		.references(() => customers.id, { onDelete: "restrict" })
 		.notNull(),
 	modelId: varchar("model_id", { length: 25 })
 		.references(() => models.id, { onDelete: "restrict" })

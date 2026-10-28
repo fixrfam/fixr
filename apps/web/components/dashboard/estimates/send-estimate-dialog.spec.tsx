@@ -46,7 +46,7 @@ describe("SendEstimateDialog", () => {
 		expect(body).toEqual({ email: "maria@fixr.test" });
 	});
 
-	it("lets the API use the client's email when left empty", async () => {
+	it("lets the API use the customer's email when left empty", async () => {
 		let body: unknown;
 		server.use(
 			http.post(SEND_URL, async ({ request }) => {

@@ -30,7 +30,7 @@ describe("NewServiceOrderForm", () => {
 		await waitFor(() =>
 			expect(
 				screen.getByRole("combobox", { name: "Cliente" })
-			).toHaveTextContent(device.client.name)
+			).toHaveTextContent(device.customer.name)
 		);
 		await user.type(
 			screen.getByRole("textbox", { name: /Problema|Defeito/i }),
@@ -78,7 +78,7 @@ describe("NewServiceOrderForm", () => {
 			await screen.findByText(t("serviceOrders.form.newCustomerHint"))
 		).toBeInTheDocument();
 		expect(
-			screen.getByPlaceholderText(t("clients.form.namePlaceholder"))
+			screen.getByPlaceholderText(t("customers.form.namePlaceholder"))
 		).toBeInTheDocument();
 	});
 
@@ -94,7 +94,7 @@ describe("NewServiceOrderForm", () => {
 
 	it("shows the customer's devices as cards to pick", async () => {
 		navigation.searchParams = new URLSearchParams({
-			customerId: device.clientId,
+			customerId: device.customerId,
 		});
 		const user = userEvent.setup();
 		render(<NewServiceOrderForm />);

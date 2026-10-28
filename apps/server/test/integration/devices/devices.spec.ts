@@ -39,7 +39,7 @@ describe("POST /companies/:subdomain/devices", () => {
 			method: "POST",
 			url,
 			payload: {
-				clientId: customer.id,
+				customerId: customer.id,
 				modelId: model.id,
 				imei: "356938035643809",
 				serialNumber: "",
@@ -48,11 +48,11 @@ describe("POST /companies/:subdomain/devices", () => {
 
 		expect(response.statusCode).toBe(201);
 		expect(response.json().data).toMatchObject({
-			clientId: customer.id,
+			customerId: customer.id,
 			imei: "356938035643809",
 			serialNumber: null,
 			status: "with_customer",
-			client: { name: "Maria Cliente" },
+			customer: { name: "Maria Cliente" },
 			model: { name: "iPhone 13" },
 			maker: { id: maker.id },
 		});
@@ -69,12 +69,12 @@ describe("POST /companies/:subdomain/devices", () => {
 		const ok = await authedInject(app, token, {
 			method: "POST",
 			url,
-			payload: { clientId: customer.id, modelId: own.id },
+			payload: { customerId: customer.id, modelId: own.id },
 		});
 		const refused = await authedInject(app, token, {
 			method: "POST",
 			url,
-			payload: { clientId: customer.id, modelId: foreign.id },
+			payload: { customerId: customer.id, modelId: foreign.id },
 		});
 
 		expect(ok.statusCode).toBe(201);
@@ -89,11 +89,11 @@ describe("POST /companies/:subdomain/devices", () => {
 		const response = await authedInject(app, token, {
 			method: "POST",
 			url,
-			payload: { clientId: foreign.id, modelId: model.id },
+			payload: { customerId: foreign.id, modelId: model.id },
 		});
 
 		expect(response.statusCode).toBe(400);
-		expect(response.json().code).toBe("device_client_not_found");
+		expect(response.json().code).toBe("device_customer_not_found");
 	});
 
 	it("is not allowed for a technician", async () => {
@@ -102,7 +102,7 @@ describe("POST /companies/:subdomain/devices", () => {
 		const response = await authedInject(app, token, {
 			method: "POST",
 			url,
-			payload: { clientId: customer.id, modelId: model.id },
+			payload: { customerId: customer.id, modelId: model.id },
 		});
 
 		expect(response.statusCode).toBe(403);
@@ -115,25 +115,25 @@ describe("GET /companies/:subdomain/devices", () => {
 		const other = await makeCustomer({ companyId: company.id, name: "João" });
 		await makeDevice({
 			companyId: company.id,
-			clientId: customer.id,
+			customerId: customer.id,
 			modelId: model.id,
 			status: "in_shop",
 		});
 		await makeDevice({
 			companyId: company.id,
-			clientId: other.id,
+			customerId: other.id,
 			modelName: "Galaxy S21",
 		});
 		await makeDevice({
 			companyId: company.id,
-			clientId: other.id,
+			customerId: other.id,
 			modelId: model.id,
 			deletedAt: new Date(),
 		});
 		const foreignCompany = await makeCompany();
 		await makeDevice({
 			companyId: foreignCompany.id,
-			clientId: (await makeCustomer({ companyId: foreignCompany.id })).id,
+			customerId: (await makeCustomer({ companyId: foreignCompany.id })).id,
 			modelId: model.id,
 		});
 		const total = async (query = "") =>
@@ -146,7 +146,7 @@ describe("GET /companies/:subdomain/devices", () => {
 
 		expect(await total()).toBe(2);
 		expect(await total("status=in_shop")).toBe(1);
-		expect(await total(`clientId=${other.id}`)).toBe(1);
+		expect(await total(`customerId=${other.id}`)).toBe(1);
 		expect(await total("query=iPhone")).toBe(1);
 		expect(await total("query=Apple")).toBe(1);
 		expect(await total("query=Maria")).toBe(1);
@@ -158,12 +158,12 @@ describe("device detail, update and delete", () => {
 		const ctx = await setup();
 		const device = await makeDevice({
 			companyId: ctx.company.id,
-			clientId: ctx.customer.id,
+			customerId: ctx.customer.id,
 			modelId: ctx.model.id,
 		});
 		await makeServiceOrder({
 			companyId: ctx.company.id,
-			clientId: ctx.customer.id,
+			customerId: ctx.customer.id,
 			employeeId: ctx.employee.id,
 			deviceId: device.id,
 		});

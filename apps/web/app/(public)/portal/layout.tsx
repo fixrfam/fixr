@@ -1,6 +1,6 @@
 import QueryClientWrapper from "@/lib/query-client";
 
-/** Client portal: passwordless area opened from the links sent by email. */
+/** Customer portal: passwordless area opened from the links sent by email. */
 export default function PortalLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {

@@ -24,23 +24,23 @@ import React from "react";
 import { FixrHeader } from "../components/fixr-header";
 
 export interface EmailProps {
-	clientName: string;
+	customerName: string;
 	companyName: string;
-	/** Estimate number as the client sees it, e.g. `0042`. */
+	/** Estimate number as the customer sees it, e.g. `0042`. */
 	number: string;
 	device: string;
 	/** Total already formatted in the recipient's currency. */
 	total: string;
 	/** Validity date already formatted for the recipient. */
 	validUntil: string;
-	/** Public page where the client approves or rejects the estimate. */
+	/** Public page where the customer approves or rejects the estimate. */
 	ctaUrl: string;
 	/** Language of the recipient. Defaults to the app's default locale. */
 	locale?: Locale;
 }
 
 export const Estimate = ({
-	clientName,
+	customerName,
 	companyName,
 	number,
 	device,
@@ -77,7 +77,7 @@ export const Estimate = ({
 						<Text
 							className="my-0 text-lg tracking-tight"
 							dangerouslySetInnerHTML={{
-								__html: t("emails.estimate.greeting", { name: clientName }),
+								__html: t("emails.estimate.greeting", { name: customerName }),
 							}}
 						/>
 						<Heading
@@ -118,7 +118,7 @@ export const Estimate = ({
 };
 
 Estimate.PreviewProps = {
-	clientName: "Maria",
+	customerName: "Maria",
 	companyName: "Central Assistência",
 	number: "0042",
 	device: "Samsung Galaxy S21",

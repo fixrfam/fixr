@@ -18,13 +18,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { sendPortalAccess } from "@/lib/services/portal";
 
-/** Confirm and email the client a link to the client portal. */
+/** Confirm and email the customer a link to the customer portal. */
 export function SendPortalAccessDialog({
-	client,
+	customer,
 	open,
 	onOpenChange,
 }: {
-	client: { id: string; name: string };
+	customer: { id: string; name: string };
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
@@ -33,7 +33,7 @@ export function SendPortalAccessDialog({
 	const toastError = useApiErrorToast();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const send = useMutation({
-		mutationFn: () => sendPortalAccess(subdomain, client.id),
+		mutationFn: () => sendPortalAccess(subdomain, customer.id),
 		onSuccess: () => {
 			const feedback = message("send_portal_access_success", "success");
 			toast.success({
@@ -50,7 +50,7 @@ export function SendPortalAccessDialog({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
-						{t("portal.shopActions.sendAccessTitle", { name: client.name })}
+						{t("portal.shopActions.sendAccessTitle", { name: customer.name })}
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						{t("portal.shopActions.sendAccessDescription")}

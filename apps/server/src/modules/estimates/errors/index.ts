@@ -39,7 +39,8 @@ export const estimatesErrors = defineErrors({
 	},
 	ESTIMATE_NO_RECIPIENT: {
 		code: "estimate_no_recipient",
-		message: "The client has no email. Send the estimate to an email address.",
+		message:
+			"The customer has no email. Send the estimate to an email address.",
 		status: 400,
 	},
 	ESTIMATE_EXPIRED: {

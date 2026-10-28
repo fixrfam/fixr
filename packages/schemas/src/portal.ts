@@ -1,7 +1,7 @@
 import { i18nMessage } from "@fixr/i18n";
 import { z } from "zod";
 
-/** @description Body schema for a client asking for a new portal link by email */
+/** @description Body schema for a customer asking for a new portal link by email */
 export const requestPortalAccessSchema = z.object({
 	email: z
 		.string()

@@ -24,7 +24,7 @@ import { portalApi } from "@/lib/services/portal";
 
 type FormValues = z.input<typeof requestPortalAccessSchema>;
 
-/** The client asks for a new portal link with their email. */
+/** The customer asks for a new portal link with their email. */
 export function PortalAccessForm() {
 	const { t } = useTranslation();
 	const toastError = useApiErrorToast();

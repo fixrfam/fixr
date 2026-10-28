@@ -7,7 +7,7 @@ import type { ServiceOrderRow } from "@/lib/services/service-orders";
 import {
 	ActionsCell,
 	CategoryCell,
-	ClientCell,
+	CustomerCell,
 	DeviceCell,
 	IssueCell,
 	OrderNumberCell,
@@ -33,10 +33,10 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				meta: { label: t("serviceOrders.table.columns.order") },
 			}),
 			columnHelper.display({
-				id: "client",
-				header: t("serviceOrders.table.columns.client"),
-				cell: ({ row }) => <ClientCell client={row.original.client} />,
-				meta: { label: t("serviceOrders.table.columns.client") },
+				id: "customer",
+				header: t("serviceOrders.table.columns.customer"),
+				cell: ({ row }) => <CustomerCell customer={row.original.customer} />,
+				meta: { label: t("serviceOrders.table.columns.customer") },
 			}),
 			columnHelper.display({
 				id: "device",

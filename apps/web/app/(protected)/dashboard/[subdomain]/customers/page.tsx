@@ -8,8 +8,8 @@ export default async function CustomersPage() {
 	return (
 		<div className="space-y-4">
 			<Heading
-				description={t("clients.page.description")}
-				title={t("clients.page.title")}
+				description={t("customers.page.description")}
+				title={t("customers.page.title")}
 			/>
 			<div className="mt-5 rounded-xs">
 				<CustomersTable />

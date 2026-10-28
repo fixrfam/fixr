@@ -23,7 +23,7 @@ const relation = z.object({ id: z.string(), name: z.string() });
 /** A device with its owner and catalog model. */
 export const deviceRecordSchema = z.object({
 	...deviceSelectSchema.shape,
-	client: relation.extend({
+	customer: relation.extend({
 		cpf: z.string(),
 		phone: z.string().nullable(),
 	}),
@@ -53,11 +53,11 @@ const deviceNotFound = notFoundError("device_not_found", "Device not found.");
 const invalidReference = zodResponseSchema({
 	status: 400,
 	error: "Bad Request",
-	code: "device_client_not_found",
+	code: "device_customer_not_found",
 	message: "The customer does not exist in this company.",
 	data: null,
 }).describe(
-	"The customer (`device_client_not_found`) or the model (`device_model_not_found`) can't be used by this company."
+	"The customer (`device_customer_not_found`) or the model (`device_model_not_found`) can't be used by this company."
 );
 
 const listDevicesSchema: FastifySchema = {
@@ -67,7 +67,7 @@ const listDevicesSchema: FastifySchema = {
 **Retrieves the customers' devices (paginated)**
 
 - \`query\`: search in model, maker, owner name, IMEI or serial number
-- \`clientId\`: only the devices of one customer
+- \`customerId\`: only the devices of one customer
 - \`status\`: one of: ${deviceStatuses.options.join(", ")}
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\` | \`updated\`)
 

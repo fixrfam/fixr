@@ -12,9 +12,9 @@ export default function NewCustomerModal() {
 
 	return (
 		<ResponsiveDialogDrawer
-			description={t("clients.page.newDescription")}
+			description={t("customers.page.newDescription")}
 			icon={<UserPlus />}
-			title={t("clients.page.newTitle")}
+			title={t("customers.page.newTitle")}
 		>
 			<CustomerForm cols={2} onSaved={() => router.back()} />
 		</ResponsiveDialogDrawer>

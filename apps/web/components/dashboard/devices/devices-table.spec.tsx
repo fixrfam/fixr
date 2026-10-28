@@ -20,7 +20,7 @@ describe("DevicesTable", () => {
 		render(<DevicesTable />);
 
 		const row = (await screen.findByText(device.model.name)).closest("tr")!;
-		expect(within(row).getByText(device.client.name)).toBeInTheDocument();
+		expect(within(row).getByText(device.customer.name)).toBeInTheDocument();
 		expect(within(row).getByText("Com o cliente")).toBeInTheDocument();
 		expect(api.listQueries[0]?.params).toMatchObject({ sort: "updated" });
 	});
@@ -71,7 +71,7 @@ describe("DeviceFormDialog", () => {
 		const user = userEvent.setup();
 		render(
 			<DeviceFormDialog
-				customer={device.client}
+				customer={device.customer}
 				onOpenChange={() => undefined}
 				open
 			/>
@@ -93,7 +93,7 @@ describe("DeviceFormDialog", () => {
 			expect(api.writes[0]).toMatchObject({
 				method: "POST",
 				body: {
-					clientId: device.client.id,
+					customerId: device.customer.id,
 					modelId: device.model.id,
 					imei: "123",
 				},

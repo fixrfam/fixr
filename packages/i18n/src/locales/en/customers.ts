@@ -1,4 +1,4 @@
-export const clients = {
+export const customers = {
 	page: {
 		title: "Customers",
 		description: "The people who bring you devices to repair.",
@@ -58,8 +58,8 @@ export const clients = {
 		save: "Save changes",
 		updated: "Customer updated!",
 		submit: "Finish registration",
-		success: "Client registered!",
-		error: "Could not register the client",
+		success: "Customer registered!",
+		error: "Could not register the customer",
 		nameDescription: "As on their ID. It shows on orders and estimates.",
 		emailDescription: "Where estimates and portal access links are sent.",
 		phoneDescription: "Main contact, with the area code.",

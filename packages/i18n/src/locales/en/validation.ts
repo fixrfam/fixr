@@ -59,7 +59,7 @@ export const validation = {
 		expirationInPast: "The expiration date must be in the future.",
 	},
 	device: {
-		clientRequired: "Pick the customer who owns the device.",
+		customerRequired: "Pick the customer who owns the device.",
 		modelRequired: "Pick the device model.",
 		imeiMax: "The IMEI exceeds {{count}} characters.",
 		serialNumberMax: "The serial number exceeds {{count}} characters.",
@@ -76,7 +76,7 @@ export const validation = {
 		itemQuantityMax: "The quantity can't exceed {{count}}.",
 		itemPriceRequired: "Enter the price.",
 		itemPriceMin: "The price can't be negative.",
-		clientInvalid: "Invalid client.",
+		customerInvalid: "Invalid customer.",
 		brandInvalid: "Invalid device brand.",
 		categoryInvalid: "Invalid device category.",
 		assigneeInvalid: "Invalid assignee.",

@@ -89,7 +89,7 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 		ability.can(permissions.estimates.sendToCustomer) &&
 		(estimate.status === "draft" || estimate.status === "sent");
 	const canSendPortalAccess =
-		ability.can(permissions.customers.update) && estimate.client !== null;
+		ability.can(permissions.customers.update) && estimate.customer !== null;
 	const [sending, setSending] = useState(false);
 	const [sendingPortal, setSendingPortal] = useState(false);
 
@@ -116,8 +116,8 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 						<DropdownMenuItem onSelect={() => setSending(true)}>
 							<Mail className="size-4" />
 							{estimate.status === "sent"
-								? t("estimates.actions.resendToClient")
-								: t("estimates.actions.sendToClient")}
+								? t("estimates.actions.resendToCustomer")
+								: t("estimates.actions.sendToCustomer")}
 						</DropdownMenuItem>
 					) : null}
 					{canSendPortalAccess ? (
@@ -163,9 +163,9 @@ function EstimateActions({ estimate }: { estimate: Estimate }) {
 					open={sending}
 				/>
 			) : null}
-			{sendingPortal && estimate.client ? (
+			{sendingPortal && estimate.customer ? (
 				<SendPortalAccessDialog
-					client={estimate.client}
+					customer={estimate.customer}
 					onOpenChange={setSendingPortal}
 					open={sendingPortal}
 				/>
@@ -221,7 +221,7 @@ export function EstimatesTable() {
 						<TableHeader>
 							<TableRow>
 								<TableHead>{t("estimates.table.headers.number")}</TableHead>
-								<TableHead>{t("estimates.table.headers.client")}</TableHead>
+								<TableHead>{t("estimates.table.headers.customer")}</TableHead>
 								<TableHead>{t("estimates.table.headers.status")}</TableHead>
 								<TableHead className="text-right">
 									{t("estimates.table.headers.total")}
@@ -251,9 +251,9 @@ export function EstimatesTable() {
 											#{String(estimate.number).padStart(4, "0")}
 										</TableCell>
 										<TableCell>
-											{estimate.client?.name ?? (
+											{estimate.customer?.name ?? (
 												<span className="text-muted-foreground">
-													{t("estimates.table.noClient")}
+													{t("estimates.table.noCustomer")}
 												</span>
 											)}
 										</TableCell>

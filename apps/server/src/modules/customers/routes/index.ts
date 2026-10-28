@@ -1,22 +1,22 @@
 import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
-import {
-	clientIdParamsSchema,
-	createClientSchema,
-	getClientsQuerySchema,
-	patchClientSchema,
-} from "@fixr/schemas/clients";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
+import {
+	createCustomerSchema,
+	customerIdParamsSchema,
+	getCustomersQuerySchema,
+	patchCustomerSchema,
+} from "@fixr/schemas/customers";
 import type { z } from "zod";
-import { clientsDocs } from "../../../core/docs/clients.docs";
+import { customersDocs } from "../../../core/docs/customers.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
-import { ClientsController } from "../controllers";
+import { CustomersController } from "../controllers";
 
-/** @description Clients routes plugin */
-export function clientsRoutes(fastify: FastifyTypedInstance) {
+/** @description Customers routes plugin */
+export function customersRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/",
 		{
@@ -24,14 +24,14 @@ export function clientsRoutes(fastify: FastifyTypedInstance) {
 				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.customers.read),
 			],
-			schema: clientsDocs.listClientsSchema,
+			schema: customersDocs.listCustomersSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const query = getClientsQuerySchema.parse(request.query);
+			const query = getCustomersQuerySchema.parse(request.query);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ClientsController.listClients({
+			await CustomersController.listCustomers({
 				userJwt,
 				subdomain,
 				response,
@@ -41,23 +41,23 @@ export function clientsRoutes(fastify: FastifyTypedInstance) {
 	);
 
 	fastify.get(
-		"/:clientId",
+		"/:customerId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.customers.read),
 			],
-			schema: clientsDocs.getClientSchema,
+			schema: customersDocs.getCustomerSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const { clientId } = clientIdParamsSchema.parse(request.params);
+			const { customerId } = customerIdParamsSchema.parse(request.params);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ClientsController.getClient({
+			await CustomersController.getCustomer({
 				userJwt,
 				subdomain,
-				clientId,
+				customerId,
 				response,
 			});
 		})
@@ -70,14 +70,14 @@ export function clientsRoutes(fastify: FastifyTypedInstance) {
 				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.customers.create),
 			],
-			schema: clientsDocs.createClientSchema,
+			schema: customersDocs.createCustomerSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const data = createClientSchema.parse(request.body);
+			const data = createCustomerSchema.parse(request.body);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ClientsController.createClient({
+			await CustomersController.createCustomer({
 				userJwt,
 				subdomain,
 				data,
@@ -87,24 +87,24 @@ export function clientsRoutes(fastify: FastifyTypedInstance) {
 	);
 
 	fastify.patch(
-		"/:clientId",
+		"/:customerId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.customers.update),
 			],
-			schema: clientsDocs.patchClientSchema,
+			schema: customersDocs.patchCustomerSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const { clientId } = clientIdParamsSchema.parse(request.params);
-			const data = patchClientSchema.parse(request.body);
+			const { customerId } = customerIdParamsSchema.parse(request.params);
+			const data = patchCustomerSchema.parse(request.body);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ClientsController.patchClient({
+			await CustomersController.patchCustomer({
 				userJwt,
 				subdomain,
-				clientId,
+				customerId,
 				data,
 				response,
 			});
@@ -112,23 +112,23 @@ export function clientsRoutes(fastify: FastifyTypedInstance) {
 	);
 
 	fastify.delete(
-		"/:clientId",
+		"/:customerId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
 				requirePermission(permissions.customers.delete),
 			],
-			schema: clientsDocs.deleteClientSchema,
+			schema: customersDocs.deleteCustomerSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const { clientId } = clientIdParamsSchema.parse(request.params);
+			const { customerId } = customerIdParamsSchema.parse(request.params);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await ClientsController.deleteClient({
+			await CustomersController.deleteCustomer({
 				userJwt,
 				subdomain,
-				clientId,
+				customerId,
 				response,
 			});
 		})

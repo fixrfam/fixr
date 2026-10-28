@@ -912,11 +912,11 @@ export function AppMockup() {
 			</Card>
 
 			<Card
-				description={t("serviceOrders.cards.clientDescription")}
+				description={t("serviceOrders.cards.customerDescription")}
 				h={164}
 				icon={FileUser}
 				index={2}
-				title={t("serviceOrders.cards.clientTitle")}
+				title={t("serviceOrders.cards.customerTitle")}
 				w={RIGHT.w}
 				x={RIGHT.x}
 				y={589}

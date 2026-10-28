@@ -11,8 +11,8 @@ import { describe, expect, it } from "vitest";
 import { events } from "../../../src/core/events";
 import {
 	makeCategory,
-	makeClient,
 	makeCompany,
+	makeCustomer,
 	makeDevice,
 	makeEmployee,
 	makeMaker,
@@ -25,22 +25,22 @@ import { authedInject, createEmployeeSession } from "../../helpers/auth";
 
 const app = await createTestApp();
 
-/** A client of `companyId` (orders only accept the company's own devices) with a device, plus its maker and category. */
+/** A customer of `companyId` (orders only accept the company's own devices) with a device, plus its maker and category. */
 async function catalog(companyId?: string) {
 	const owner = companyId ?? (await makeCompany()).id;
-	const [client, maker, category] = await Promise.all([
-		makeClient({ name: "Maria Cliente", companyId: owner }),
+	const [customer, maker, category] = await Promise.all([
+		makeCustomer({ name: "Maria Cliente", companyId: owner }),
 		makeMaker(),
 		makeCategory(),
 	]);
 	const device = await makeDevice({
 		companyId: owner,
-		clientId: client.id,
+		customerId: customer.id,
 		makerId: maker.id,
 		categoryId: category.id,
 		modelName: "iPhone 12",
 	});
-	return { client, maker, category, device };
+	return { customer, maker, category, device };
 }
 
 function orderBody(
@@ -80,7 +80,7 @@ describe("POST /companies/:subdomain/service-orders", () => {
 		expect(stored).toMatchObject({
 			companyId: company.id,
 			employeeId: employee.id,
-			clientId: refs.client.id,
+			customerId: refs.customer.id,
 			deviceId: refs.device.id,
 			status: "pending",
 		});
@@ -270,7 +270,7 @@ describe("GET /companies/:subdomain/service-orders", () => {
 		const otherCategory = await makeCategory();
 		const base = {
 			companyId: company.id,
-			clientId: refs.client.id,
+			customerId: refs.customer.id,
 			employeeId: technician.id,
 			deviceMakerId: refs.maker.id,
 			deviceCategoryId: refs.category.id,
@@ -317,7 +317,7 @@ describe("GET /companies/:subdomain/service-orders", () => {
 		expect(
 			records.map((r: { model: { name: string } }) => r.model.name)
 		).toEqual(["Moto G", "Galaxy S20", "iPhone 12"]);
-		expect(records[0].client.name).toBe("Maria Cliente");
+		expect(records[0].customer.name).toBe("Maria Cliente");
 		expect(records[0].deviceCategory.id).toBeTruthy();
 	});
 
@@ -374,7 +374,7 @@ describe("service order detail and status", () => {
 		const refs = await catalog(session.company.id);
 		const serviceOrder = await makeServiceOrder({
 			companyId: session.company.id,
-			clientId: refs.client.id,
+			customerId: refs.customer.id,
 			employeeId: session.employee.id,
 			deviceId: refs.device.id,
 		});
@@ -389,7 +389,7 @@ describe("service order detail and status", () => {
 
 		expect(response.statusCode).toBe(200);
 		expect(response.json().data).toMatchObject({
-			client: { id: refs.client.id, name: "Maria Cliente" },
+			customer: { id: refs.customer.id, name: "Maria Cliente" },
 			device: { id: refs.device.id },
 			model: { name: "iPhone 12" },
 			deviceMaker: { id: refs.maker.id },
