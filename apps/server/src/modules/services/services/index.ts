@@ -8,16 +8,47 @@ import type {
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
+import { sumMoney } from "../../../core/lib/money";
 import {
 	getPaginatedCount,
 	getPaginatedRecords,
 	paginationMeta,
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
-import { ServicesRepository } from "../repositories";
+import { type ServiceRecord, ServicesRepository } from "../repositories";
 
 type UserJwt = z.infer<typeof jwtPayload>;
 type ServiceRow = typeof services.$inferSelect;
+
+/**
+ * What the service costs the customer: its own price (labor) plus the
+ * current sale price of the parts it uses.
+ */
+async function withPricing<T extends Pick<ServiceRecord, "price" | "partIds">>(
+	records: T[]
+) {
+	const prices = await ServicesRepository.queryPartPrices([
+		...new Set(records.flatMap((record) => record.partIds)),
+	]);
+	return records.map((record) => {
+		const partsPrice = sumMoney(
+			record.partIds.map((partId) => prices.get(partId) ?? 0)
+		);
+		return {
+			...record,
+			partsPrice,
+			totalPrice: sumMoney([record.price, partsPrice]),
+		};
+	});
+}
+
+async function withServicePricing(record: ServiceRecord | null) {
+	if (!record) {
+		return null;
+	}
+	const [priced] = await withPricing([record]);
+	return priced;
+}
 
 /** @description Business logic for the repair services a company offers */
 export class ServicesService {
@@ -100,10 +131,12 @@ export class ServicesService {
 		const partIds = await ServicesRepository.queryPartIdsByServiceIds(
 			rows.map((row) => row.id)
 		);
-		const records = rows.map((row) => ({
-			...row,
-			partIds: partIds.get(row.id) ?? [],
-		}));
+		const records = await withPricing(
+			rows.map((row) => ({
+				...row,
+				partIds: partIds.get(row.id) ?? [],
+			}))
+		);
 
 		return response.status(200).send(
 			apiResponse({
@@ -128,7 +161,9 @@ export class ServicesService {
 		response: FastifyReply;
 	}) {
 		const companyId = ServicesService.resolveCompanyId(userJwt, subdomain);
-		const service = await ServicesService.queryOwnService(serviceId, companyId);
+		const service = await withServicePricing(
+			await ServicesService.queryOwnService(serviceId, companyId)
+		);
 
 		return response.status(200).send(
 			apiResponse({
@@ -163,7 +198,9 @@ export class ServicesService {
 			{ ...values, companyId },
 			linkedPartIds
 		);
-		const service = await ServicesRepository.queryServiceById(serviceId);
+		const service = await withServicePricing(
+			await ServicesRepository.queryServiceById(serviceId)
+		);
 
 		return response.status(201).send(
 			apiResponse({
@@ -199,7 +236,9 @@ export class ServicesService {
 				: await ServicesService.resolvePartIds(companyId, partIds);
 
 		await ServicesRepository.updateService(serviceId, values, linkedPartIds);
-		const service = await ServicesRepository.queryServiceById(serviceId);
+		const service = await withServicePricing(
+			await ServicesRepository.queryServiceById(serviceId)
+		);
 
 		return response.status(200).send(
 			apiResponse({

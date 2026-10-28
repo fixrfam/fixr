@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "c3ff89ec-c509-49a2-b981-37b9932adaae",
-  "prevId": "69ca2be8-abb5-4162-b9b4-775c8e308143",
+  "id": "0247c390-43cc-4e9c-8177-fd5f826f6f4c",
+  "prevId": "b9c7e924-5d38-4ed0-9bfd-2f71e089cc88",
   "tables": {
     "api_keys": {
       "name": "api_keys",
@@ -679,6 +679,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "parent_item_id": {
+          "name": "parent_item_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(120)",
@@ -736,6 +743,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "estimate_items_parent_item_id_estimate_items_id_fk": {
+          "name": "estimate_items_parent_item_id_estimate_items_id_fk",
+          "tableFrom": "estimate_items",
+          "tableTo": "estimate_items",
+          "columnsFrom": ["parent_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -823,41 +839,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "public_token_hash": {
-          "name": "public_token_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "sent_to": {
-          "name": "sent_to",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "responded_at": {
-          "name": "responded_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "rejection_reason": {
-          "name": "rejection_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -921,10 +902,6 @@
         }
       },
       "uniqueConstraints": {
-        "estimates_public_token_hash_unique": {
-          "name": "estimates_public_token_hash_unique",
-          "columns": ["public_token_hash"]
-        },
         "estimates_number_company_unique": {
           "name": "estimates_number_company_unique",
           "columns": ["company_id", "number"]
@@ -1940,6 +1917,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "parent_item_id": {
+          "name": "parent_item_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(120)",
@@ -2006,6 +1990,15 @@
           "columnsFrom": ["service_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "service_order_items_parent_item_id_service_order_items_id_fk": {
+          "name": "service_order_items_parent_item_id_service_order_items_id_fk",
+          "tableFrom": "service_order_items",
+          "tableTo": "service_order_items",
+          "columnsFrom": ["parent_item_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
