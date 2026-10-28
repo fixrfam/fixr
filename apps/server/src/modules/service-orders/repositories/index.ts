@@ -25,6 +25,7 @@ import {
 	serviceOrderItems,
 	serviceOrderSequences,
 	serviceOrders,
+	serviceParts,
 	services,
 	uploads,
 } from "@fixr/db/schema";
@@ -510,21 +511,75 @@ export class ServiceOrdersRepository {
 		return item ?? null;
 	}
 
-	static async insertItem(values: ServiceOrderItemInsert) {
-		await db.insert(serviceOrderItems).values(values);
+	static async insertItem(
+		values: ServiceOrderItemInsert,
+		executor: Transaction | typeof db = db
+	) {
+		const [{ id }] = await executor
+			.insert(serviceOrderItems)
+			.values(values)
+			.$returningId();
+		return id;
+	}
+
+	/** Parts of the company a catalog service uses, with their current sale price. */
+	static async queryServiceParts(serviceId: string, companyId: string) {
+		return await db
+			.select({ id: parts.id, name: parts.name, price: parts.salePrice })
+			.from(serviceParts)
+			.innerJoin(parts, eq(parts.id, serviceParts.partId))
+			.where(
+				and(
+					eq(serviceParts.serviceId, serviceId),
+					eq(parts.companyId, companyId)
+				)
+			)
+			.orderBy(parts.name);
+	}
+
+	/** Part lines of the order that don't belong to a service yet, for the given parts. */
+	static async queryLoosePartItems(
+		tx: Transaction,
+		serviceOrderId: string,
+		partIds: string[]
+	) {
+		if (partIds.length === 0) {
+			return [];
+		}
+		return await tx
+			.select()
+			.from(serviceOrderItems)
+			.where(
+				and(
+					eq(serviceOrderItems.serviceOrderId, serviceOrderId),
+					eq(serviceOrderItems.type, "part"),
+					isNull(serviceOrderItems.parentItemId),
+					inArray(serviceOrderItems.partId, partIds)
+				)
+			)
+			.orderBy(serviceOrderItems.createdAt, serviceOrderItems.id);
 	}
 
 	static async updateItem(
 		itemId: string,
-		values: Partial<ServiceOrderItemInsert>
+		values: Partial<ServiceOrderItemInsert>,
+		executor: Transaction | typeof db = db
 	) {
-		await db
+		await executor
 			.update(serviceOrderItems)
 			.set(values)
 			.where(eq(serviceOrderItems.id, itemId));
 	}
 
+	/** Delete the line and, for a service, the parts under it. */
 	static async deleteItem(itemId: string) {
-		await db.delete(serviceOrderItems).where(eq(serviceOrderItems.id, itemId));
+		await db
+			.delete(serviceOrderItems)
+			.where(
+				or(
+					eq(serviceOrderItems.id, itemId),
+					eq(serviceOrderItems.parentItemId, itemId)
+				)
+			);
 	}
 }

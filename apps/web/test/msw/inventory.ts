@@ -8,9 +8,12 @@ import type {
 import { apiUrl, envelope } from "./handlers";
 import { server } from "./server";
 
+/** Services as stored: the API adds `partsPrice`/`totalPrice` when it answers. */
+type StoredService = Omit<ServiceRow, "partsPrice" | "totalPrice">;
+
 interface Catalog {
 	parts: PartRow[];
-	services: ServiceRow[];
+	services: StoredService[];
 	suppliers: SupplierRow[];
 }
 
@@ -63,6 +66,21 @@ function page<T>(records: T[], request: Request) {
  * Serve the company catalog of `subdomain` from memory (the mocks by default)
  * and record every write the dashboard sends.
  */
+/** The service priced like the API: labor plus the linked parts' sale price. */
+function priced(service: StoredService, parts: PartRow[]): ServiceRow {
+	const partsCents = service.partIds.reduce(
+		(cents, id) =>
+			cents +
+			Math.round((parts.find((part) => part.id === id)?.salePrice ?? 0) * 100),
+		0
+	);
+	return {
+		...service,
+		partsPrice: partsCents / 100,
+		totalPrice: (Math.round(service.price * 100) + partsCents) / 100,
+	};
+}
+
 export function serveInventory(
 	subdomain = "fixr",
 	catalog: Catalog = {
@@ -145,11 +163,18 @@ export function serveInventory(
 						contains(service.description, query)) &&
 					(!deviceCategory || service.deviceCategories.includes(deviceCategory))
 			);
-			return page(sortRecords(services, params.get("sort")), request);
+			return page(
+				sortRecords(services, params.get("sort")).map((service) =>
+					priced(service, catalog.parts)
+				),
+				request
+			);
 		}),
 		http.get(apiUrl(`${base}/services/:id`), ({ params }) => {
 			const service = catalog.services.find((s) => s.id === params.id);
-			return service ? HttpResponse.json(envelope(service)) : notFound();
+			return service
+				? HttpResponse.json(envelope(priced(service, catalog.parts)))
+				: notFound();
 		}),
 		http.get(apiUrl(`${base}/suppliers`), ({ request }) => {
 			const params = list(request);
@@ -197,7 +222,7 @@ export function serveInventory(
 				...(await record(request)),
 				id: `srv-${writes.length}`,
 			};
-			catalog.services.push(service as ServiceRow);
+			catalog.services.push(service as StoredService);
 			return HttpResponse.json(envelope(service, { status: 201 }), {
 				status: 201,
 			});

@@ -37,6 +37,7 @@ import {
 	type ServiceOrderItems as ServiceOrderItemsData,
 	serviceOrderItemsApi,
 } from "@/lib/services/service-orders";
+import { cn } from "@/lib/utils";
 
 type Change =
 	| { kind: "add"; type: "part" | "service"; itemId: string }
@@ -129,20 +130,47 @@ export function ServiceOrderItems({
 				</p>
 			) : (
 				<div className="grid gap-2">
-					{data.items.map((item) => (
-						<ItemRow
-							canEdit={canEdit}
-							disabled={change.isPending}
-							item={item}
-							key={item.id}
-							onQuantity={(quantity) =>
-								change.mutate({ kind: "quantity", itemId: item.id, quantity })
-							}
-							onRemove={() =>
-								change.mutate({ kind: "remove", itemId: item.id })
-							}
-						/>
-					))}
+					{groupItems(data.items).map(({ item, parts }) => {
+						const rowProps = (line: ServiceOrderItem) => ({
+							canEdit,
+							disabled: change.isPending,
+							item: line,
+							onQuantity: (quantity: number) =>
+								change.mutate({ kind: "quantity", itemId: line.id, quantity }),
+							onRemove: () =>
+								change.mutate({ kind: "remove", itemId: line.id }),
+						});
+
+						if (parts.length === 0) {
+							return <ItemRow key={item.id} {...rowProps(item)} />;
+						}
+
+						return (
+							<div className="rounded-md border bg-card" key={item.id}>
+								<ItemRow {...rowProps(item)} bare />
+								<ul
+									aria-label={t("serviceOrders.items.serviceParts", {
+										name: item.name,
+									})}
+									className="ml-4 border-l pb-1"
+								>
+									{parts.map((part) => (
+										<li key={part.id}>
+											<ItemRow {...rowProps(part)} bare nested />
+										</li>
+									))}
+								</ul>
+								<div className="flex justify-between border-t px-3 py-1.5 text-2xs text-muted-foreground">
+									<span>{t("serviceOrders.items.serviceWithParts")}</span>
+									<span className="font-medium text-foreground tabular-nums">
+										{format.currency(
+											sumTotals([item, ...parts].map((line) => line.total))
+										)}
+									</span>
+								</div>
+							</div>
+						);
+					})}
 				</div>
 			)}
 
@@ -166,23 +194,62 @@ export function ServiceOrderItems({
 	);
 }
 
+/**
+ * Top level lines in the order they were added, each service with the parts
+ * it uses. A part whose service is gone (shouldn't happen) shows on its own.
+ */
+export function groupItems(items: ServiceOrderItem[]) {
+	const ids = new Set(items.map((item) => item.id));
+	const partsOf = new Map<string, ServiceOrderItem[]>();
+	for (const item of items) {
+		if (item.parentItemId && ids.has(item.parentItemId)) {
+			partsOf.set(item.parentItemId, [
+				...(partsOf.get(item.parentItemId) ?? []),
+				item,
+			]);
+		}
+	}
+	return items
+		.filter((item) => !(item.parentItemId && ids.has(item.parentItemId)))
+		.map((item) => ({ item, parts: partsOf.get(item.id) ?? [] }));
+}
+
+/** Sum of line totals through cents, as the API sums the order. */
+function sumTotals(totals: number[]) {
+	return (
+		totals.reduce((cents, total) => cents + Math.round(total * 100), 0) / 100
+	);
+}
+
 function ItemRow({
 	item,
 	canEdit,
 	disabled,
 	onQuantity,
 	onRemove,
+	bare = false,
+	nested = false,
 }: {
 	item: ServiceOrderItem;
 	canEdit: boolean;
 	disabled: boolean;
 	onQuantity: (quantity: number) => void;
 	onRemove: () => void;
+	/** Inside a service's box: no border of its own. */
+	bare?: boolean;
+	/** A part the service above uses. */
+	nested?: boolean;
 }) {
 	const { t, format } = useTranslation();
 
 	return (
-		<div className="flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-2xs">
+		<div
+			className={cn(
+				"flex items-center gap-3 px-3 py-2 text-2xs",
+				!bare && "rounded-md border bg-card",
+				nested && "py-1.5"
+			)}
+		>
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center gap-2">
 					<span className="wrap-break-words font-medium">{item.name}</span>
@@ -317,7 +384,7 @@ function AddItemPicker({
 									<div className="flex w-full items-center justify-between gap-2">
 										<span className="truncate">{service.name}</span>
 										<span className="text-muted-foreground text-xs tabular-nums">
-											{format.currency(service.price)}
+											{format.currency(service.totalPrice)}
 										</span>
 									</div>
 								</CommandItem>

@@ -29,7 +29,12 @@ export interface ServiceRow {
 	name: string;
 	description: string;
 	estimatedDurationMinutes: number;
+	/** Labor only. */
 	price: number;
+	/** Current sale price of the linked parts, summed by the API. */
+	partsPrice: number;
+	/** `price + partsPrice`: what an order charges for the service. */
+	totalPrice: number;
 	partIds: string[];
 	deviceCategories: string[];
 	testInstructions: string[];

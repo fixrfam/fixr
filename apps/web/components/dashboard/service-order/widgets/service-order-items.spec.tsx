@@ -21,6 +21,7 @@ const screenItem = {
 	type: "part",
 	partId: mockParts[0]!.id,
 	serviceId: null,
+	parentItemId: null,
 	name: "Tela OLED iPhone 13",
 	quantity: 1,
 	unitPrice: 890,
@@ -156,5 +157,38 @@ describe("ServiceOrderItems", () => {
 				/só ficam disponíveis para ordens de serviço salvas/
 			)
 		).toBeInTheDocument();
+	});
+
+	it("shows the parts a service uses under it, with what the service charges in all", async () => {
+		const serviceLine = {
+			...screenItem,
+			id: "item-2",
+			type: "service",
+			partId: null,
+			serviceId: "srv-1",
+			name: "Troca de tela",
+			unitPrice: 150,
+			total: 150,
+		};
+		const usedScreen = { ...screenItem, parentItemId: "item-2" };
+		server.use(
+			http.get(ITEMS_URL, () =>
+				HttpResponse.json(
+					envelope({
+						items: [serviceLine, usedScreen],
+						totals: { parts: 890, services: 150, total: 1040 },
+					})
+				)
+			)
+		);
+
+		renderWidget();
+
+		const parts = await screen.findByRole("list", {
+			name: "Peças usadas em Troca de tela",
+		});
+		expect(within(parts).getByText("Tela OLED iPhone 13")).toBeInTheDocument();
+		const bundle = screen.getByText("Serviço com peças").closest("div")!;
+		expect(within(bundle).getByText(/1\.040,00/)).toBeInTheDocument();
 	});
 });
