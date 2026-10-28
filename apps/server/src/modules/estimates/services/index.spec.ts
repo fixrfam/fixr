@@ -2,7 +2,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { repo, pdf } = vi.hoisted(() => ({
+const { repo, pdf, queueEmail, emit } = vi.hoisted(() => ({
+	emit: vi.fn(),
 	repo: {
 		buildListFilter: vi.fn(() => "FILTER"),
 		queryEstimate: vi.fn(),
@@ -15,11 +16,15 @@ const { repo, pdf } = vi.hoisted(() => ({
 		deleteEstimate: vi.fn(),
 		queryPdfContext: vi.fn(),
 		queryClient: vi.fn(),
+		queryByTokenHash: vi.fn(),
+		markSent: vi.fn(),
+		recordAnswer: vi.fn(async () => true),
 	},
 	pdf: {
 		renderEstimatePdf: vi.fn(async () => Buffer.from("%PDF-")),
 		fetchLogo: vi.fn(async () => null),
 	},
+	queueEmail: vi.fn(),
 }));
 
 vi.mock("../repositories", () => ({
@@ -28,6 +33,14 @@ vi.mock("../repositories", () => ({
 	estimatesListSelect: {},
 }));
 vi.mock("../pdf/render", () => pdf);
+vi.mock("../../../core/lib/transaction", () => ({
+	inTransaction: (work: (tx: unknown) => unknown) => work("TX"),
+}));
+vi.mock("../../../core/events", () => ({ events: { emit } }));
+vi.mock("@fixr/mail/queue", () => ({
+	createEmailQueue: vi.fn(() => "email-queue"),
+	queueEmail,
+}));
 
 const { EstimatesService } = await import(".");
 
@@ -195,23 +208,76 @@ describe("EstimatesService.createEstimate", () => {
 });
 
 describe("EstimatesService.updateStatus", () => {
-	it.each([
-		["draft", "sent"],
-		["sent", "approved"],
-		["sent", "rejected"],
-		["sent", "draft"],
-		["rejected", "draft"],
-	] as const)("moves %s to %s", async (from, to) => {
-		repo.queryEstimate.mockResolvedValue({ ...estimate, status: from });
-
-		await EstimatesService.updateStatus({
+	const move = (to: "draft" | "sent" | "approved" | "rejected") =>
+		EstimatesService.updateStatus({
 			...base,
 			status: to,
 			response: asReply(createFakeReply()),
 		});
 
+	it("marks a draft as sent without a public link", async () => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "draft" });
+
+		await move("sent");
+
+		expect(repo.markSent).toHaveBeenCalledWith("TX", estimateId, {
+			publicTokenHash: null,
+			sentTo: null,
+		});
+		expect(emit).toHaveBeenCalledWith(
+			"TX",
+			"estimate.sent",
+			expect.objectContaining({ estimateId, serviceOrderId })
+		);
+	});
+
+	it("records the approval like the client link does", async () => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "sent" });
+
+		await move("approved");
+
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", estimateId, {
+			status: "approved",
+		});
+		expect(emit).toHaveBeenCalledWith(
+			"TX",
+			"estimate.approved",
+			expect.objectContaining({ estimateId, serviceOrderId })
+		);
+	});
+
+	it("records a rejection without a reason", async () => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "sent" });
+
+		await move("rejected");
+
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", estimateId, {
+			status: "rejected",
+			rejectionReason: null,
+		});
+		expect(emit).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		"sent",
+		"rejected",
+	] as const)("moves %s back to draft and disables the link", async (from) => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, status: from });
+
+		await move("draft");
+
 		expect(repo.updateEstimate).toHaveBeenCalledWith(estimateId, {
-			status: to,
+			status: "draft",
+			publicTokenHash: null,
+		});
+	});
+
+	it("refuses an answer that lost a race with the client", async () => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, status: "sent" });
+		repo.recordAnswer.mockResolvedValueOnce(false);
+
+		await expect(move("approved")).rejects.toMatchObject({
+			code: "estimate_invalid_transition",
 		});
 	});
 
@@ -223,13 +289,182 @@ describe("EstimatesService.updateStatus", () => {
 	] as const)("refuses %s to %s", async (from, to) => {
 		repo.queryEstimate.mockResolvedValue({ ...estimate, status: from });
 
-		await expect(
-			EstimatesService.updateStatus({
-				...base,
-				status: to,
-				response: asReply(createFakeReply()),
-			})
-		).rejects.toMatchObject({ code: "estimate_invalid_transition" });
+		await expect(move(to)).rejects.toMatchObject({
+			code: "estimate_invalid_transition",
+		});
+	});
+});
+
+describe("EstimatesService.sendEstimate", () => {
+	const future = new Date(Date.now() + 86_400_000);
+	const context = {
+		serviceOrderNumber: 12,
+		subdomain: "fixr",
+		company: {
+			name: "Central",
+			cnpj: "12345678000190",
+			address: "Rua A",
+			email: null,
+			phone: null,
+			website: null,
+			logoUrl: null,
+		},
+		device: { maker: "Samsung", model: "S21", reportedDefect: "Tela" },
+	};
+	const send = (email?: string) =>
+		EstimatesService.sendEstimate({
+			...base,
+			email,
+			locale: "pt-BR",
+			response: asReply(createFakeReply()),
+		});
+
+	beforeEach(() => {
+		repo.queryEstimate.mockResolvedValue({ ...estimate, validUntil: future });
+		repo.queryPdfContext.mockResolvedValue(context);
+		repo.queryClient.mockResolvedValue({
+			name: "Maria",
+			email: "maria@fixr.test",
+		});
+	});
+
+	it("queues the email with the PDF and a link whose hash is stored", async () => {
+		await send();
+
+		const [, , { publicTokenHash, sentTo }] = repo.markSent.mock.calls[0]!;
+		expect(sentTo).toBe("maria@fixr.test");
+
+		const [, { job, payload }] = queueEmail.mock.calls[0]!;
+		expect(job).toBe("sendEstimateEmail");
+		expect(payload).toMatchObject({
+			to: "maria@fixr.test",
+			clientName: "Maria",
+			companyName: "Central",
+			number: "0003",
+			device: "Samsung S21",
+			locale: "pt-BR",
+		});
+		expect(payload.attachment.contentBase64).toBe(
+			Buffer.from("%PDF-").toString("base64")
+		);
+
+		const token = payload.ctaUrl.split("/estimate/")[1];
+		expect(token).toHaveLength(43);
+		const { createHash } = await import("node:crypto");
+		expect(publicTokenHash).toBe(
+			createHash("sha256").update(token).digest("hex")
+		);
+		expect(publicTokenHash).not.toContain(token);
+	});
+
+	it("sends to the given email over the client's", async () => {
+		await send("outro@fixr.test");
+
+		expect(queueEmail.mock.calls[0]![1].payload.to).toBe("outro@fixr.test");
+	});
+
+	it("refuses when nobody has an email", async () => {
+		repo.queryClient.mockResolvedValue({ name: "Maria", email: null });
+
+		await expect(send()).rejects.toMatchObject({
+			code: "estimate_no_recipient",
+		});
+		expect(repo.markSent).not.toHaveBeenCalled();
+	});
+
+	it("refuses an expired estimate", async () => {
+		repo.queryEstimate.mockResolvedValue({
+			...estimate,
+			validUntil: new Date(Date.now() - 1000),
+		});
+
+		await expect(send()).rejects.toMatchObject({ code: "estimate_expired" });
+	});
+
+	it.each([
+		"approved",
+		"rejected",
+	] as const)("refuses a %s estimate", async (status) => {
+		repo.queryEstimate.mockResolvedValue({
+			...estimate,
+			status,
+			validUntil: future,
+		});
+
+		await expect(send()).rejects.toMatchObject({
+			code: "estimate_invalid_transition",
+		});
+	});
+});
+
+describe("EstimatesService.answerEstimate", () => {
+	const token = "t".repeat(43);
+	const sent = {
+		...estimate,
+		status: "sent" as const,
+		validUntil: new Date(Date.now() + 86_400_000),
+	};
+	const answer = (
+		value: { status: "approved" } | { status: "rejected"; reason?: string }
+	) =>
+		EstimatesService.answerEstimate({
+			token,
+			answer: value,
+			response: asReply(createFakeReply()),
+		});
+
+	beforeEach(() => {
+		repo.queryByTokenHash.mockResolvedValue(sent);
+		repo.queryPdfContext.mockResolvedValue({
+			serviceOrderNumber: 12,
+			subdomain: "fixr",
+			company: { name: "Central" },
+			device: { maker: "Samsung", model: "S21", reportedDefect: "Tela" },
+		});
+	});
+
+	it("records a rejection with its reason", async () => {
+		await answer({ status: "rejected", reason: "Caro" });
+
+		expect(repo.recordAnswer).toHaveBeenCalledWith("TX", sent.id, {
+			status: "rejected",
+			rejectionReason: "Caro",
+		});
+	});
+
+	it("refuses an unknown link", async () => {
+		repo.queryByTokenHash.mockResolvedValue(null);
+
+		await expect(answer({ status: "approved" })).rejects.toMatchObject({
+			code: "estimate_link_invalid",
+		});
+	});
+
+	it("refuses an estimate that was already answered", async () => {
+		repo.queryByTokenHash.mockResolvedValue({ ...sent, status: "approved" });
+
+		await expect(answer({ status: "rejected" })).rejects.toMatchObject({
+			code: "estimate_already_answered",
+		});
+	});
+
+	it("refuses when another answer won the race", async () => {
+		repo.recordAnswer.mockResolvedValueOnce(false);
+
+		await expect(answer({ status: "approved" })).rejects.toMatchObject({
+			code: "estimate_already_answered",
+		});
+	});
+
+	it("refuses an expired estimate", async () => {
+		repo.queryByTokenHash.mockResolvedValue({
+			...sent,
+			validUntil: new Date(Date.now() - 1000),
+		});
+
+		await expect(answer({ status: "approved" })).rejects.toMatchObject({
+			code: "estimate_expired",
+		});
 	});
 });
 

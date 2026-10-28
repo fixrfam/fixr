@@ -131,6 +131,7 @@ export const validation: Translated<typeof source> = {
 		discountMin: "O desconto não pode ser negativo.",
 		discountMax: "O desconto não pode passar de 100%.",
 		notesMax: "As observações excedem {{count}} caracteres.",
+		reasonMax: "O motivo excede {{count}} caracteres.",
 	},
 	supplier: {
 		cnpjRequired: "O CNPJ é obrigatório.",

@@ -22,6 +22,17 @@ export const emails = {
 			"Change the default password in your account settings after the first login.",
 		footer: "If you do not recognize this company, please ignore this email.",
 	},
+	estimate: {
+		subject: "Estimate #{{number}} from {{company}}",
+		preview: "{{company}} sent you estimate #{{number}}.",
+		greeting: "Hi, <i>{{name}}</i>!",
+		heading: "<b>{{company}}</b> sent you an estimate.",
+		body: "Estimate <b>#{{number}}</b> for your <b>{{device}}</b> totals <b>{{total}}</b>. The PDF is attached.",
+		instructions:
+			"Open the estimate to review the items and <b>approve or reject</b> it. It is valid until <b>{{date}}</b>.",
+		cta: "Review estimate",
+		footer: "If you did not request this estimate, please ignore this email.",
+	},
 	verification: {
 		subject: "Verify your email, @{{name}}!",
 		preview: "{{name}}, confirm your email!",

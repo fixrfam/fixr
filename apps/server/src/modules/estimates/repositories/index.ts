@@ -7,6 +7,7 @@ import {
 	or,
 	type SQL,
 	sql,
+	type Transaction,
 } from "@fixr/db/connection";
 import {
 	clients,
@@ -38,6 +39,10 @@ export const estimatesListSelect = {
 	discountPercentage: estimates.discountPercentage,
 	validUntil: estimates.validUntil,
 	notes: estimates.notes,
+	sentTo: estimates.sentTo,
+	sentAt: estimates.sentAt,
+	respondedAt: estimates.respondedAt,
+	rejectionReason: estimates.rejectionReason,
 	createdAt: estimates.createdAt,
 	updatedAt: estimates.updatedAt,
 	clientName: clients.name,
@@ -184,6 +189,60 @@ export class EstimatesRepository {
 		values: Partial<EstimateInsert>
 	) {
 		await db.update(estimates).set(values).where(eq(estimates.id, estimateId));
+	}
+
+	/** Estimate behind a public link, with the company it belongs to. */
+	static async queryByTokenHash(tokenHash: string) {
+		const [estimate] = await db
+			.select({ ...estimatesListSelect, companyId: estimates.companyId })
+			.from(estimates)
+			.leftJoin(clients, eq(clients.id, estimates.clientId))
+			.where(eq(estimates.publicTokenHash, tokenHash))
+			.limit(1);
+		return estimate ?? null;
+	}
+
+	/**
+	 * Mark the estimate as sent, with the public link's token hash (or none when
+	 * it was delivered outside the app). Runs in the caller's transaction,
+	 * which also emits `estimate.sent`.
+	 */
+	static async markSent(
+		tx: Transaction,
+		estimateId: string,
+		values: { publicTokenHash: string | null; sentTo: string | null }
+	) {
+		await tx
+			.update(estimates)
+			.set({
+				...values,
+				status: "sent",
+				sentAt: new Date(),
+				respondedAt: null,
+				rejectionReason: null,
+			})
+			.where(eq(estimates.id, estimateId));
+	}
+
+	/**
+	 * Record the customer's answer. Only a sent estimate can be answered,
+	 * checked in the update itself so two answers at the same time can't both
+	 * win. Runs in the caller's transaction, which emits `estimate.approved`.
+	 *
+	 * @returns whether the answer was recorded
+	 */
+	static async recordAnswer(
+		tx: Transaction,
+		estimateId: string,
+		answer:
+			| { status: "approved" }
+			| { status: "rejected"; rejectionReason: string | null }
+	) {
+		const [result] = await tx
+			.update(estimates)
+			.set({ ...answer, respondedAt: new Date() })
+			.where(and(eq(estimates.id, estimateId), eq(estimates.status, "sent")));
+		return result.affectedRows > 0;
 	}
 
 	static async deleteEstimate(estimateId: string) {

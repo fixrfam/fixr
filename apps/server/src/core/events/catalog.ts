@@ -21,6 +21,22 @@ export interface DomainEvents {
 		deviceId: string;
 		employeeId: string;
 	};
+	/** An estimate was sent to the customer (by email, or marked as sent by the staff). */
+	"estimate.sent": {
+		estimateId: string;
+		serviceOrderId: string;
+		companyId: string;
+		/** Who did it; null when the customer did (the public link). */
+		employeeId: string | null;
+	};
+	/** The customer (or the staff on their behalf) approved an estimate. */
+	"estimate.approved": {
+		estimateId: string;
+		serviceOrderId: string;
+		companyId: string;
+		/** Who did it; null when the customer did (the public link). */
+		employeeId: string | null;
+	};
 	/** A service order moved from one status to another. */
 	"serviceOrder.statusChanged": {
 		serviceOrderId: string;

@@ -31,6 +31,7 @@ export async function makeCustomer(input: {
 	companyId: string;
 	name?: string;
 	cpf?: string;
+	email?: string | null;
 	deletedAt?: Date;
 }) {
 	const seq = nextSeq();
@@ -39,7 +40,8 @@ export async function makeCustomer(input: {
 		companyId: input.companyId,
 		name: input.name ?? `Customer ${seq}`,
 		cpf: input.cpf ?? uniqueDigits(11),
-		email: `customer-${seq}@fixr.test`,
+		email:
+			input.email === undefined ? `customer-${seq}@fixr.test` : input.email,
 		phone: "11999999999",
 		address: "Rua Exemplo, 123",
 		city: "São Paulo",

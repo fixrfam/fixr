@@ -18,6 +18,13 @@ ServiceOrdersService.changeStatus
             └─ emit "serviceOrder.statusChanged" { from, to, employeeId, ... }
             ├─ devices.followServiceOrder   → DevicesRepository.updateDevice(..., tx)
             └─ (inventory.consumeParts      → later)
+
+EstimatesService (customer approves)
+  └─ inTransaction(tx)
+       ├─ EstimatesRepository.recordAnswer(tx, ...)
+       └─ events.emit(tx, "estimate.approved", ...)
+            └─ serviceOrders.approve → moveServiceOrder(...)
+                 └─ emit "serviceOrder.statusChanged" → devices.followServiceOrder, ...
 ```
 
 ## How it works
@@ -40,6 +47,8 @@ ServiceOrdersService.changeStatus
 | Event | Emitted by | When | Effects |
 | --- | --- | --- | --- |
 | `serviceOrder.opened` | `ServiceOrdersService.createServiceOrder` | A service order was opened for a device | `devices.checkIn`: the device is `in_shop` |
+| `estimate.sent` | `EstimatesService` (send by email, or staff marks as sent) | An estimate was sent to the customer | `serviceOrders.awaitApproval`: the order goes to `waiting_approval` if it wasn't answered yet, recorded as moved by who sent it |
+| `estimate.approved` | `EstimatesService` (customer link or staff) | An estimate was approved | `serviceOrders.approve`: the order goes to `approved` if it wasn't answered yet, by the staff member or, from the customer's link, by nobody |
 | `serviceOrder.statusChanged` | `moveServiceOrder` (used by `ServiceOrdersService.changeStatus`) | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop` |
 
 Keep this table up to date: it is the map of what happens when.
@@ -70,7 +79,7 @@ and not by an effect (see "When not to use it").
    ```ts
    await inTransaction(async (tx) => {
    	await EstimatesRepository.approve(tx, estimateId);
-   	await events.emit(tx, "estimate.approved", { estimateId, serviceOrderId, companyId });
+   	await events.emit(tx, "estimate.approved", { estimateId, serviceOrderId, companyId, employeeId });
    });
    ```
 

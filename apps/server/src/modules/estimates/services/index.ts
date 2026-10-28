@@ -1,7 +1,11 @@
+import { createHash, randomBytes } from "node:crypto";
+import { APP_NAME } from "@fixr/constants/app";
 import { asc, desc } from "@fixr/db/connection";
 import { estimates } from "@fixr/db/schema";
+import { env } from "@fixr/env/server";
 import type { Locale } from "@fixr/i18n";
 import { createTranslator } from "@fixr/i18n";
+import { createEmailQueue, queueEmail } from "@fixr/mail/queue";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	createEstimateSchema,
@@ -13,6 +17,8 @@ import { formatServiceOrderCode } from "@fixr/schemas/service-orders";
 import { createId } from "@paralleldrive/cuid2";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
+import { redis } from "../../../config/redis";
+import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
@@ -21,6 +27,7 @@ import {
 	paginationMeta,
 } from "../../../core/lib/pagination";
 import { apiResponse, paginatedData } from "../../../core/lib/response";
+import { inTransaction } from "../../../core/lib/transaction";
 import { fetchLogo, renderEstimatePdf } from "../pdf/render";
 import {
 	type EstimateItemRow,
@@ -46,6 +53,18 @@ const TRANSITIONS: Record<EstimateStatus, EstimateStatus[]> = {
 	approved: [],
 	rejected: ["draft"],
 };
+
+/** Bytes of entropy in a public link token (encoded as 43 base64url chars). */
+const TOKEN_BYTES = 32;
+
+/** Links are looked up by the token's hash; the token itself is never stored. */
+function hashToken(token: string) {
+	return createHash("sha256").update(token).digest("hex");
+}
+
+function isExpired(estimate: { validUntil: Date }) {
+	return estimate.validUntil.getTime() < Date.now();
+}
 
 /**
  * The order's items as estimate items: each service followed by the parts it
@@ -350,7 +369,11 @@ export class EstimatesService {
 			});
 		}
 
-		await EstimatesRepository.updateEstimate(estimateId, { status });
+		const employee = await EstimatesRepository.queryEmployee(
+			userJwt.id,
+			companyId
+		);
+		await EstimatesService.applyStatus(estimate, status, employee?.id ?? null);
 
 		return response.status(200).send(
 			apiResponse({
@@ -359,6 +382,322 @@ export class EstimatesService {
 				code: "update_estimate_status_success",
 				message: "Estimate status updated successfully.",
 				data: await EstimatesService.detail(estimateId, companyId),
+			})
+		);
+	}
+
+	/** Mark the estimate as sent and announce it: the service order waits for approval. */
+	private static markSent(
+		estimate: EstimateRow,
+		values: { publicTokenHash: string | null; sentTo: string | null },
+		employeeId: string | null
+	) {
+		return inTransaction(async (tx) => {
+			await EstimatesRepository.markSent(tx, estimate.id, values);
+			await events.emit(tx, "estimate.sent", {
+				estimateId: estimate.id,
+				serviceOrderId: estimate.serviceOrderId,
+				companyId: estimate.companyId,
+				employeeId,
+			});
+		});
+	}
+
+	/**
+	 * Record the customer's answer and, for an approval, announce it: the
+	 * service order is approved.
+	 *
+	 * @returns whether the answer was recorded (only a sent estimate is answered)
+	 */
+	private static recordAnswer(
+		estimate: EstimateRow,
+		answer:
+			| { status: "approved" }
+			| { status: "rejected"; rejectionReason: string | null },
+		employeeId: string | null
+	) {
+		return inTransaction(async (tx) => {
+			const recorded = await EstimatesRepository.recordAnswer(
+				tx,
+				estimate.id,
+				answer
+			);
+			if (recorded && answer.status === "approved") {
+				await events.emit(tx, "estimate.approved", {
+					estimateId: estimate.id,
+					serviceOrderId: estimate.serviceOrderId,
+					companyId: estimate.companyId,
+					employeeId,
+				});
+			}
+			return recorded;
+		});
+	}
+
+	/**
+	 * Staff-side status change. It has the same effects on the service order as
+	 * the client's link, and going back to draft disables the link.
+	 */
+	private static async applyStatus(
+		estimate: EstimateRow,
+		status: EstimateStatus,
+		employeeId: string | null
+	) {
+		if (status === "draft") {
+			await EstimatesRepository.updateEstimate(estimate.id, {
+				status,
+				publicTokenHash: null,
+			});
+			return;
+		}
+		if (status === "sent") {
+			await EstimatesService.markSent(
+				estimate,
+				{ publicTokenHash: null, sentTo: null },
+				employeeId
+			);
+			return;
+		}
+
+		const recorded = await EstimatesService.recordAnswer(
+			estimate,
+			status === "approved" ? { status } : { status, rejectionReason: null },
+			employeeId
+		);
+		if (!recorded) {
+			throw new AppError("ESTIMATE_INVALID_TRANSITION", {
+				from: estimate.status,
+				to: status,
+			});
+		}
+	}
+
+	/**
+	 * Email the estimate to the client with the PDF attached and a public link
+	 * to approve or reject it. Sending again issues a new link and the previous
+	 * one stops working.
+	 */
+	static async sendEstimate({
+		userJwt,
+		subdomain,
+		estimateId,
+		email,
+		locale,
+		response,
+	}: {
+		userJwt: UserJwt;
+		subdomain: string;
+		estimateId: string;
+		email?: string;
+		locale: Locale;
+		response: FastifyReply;
+	}) {
+		const companyId = EstimatesService.resolveCompanyId(userJwt, subdomain);
+		const estimate = await EstimatesService.queryOwnEstimate(
+			estimateId,
+			companyId
+		);
+
+		// A draft is sent for the first time; a sent one can be sent again.
+		if (estimate.status !== "draft" && estimate.status !== "sent") {
+			throw new AppError("ESTIMATE_INVALID_TRANSITION", {
+				from: estimate.status,
+				to: "sent",
+			});
+		}
+		if (isExpired(estimate)) {
+			throw new AppError("ESTIMATE_EXPIRED");
+		}
+
+		const { pdf, fileName, detail, context, client } =
+			await EstimatesService.buildPdf(estimateId, companyId, locale);
+
+		const recipient = email || client?.email;
+		if (!recipient) {
+			throw new AppError("ESTIMATE_NO_RECIPIENT");
+		}
+
+		const token = randomBytes(TOKEN_BYTES).toString("base64url");
+		const employee = await EstimatesRepository.queryEmployee(
+			userJwt.id,
+			companyId
+		);
+		await EstimatesService.markSent(
+			estimate,
+			{ publicTokenHash: hashToken(token), sentTo: recipient },
+			employee?.id ?? null
+		);
+
+		const { format } = createTranslator(locale);
+		await queueEmail(createEmailQueue(redis), {
+			job: "sendEstimateEmail",
+			payload: {
+				to: recipient,
+				appName: APP_NAME,
+				locale,
+				clientName: client?.name ?? recipient,
+				companyName: context.company.name,
+				number: String(detail.number).padStart(4, "0"),
+				device: `${context.device.maker} ${context.device.model}`,
+				total: format.currency(detail.totals.total),
+				validUntil: format.date(detail.validUntil),
+				ctaUrl: `${env.FRONTEND_URL}/estimate/${token}`,
+				attachment: { fileName, contentBase64: pdf.toString("base64") },
+			},
+		});
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "send_estimate_success",
+				message: "Estimate sent to the client.",
+				data: await EstimatesService.detail(estimateId, companyId),
+			})
+		);
+	}
+
+	/** Estimate behind a public link, or an error when the link is not valid. */
+	private static async queryByToken(token: string) {
+		const estimate = await EstimatesRepository.queryByTokenHash(
+			hashToken(token)
+		);
+		if (!estimate) {
+			throw new AppError("ESTIMATE_LINK_INVALID");
+		}
+		return estimate;
+	}
+
+	/** What the client sees on the public page: no internal ids or staff data. */
+	private static async publicView(estimate: EstimateRow) {
+		const [items, context] = await Promise.all([
+			EstimatesRepository.queryItemsByEstimateIds([estimate.id]),
+			EstimatesRepository.queryPdfContext(estimate.id),
+		]);
+		if (!context) {
+			throw new AppError("ESTIMATE_LINK_INVALID");
+		}
+		const record = withItems(estimate, items.get(estimate.id) ?? []);
+
+		return {
+			number: record.number,
+			status: record.status,
+			validUntil: record.validUntil,
+			expired: isExpired(record),
+			discountPercentage: record.discountPercentage,
+			notes: record.notes,
+			sentAt: record.sentAt,
+			respondedAt: record.respondedAt,
+			rejectionReason: record.rejectionReason,
+			company: {
+				name: context.company.name,
+				email: context.company.email,
+				phone: context.company.phone,
+				website: context.company.website,
+				logoUrl: context.company.logoUrl,
+			},
+			client: record.client ? { name: record.client.name } : null,
+			device: context.device,
+			// Items are stored in reading order: a part a service uses comes right
+			// after it, flagged instead of pointing at an internal id.
+			items: record.items.map((item) => ({
+				type: item.type,
+				nested: Boolean(item.parentItemId),
+				name: item.name,
+				quantity: item.quantity,
+				unitPrice: item.unitPrice,
+				total: item.total,
+			})),
+			totals: record.totals,
+		};
+	}
+
+	static async getPublicEstimate({
+		token,
+		response,
+	}: {
+		token: string;
+		response: FastifyReply;
+	}) {
+		const estimate = await EstimatesService.queryByToken(token);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "get_estimate_success",
+				message: "Estimate retrieved successfully.",
+				data: await EstimatesService.publicView(estimate),
+			})
+		);
+	}
+
+	static async getPublicEstimatePdf({
+		token,
+		locale,
+		response,
+	}: {
+		token: string;
+		locale: Locale;
+		response: FastifyReply;
+	}) {
+		const estimate = await EstimatesService.queryByToken(token);
+		const { pdf, fileName } = await EstimatesService.buildPdf(
+			estimate.id,
+			estimate.companyId,
+			locale
+		);
+
+		return response
+			.status(200)
+			.header("Content-Type", "application/pdf")
+			.header("Content-Disposition", `inline; filename="${fileName}"`)
+			.send(pdf);
+	}
+
+	/** The client approves or rejects the estimate from the public link. */
+	static async answerEstimate({
+		token,
+		answer,
+		response,
+	}: {
+		token: string;
+		answer: { status: "approved" } | { status: "rejected"; reason?: string };
+		response: FastifyReply;
+	}) {
+		const estimate = await EstimatesService.queryByToken(token);
+
+		if (estimate.status !== "sent") {
+			throw new AppError("ESTIMATE_ALREADY_ANSWERED");
+		}
+		if (isExpired(estimate)) {
+			throw new AppError("ESTIMATE_EXPIRED");
+		}
+
+		const recorded = await EstimatesService.recordAnswer(
+			estimate,
+			answer.status === "approved"
+				? answer
+				: { status: "rejected", rejectionReason: answer.reason || null },
+			// The customer answered: nobody of the shop moved the order.
+			null
+		);
+		if (!recorded) {
+			throw new AppError("ESTIMATE_ALREADY_ANSWERED");
+		}
+
+		const updated = await EstimatesService.queryByToken(token);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code:
+					answer.status === "approved"
+						? "approve_estimate_success"
+						: "reject_estimate_success",
+				message: "Answer recorded.",
+				data: await EstimatesService.publicView(updated),
 			})
 		);
 	}
@@ -434,7 +773,7 @@ export class EstimatesService {
 			number: String(estimate.number).padStart(4, "0"),
 		});
 
-		return { pdf, fileName, estimate };
+		return { pdf, fileName, detail: estimate, context, client };
 	}
 
 	static async getEstimatePdf({

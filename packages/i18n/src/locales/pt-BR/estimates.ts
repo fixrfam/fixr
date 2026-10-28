@@ -27,6 +27,8 @@ export const estimates: Translated<typeof source> = {
 		creating: "Gerando orçamento...",
 		openPdf: "Abrir PDF",
 		send: "Marcar como enviado",
+		sendToClient: "Enviar ao cliente",
+		resendToClient: "Enviar novamente",
 		approve: "Marcar como aprovado",
 		reject: "Marcar como recusado",
 		reopen: "Voltar para rascunho",
@@ -38,6 +40,43 @@ export const estimates: Translated<typeof source> = {
 		sent: "Enviado",
 		approved: "Aprovado",
 		rejected: "Recusado",
+	},
+	sendDialog: {
+		title: "Enviar orçamento #{{number}}",
+		description:
+			"O cliente recebe um email com o PDF e um link para aprovar ou recusar. Enviar de novo substitui o link anterior.",
+		email: "Email do cliente",
+		emailPlaceholder: "cliente@email.com",
+		submit: "Enviar",
+		sending: "Enviando...",
+		cancel: "Cancelar",
+	},
+	public: {
+		title: "Orçamento #{{number}}",
+		issuedBy: "Emitido por {{company}}",
+		validUntil: "Válido até {{date}}",
+		device: "Aparelho",
+		items: "Itens",
+		servicePart: "Peça usada no serviço acima",
+		notes: "Observações",
+		downloadPdf: "Baixar PDF",
+		approve: "Aprovar orçamento",
+		reject: "Recusar",
+		rejectTitle: "Recusar orçamento #{{number}}",
+		rejectDescription:
+			"Se quiser, conte o motivo. Isso ajuda a assistência a preparar uma nova proposta.",
+		reasonLabel: "Motivo (opcional)",
+		reasonPlaceholder: "O valor ficou acima do que eu esperava...",
+		confirmReject: "Recusar orçamento",
+		cancel: "Cancelar",
+		approved:
+			"Você aprovou este orçamento em {{date}}. A assistência vai entrar em contato.",
+		rejected: "Você recusou este orçamento em {{date}}.",
+		expired:
+			"Este orçamento venceu em {{date}}. Fale com a assistência para receber um novo.",
+		invalidTitle: "Orçamento indisponível",
+		invalidDescription:
+			"Este link é inválido ou foi substituído por um mais novo. Confira o último email da assistência.",
 	},
 	pdf: {
 		title: "Orçamento",

@@ -5,6 +5,7 @@ import type {
 	estimateStatuses,
 	getEstimatesQuerySchema,
 	patchEstimateSchema,
+	rejectEstimateSchema,
 } from "@fixr/schemas/estimates";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
@@ -62,5 +63,45 @@ export class EstimatesController {
 
 	static getEstimatePdf(params: EstimateParams & { locale: Locale }) {
 		return EstimatesService.getEstimatePdf(params);
+	}
+
+	static sendEstimate(
+		params: EstimateParams & { email?: string; locale: Locale }
+	) {
+		return EstimatesService.sendEstimate(params);
+	}
+
+	static getPublicEstimate(params: { token: string; response: FastifyReply }) {
+		return EstimatesService.getPublicEstimate(params);
+	}
+
+	static getPublicEstimatePdf(params: {
+		token: string;
+		locale: Locale;
+		response: FastifyReply;
+	}) {
+		return EstimatesService.getPublicEstimatePdf(params);
+	}
+
+	static approvePublicEstimate(params: {
+		token: string;
+		response: FastifyReply;
+	}) {
+		return EstimatesService.answerEstimate({
+			...params,
+			answer: { status: "approved" },
+		});
+	}
+
+	static rejectPublicEstimate(params: {
+		token: string;
+		data: z.infer<typeof rejectEstimateSchema>;
+		response: FastifyReply;
+	}) {
+		return EstimatesService.answerEstimate({
+			token: params.token,
+			answer: { status: "rejected", reason: params.data.reason },
+			response: params.response,
+		});
 	}
 }

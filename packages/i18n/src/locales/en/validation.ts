@@ -132,6 +132,7 @@ export const validation = {
 		discountMin: "The discount can't be negative.",
 		discountMax: "The discount can't exceed 100%.",
 		notesMax: "The notes exceed {{count}} characters.",
+		reasonMax: "The reason exceeds {{count}} characters.",
 	},
 	supplier: {
 		cnpjRequired: "The CNPJ is required.",

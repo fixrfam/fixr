@@ -1,4 +1,5 @@
 import { registerDeviceEffects } from "../../modules/devices/effects";
+import { registerServiceOrderEffects } from "../../modules/service-orders/effects";
 import { events } from "./bus";
 
 let registered = false;
@@ -13,5 +14,6 @@ export function registerEffects() {
 	}
 	registered = true;
 
+	registerServiceOrderEffects(events);
 	registerDeviceEffects(events);
 }

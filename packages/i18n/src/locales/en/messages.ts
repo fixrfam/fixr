@@ -43,6 +43,36 @@ export const messages = {
 			title: "Status not allowed",
 			description: "The estimate can't move to this status now.",
 		},
+		send_estimate_success: {
+			title: "Estimate sent",
+			description:
+				"The client will get an email with the PDF and the approval link.",
+		},
+		estimate_no_recipient: {
+			title: "No email to send to",
+			description: "The client has no email. Enter one to send the estimate.",
+		},
+		estimate_expired: {
+			title: "Estimate expired",
+			description: "The validity date has passed. Back to draft and update it.",
+		},
+		estimate_link_invalid: {
+			title: "Link not available",
+			description:
+				"This estimate link is invalid or was replaced by a newer one.",
+		},
+		estimate_already_answered: {
+			title: "Estimate already answered",
+			description: "This estimate was already approved or rejected.",
+		},
+		approve_estimate_success: {
+			title: "Estimate approved",
+			description: "Thank you! The shop was notified.",
+		},
+		reject_estimate_success: {
+			title: "Estimate rejected",
+			description: "Thank you for the answer. The shop was notified.",
+		},
 		estimate_not_found: {
 			title: "Estimate not found",
 			description: "This estimate does not exist or was removed.",

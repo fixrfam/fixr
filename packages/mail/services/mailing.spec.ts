@@ -85,6 +85,31 @@ describe("email senders", () => {
 		expect(send.mock.calls[0]![0].subject).toContain("Bem-vindo ao Fixr");
 	});
 
+	it("sendEstimateEmail attaches the PDF and names the estimate in the subject", async () => {
+		send.mockResolvedValue({ data: { id: "e3" }, error: null });
+
+		await emails.sendEstimateEmail({
+			to: "maria@fixr.test",
+			appName: "Fixr",
+			clientName: "Maria",
+			companyName: "Central",
+			number: "0042",
+			device: "Galaxy S21",
+			total: "R$ 450,00",
+			validUntil: "23/11/2026",
+			ctaUrl: "https://fixr.test/estimate/tok3n",
+			locale: "pt-BR",
+			attachment: { fileName: "orcamento-0042.pdf", contentBase64: "JVBERi0=" },
+		});
+
+		const [message] = send.mock.calls[0]!;
+		expect(message.subject).toBe("Orçamento #0042 da Central");
+		expect(message.html).toContain("https://fixr.test/estimate/tok3n");
+		expect(message.attachments).toEqual([
+			{ filename: "orcamento-0042.pdf", content: "JVBERi0=" },
+		]);
+	});
+
 	it("throws when Resend reports an error (so the worker retries)", async () => {
 		send.mockResolvedValue({ data: null, error: { message: "rate limited" } });
 

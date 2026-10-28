@@ -70,6 +70,10 @@ const PUBLIC_ROUTES = new Set([
 	"PUT /credentials/password/reset", // Turnstile + one-time token
 	"GET /credentials/password/reset", // one-time token
 	"GET /account/confirm-deletion", // one-time token
+	"GET /estimate-links/:token", // estimate link token from the email
+	"GET /estimate-links/:token/pdf", // estimate link token from the email
+	"POST /estimate-links/:token/approve", // estimate link token from the email
+	"POST /estimate-links/:token/reject", // estimate link token from the email
 ]);
 
 /** Authenticated routes that intentionally have no RBAC permission. */
@@ -189,6 +193,7 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 	"PATCH /companies/:subdomain": {},
 	"POST /companies/:subdomain/estimates": { serviceOrderId: createId() },
 	"PATCH /companies/:subdomain/estimates/:estimateId": {},
+	"POST /companies/:subdomain/estimates/:estimateId/send": {},
 	"PATCH /companies/:subdomain/estimates/:estimateId/status": {
 		status: "sent",
 	},
