@@ -81,6 +81,24 @@ export const changeServiceOrderStatusSchema = z.object({
 		.nullable(),
 });
 
+/**
+ * @description Body schema for reassigning a service order: the sector whose
+ * pool it is in and the employee responsible for it (either can be cleared).
+ */
+export const assignServiceOrderSchema = z.object({
+	sectorId: z
+		.string()
+		.cuid2({ message: i18nMessage("validation.sector.invalid") })
+		.nullable(),
+	assigneeId: z
+		.string()
+		.cuid2({ message: i18nMessage("validation.serviceOrder.assigneeInvalid") })
+		.nullable(),
+});
+
+/** Which orders a list shows: all of them, the caller's own or their sector's pool. */
+export const serviceOrderScopes = z.enum(["all", "mine", "sector"]);
+
 /** @description Body schema for attaching photos to an open service order */
 export const addServiceOrderPhotosSchema = z.object({
 	photos: z
@@ -173,6 +191,11 @@ export const getServiceOrdersQuerySchema = getPaginatedDataSchema
 			.cuid2({
 				message: i18nMessage("validation.serviceOrder.assigneeInvalid"),
 			})
+			.optional(),
+		scope: serviceOrderScopes.optional(),
+		sectorId: z
+			.string()
+			.cuid2({ message: i18nMessage("validation.sector.invalid") })
 			.optional(),
 		status: serviceOrderStatuses.optional(),
 		dateFrom: z.coerce

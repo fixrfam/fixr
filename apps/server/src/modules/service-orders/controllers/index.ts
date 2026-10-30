@@ -2,6 +2,7 @@ import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -23,6 +24,8 @@ export class ServiceOrdersController {
 		sort,
 		deviceCategoryId,
 		employeeId,
+		scope,
+		sectorId,
 		status,
 		dateFrom,
 		dateTo,
@@ -41,6 +44,8 @@ export class ServiceOrdersController {
 			sort,
 			deviceCategoryId,
 			employeeId,
+			scope,
+			sectorId,
 			status,
 			dateFrom,
 			dateTo,
@@ -114,6 +119,16 @@ export class ServiceOrdersController {
 		response: FastifyReply;
 	}) {
 		return ServiceOrdersService.changeStatus(params);
+	}
+
+	static assign(params: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof assignServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		return ServiceOrdersService.assign(params);
 	}
 
 	static listItems(params: {

@@ -7,6 +7,7 @@ import { deviceStatuses } from "@fixr/schemas/devices";
 import {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -37,6 +38,8 @@ const serviceOrderListRecordSchema = z.object({
 		email: z.string().nullable(),
 	}),
 	employee: relation,
+	sector: relation.nullable(),
+	assignee: relation.nullable(),
 	device: z.object({
 		id: z.string(),
 		imei: z.string().nullable(),
@@ -69,6 +72,18 @@ const serviceOrderDetailSchema = serviceOrderListRecordSchema.extend({
 			employee: relation.nullable(),
 		})
 	),
+	/** Every change of the responsible sector or employee, oldest first; `employee` is who made it (null: the stage's default). */
+	assignments: z.array(
+		z.object({
+			id: z.string(),
+			createdAt: z.coerce.date(),
+			fromSector: relation.nullable(),
+			toSector: relation.nullable(),
+			fromAssignee: relation.nullable(),
+			toAssignee: relation.nullable(),
+			employee: relation.nullable(),
+		})
+	),
 });
 
 const getCompanyServiceOrdersSchema: FastifySchema = {
@@ -79,7 +94,9 @@ const getCompanyServiceOrdersSchema: FastifySchema = {
 
 Optional filters (query string):
 - \`deviceCategoryId\`: device category (cuid2)
-- \`employeeId\`: responsible employee (cuid2)
+- \`employeeId\`: responsible employee, the assignee (cuid2)
+- \`sectorId\`: sector whose pool the order is in (cuid2)
+- \`scope\`: \`all\` (default), \`mine\` (assigned to the caller) or \`sector\` (the caller's sector's pool)
 - \`status\`: one of: ${serviceOrderStatuses.options.join(", ")}
 - \`dateFrom\` / \`dateTo\`: filter by \`created_at\` (inclusive; ISO date or datetime)
 - \`query\`: search in device model, maker, IMEI, reported defect, or customer name
@@ -280,6 +297,50 @@ The change, with who made it and the optional \`note\`, is added to the order's 
 	security: [{ JWT: [] }],
 };
 
+const assignServiceOrderSchemaDoc: FastifySchema = {
+	tags: ["Service Orders"],
+	summary: "Reassign service order",
+	description: `
+**Hands the order to another sector and/or employee.** Either can be \`null\`
+(back to no sector / to the sector's pool). With an employee and no sector,
+the order goes to the employee's sector.
+
+The change, with who made it, is added to the order's \`assignments\`. Moving
+the order to a stage with a default owner (see the sectors' stage owners)
+reassigns it again, by nobody.
+`,
+	params: serviceOrderParams,
+	body: assignServiceOrderSchema,
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			message: "Service order reassigned successfully.",
+			code: "assign_service_order_success",
+			data: serviceOrderDetailSchema,
+		}).describe("Service order reassigned successfully."),
+		400: z.union([
+			zodResponseSchema({
+				status: 400,
+				error: "Bad Request",
+				code: "service_order_sector_not_found",
+				message: "The sector does not exist in this company.",
+				data: null,
+			}),
+			zodResponseSchema({
+				status: 400,
+				error: "Bad Request",
+				code: "service_order_assignee_not_found",
+				message: "The employee does not exist in this company.",
+				data: null,
+			}),
+		]),
+		...companyScopedErrors,
+		404: serviceOrderNotFound,
+	},
+	security: [{ JWT: [] }],
+};
+
 const itemNotFound = notFoundError(
 	"service_order_item_not_found",
 	"Item not found in this service order."
@@ -437,6 +498,7 @@ export const serviceOrdersDocs = {
 	getServiceOrderSchema,
 	patchServiceOrderSchema: patchServiceOrderSchemaDoc,
 	changeServiceOrderStatusSchema: changeServiceOrderStatusSchemaDoc,
+	assignServiceOrderSchema: assignServiceOrderSchemaDoc,
 	listServiceOrderItemsSchema,
 	addServiceOrderItemSchema: addServiceOrderItemSchemaDoc,
 	patchServiceOrderItemSchema: patchServiceOrderItemSchemaDoc,

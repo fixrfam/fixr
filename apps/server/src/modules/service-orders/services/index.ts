@@ -4,6 +4,7 @@ import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -27,6 +28,7 @@ import {
 	serviceOrdersListJoins,
 	serviceOrdersListSelect,
 } from "../repositories";
+import { assignServiceOrder } from "./assign";
 import { moveServiceOrder } from "./move-status";
 
 export class ServiceOrdersService {
@@ -39,6 +41,8 @@ export class ServiceOrdersService {
 		sort,
 		deviceCategoryId,
 		employeeId,
+		scope,
+		sectorId,
 		status,
 		dateFrom,
 		dateTo,
@@ -65,14 +69,26 @@ export class ServiceOrdersService {
 				? desc(serviceOrdersTable.createdAt)
 				: asc(serviceOrdersTable.createdAt);
 
-		const filter = ServiceOrdersRepository.buildListFilter(companyId, {
-			query,
-			deviceCategoryId,
-			employeeId,
-			status,
-			dateFrom,
-			dateTo,
-		});
+		// "Mine" and "my sector" are relative to the caller's employee record.
+		const viewer =
+			scope === "mine" || scope === "sector"
+				? await ServiceOrdersService.resolveEmployee(userJwt, companyId)
+				: undefined;
+
+		const filter = ServiceOrdersRepository.buildListFilter(
+			companyId,
+			{
+				query,
+				deviceCategoryId,
+				employeeId,
+				scope,
+				sectorId,
+				status,
+				dateFrom,
+				dateTo,
+			},
+			viewer
+		);
 
 		const [records, totalRecords] = await Promise.all([
 			getPaginatedRecords({
@@ -190,6 +206,7 @@ export class ServiceOrdersService {
 			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
+				sectorId: employee.sectorId,
 				customerId: device.customerId,
 				data,
 			});
@@ -385,6 +402,70 @@ export class ServiceOrdersService {
 				error: null,
 				code: "change_service_order_status_success",
 				message: "Service order status updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/**
+	 * Hand the order to another sector and/or employee, recording who did it.
+	 * An employee from another sector brings the order to their sector's pool
+	 * when no sector is given.
+	 */
+	static async assign({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof assignServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+
+		if (
+			data.sectorId &&
+			!(await ServiceOrdersRepository.querySectorOfCompany(
+				data.sectorId,
+				companyId
+			))
+		) {
+			throw new AppError("SERVICE_ORDER_SECTOR_NOT_FOUND");
+		}
+		const assignee = data.assigneeId
+			? await ServiceOrdersRepository.queryEmployeeOfCompany(
+					data.assigneeId,
+					companyId
+				)
+			: null;
+		if (data.assigneeId && !assignee) {
+			throw new AppError("SERVICE_ORDER_ASSIGNEE_NOT_FOUND");
+		}
+
+		await inTransaction((tx) =>
+			assignServiceOrder(tx, {
+				serviceOrderId,
+				sectorId: data.sectorId ?? assignee?.sectorId ?? null,
+				assigneeId: data.assigneeId,
+				employeeId: employee.id,
+			})
+		);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "assign_service_order_success",
+				message: "Service order reassigned successfully.",
 				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
 			})
 		);

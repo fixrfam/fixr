@@ -12,6 +12,8 @@ const baseEmployee: Permission[] = [
 	permissions.settings.update,
 	permissions.settings.security,
 	permissions.customers.read,
+	// Everyone sees the sectors: their own is "my sector" and orders move between them.
+	permissions.sectors.read,
 	// API keys are self-service: every employee manages their own, and a key
 	// never carries more than the role of the employee who created it.
 	permissions.apiKeys.read,
@@ -62,6 +64,8 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.serviceOrders.update,
 		permissions.serviceOrders.changeStatus,
 		permissions.serviceOrders.assign,
+		permissions.sectors.create,
+		permissions.sectors.update,
 		permissions.customers.read,
 		permissions.customers.create,
 		permissions.customers.update,
@@ -101,6 +105,9 @@ const roleAbilities: Record<EmployeeRole, Permission[]> = {
 		permissions.serviceOrders.delete,
 		permissions.serviceOrders.changeStatus,
 		permissions.serviceOrders.assign,
+		permissions.sectors.create,
+		permissions.sectors.update,
+		permissions.sectors.delete,
 		permissions.customers.read,
 		permissions.customers.create,
 		permissions.customers.update,

@@ -91,6 +91,7 @@ export class EmployeesService {
 					createdAt: employeesTable.createdAt,
 					userId: employeesTable.userId,
 					companyId: employeesTable.companyId,
+					sectorId: employeesTable.sectorId,
 					account: {
 						id: usersTable.id,
 						email: usersTable.email,

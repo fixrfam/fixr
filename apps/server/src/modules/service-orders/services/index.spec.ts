@@ -2,33 +2,37 @@ import { createId } from "@paralleldrive/cuid2";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asReply, createFakeReply } from "@/test/helpers/fake-reply";
 
-const { repo, pagination, emit, moveServiceOrder } = vi.hoisted(() => ({
-	emit: vi.fn(),
-	moveServiceOrder: vi.fn(),
-	repo: {
-		buildListFilter: vi.fn(() => "FILTER"),
-		queryEmployeeByUserId: vi.fn(),
-		queryDeviceOfCompany: vi.fn(),
-		create: vi.fn(),
-		queryPhotoUploads: vi.fn(),
-		insertPhotos: vi.fn(),
-		queryPhoto: vi.fn(),
-		deletePhoto: vi.fn(),
-		queryServiceOrderOfCompany: vi.fn(),
-		queryServiceOrderDetail: vi.fn(),
-		updateServiceOrder: vi.fn(),
-		updateStatus: vi.fn(),
-		queryItems: vi.fn(),
-		queryItem: vi.fn(),
-		queryCatalogItem: vi.fn(),
-		insertItem: vi.fn(),
-		queryServiceParts: vi.fn(async (): Promise<unknown[]> => []),
-		queryLoosePartItems: vi.fn(async (): Promise<unknown[]> => []),
-		updateItem: vi.fn(),
-		deleteItem: vi.fn(),
-	},
-	pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
-}));
+const { repo, pagination, emit, moveServiceOrder, assignServiceOrder } =
+	vi.hoisted(() => ({
+		emit: vi.fn(),
+		moveServiceOrder: vi.fn(),
+		assignServiceOrder: vi.fn(),
+		repo: {
+			buildListFilter: vi.fn(() => "FILTER"),
+			queryEmployeeByUserId: vi.fn(),
+			queryDeviceOfCompany: vi.fn(),
+			create: vi.fn(),
+			queryPhotoUploads: vi.fn(),
+			insertPhotos: vi.fn(),
+			queryPhoto: vi.fn(),
+			deletePhoto: vi.fn(),
+			queryServiceOrderOfCompany: vi.fn(),
+			queryServiceOrderDetail: vi.fn(),
+			updateServiceOrder: vi.fn(),
+			updateStatus: vi.fn(),
+			queryItems: vi.fn(),
+			queryItem: vi.fn(),
+			queryCatalogItem: vi.fn(),
+			insertItem: vi.fn(),
+			queryServiceParts: vi.fn(async (): Promise<unknown[]> => []),
+			queryLoosePartItems: vi.fn(async (): Promise<unknown[]> => []),
+			updateItem: vi.fn(),
+			deleteItem: vi.fn(),
+			querySectorOfCompany: vi.fn(),
+			queryEmployeeOfCompany: vi.fn(),
+		},
+		pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
+	}));
 
 vi.mock("../repositories", () => ({
 	ServiceOrdersRepository: repo,
@@ -45,6 +49,7 @@ vi.mock("../../../core/lib/transaction", () => ({
 }));
 vi.mock("../../../core/events", () => ({ events: { emit } }));
 vi.mock("./move-status", () => ({ moveServiceOrder }));
+vi.mock("./assign", () => ({ assignServiceOrder }));
 
 const { ServiceOrdersService } = await import(".");
 
@@ -119,14 +124,31 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 			dateTo,
 		}).promise;
 
-		expect(repo.buildListFilter).toHaveBeenCalledWith(companyId, {
-			query: "iphone",
-			deviceCategoryId: "cat",
-			employeeId: "emp",
-			status: "fixing",
-			dateFrom,
-			dateTo,
-		});
+		expect(repo.buildListFilter).toHaveBeenCalledWith(
+			companyId,
+			{
+				query: "iphone",
+				deviceCategoryId: "cat",
+				employeeId: "emp",
+				status: "fixing",
+				dateFrom,
+				dateTo,
+			},
+			undefined
+		);
+	});
+
+	it("filters the caller's own orders and sector pool by their employee record", async () => {
+		const employee = { id: createId(), companyId, sectorId: "bench" };
+		repo.queryEmployeeByUserId.mockResolvedValue(employee);
+
+		await list({ scope: "sector" }).promise;
+
+		expect(repo.buildListFilter).toHaveBeenCalledWith(
+			companyId,
+			expect.objectContaining({ scope: "sector" }),
+			employee
+		);
 	});
 
 	it("joins on the count query too (search and the category filter read joined tables)", async () => {
@@ -199,7 +221,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		reportedDefect: "Tela quebrada",
 		photos: [] as { uploadId: string; description?: string | null }[],
 	};
-	const employee = { id: createId(), companyId };
+	const employee = { id: createId(), companyId, sectorId: "front-desk" };
 
 	beforeEach(() => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
@@ -238,6 +260,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		expect(repo.create).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
+			sectorId: "front-desk",
 			customerId,
 			data,
 		});
@@ -666,6 +689,83 @@ describe("ServiceOrdersService detail, edit and status", () => {
 			call("changeStatus", { status: "ready" }).promise
 		).rejects.toMatchObject({ code: "service_order_not_found" });
 		expect(moveServiceOrder).not.toHaveBeenCalled();
+	});
+});
+
+describe("ServiceOrdersService.assign", () => {
+	const serviceOrderId = createId();
+	const employee = { id: createId(), companyId };
+
+	beforeEach(() => {
+		repo.queryEmployeeByUserId.mockResolvedValue(employee);
+		repo.queryServiceOrderOfCompany.mockResolvedValue({ id: serviceOrderId });
+		repo.queryServiceOrderDetail.mockResolvedValue({ id: serviceOrderId });
+		repo.querySectorOfCompany.mockResolvedValue({ id: "bench" });
+		repo.queryEmployeeOfCompany.mockResolvedValue({
+			id: "bia",
+			sectorId: "bench",
+		});
+	});
+
+	const assign = (data: {
+		sectorId: string | null;
+		assigneeId: string | null;
+	}) => {
+		const reply = createFakeReply();
+		return {
+			reply,
+			promise: ServiceOrdersService.assign({
+				userJwt,
+				subdomain: "fixr",
+				serviceOrderId,
+				data,
+				response: asReply(reply),
+			}),
+		};
+	};
+
+	it("reassigns through assignServiceOrder, recording who did it", async () => {
+		const { reply, promise } = assign({ sectorId: "bench", assigneeId: "bia" });
+		await promise;
+
+		expect(assignServiceOrder).toHaveBeenCalledWith("TX", {
+			serviceOrderId,
+			sectorId: "bench",
+			assigneeId: "bia",
+			employeeId: employee.id,
+		});
+		expect(reply.state.body).toMatchObject({
+			code: "assign_service_order_success",
+		});
+	});
+
+	it("takes the employee's sector when no sector is given", async () => {
+		await assign({ sectorId: null, assigneeId: "bia" }).promise;
+
+		expect(assignServiceOrder).toHaveBeenCalledWith(
+			"TX",
+			expect.objectContaining({ sectorId: "bench", assigneeId: "bia" })
+		);
+	});
+
+	it.each([
+		[
+			"a sector",
+			"querySectorOfCompany" as const,
+			"service_order_sector_not_found",
+		],
+		[
+			"an employee",
+			"queryEmployeeOfCompany" as const,
+			"service_order_assignee_not_found",
+		],
+	])("refuses %s of another company", async (_, query, code) => {
+		repo[query].mockResolvedValue(null);
+
+		await expect(
+			assign({ sectorId: "bench", assigneeId: "bia" }).promise
+		).rejects.toMatchObject({ code });
+		expect(assignServiceOrder).not.toHaveBeenCalled();
 	});
 });
 

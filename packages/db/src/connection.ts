@@ -28,4 +28,4 @@ export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type DbExecutor = typeof db | Transaction;
 
 export * from "drizzle-orm";
-export { MySqlTable } from "drizzle-orm/mysql-core";
+export { alias, MySqlTable } from "drizzle-orm/mysql-core";
