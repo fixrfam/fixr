@@ -13,6 +13,8 @@ export * from "./one-time-tokens";
 export * from "./parts";
 export * from "./portal";
 export * from "./refresh-tokens";
+export * from "./sectors";
+export * from "./service-order-assignments";
 export * from "./service-order-history";
 export * from "./service-order-items";
 export * from "./service-order-photos";
