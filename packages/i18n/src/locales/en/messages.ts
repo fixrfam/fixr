@@ -173,6 +173,31 @@ export const messages = {
 			title: "Supplier in use",
 			description: "Move or remove its parts before deleting the supplier.",
 		},
+		service_order_sector_not_found: {
+			title: "Sector not found",
+			description: "Pick one of the company's sectors.",
+		},
+		service_order_assignee_not_found: {
+			title: "Employee not found",
+			description: "Pick one of the company's employees.",
+		},
+		sector_not_found: {
+			title: "Sector not found",
+			description: "This sector does not exist or was removed.",
+		},
+		sector_name_conflict: {
+			title: "Sector already exists",
+			description: "Your company already has a sector with this name.",
+		},
+		sector_employee_not_found: {
+			title: "Employee not found",
+			description: "This employee is not part of your company.",
+		},
+		sector_stage_owner_invalid: {
+			title: "Invalid owner",
+			description:
+				"A stage points to a sector or employee that no longer exists.",
+		},
 		supplier_not_found: {
 			title: "Supplier not found",
 			description: "This supplier does not exist or was removed.",

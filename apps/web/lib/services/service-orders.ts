@@ -3,9 +3,11 @@ import type { deviceStatuses } from "@fixr/schemas/devices";
 import type {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	createServiceOrderSchema,
 	patchServiceOrderItemSchema,
 	patchServiceOrderSchema,
+	serviceOrderScopes,
 	serviceOrderStatuses,
 } from "@fixr/schemas/service-orders";
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
@@ -54,6 +56,7 @@ export const serviceOrderItemsApi = {
 };
 
 export type ServiceOrderStatus = z.infer<typeof serviceOrderStatuses>;
+export type ServiceOrderScope = z.infer<typeof serviceOrderScopes>;
 
 interface Relation {
 	id: string;
@@ -66,7 +69,10 @@ export interface ServiceOrderRow {
 	/** Sequential per company; people see it as `<SUBDOMAIN>-<number>`. */
 	number: number;
 	customerId: string;
+	/** Who opened it. */
 	employeeId: string;
+	sectorId: string | null;
+	assigneeId: string | null;
 	deviceId: string;
 	reportedDefect: string;
 	observations: string | null;
@@ -79,6 +85,10 @@ export interface ServiceOrderRow {
 		email: string | null;
 	};
 	employee: Relation;
+	/** The sector whose pool the order is in. */
+	sector: Relation | null;
+	/** The employee responsible for it now. */
+	assignee: Relation | null;
 	device: {
 		id: string;
 		imei: string | null;
@@ -109,10 +119,24 @@ export interface ServiceOrderHistoryEntry {
 	employee: Relation | null;
 }
 
+/** A change of the order's sector or assignee. */
+export interface ServiceOrderAssignmentEntry {
+	id: string;
+	createdAt: string;
+	fromSector: Relation | null;
+	toSector: Relation | null;
+	fromAssignee: Relation | null;
+	toAssignee: Relation | null;
+	/** Null when the stage's default reassigned it. */
+	employee: Relation | null;
+}
+
 export interface ServiceOrderDetail extends ServiceOrderRow {
 	photos: ServiceOrderPhoto[];
 	/** Oldest first. */
 	history: ServiceOrderHistoryEntry[];
+	/** Oldest first. */
+	assignments: ServiceOrderAssignmentEntry[];
 }
 
 export interface ServiceOrderListParams {
@@ -120,6 +144,9 @@ export interface ServiceOrderListParams {
 	perPage: number;
 	query?: string;
 	status?: ServiceOrderStatus;
+	scope?: ServiceOrderScope;
+	sectorId?: string;
+	employeeId?: string;
 	sort?: "newer" | "older";
 }
 
@@ -169,6 +196,14 @@ export const serviceOrdersApi = {
 	) =>
 		send<ServiceOrderDetail>(
 			axios.patch(`${ordersUrl(subdomain)}/${id}/status`, change)
+		),
+	assign: (
+		subdomain: string,
+		id: string,
+		values: z.input<typeof assignServiceOrderSchema>
+	) =>
+		send<ServiceOrderDetail>(
+			axios.patch(`${ordersUrl(subdomain)}/${id}/assignment`, values)
 		),
 	addPhotos: (
 		subdomain: string,

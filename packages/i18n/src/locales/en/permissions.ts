@@ -14,6 +14,7 @@ export const permissions = {
 		inventory: "Inventory",
 		logs: "Logs",
 		parts: "Parts",
+		sectors: "Sectors",
 		serviceOrders: "Service orders",
 		services: "Services",
 		settings: "Settings",

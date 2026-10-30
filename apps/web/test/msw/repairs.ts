@@ -55,6 +55,8 @@ export const serviceOrder: ServiceOrderDetail = {
 	number: 12,
 	customerId: customer.id,
 	employeeId: "cemployee0000000000000001",
+	sectorId: null,
+	assigneeId: "cemployee0000000000000001",
 	deviceId: device.id,
 	reportedDefect: "Tela quebrada",
 	observations: "Sem carregador",
@@ -69,6 +71,8 @@ export const serviceOrder: ServiceOrderDetail = {
 		email: customer.email,
 	},
 	employee: { id: "cemployee0000000000000001", name: "Téo Técnico" },
+	sector: null,
+	assignee: { id: "cemployee0000000000000001", name: "Téo Técnico" },
 	device: {
 		id: device.id,
 		imei: device.imei,
@@ -97,6 +101,7 @@ export const serviceOrder: ServiceOrderDetail = {
 			employee: { id: "cemployee0000000000000001", name: "Téo Técnico" },
 		},
 	],
+	assignments: [],
 };
 
 const modelListItem = {

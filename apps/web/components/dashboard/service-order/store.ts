@@ -75,6 +75,28 @@ export function useChangeServiceOrderStatus(id: string) {
 	});
 }
 
+/** Hand the order to another sector or employee; lists and pools refresh. */
+export function useAssignServiceOrder(id: string) {
+	const subdomain = useSubdomain();
+	const invalidate = useInvalidateRepairs();
+	return useMutation({
+		mutationFn: (values: Parameters<typeof serviceOrdersApi.assign>[2]) =>
+			serviceOrdersApi.assign(subdomain, id, values),
+		onSuccess: invalidate,
+	});
+}
+
+/** Move any order (the board moves whichever card was dropped). */
+export function useMoveServiceOrder() {
+	const subdomain = useSubdomain();
+	const invalidate = useInvalidateRepairs();
+	return useMutation({
+		mutationFn: ({ id, status }: { id: string; status: ServiceOrderStatus }) =>
+			serviceOrdersApi.changeStatus(subdomain, id, { status }),
+		onSettled: invalidate,
+	});
+}
+
 /** Upload the files to R2, then attach them to the order. */
 export function useAddServiceOrderPhotos(id: string) {
 	const subdomain = useSubdomain();
