@@ -7,7 +7,7 @@ import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedbac
 import { CustomerEstimate } from "@/components/estimates/customer-estimate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { portalApi } from "@/lib/services/portal";
-import { PortalEstimateCard } from "./portal-cards";
+import { PortalEstimateRow, PortalList } from "./portal-cards";
 import { PortalBackLink } from "./portal-service-order";
 import { PortalPageTitle } from "./portal-shell";
 import { portalKeys, usePortalEstimate, usePortalEstimates } from "./store";
@@ -17,8 +17,15 @@ export function PortalEstimates() {
 	const { t } = useTranslation();
 	const { data, isPending } = usePortalEstimates();
 	const estimates = data ?? [];
-	const open = estimates.filter((e) => e.status === "sent" && !e.expired);
-	const others = estimates.filter((e) => !(e.status === "sent" && !e.expired));
+	const isOpen = (e: (typeof estimates)[number]) =>
+		e.status === "sent" && !e.expired;
+	const groups = [
+		{ title: t("portal.estimates.pending"), list: estimates.filter(isOpen) },
+		{
+			title: t("portal.estimates.answered"),
+			list: estimates.filter((e) => !isOpen(e)),
+		},
+	].filter((group) => group.list.length > 0);
 
 	return (
 		<div>
@@ -26,45 +33,24 @@ export function PortalEstimates() {
 				description={t("portal.estimates.description")}
 				title={t("portal.estimates.title")}
 			/>
-			{isPending && (
-				<div className="grid gap-3">
-					<Skeleton className="h-36 rounded-2xl" />
-					<Skeleton className="h-36 rounded-2xl" />
-				</div>
-			)}
+			{isPending && <Skeleton className="h-44 rounded-2xl" />}
 			{!isPending && estimates.length === 0 && (
-				<p className="rounded-2xl border border-dashed bg-card p-8 text-center text-muted-foreground text-sm">
+				<p className="py-12 text-center text-muted-foreground text-sm">
 					{t("portal.estimates.empty")}
 				</p>
 			)}
-			{open.length > 0 && (
-				<section className="mb-7 space-y-3">
-					<h2 className="font-semibold text-sm">
-						{t("portal.estimates.pending")}
-					</h2>
-					<div className="grid gap-3 sm:grid-cols-2">
-						{open.map((estimate) => (
-							<PortalEstimateCard
-								estimate={estimate}
-								highlight
-								key={estimate.id}
-							/>
-						))}
-					</div>
-				</section>
-			)}
-			{others.length > 0 && (
-				<section className="space-y-3">
-					<h2 className="font-semibold text-sm">
-						{t("portal.estimates.answered")}
-					</h2>
-					<div className="grid gap-3 sm:grid-cols-2">
-						{others.map((estimate) => (
-							<PortalEstimateCard estimate={estimate} key={estimate.id} />
-						))}
-					</div>
-				</section>
-			)}
+			<div className="space-y-7">
+				{groups.map((group) => (
+					<section className="space-y-2.5" key={group.title}>
+						<h2 className="px-1 font-semibold text-sm">{group.title}</h2>
+						<PortalList>
+							{group.list.map((estimate) => (
+								<PortalEstimateRow estimate={estimate} key={estimate.id} />
+							))}
+						</PortalList>
+					</section>
+				))}
+			</div>
 		</div>
 	);
 }

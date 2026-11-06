@@ -17,6 +17,7 @@ import {
 import { type ReactNode, useState } from "react";
 import { daysUntil } from "@/components/dashboard/estimates/store";
 import { ModelImage } from "@/components/dashboard/models/model-image";
+import { FixrLoader } from "@/components/fixr-loader";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -108,12 +109,12 @@ export function CustomerEstimate({
 						withBottomNav ? "bottom-24" : "bottom-4"
 					)}
 				>
-					<div className="mx-auto flex max-w-xl items-center gap-2 rounded-2xl border bg-background/95 p-2 shadow-black/10 shadow-lg backdrop-blur lg:ml-0 lg:max-w-none lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+					<div className="mx-auto flex max-w-xl items-center gap-2 rounded-[1.75rem] bg-background/90 p-1.5 shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_8px_24px_-6px_oklch(0_0_0/0.25)] backdrop-blur-xl lg:ml-0 lg:max-w-none lg:justify-end lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-[0_0_0_1px_oklch(1_0_0/0.1),0_8px_24px_-6px_oklch(0_0_0/0.6)]">
 						<span className="hidden flex-1 text-muted-foreground text-sm lg:block">
 							{t("estimates.public.answerPrompt")}
 						</span>
 						<Button
-							className="flex-1 lg:flex-none"
+							className="flex-1 rounded-full transition-[scale] active:scale-[0.96] lg:flex-none"
 							disabled={pending}
 							onClick={() => setRejecting(true)}
 							size="lg"
@@ -123,7 +124,7 @@ export function CustomerEstimate({
 							{t("estimates.public.reject")}
 						</Button>
 						<Button
-							className="flex-[2] lg:flex-none"
+							className="flex-[2] rounded-full transition-[scale] active:scale-[0.96] lg:flex-none"
 							disabled={pending}
 							onClick={onApprove}
 							size="lg"
@@ -156,9 +157,7 @@ export function CustomerEstimate({
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
 		<section className="space-y-2.5">
-			<h2 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-				{title}
-			</h2>
+			<h2 className="px-1 font-semibold text-sm">{title}</h2>
 			{children}
 		</section>
 	);
@@ -176,12 +175,12 @@ function Hero({
 	const open = estimate.status === "sent" && !estimate.expired;
 
 	return (
-		<header className="overflow-hidden rounded-2xl border bg-card">
-			<div className="flex items-center gap-3 border-b bg-muted/30 px-4 py-3">
+		<header className="space-y-4">
+			<div className="flex items-center gap-3">
 				{estimate.company.logoUrl ? (
 					<img
 						alt=""
-						className="size-9 rounded-lg border bg-background object-contain"
+						className="size-9 rounded-lg bg-background object-contain outline outline-1 outline-black/10 -outline-offset-1 dark:outline-white/10"
 						height={36}
 						src={estimate.company.logoUrl}
 						width={36}
@@ -195,25 +194,25 @@ function Hero({
 					<p className="truncate font-medium text-sm">
 						{estimate.company.name}
 					</p>
-					<p className="text-muted-foreground text-xs">
+					<p className="whitespace-nowrap text-muted-foreground text-xs">
 						{t("estimates.public.title", { number })}
 					</p>
 				</div>
 				<span
 					className={cn(
-						"ml-auto shrink-0 rounded-full px-2.5 py-1 font-semibold text-xs",
+						"ml-auto shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 font-semibold text-xs",
 						STATUS_TONE[estimate.status]
 					)}
 				>
 					{t(`estimates.status.${estimate.status}`)}
 				</span>
 			</div>
-			<div className="space-y-3 px-4 py-5">
+			<div className="space-y-3 px-1">
 				<div>
 					<p className="text-muted-foreground text-xs">
 						{t("estimates.public.total")}
 					</p>
-					<p className="font-heading font-semibold text-4xl tabular-nums tracking-tight">
+					<p className="font-heading font-semibold text-4xl tracking-tight">
 						{format.currency(estimate.totals.total)}
 					</p>
 					{estimate.totals.discount > 0 && (
@@ -231,18 +230,16 @@ function Hero({
 				</div>
 				<p
 					className={cn(
-						"inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs",
-						open &&
-							days <= 3 &&
-							"border-amber-500/40 text-amber-700 dark:text-amber-300"
+						"flex items-center gap-1.5 whitespace-nowrap text-muted-foreground text-xs",
+						open && days <= 3 && "text-amber-700 dark:text-amber-300"
 					)}
 				>
-					<CalendarClock className="size-3.5" />
+					<CalendarClock className="size-3.5 shrink-0" />
 					{t("estimates.public.validFor", {
 						date: format.date(estimate.validUntil),
 					})}
 					{open && days >= 0 && days <= 7 && (
-						<span className="text-muted-foreground">
+						<span>
 							·{" "}
 							{days === 0
 								? t("estimates.public.lastDay")
@@ -310,7 +307,7 @@ function DeviceSection({ estimate }: { estimate: PublicEstimate }) {
 
 	return (
 		<Section title={t("estimates.public.yourDevice")}>
-			<div className="rounded-2xl border bg-card p-4">
+			<div className="px-1">
 				<div className="flex items-center gap-3">
 					<ModelImage
 						alt={device.model}
@@ -347,13 +344,13 @@ function DeviceSection({ estimate }: { estimate: PublicEstimate }) {
 						</dd>
 					</div>
 				</dl>
-				<div className="mt-3 rounded-xl bg-muted/40 p-3">
+				<div className="mt-3">
 					<p className="text-muted-foreground text-xs">
 						{t("estimates.public.reportedDefect")}
 					</p>
-					<p className="mt-0.5 whitespace-pre-line text-sm">
+					<blockquote className="mt-1 whitespace-pre-line text-pretty border-l-2 pl-3 text-sm">
 						{device.reportedDefect}
-					</p>
+					</blockquote>
 				</div>
 			</div>
 		</Section>
@@ -372,7 +369,7 @@ export function ItemsSection({
 
 	return (
 		<Section title={title ?? t("estimates.public.whatWillBeDone")}>
-			<div className="overflow-hidden rounded-2xl border bg-card">
+			<div className="overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_1px_2px_oklch(0_0_0/0.04)] dark:shadow-[0_0_0_1px_oklch(1_0_0/0.08)]">
 				<ul className="divide-y">
 					{estimate.items.map((item, index) => (
 						<li
@@ -453,9 +450,10 @@ function PdfSection({
 }) {
 	const { t } = useTranslation();
 	const [shown, setShown] = useState(!collapsible);
+	const [loaded, setLoaded] = useState(false);
 
 	return (
-		<section className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card">
+		<section className="flex h-full flex-col overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_1px_2px_oklch(0_0_0/0.04)] dark:shadow-[0_0_0_1px_oklch(1_0_0/0.08)]">
 			<div className="flex items-center gap-2 px-4 py-3">
 				<FileText className="size-4 text-muted-foreground" />
 				<span className="flex-1 font-medium text-sm">
@@ -484,14 +482,26 @@ function PdfSection({
 				</button>
 			)}
 			{shown && (
-				<iframe
+				<div
 					className={cn(
-						"w-full flex-1 border-t bg-white",
+						"relative grid flex-1 border-t",
 						collapsible && "h-[70dvh] flex-none"
 					)}
-					src={`${url}#view=FitH`}
-					title={t("estimates.public.pdfTitle", { number })}
-				/>
+				>
+					{!loaded && (
+						<FixrLoader className="absolute inset-0 m-auto size-10" />
+					)}
+					{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onLoad only hides the loader */}
+					<iframe
+						className={cn(
+							"size-full bg-white transition-opacity duration-300 ease-out",
+							loaded ? "opacity-100" : "opacity-0"
+						)}
+						onLoad={() => setLoaded(true)}
+						src={`${url}#view=FitH`}
+						title={t("estimates.public.pdfTitle", { number })}
+					/>
+				</div>
 			)}
 		</section>
 	);

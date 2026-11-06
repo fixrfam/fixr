@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { PublicEstimate } from "@/components/estimates/public-estimate";
 import { portalApi } from "@/lib/services/portal";
-import { PortalOpening } from "./portal-entry";
+import { PortalOpening } from "./portal-center";
 
 /**
  * The link of an estimate email. It is also the client's access to the
@@ -27,7 +27,7 @@ export function EstimateEntry({ token }: { token: string }) {
 
 	if (open.isError) {
 		return (
-			<div className="mx-auto min-h-dvh w-full max-w-6xl bg-muted/30 px-4 py-8 md:px-6">
+			<div className="mx-auto min-h-dvh w-full max-w-6xl px-4 py-8 md:px-6">
 				<PublicEstimate token={token} />
 			</div>
 		);
