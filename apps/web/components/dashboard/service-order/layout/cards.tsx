@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { CopyableValue } from "@/components/dashboard/copyable-value";
 import { CustomerAvatar } from "@/components/dashboard/customers/customer-avatar";
+import { ServiceOrderEstimates } from "@/components/dashboard/estimates/service-order-estimates";
 import { ModelImage } from "@/components/dashboard/models/model-image";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
@@ -197,6 +198,7 @@ export function getCards(
 				<ServiceOrderItems serviceOrderId={order.id} />
 			</ServiceOrderDetailsCard>
 		),
+		estimates: <ServiceOrderEstimates serviceOrderId={order.id} />,
 		images: (
 			<ServiceOrderDetailsCard
 				description={t("serviceOrders.cards.imagesDescription")}

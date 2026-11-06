@@ -12,11 +12,20 @@ const STATUS_STYLES: Record<EstimateStatus, string> = {
 	rejected: "bg-red-500/15 text-red-700 dark:text-red-300",
 };
 
-export function EstimateStatusBadge({ status }: { status: EstimateStatus }) {
+export function EstimateStatusBadge({
+	status,
+	className,
+}: {
+	status: EstimateStatus;
+	className?: string;
+}) {
 	const { t } = useTranslation();
 
 	return (
-		<Badge className={cn("border-0", STATUS_STYLES[status])} variant="outline">
+		<Badge
+			className={cn("border-0", STATUS_STYLES[status], className)}
+			variant="outline"
+		>
 			{t(`estimates.status.${status}`)}
 		</Badge>
 	);

@@ -13,6 +13,7 @@ import { AxiosError } from "axios";
 import { HandCoins, Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { estimatesKey } from "@/components/dashboard/estimates/use-estimate-actions";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import {
 	PICKER_PAGE_SIZE,
@@ -243,8 +244,7 @@ export function ServiceOrderItems({
 }
 
 /**
- * Turn the order's current items into a draft estimate and go to the
- * estimates list. Shown once the order has items, to who creates estimates.
+ * Turn the order's current items into a draft estimate and open it. Shown once the order has items, to who creates estimates.
  */
 export function CreateEstimateButton({
 	serviceOrderId,
@@ -261,16 +261,18 @@ export function CreateEstimateButton({
 	const router = useRouter();
 	const { subdomain } = useParams<{ subdomain: string }>();
 	const toastError = useApiErrorToast();
+	const queryClient = useQueryClient();
 
 	const create = useMutation({
 		mutationFn: () => estimatesApi.create(subdomain, { serviceOrderId }),
-		onSuccess: () => {
+		onSuccess: (estimate) => {
+			queryClient.invalidateQueries({ queryKey: estimatesKey(subdomain) });
 			const feedback = message("create_estimate_success", "success");
 			toast.success({
 				text: feedback.title,
 				description: feedback.description,
 			});
-			router.push(`/dashboard/${subdomain}/estimates`);
+			router.push(`/dashboard/${subdomain}/estimates/${estimate.id}`);
 		},
 		onError: toastError,
 	});
@@ -302,9 +304,11 @@ export function CreateEstimateButton({
  * Top level lines in the order they were added, each service with the parts
  * it uses. A part whose service is gone (shouldn't happen) shows on its own.
  */
-export function groupItems(items: ServiceOrderItem[]) {
+export function groupItems<
+	T extends { id: string; parentItemId?: string | null },
+>(items: T[]) {
 	const ids = new Set(items.map((item) => item.id));
-	const partsOf = new Map<string, ServiceOrderItem[]>();
+	const partsOf = new Map<string, T[]>();
 	for (const item of items) {
 		if (item.parentItemId && ids.has(item.parentItemId)) {
 			partsOf.set(item.parentItemId, [
