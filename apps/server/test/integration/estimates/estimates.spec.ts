@@ -267,6 +267,40 @@ describe("GET /companies/:subdomain/estimates", () => {
 			2,
 		]);
 	});
+
+	it("shows the client, the source order, the device and the item count", async () => {
+		const ctx = await setup();
+		await createEstimate(ctx);
+		const other = await makeCustomer({
+			companyId: ctx.company.id,
+			name: "João Souza",
+		});
+		const list = (qs: string) =>
+			authedInject(app, ctx.token, {
+				method: "GET",
+				url: `${ctx.base}?page=1&${qs}`,
+			});
+
+		const [record] = (await list("")).json().data.records;
+		const ofClient = (await list(`clientId=${ctx.customer.id}`)).json().data;
+		const ofOther = (await list(`clientId=${other.id}`)).json().data;
+		const ofOrder = (await list(`serviceOrderId=${ctx.serviceOrder.id}`)).json()
+			.data;
+
+		expect(record).toMatchObject({
+			itemsCount: 2,
+			client: { id: ctx.customer.id, name: "Maria Oliveira" },
+			serviceOrder: {
+				id: ctx.serviceOrder.id,
+				number: ctx.serviceOrder.number,
+			},
+			device: { maker: "Apple", model: { name: "iPhone 13" } },
+		});
+		expect(record.client).toHaveProperty("phone");
+		expect(ofClient.pagination.total_records).toBe(1);
+		expect(ofOther.pagination.total_records).toBe(0);
+		expect(ofOrder.pagination.total_records).toBe(1);
+	});
 });
 
 describe("GET /companies/:subdomain/estimates/:estimateId/pdf", () => {
