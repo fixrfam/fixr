@@ -197,3 +197,43 @@
 		transform: scale(1.04);
 	}
 }
+
+/* Fixr loader: the chip's outline, its core and its pins are drawn by a
+   stroke, then erased, in a loop. Paths use pathLength="100". */
+.fixr-loader {
+	--loader-dur: 1800ms;
+	--loader-ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+.fixr-loader .fixr-loader-track {
+	opacity: 0.15;
+}
+.fixr-loader .fixr-loader-draw {
+	stroke-dasharray: 100 100;
+	stroke-dashoffset: 100;
+	animation: fixr-loader-draw var(--loader-dur) var(--loader-ease) infinite;
+}
+.fixr-loader .fixr-loader-core {
+	animation-delay: calc(var(--loader-dur) * 0.12);
+}
+.fixr-loader .fixr-loader-pin {
+	animation-delay: calc(var(--loader-dur) * 0.2 + var(--pin) * 40ms);
+}
+@keyframes fixr-loader-draw {
+	0% {
+		stroke-dashoffset: 100;
+	}
+	45%,
+	55% {
+		stroke-dashoffset: 0;
+	}
+	100% {
+		stroke-dashoffset: -100;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.fixr-loader .fixr-loader-draw {
+		animation: none;
+		stroke-dashoffset: 0;
+		opacity: 0.6;
+	}
+}
