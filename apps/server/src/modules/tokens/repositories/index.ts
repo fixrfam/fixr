@@ -1,4 +1,4 @@
-import { and, db, eq, gte, sql } from "@fixr/db/connection";
+import { and, db, eq, gte, ne, sql } from "@fixr/db/connection";
 import { oneTimeTokens, refreshTokens, users } from "@fixr/db/schema";
 
 /** @description Token data access layer for refresh tokens and one-time tokens */
@@ -37,6 +37,24 @@ export class TokensRepository {
 	 */
 	static async deleteRefreshToken(token: string) {
 		return await db.delete(refreshTokens).where(eq(refreshTokens.token, token));
+	}
+
+	/**
+	 * End the user's sessions: delete their refresh tokens, except `keep` (the
+	 * session that asked for it, when it should stay signed in).
+	 *
+	 * @param userId - The user ID
+	 * @param keep - Refresh token to keep, if any
+	 */
+	static async deleteUserRefreshTokens(userId: string, keep?: string) {
+		return await db
+			.delete(refreshTokens)
+			.where(
+				and(
+					eq(refreshTokens.userId, userId),
+					keep ? ne(refreshTokens.token, keep) : undefined
+				)
+			);
 	}
 
 	/**
