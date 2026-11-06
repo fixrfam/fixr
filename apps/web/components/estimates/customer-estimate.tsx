@@ -29,18 +29,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Wallpaper } from "@/components/wallpaper";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import type { PublicEstimate } from "@/lib/services/estimates";
 import { cn } from "@/lib/utils";
 
 const REASON_MAX = 500;
-
-const STATUS_TONE = {
-	draft: "bg-muted text-muted-foreground",
-	sent: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-	approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-	rejected: "bg-red-500/15 text-red-700 dark:text-red-300",
-} as const;
 
 export interface CustomerEstimateProps {
 	estimate: PublicEstimate;
@@ -157,7 +151,7 @@ export function CustomerEstimate({
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
 		<section className="space-y-2.5">
-			<h2 className="px-1 font-semibold text-sm">{title}</h2>
+			<h2 className="font-semibold text-sm">{title}</h2>
 			{children}
 		</section>
 	);
@@ -175,80 +169,71 @@ function Hero({
 	const open = estimate.status === "sent" && !estimate.expired;
 
 	return (
-		<header className="space-y-4">
-			<div className="flex items-center gap-3">
+		<Wallpaper className="rounded-[1.25rem] p-4">
+			<header className="flex items-center gap-3">
 				{estimate.company.logoUrl ? (
 					<img
 						alt=""
-						className="size-9 rounded-lg bg-background object-contain outline outline-1 outline-black/10 -outline-offset-1 dark:outline-white/10"
+						className="size-9 shrink-0 rounded-lg bg-white object-contain"
 						height={36}
 						src={estimate.company.logoUrl}
 						width={36}
 					/>
 				) : (
-					<span className="grid size-9 place-items-center rounded-lg bg-primary font-semibold text-primary-foreground text-sm">
+					<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white font-semibold text-[#050b1f] text-sm">
 						{estimate.company.name.charAt(0).toUpperCase()}
 					</span>
 				)}
-				<div className="min-w-0">
+				<div className="min-w-0 flex-1">
 					<p className="truncate font-medium text-sm">
 						{estimate.company.name}
 					</p>
-					<p className="whitespace-nowrap text-muted-foreground text-xs">
+					<p className="whitespace-nowrap text-white/70 text-xs">
 						{t("estimates.public.title", { number })}
 					</p>
 				</div>
-				<span
-					className={cn(
-						"ml-auto shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 font-semibold text-xs",
-						STATUS_TONE[estimate.status]
-					)}
-				>
+				<span className="shrink-0 whitespace-nowrap rounded-full bg-white/15 px-2.5 py-1 font-semibold text-xs backdrop-blur">
 					{t(`estimates.status.${estimate.status}`)}
 				</span>
-			</div>
-			<div className="space-y-3 px-1">
-				<div>
-					<p className="text-muted-foreground text-xs">
-						{t("estimates.public.total")}
-					</p>
-					<p className="font-heading font-semibold text-4xl tracking-tight">
-						{format.currency(estimate.totals.total)}
-					</p>
-					{estimate.totals.discount > 0 && (
-						<p className="text-sm tabular-nums">
-							<s className="text-muted-foreground">
-								{format.currency(estimate.totals.subtotal)}
-							</s>{" "}
-							<span className="font-medium text-emerald-700 dark:text-emerald-300">
-								{t("estimates.table.discount", {
-									percentage: format.number(estimate.discountPercentage),
-								})}
-							</span>
-						</p>
-					)}
-				</div>
-				<p
-					className={cn(
-						"flex items-center gap-1.5 whitespace-nowrap text-muted-foreground text-xs",
-						open && days <= 3 && "text-amber-700 dark:text-amber-300"
-					)}
-				>
-					<CalendarClock className="size-3.5 shrink-0" />
-					{t("estimates.public.validFor", {
-						date: format.date(estimate.validUntil),
-					})}
-					{open && days >= 0 && days <= 7 && (
-						<span>
-							·{" "}
-							{days === 0
-								? t("estimates.public.lastDay")
-								: t("estimates.public.daysLeft", { days })}
-						</span>
-					)}
+			</header>
+			<div className="mt-6">
+				<p className="text-white/70 text-xs">{t("estimates.public.total")}</p>
+				<p className="font-heading font-semibold text-4xl tracking-tight">
+					{format.currency(estimate.totals.total)}
 				</p>
+				{estimate.totals.discount > 0 && (
+					<p className="mt-0.5 whitespace-nowrap text-sm">
+						<s className="text-white/60">
+							{format.currency(estimate.totals.subtotal)}
+						</s>{" "}
+						<span className="font-medium text-emerald-300">
+							{t("estimates.table.discount", {
+								percentage: format.number(estimate.discountPercentage),
+							})}
+						</span>
+					</p>
+				)}
 			</div>
-		</header>
+			<p
+				className={cn(
+					"mt-4 flex items-center gap-1.5 whitespace-nowrap text-xs",
+					open && days <= 3 ? "text-amber-300" : "text-white/70"
+				)}
+			>
+				<CalendarClock className="size-3.5 shrink-0" />
+				{t("estimates.public.validFor", {
+					date: format.date(estimate.validUntil),
+				})}
+				{open && days >= 0 && days <= 7 && (
+					<span>
+						·{" "}
+						{days === 0
+							? t("estimates.public.lastDay")
+							: t("estimates.public.daysLeft", { days })}
+					</span>
+				)}
+			</p>
+		</Wallpaper>
 	);
 }
 
@@ -307,7 +292,7 @@ function DeviceSection({ estimate }: { estimate: PublicEstimate }) {
 
 	return (
 		<Section title={t("estimates.public.yourDevice")}>
-			<div className="px-1">
+			<div>
 				<div className="flex items-center gap-3">
 					<ModelImage
 						alt={device.model}
@@ -320,31 +305,37 @@ function DeviceSection({ estimate }: { estimate: PublicEstimate }) {
 						<p className="text-muted-foreground text-sm">{device.maker}</p>
 					</div>
 				</div>
-				<dl className="mt-4 grid grid-cols-2 gap-3 border-t pt-3 text-sm sm:grid-cols-3">
+				<dl className="mt-4 grid grid-cols-[auto_auto_minmax(0,1fr)] gap-x-6 border-t pt-3 text-sm">
 					<div>
 						<dt className="text-muted-foreground text-xs">
 							{t("estimates.public.serviceOrder")}
 						</dt>
-						<dd className="font-medium tabular-nums">{serviceOrder.code}</dd>
-					</div>
-					<div>
-						<dt className="text-muted-foreground text-xs">
-							{t("estimates.public.orderStatus")}
-						</dt>
-						<dd className="font-medium">
-							{t(serviceOrderStatusKeys[serviceOrder.status])}
+						<dd className="whitespace-nowrap font-medium">
+							{serviceOrder.code}
 						</dd>
 					</div>
 					<div>
 						<dt className="text-muted-foreground text-xs">
 							{t("estimates.public.openedAt")}
 						</dt>
-						<dd className="font-medium">
-							{format.date(serviceOrder.openedAt)}
+						<dd className="whitespace-nowrap font-medium">
+							{format.date(serviceOrder.openedAt, {
+								dateStyle: undefined,
+								day: "numeric",
+								month: "short",
+							})}
+						</dd>
+					</div>
+					<div className="min-w-0">
+						<dt className="text-muted-foreground text-xs">
+							{t("estimates.public.orderStatus")}
+						</dt>
+						<dd className="truncate font-medium">
+							{t(serviceOrderStatusKeys[serviceOrder.status])}
 						</dd>
 					</div>
 				</dl>
-				<div className="mt-3">
+				<div className="mt-4">
 					<p className="text-muted-foreground text-xs">
 						{t("estimates.public.reportedDefect")}
 					</p>
