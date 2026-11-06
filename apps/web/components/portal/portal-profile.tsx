@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCpf, formatPhone } from "@/lib/format";
 import { portalApi } from "@/lib/services/portal";
-import { ShopMark } from "./portal-cards";
+import { PortalList, ShopMark } from "./portal-cards";
 import { portalKeys, usePortalMe } from "./store";
 
 /** CPF with only the last digits visible, e.g. `***.***.725-47`. */
@@ -40,32 +40,38 @@ export function PortalProfile() {
 
 	return (
 		<div className="space-y-5">
-			<section className="flex flex-col items-center rounded-2xl border bg-card px-4 py-6 text-center">
+			<section className="flex flex-col items-center pb-2 text-center">
 				<Avatar
-					className="size-20 border-4 border-background shadow-md"
+					className="size-20 shadow-[0_0_0_4px_var(--color-background),0_4px_12px_oklch(0_0_0/0.15)]"
 					fallbackHash={me.email}
 					fallbackType="beam"
 				/>
-				<h1 className="mt-3 font-heading font-semibold text-xl">
+				<h1 className="mt-3 max-w-full truncate font-heading font-semibold text-xl">
 					{me.name ?? me.email}
 				</h1>
-				<dl className="mt-3 grid w-full max-w-xs grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-left text-sm">
-					<dt className="text-muted-foreground">{t("portal.profile.email")}</dt>
-					<dd className="truncate">{me.email}</dd>
-					<dt className="text-muted-foreground">{t("portal.profile.cpf")}</dt>
-					<dd className="tabular-nums">{maskCpf(me.cpf)}</dd>
+				<dl className="mt-1 flex max-w-full flex-col items-center text-muted-foreground text-sm">
+					<dt className="sr-only">{t("portal.profile.email")}</dt>
+					<dd className="max-w-full truncate">{me.email}</dd>
+					<dt className="sr-only">{t("portal.profile.cpf")}</dt>
+					<dd className="whitespace-nowrap">
+						{t("portal.profile.cpf")} {maskCpf(me.cpf)}
+					</dd>
 				</dl>
 			</section>
 
 			{me.shops.length > 0 && (
-				<section className="rounded-2xl border bg-card p-4">
-					<h2 className="font-semibold text-sm">{t("portal.profile.shops")}</h2>
-					<p className="text-muted-foreground text-xs">
-						{t("portal.profile.shopsDescription")}
-					</p>
-					<ul className="mt-3 divide-y">
+				<section className="space-y-2.5">
+					<div className="px-1">
+						<h2 className="font-semibold text-sm">
+							{t("portal.profile.shops")}
+						</h2>
+						<p className="text-pretty text-muted-foreground text-xs">
+							{t("portal.profile.shopsDescription")}
+						</p>
+					</div>
+					<PortalList>
 						{me.shops.map((shop) => (
-							<li className="flex items-center gap-3 py-3" key={shop.name}>
+							<li className="flex items-center gap-3 px-4 py-3" key={shop.name}>
 								<ShopMark className="size-9 rounded-xl text-sm" shop={shop} />
 								<div className="min-w-0 flex-1">
 									<p className="truncate font-medium text-sm">{shop.name}</p>
@@ -107,26 +113,28 @@ export function PortalProfile() {
 								)}
 							</li>
 						))}
-					</ul>
+					</PortalList>
 				</section>
 			)}
 
-			<section className="rounded-2xl border bg-card p-4">
-				<h2 className="mb-2 font-semibold text-sm">
+			<section className="space-y-2.5">
+				<h2 className="px-1 font-semibold text-sm">
 					{t("portal.profile.preferences")}
 				</h2>
-				<div className="flex items-center justify-between py-1.5 text-sm">
-					<span>{t("portal.profile.theme")}</span>
-					<ModeToggle variant="outline" />
-				</div>
-				<div className="flex items-center justify-between py-1.5 text-sm">
-					<span>{t("portal.profile.language")}</span>
-					<LanguageToggle variant="outline" />
-				</div>
+				<PortalList>
+					<li className="flex items-center justify-between px-4 py-2 text-sm">
+						<span>{t("portal.profile.theme")}</span>
+						<ModeToggle />
+					</li>
+					<li className="flex items-center justify-between px-4 py-2 text-sm">
+						<span>{t("portal.profile.language")}</span>
+						<LanguageToggle />
+					</li>
+				</PortalList>
 			</section>
 
 			<Button
-				className="w-full rounded-full"
+				className="w-full rounded-full transition-[scale] active:scale-[0.96]"
 				disabled={signOut.isPending}
 				onClick={() => signOut.mutate()}
 				size="lg"

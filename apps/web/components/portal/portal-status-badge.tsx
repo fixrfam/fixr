@@ -27,7 +27,7 @@ export function PortalStatusBadge({
 	return (
 		<span
 			className={cn(
-				"inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 font-medium text-xs",
+				"inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 font-medium text-xs",
 				PORTAL_STATUS_TONE[status],
 				className
 			)}
