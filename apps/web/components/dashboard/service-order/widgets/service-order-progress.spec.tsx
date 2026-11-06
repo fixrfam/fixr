@@ -6,6 +6,7 @@ import "@/test/mocks";
 import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { serveRepairs, serviceOrder } from "@/test/msw/repairs";
 import { renderWithQuery as render } from "@/test/query";
+import { ServiceOrderActions } from "../service-order-details";
 import { ServiceOrderProgress } from "./service-order-progress";
 
 // jsdom has no matchMedia: render the desktop dialog.
@@ -21,7 +22,7 @@ beforeEach(() => {
 
 async function openDialog() {
 	const user = userEvent.setup();
-	render(<ServiceOrderProgress order={serviceOrder} />, {
+	render(<ServiceOrderActions order={serviceOrder} />, {
 		role: "technician",
 	});
 	await user.click(
@@ -95,7 +96,7 @@ describe("ServiceOrderProgress", () => {
 	});
 
 	it("is read only without the change status permission", () => {
-		render(<ServiceOrderProgress order={serviceOrder} />, {
+		render(<ServiceOrderActions order={serviceOrder} />, {
 			role: "warehouse",
 		});
 
