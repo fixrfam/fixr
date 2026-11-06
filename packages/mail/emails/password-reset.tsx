@@ -5,23 +5,15 @@
  * design asks for.
  */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import {
-	Body,
-	Button,
-	Container,
-	Head,
-	Heading,
-	Hr,
-	Html,
-	Preview,
-	Section,
-	Tailwind,
-	Text,
-} from "@react-email/components";
+import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
-import { FixrHeader } from "../components/fixr-header";
+import {
+	EmailButton,
+	EmailLayout,
+	EmailNote,
+} from "../components/email-layout";
 
 interface EmailProps {
 	displayName: string;
@@ -31,10 +23,7 @@ interface EmailProps {
 	locale?: Locale;
 }
 
-const _baseUrl = process.env.VERCEL_URL
-	? `https://${process.env.VERCEL_URL}`
-	: "";
-
+/** A security email: short, one action, and a reminder not to forward it. */
 export const PasswordReset = ({
 	displayName,
 	appName,
@@ -44,143 +33,46 @@ export const PasswordReset = ({
 	const { t } = createTranslator(locale, { escapeValues: true });
 
 	return (
-		<Tailwind
-			config={{
-				theme: {
-					extend: {
-						colors: {
-							brand: "#1F65FE",
-							border: "#dedede",
-						},
-					},
-				},
-			}}
+		<EmailLayout
+			footer={t("emails.passwordReset.footer")}
+			illustration="password-reset"
+			preview={t("emails.passwordReset.preview")}
+			tone="action"
 		>
-			<Html>
-				<Head />
-				<Preview>{t("emails.passwordReset.preview")}</Preview>
-				<Body style={main}>
-					<Container className="mx-auto max-w-[480px]">
-						<FixrHeader />
-
-						<Text
-							className="my-0 text-lg tracking-tight"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.passwordReset.greeting", {
-									name: displayName,
-								}),
-							}}
-						/>
-						<Heading className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:text-3xl">
-							{t("emails.passwordReset.heading")}
-						</Heading>
-						<Section className="gap-0">
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.passwordReset.body", { app: appName }),
-								}}
-							/>
-
-							<Container>
-								<Container className="flex w-full items-center justify-center text-center" />
-								<Button
-									className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
-									href={verificationUrl}
-								>
-									{t("emails.passwordReset.cta")}
-								</Button>
-							</Container>
-							<Text className="my-0 text-center font-bold">
-								{t("emails.passwordReset.warning")}
-							</Text>
-						</Section>
-						<Hr className="my-12" />
-						<Text className="text-center text-[#6a737d] text-sm">
-							{t("emails.passwordReset.footer")}
-						</Text>
-					</Container>
-				</Body>
-			</Html>
-		</Tailwind>
+			<Text
+				className="mb-0 text-[15px] text-muted"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.passwordReset.greeting", { name: displayName }),
+				}}
+			/>
+			<Heading className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8">
+				{t("emails.passwordReset.heading")}
+			</Heading>
+			<Text
+				className="text-[15px] leading-6"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.passwordReset.body", { app: appName }),
+				}}
+			/>
+			<EmailButton href={verificationUrl} tone="action">
+				{t("emails.passwordReset.cta")}
+			</EmailButton>
+			<EmailNote>{t("emails.passwordReset.warning")}</EmailNote>
+		</EmailLayout>
 	);
 };
 
 PasswordReset.PreviewProps = {
 	displayName: "alanturing",
+	appName: "Fixr",
+	verificationUrl: "https://fixr.com.br/auth/forgot-password/token",
 } as EmailProps;
 
 export default PasswordReset;
 
-const main = {
-	backgroundColor: "#ffffff",
-	color: "#24292e",
-	fontFamily:
-		'-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-};
-
-const _container = {
-	maxWidth: "480px",
-	margin: "0 auto",
-	padding: "20px 0 48px",
-};
-
-const _title = {
-	fontSize: "24px",
-	lineHeight: 1.25,
-};
-
-const _section = {
-	padding: "24px",
-	border: "solid 1px #dedede",
-	borderRadius: "5px",
-	textAlign: "center" as const,
-};
-
-const _text = {
-	margin: "0 0 10px 0",
-	textAlign: "left" as const,
-};
-
-const _button = {
-	fontSize: "14px",
-	backgroundColor: "#000000",
-	color: "#fff",
-	lineHeight: 1.5,
-	borderRadius: "0.5em",
-	padding: "12px 24px",
-};
-
-const _links = {
-	textAlign: "center" as const,
-};
-
-const _link = {
-	color: "#0366d6",
-	fontSize: "12px",
-};
-
-const _footer = {
-	color: "#6a737d",
-	fontSize: "12px",
-	textAlign: "center" as const,
-	marginTop: "60px",
-};
-
-export async function renderEmail({
-	verificationUrl,
-	displayName,
-	appName,
-	locale,
-}: EmailProps): Promise<string> {
+export async function renderEmail({ ...props }: EmailProps): Promise<string> {
 	try {
-		return await render(
-			<PasswordReset
-				appName={appName}
-				displayName={displayName}
-				locale={locale}
-				verificationUrl={verificationUrl}
-			/>
-		);
+		return await render(<PasswordReset {...props} />);
 	} catch (error) {
 		console.error("Failed to render email", error);
 		throw new Error(`Failed to render email ${error}`);

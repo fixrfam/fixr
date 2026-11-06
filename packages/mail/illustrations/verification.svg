@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="58%" r="60%">
+      <stop offset="0" stop-color="#dbe7ff"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </radialGradient>
+    
+  </defs>
+  <rect width="960" height="440" rx="28" fill="url(#bg)"/>
+  <circle cx="170" cy="110" r="5" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="790" cy="90" r="6" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="840" cy="300" r="4" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="120" cy="300" r="4" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="720" cy="60" r="3" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="250" cy="60" r="3" fill="#89c4ff" opacity="0.5"/>
+  <ellipse cx="480" cy="276.0" rx="315.0" ry="96.0" fill="#0b45ea" opacity="0.07"/>
+  <polygon points="220.2,250.0 480.0,400.0 480.0,426.0 220.2,276.0" fill="#c9dbff" />
+  <polygon points="739.8,250.0 480.0,400.0 480.0,426.0 739.8,276.0" fill="#a9c4ff" />
+  <polygon points="480.0,100.0 739.8,250.0 480.0,400.0 220.2,250.0" fill="#ffffff" />
+  <line x1="523.3" y1="125.0" x2="263.5" y2="275.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="436.7" y1="125.0" x2="696.5" y2="275.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="566.6" y1="150.0" x2="306.8" y2="300.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="393.4" y1="150.0" x2="653.2" y2="300.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="609.9" y1="175.0" x2="350.1" y2="325.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="350.1" y1="175.0" x2="609.9" y2="325.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="653.2" y1="200.0" x2="393.4" y2="350.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="306.8" y1="200.0" x2="566.6" y2="350.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="696.5" y1="225.0" x2="436.7" y2="375.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="263.5" y1="225.0" x2="523.3" y2="375.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <polygon points="454.0,174.5 627.2,274.5 506.0,344.5 332.8,244.5" fill="#0b45ea" opacity="0.1"/>
+  <polygon points="332.8,161.0 506.0,261.0 506.0,279.0 332.8,179.0" fill="#51a3ff" />
+  <polygon points="627.2,191.0 506.0,261.0 506.0,279.0 627.2,209.0" fill="#1F65FE" />
+  <polygon points="454.0,91.0 627.2,191.0 506.0,261.0 332.8,161.0" fill="#d6e4ff" />
+  <polygon points="454.0,91.0 470.3,181.6 627.2,191.0" fill="#ffffff" stroke="#51a3ff" stroke-width="2.5" stroke-linejoin="round"/>
+  <line x1="332.8" y1="161.0" x2="470.3" y2="181.6" stroke="#51a3ff" stroke-width="2.5" stroke-linecap="round" />
+  <line x1="506.0" y1="261.0" x2="470.3" y2="181.6" stroke="#51a3ff" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M300,114 Q302.88,127.12 316,130 Q302.88,132.88 300,146 Q297.12,132.88 284,130 Q297.12,127.12 300,114 Z" fill="#51a3ff"/>
+  <path d="M668,160 Q669.8,168.2 678,170 Q669.8,171.8 668,180 Q666.2,171.8 658,170 Q666.2,168.2 668,160 Z" fill="#89c4ff"/>
+  <circle cx="560" cy="124" r="44" fill="#0b2a7a" opacity="0.12"/>
+  <circle cx="560" cy="118" r="44" fill="#10b981" stroke="#ffffff" stroke-width="5"/>
+  <path d="M541.5,118.9 L555.6,133.0 L579.8,103.9" fill="none" stroke="#ffffff" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
