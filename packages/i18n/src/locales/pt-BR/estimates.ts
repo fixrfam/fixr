@@ -90,8 +90,7 @@ export const estimates: Translated<typeof source> = {
 		fromProfile: "Email do cadastro do cliente",
 		otherEmail: "Enviar para outro email",
 		useProfile: "Usar o email do cadastro",
-		noEmail:
-			"Este cliente não tem email no cadastro. Informe um para enviar.",
+		noEmail: "Este cliente não tem email no cadastro. Informe um para enviar.",
 		email: "Email do cliente",
 		emailPlaceholder: "cliente@email.com",
 		submit: "Enviar",
