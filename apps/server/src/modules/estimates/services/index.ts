@@ -577,8 +577,11 @@ export class EstimatesService {
 		return estimate;
 	}
 
-	/** What the client sees on the public page: no internal ids or staff data. */
-	private static async publicView(estimate: EstimateRow) {
+	/**
+	 * What the client sees (the link page and the portal): no internal ids or
+	 * staff data.
+	 */
+	static async customerView(estimate: EstimateRow) {
 		const [items, context] = await Promise.all([
 			EstimatesRepository.queryItemsByEstimateIds([estimate.id]),
 			EstimatesRepository.queryPdfContext(estimate.id),
@@ -648,7 +651,7 @@ export class EstimatesService {
 				error: null,
 				code: "get_estimate_success",
 				message: "Estimate retrieved successfully.",
-				data: await EstimatesService.publicView(estimate),
+				data: await EstimatesService.customerView(estimate),
 			})
 		);
 	}
@@ -718,7 +721,7 @@ export class EstimatesService {
 						? "approve_estimate_success"
 						: "reject_estimate_success",
 				message: "Answer recorded.",
-				data: await EstimatesService.publicView(updated),
+				data: await EstimatesService.customerView(updated),
 			})
 		);
 	}

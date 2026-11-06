@@ -8,6 +8,7 @@ import {
 } from "@fixr/schemas/portal";
 import type { FastifySchema } from "fastify";
 import { z } from "zod";
+import { publicEstimateSchema } from "./estimates.docs";
 import { companyScopedErrors, conflictError, notFoundError } from "./responses";
 import { zodResponseSchema } from "./types";
 
@@ -60,11 +61,46 @@ const serviceOrderSummary = z.object({
 	status: serviceOrderStatus,
 	deviceMaker: z.string(),
 	deviceModel: z.string(),
+	deviceCategory: z.string().nullable(),
+	deviceImageUrl: z.string().nullable(),
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 	company: z.object({ name: z.string(), logoUrl: z.string().nullable() }),
 	pendingEstimate: z.boolean(),
 });
+
+/** The estimate as the client sees it, plus the ids the portal links by. */
+const portalEstimateSchema = publicEstimateSchema.extend({
+	id: z.string(),
+	serviceOrderId: z.string(),
+});
+
+const portalEstimateSummary = z.object({
+	id: z.string(),
+	number: z.number(),
+	status: z.enum(["draft", "sent", "approved", "rejected"]),
+	validUntil: z.coerce.date(),
+	sentAt: z.coerce.date().nullable(),
+	respondedAt: z.coerce.date().nullable(),
+	expired: z.boolean(),
+	serviceOrderId: z.string(),
+	serviceOrderCode: z.string(),
+	company: z.object({ name: z.string(), logoUrl: z.string().nullable() }),
+	deviceMaker: z.string(),
+	deviceModel: z.string(),
+	deviceCategory: z.string().nullable(),
+	deviceImageUrl: z.string().nullable(),
+	totals: totalsSchema,
+});
+
+const estimateResponse = (code: string, message: string) =>
+	zodResponseSchema({
+		status: 200,
+		error: null,
+		code,
+		message,
+		data: portalEstimateSchema,
+	}).describe(message);
 
 const serviceOrderDetail = z.object({
 	id: z.string(),
@@ -73,9 +109,15 @@ const serviceOrderDetail = z.object({
 	status: serviceOrderStatus,
 	deviceMaker: z.string(),
 	deviceModel: z.string(),
+	deviceCategory: z.string().nullable(),
+	deviceImageUrl: z.string().nullable(),
 	reportedDefect: z.string(),
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
+	/** When the order reached each status, oldest first. */
+	history: z.array(
+		z.object({ status: serviceOrderStatus, at: z.coerce.date() })
+	),
 	company: z.object({
 		name: z.string(),
 		email: z.string().nullable(),
@@ -125,7 +167,7 @@ const openFromPortalLinkSchema: FastifySchema = {
 	description: `
 **Public: the client opens the link from the portal access email.**
 
-Sets an httpOnly portal session cookie (30 days). The link is the client's account: there is no password. The session sees the service orders of every client record (any shop) with the link's CPF **and** email, plus the record the link was issued for.
+Sets an httpOnly portal session cookie (30 days). The link is the client's account: there is no password. A link signs in as many times as needed for 30 days after it was sent, unless the shop sends a newer one. The session sees the service orders of every client record (any shop) with the link's CPF **and** email, plus the record the link was issued for.
 `,
 	body: portalTokenSchema,
 	response: {
@@ -144,7 +186,13 @@ The estimate email proves the client reads the address it was sent to, so that e
 `,
 	body: portalTokenSchema,
 	response: {
-		200: empty(200, "portal_session_opened", "Portal session opened."),
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "portal_session_opened",
+			message: "Portal session opened.",
+			data: z.object({ estimateId: z.string() }),
+		}).describe("Portal session opened, landing on the estimate."),
 		404: linkInvalid,
 	},
 };
@@ -179,14 +227,28 @@ A link is emailed for each CPF registered with this email, in any shop. The answ
 const meSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Portal profile",
-	description: "Name and email of the signed-in client.",
+	description:
+		"Name, email and CPF of the signed-in client, with the shops they are a client of.",
 	response: {
 		200: zodResponseSchema({
 			status: 200,
 			error: null,
 			code: "portal_me_success",
 			message: "Portal profile retrieved.",
-			data: z.object({ name: z.string().nullable(), email: z.string() }),
+			data: z.object({
+				name: z.string().nullable(),
+				email: z.string(),
+				cpf: z.string(),
+				shops: z.array(
+					z.object({
+						name: z.string(),
+						logoUrl: z.string().nullable(),
+						email: z.string().nullable(),
+						phone: z.string().nullable(),
+						website: z.string().nullable(),
+					})
+				),
+			}),
 		}).describe("Portal profile retrieved."),
 		401: unauthorized,
 	},
@@ -246,6 +308,68 @@ const answerErrors = {
 	}).describe("The validity date has passed."),
 };
 
+const employeeMatchSchema: FastifySchema = {
+	tags: [TAG],
+	summary: "Is the signed-in user also a client?",
+	description:
+		"Whether the email of the signed-in account is registered as a client in some shop, so the login can offer the client portal next to the company.",
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "portal_employee_match_success",
+			message: "Portal match checked.",
+			data: z.object({ customer: z.boolean() }),
+		}).describe("Portal match checked."),
+	},
+	security: [{ JWT: [] }],
+};
+
+const employeeAccessSchema: FastifySchema = {
+	tags: [TAG],
+	summary: "Email portal access to the signed-in user",
+	description:
+		"Sends portal links to the email of the signed-in account (one per CPF registered with it). The password proves the account, not the inbox, so the portal still opens from the email.",
+	response: {
+		202: empty(
+			202,
+			"portal_access_requested",
+			"If the email is registered, a link was sent."
+		),
+	},
+	security: [{ JWT: [] }],
+};
+
+const listEstimatesSchema: FastifySchema = {
+	tags: [TAG],
+	summary: "List the client's estimates",
+	description:
+		"Estimates the client was sent in every shop (drafts stay internal), newest first, with the order and device they are about.",
+	response: {
+		200: zodResponseSchema({
+			status: 200,
+			error: null,
+			code: "portal_estimates_success",
+			message: "Estimates retrieved.",
+			data: z.array(portalEstimateSummary),
+		}).describe("Estimates retrieved."),
+		401: unauthorized,
+	},
+};
+
+const getEstimateSchema: FastifySchema = {
+	tags: [TAG],
+	summary: "Get one of the client's estimates",
+	description:
+		"The estimate as the client sees it: the shop, the order and the device, the items and totals, and its answer.",
+	params: portalEstimateParamsSchema,
+	response: {
+		200: estimateResponse("portal_estimate_success", "Estimate retrieved."),
+		401: unauthorized,
+		404: estimateNotFound,
+	},
+};
+
 const getEstimatePdfSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Download an estimate PDF",
@@ -259,10 +383,10 @@ const approveEstimateSchema: FastifySchema = {
 	tags: [TAG],
 	summary: "Approve an estimate",
 	description:
-		"Same rules as the estimate link: only a `sent`, unexpired estimate. The service order moves to `approved` unless it is already past that point. Answers with the updated service order.",
+		"Same rules as the estimate link: only a `sent`, unexpired estimate. The service order moves to `approved` unless it is already past that point. Answers with the updated estimate.",
 	params: portalEstimateParamsSchema,
 	response: {
-		200: detailResponse("approve_estimate_success", "Answer recorded."),
+		200: estimateResponse("approve_estimate_success", "Answer recorded."),
 		...answerErrors,
 	},
 };
@@ -271,11 +395,11 @@ const rejectEstimateSchemaDoc: FastifySchema = {
 	tags: [TAG],
 	summary: "Reject an estimate",
 	description:
-		"Same rules as the estimate link, with an optional reason the shop sees. Answers with the updated service order.",
+		"Same rules as the estimate link, with an optional reason the shop sees. Answers with the updated estimate.",
 	params: portalEstimateParamsSchema,
 	body: rejectEstimateSchema,
 	response: {
-		200: detailResponse("reject_estimate_success", "Answer recorded."),
+		200: estimateResponse("reject_estimate_success", "Answer recorded."),
 		...answerErrors,
 	},
 };
@@ -316,6 +440,10 @@ export const portalDocs = {
 	meSchema,
 	listServiceOrdersSchema,
 	getServiceOrderSchema,
+	employeeMatchSchema,
+	employeeAccessSchema,
+	listEstimatesSchema,
+	getEstimateSchema,
 	getEstimatePdfSchema,
 	approveEstimateSchema,
 	rejectEstimateSchema: rejectEstimateSchemaDoc,

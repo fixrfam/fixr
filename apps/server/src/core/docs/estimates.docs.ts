@@ -311,7 +311,7 @@ const linkNotFound = notFoundError(
 	"This estimate link is invalid or was replaced."
 );
 
-const publicEstimateSchema = z.object({
+export const publicEstimateSchema = z.object({
 	number: z.number(),
 	status: estimateStatuses,
 	validUntil: z.coerce.date(),

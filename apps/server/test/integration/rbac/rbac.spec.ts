@@ -103,6 +103,22 @@ const AUTH_ONLY_ROUTES = new Map([
 		"client portal session: the client only sees their own service orders",
 	],
 	[
+		"GET /portal/employee-access",
+		"self-service: only checks the signed-in user's own email",
+	],
+	[
+		"POST /portal/employee-access",
+		"self-service: only emails the signed-in user's own address",
+	],
+	[
+		"GET /portal/estimates",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
+		"GET /portal/estimates/:estimateId",
+		"client portal session: the client only sees their own service orders",
+	],
+	[
 		"GET /portal/estimates/:estimateId/pdf",
 		"client portal session: the client only sees their own service orders",
 	],
