@@ -480,7 +480,7 @@ function PdfSection({
 					)}
 				>
 					{!loaded && (
-						<FixrLoader className="absolute inset-0 m-auto size-10" />
+						<FixrLoader className="absolute inset-0 m-auto" size={28} />
 					)}
 					{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onLoad only hides the loader */}
 					<iframe
