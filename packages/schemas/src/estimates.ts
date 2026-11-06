@@ -48,6 +48,7 @@ export const updateEstimateStatusSchema = z.object({
 export const getEstimatesQuerySchema = getPaginatedDataSchema.extend({
 	status: estimateStatuses.optional(),
 	serviceOrderId: z.string().cuid2().optional(),
+	clientId: z.string().cuid2().optional(),
 });
 
 /** @description Params schema for routes that target a single estimate */

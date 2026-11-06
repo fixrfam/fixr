@@ -32,7 +32,30 @@ const totalsSchema = z.object({
 
 const estimateRecordSchema = z.object({
 	...estimateSelectSchema.shape,
-	client: z.object({ id: z.string(), name: z.string() }).nullable(),
+	client: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+			phone: z.string().nullable(),
+			email: z.string().nullable(),
+		})
+		.nullable(),
+	serviceOrder: z.object({
+		id: z.string(),
+		number: z.number(),
+		status: z.string(),
+	}),
+	device: z.object({
+		model: z.object({
+			id: z.string(),
+			name: z.string(),
+			slug: z.string(),
+			imageUrl: z.string().nullable(),
+		}),
+		maker: z.string(),
+		category: z.string().nullable(),
+	}),
+	itemsCount: z.number(),
 	totals: totalsSchema,
 });
 
@@ -76,6 +99,7 @@ Optional filters (query string):
 - \`status\`: one of ${estimateStatuses.options.join(", ")}
 - \`serviceOrderId\`: estimates of one service order
 - \`query\`: client name or estimate number
+- \`clientId\`: estimates of one client
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`)
 `,
 	params: getCompanyNestedDataSchema,

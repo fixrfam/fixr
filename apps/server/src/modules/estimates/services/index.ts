@@ -14,6 +14,7 @@ import { createId } from "@paralleldrive/cuid2";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
+import { withModelImageUrl } from "../../../core/lib/model-image";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	getPaginatedCount,
@@ -78,21 +79,37 @@ function copyItems(
 	}));
 }
 
-function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
-	const { clientName, ...estimate } = row;
+async function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
+	const {
+		clientName,
+		clientPhone,
+		clientEmail,
+		makerName,
+		categorySlug,
+		model,
+		...estimate
+	} = row;
+	const { model: device } = await withModelImageUrl({ model });
 	return {
 		...estimate,
 		client:
 			estimate.clientId && clientName
-				? { id: estimate.clientId, name: clientName }
+				? {
+						id: estimate.clientId,
+						name: clientName,
+						phone: clientPhone,
+						email: clientEmail,
+					}
 				: null,
+		device: { model: device, maker: makerName, category: categorySlug },
+		itemsCount: items.length,
 		totals: estimateTotals(items, estimate.discountPercentage),
 	};
 }
 
-function withItems(row: EstimateRow, items: EstimateItemRow[]) {
+async function withItems(row: EstimateRow, items: EstimateItemRow[]) {
 	return {
-		...toRecord(row, items),
+		...(await toRecord(row, items)),
 		items: items.map((item) => ({ ...item, total: lineTotal(item) })),
 	};
 }
@@ -141,6 +158,7 @@ export class EstimatesService {
 		sort,
 		status,
 		serviceOrderId,
+		clientId,
 		response,
 	}: {
 		userJwt: UserJwt;
@@ -153,6 +171,7 @@ export class EstimatesService {
 			query,
 			status,
 			serviceOrderId,
+			clientId,
 		});
 
 		const [rows, totalRecords] = await Promise.all([
@@ -186,7 +205,9 @@ export class EstimatesService {
 		const items = await EstimatesRepository.queryItemsByEstimateIds(
 			rows.map((row) => row.id)
 		);
-		const records = rows.map((row) => toRecord(row, items.get(row.id) ?? []));
+		const records = await Promise.all(
+			rows.map((row) => toRecord(row, items.get(row.id) ?? []))
+		);
 
 		return response.status(200).send(
 			apiResponse({
