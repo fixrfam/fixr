@@ -9,6 +9,7 @@ import {
 	ne,
 	or,
 	sql,
+	type Transaction,
 } from "@fixr/db/connection";
 import {
 	companies,
@@ -101,6 +102,13 @@ export class PortalRepository {
 			)
 			.limit(1);
 		return session ?? null;
+	}
+
+	/** End the sessions opened from an estimate's emailed link. */
+	static async deleteEstimateSessions(estimateId: string, tx: Transaction) {
+		await tx
+			.delete(portalSessions)
+			.where(eq(portalSessions.estimateId, estimateId));
 	}
 
 	static async deleteSession(tokenHash: string) {

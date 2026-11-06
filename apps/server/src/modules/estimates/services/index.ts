@@ -401,6 +401,12 @@ export class EstimatesService {
 	) {
 		return inTransaction(async (tx) => {
 			await EstimatesRepository.markSent(tx, estimate.id, values);
+			// Whatever link the estimate had is replaced (or gone, when it was
+			// delivered outside the app).
+			await events.emit(tx, "estimate.linkRevoked", {
+				estimateId: estimate.id,
+				companyId: estimate.companyId,
+			});
 			await events.emit(tx, "estimate.sent", {
 				estimateId: estimate.id,
 				serviceOrderId: estimate.serviceOrderId,
@@ -453,9 +459,12 @@ export class EstimatesService {
 		employeeId: string | null
 	) {
 		if (status === "draft") {
-			await EstimatesRepository.updateEstimate(estimate.id, {
-				status,
-				publicTokenHash: null,
+			await inTransaction(async (tx) => {
+				await EstimatesRepository.returnToDraft(tx, estimate.id);
+				await events.emit(tx, "estimate.linkRevoked", {
+					estimateId: estimate.id,
+					companyId: estimate.companyId,
+				});
 			});
 			return;
 		}

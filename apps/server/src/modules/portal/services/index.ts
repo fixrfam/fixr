@@ -52,7 +52,10 @@ export class PortalService {
 	/** Sign the browser in with the identity of a link and set the cookie. */
 	private static async openSession(
 		response: FastifyReply,
-		identity: PortalIdentity & { portalLinkId: string | null },
+		identity: PortalIdentity & {
+			portalLinkId: string | null;
+			estimateId: string | null;
+		},
 		/** Where the portal should land, e.g. the estimate the link was for. */
 		landing: { estimateId: string } | null = null
 	) {
@@ -61,6 +64,7 @@ export class PortalService {
 		await PortalRepository.insertSession({
 			tokenHash: hashOpaqueToken(token),
 			portalLinkId: identity.portalLinkId,
+			estimateId: identity.estimateId,
 			cpf: identity.cpf,
 			email: identity.email,
 			customerId: identity.customerId,
@@ -103,12 +107,14 @@ export class PortalService {
 			email: link.email,
 			customerId: link.customerId,
 			portalLinkId: link.id,
+			estimateId: null,
 		});
 	}
 
 	/**
 	 * Open a session from an estimate link. The estimate email proves the
-	 * person reads `sent_to`, so that is the identity's email.
+	 * person reads `sent_to`, so that is the identity's email. The session ends
+	 * when the link does (sent again or back to draft, see the portal effects).
 	 */
 	static async openFromEstimateLink({
 		token,
@@ -134,6 +140,7 @@ export class PortalService {
 				email: normalizeEmail(estimate.sentTo),
 				customerId: customer.id,
 				portalLinkId: null,
+				estimateId: estimate.id,
 			},
 			{ estimateId: estimate.id }
 		);

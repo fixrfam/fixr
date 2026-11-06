@@ -13,6 +13,7 @@ const { repo, pdf, queueEmail, emit } = vi.hoisted(() => ({
 		queryEmployee: vi.fn(),
 		createWithItems: vi.fn(),
 		updateEstimate: vi.fn(),
+		returnToDraft: vi.fn(),
 		deleteEstimate: vi.fn(),
 		queryPdfContext: vi.fn(),
 		queryCustomer: vi.fn(),
@@ -240,6 +241,10 @@ describe("EstimatesService.updateStatus", () => {
 			publicTokenHash: null,
 			sentTo: null,
 		});
+		expect(emit).toHaveBeenCalledWith("TX", "estimate.linkRevoked", {
+			estimateId,
+			companyId,
+		});
 		expect(emit).toHaveBeenCalledWith(
 			"TX",
 			"estimate.sent",
@@ -282,9 +287,10 @@ describe("EstimatesService.updateStatus", () => {
 
 		await move("draft");
 
-		expect(repo.updateEstimate).toHaveBeenCalledWith(estimateId, {
-			status: "draft",
-			publicTokenHash: null,
+		expect(repo.returnToDraft).toHaveBeenCalledWith("TX", estimateId);
+		expect(emit).toHaveBeenCalledWith("TX", "estimate.linkRevoked", {
+			estimateId,
+			companyId,
 		});
 	});
 

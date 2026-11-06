@@ -438,56 +438,114 @@ describe("customer portal", () => {
 	});
 });
 
-describe("portal entry from an estimate link", () => {
-	it("uses the email the estimate was sent to as the identity", async () => {
-		const shop = await shopWithOrder({
-			cpf: uniqueCpf(),
-			email: `link-${seq}@fixr.test`,
-		});
-		await db.insert(serviceOrderItems).values({
-			serviceOrderId: shop.serviceOrder.id,
-			type: "service",
-			name: "Diagnóstico",
-			quantity: 1,
-			unitPrice: 80,
-		});
-		const base = `/companies/${shop.company.subdomain}/estimates`;
-		const { id } = (
-			await authedInject(app, shop.token, {
-				method: "POST",
-				url: base,
-				payload: { serviceOrderId: shop.serviceOrder.id },
-			})
-		).json().data;
+/** Newest estimate link token emailed to `to`. */
+async function estimateToken(to: string) {
+	const jobs = await queue.getJobs(["waiting", "delayed", "prioritized"]);
+	const [latest] = jobs
+		.filter(
+			(job) =>
+				job.data.job === "sendEstimateEmail" && job.data.payload.to === to
+		)
+		.sort((a, b) => b.timestamp - a.timestamp);
+	const url = (latest?.data.payload as { ctaUrl?: string } | undefined)?.ctaUrl;
+	return url?.split("/estimate/")[1] ?? "";
+}
+
+/** A shop that emailed an estimate of its customer's order. */
+async function shopWithSentEstimate() {
+	const shop = await shopWithOrder({
+		cpf: uniqueCpf(),
+		email: `link-${seq}@fixr.test`,
+	});
+	await db.insert(serviceOrderItems).values({
+		serviceOrderId: shop.serviceOrder.id,
+		type: "service",
+		name: "Diagnóstico",
+		quantity: 1,
+		unitPrice: 80,
+	});
+	const base = `/companies/${shop.company.subdomain}/estimates`;
+	const { id } = (
 		await authedInject(app, shop.token, {
+			method: "POST",
+			url: base,
+			payload: { serviceOrderId: shop.serviceOrder.id },
+		})
+	).json().data;
+	const send = () =>
+		authedInject(app, shop.token, {
 			method: "POST",
 			url: `${base}/${id}/send`,
 			payload: {},
 		});
-		const jobs = await queue.getJobs(["waiting", "delayed", "prioritized"]);
-		const job = jobs.find(
-			(j) =>
-				j.data.job === "sendEstimateEmail" &&
-				j.data.payload.to === shop.customer.email
-		);
-		const ctaUrl = (job?.data.payload as { ctaUrl?: string } | undefined)
-			?.ctaUrl;
-		const estimateToken = ctaUrl?.split("/estimate/")[1] ?? "";
+	await send();
+	const moveTo = (status: string) =>
+		authedInject(app, shop.token, {
+			method: "PATCH",
+			url: `${base}/${id}/status`,
+			payload: { status },
+		});
+	return { ...shop, estimateId: id as string, send, moveTo };
+}
+
+describe("portal entry from an estimate link", () => {
+	it("uses the email the estimate was sent to as the identity", async () => {
+		const shop = await shopWithSentEstimate();
 
 		const { response, cookie } = await openSession(
-			estimateToken,
+			await estimateToken(shop.customer.email ?? ""),
 			"/portal/session/estimate"
 		);
 		const orders = await portal(cookie, "/portal/service-orders");
 
 		expect(response.statusCode).toBe(200);
-		expect(response.json().data).toEqual({ estimateId: id });
+		expect(response.json().data).toEqual({ estimateId: shop.estimateId });
 		expect(orders.json().data).toEqual([
 			expect.objectContaining({
 				id: shop.serviceOrder.id,
 				pendingEstimate: true,
 			}),
 		]);
+	});
+
+	it("signs out the sessions of the old link when the estimate is sent again", async () => {
+		const shop = await shopWithSentEstimate();
+		const email = shop.customer.email ?? "";
+		const { cookie } = await openSession(
+			await estimateToken(email),
+			"/portal/session/estimate"
+		);
+
+		await shop.send();
+		const fresh = await openSession(
+			await estimateToken(email),
+			"/portal/session/estimate"
+		);
+
+		expect((await portal(cookie, "/portal/me")).statusCode).toBe(401);
+		expect((await portal(fresh.cookie, "/portal/me")).statusCode).toBe(200);
+	});
+
+	it("signs out the sessions of the link when the estimate goes back to draft", async () => {
+		const shop = await shopWithSentEstimate();
+		const { cookie } = await openSession(
+			await estimateToken(shop.customer.email ?? ""),
+			"/portal/session/estimate"
+		);
+
+		const moved = await shop.moveTo("draft");
+
+		expect(moved.statusCode).toBe(200);
+		expect((await portal(cookie, "/portal/me")).statusCode).toBe(401);
+	});
+
+	it("keeps sessions opened from a portal link when an estimate is sent again", async () => {
+		const shop = await shopWithSentEstimate();
+		const cookie = await signIn(shop);
+
+		await shop.send();
+
+		expect((await portal(cookie, "/portal/me")).statusCode).toBe(200);
 	});
 
 	it("refuses an unknown estimate token", async () => {

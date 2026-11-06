@@ -256,6 +256,17 @@ export class EstimatesRepository {
 	}
 
 	/**
+	 * Take the estimate back to draft and disable its emailed link. Runs in the
+	 * caller's transaction, which emits `estimate.linkRevoked`.
+	 */
+	static async returnToDraft(tx: Transaction, estimateId: string) {
+		await tx
+			.update(estimates)
+			.set({ status: "draft", publicTokenHash: null })
+			.where(eq(estimates.id, estimateId));
+	}
+
+	/**
 	 * Mark the estimate as sent, with the public link's token hash (or none when
 	 * it was delivered outside the app). Runs in the caller's transaction,
 	 * which also emits `estimate.sent`.
