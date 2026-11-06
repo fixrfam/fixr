@@ -198,42 +198,44 @@
 	}
 }
 
-/* Fixr loader: the chip's outline, its core and its pins are drawn by a
-   stroke, then erased, in a loop. Paths use pathLength="100". */
+/* Fixr loader: the logo, filled, with a thin line that runs around its
+   outline and eases in and out on each lap. The outline uses
+   pathLength="100", so the dash values are percentages of the lap. */
 .fixr-loader {
-	--loader-dur: 1800ms;
+	--loader-dur: 1600ms;
 	--loader-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
+.fixr-loader .fixr-loader-mark {
+	opacity: 0.28;
+	animation: fixr-loader-breathe var(--loader-dur) var(--loader-ease) infinite;
+}
 .fixr-loader .fixr-loader-track {
-	opacity: 0.15;
+	opacity: 0.18;
 }
-.fixr-loader .fixr-loader-draw {
-	stroke-dasharray: 100 100;
-	stroke-dashoffset: 100;
-	animation: fixr-loader-draw var(--loader-dur) var(--loader-ease) infinite;
+.fixr-loader .fixr-loader-run {
+	stroke-dasharray: 22 78;
+	animation: fixr-loader-run var(--loader-dur) var(--loader-ease) infinite;
 }
-.fixr-loader .fixr-loader-core {
-	animation-delay: calc(var(--loader-dur) * 0.12);
-}
-.fixr-loader .fixr-loader-pin {
-	animation-delay: calc(var(--loader-dur) * 0.2 + var(--pin) * 40ms);
-}
-@keyframes fixr-loader-draw {
-	0% {
-		stroke-dashoffset: 100;
-	}
-	45%,
-	55% {
+@keyframes fixr-loader-run {
+	from {
 		stroke-dashoffset: 0;
 	}
-	100% {
+	to {
 		stroke-dashoffset: -100;
 	}
 }
+@keyframes fixr-loader-breathe {
+	0%,
+	100% {
+		opacity: 0.24;
+	}
+	50% {
+		opacity: 0.38;
+	}
+}
 @media (prefers-reduced-motion: reduce) {
-	.fixr-loader .fixr-loader-draw {
+	.fixr-loader .fixr-loader-run,
+	.fixr-loader .fixr-loader-mark {
 		animation: none;
-		stroke-dashoffset: 0;
-		opacity: 0.6;
 	}
 }
