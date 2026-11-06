@@ -8,7 +8,7 @@ export default async function EstimateLinkPage(props: {
 	const { token } = await props.params;
 
 	return (
-		<main className="flex min-h-screen flex-col items-center px-4 py-20 md:px-6">
+		<main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pt-20 pb-10 md:px-6">
 			<QueryClientWrapper>
 				<PublicEstimate token={token} />
 			</QueryClientWrapper>

@@ -29,9 +29,16 @@ const estimate = {
 		logoUrl: null,
 	},
 	client: { name: "Maria" },
+	serviceOrder: {
+		code: "CENTRAL-12",
+		status: "waiting_approval",
+		openedAt: "2026-10-18T12:00:00.000Z",
+	},
 	device: {
 		maker: "Apple",
 		model: "iPhone 13",
+		category: "smartphone",
+		imageUrl: null,
 		reportedDefect: "Tela quebrada",
 	},
 	items: [
@@ -60,25 +67,29 @@ function serve(data: unknown = estimate) {
 }
 
 describe("PublicEstimate", () => {
-	it("shows the estimate with its items and totals", async () => {
+	it("shows the estimate with the device, the order, the items and the PDF", async () => {
 		serve();
 
 		renderWithQuery(<PublicEstimate token={TOKEN} />);
 
-		expect(
-			await screen.findByRole("heading", { name: "Orçamento #0007" })
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Emitido por Central Assistência")
-		).toBeInTheDocument();
-		expect(screen.getByText("Tela OLED").closest("tr")).toHaveTextContent(
+		expect(await screen.findByText("Orçamento #0007")).toBeInTheDocument();
+		expect(screen.getByText("Central Assistência")).toBeInTheDocument();
+		expect(screen.getByText("CENTRAL-12")).toBeInTheDocument();
+		expect(screen.getByText("Aguardando aprovação")).toBeInTheDocument();
+		expect(screen.getByText("Tela quebrada")).toBeInTheDocument();
+		expect(screen.getByText("Tela OLED").closest("li")).toHaveTextContent(
 			"Peça usada no serviço acima"
 		);
 		expect(screen.getByText("Garantia de 90 dias")).toBeInTheDocument();
-		expect(screen.getByText(/450,00/)).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /Baixar PDF/ })).toHaveAttribute(
-			"href",
-			`${LINK}/pdf`
+		expect(screen.getAllByText(/450,00/).length).toBeGreaterThan(0);
+		for (const link of screen.getAllByRole("link", {
+			name: /Abrir em nova aba/,
+		})) {
+			expect(link).toHaveAttribute("href", `${LINK}/pdf`);
+		}
+		expect(screen.getByTitle("PDF do orçamento #0007")).toHaveAttribute(
+			"src",
+			`${LINK}/pdf#view=FitH`
 		);
 	});
 
