@@ -92,4 +92,5 @@ export const verifyEmailSchema = z.object({
 
 export const googleCallbackSchema = z.object({
 	code: z.string(),
+	state: z.string().optional(),
 });

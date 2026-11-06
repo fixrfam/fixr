@@ -9,6 +9,7 @@ export function createFakeReply() {
 		statusCode: 200,
 		body: undefined as unknown,
 		cookies: {} as Record<string, { value: string; options: unknown }>,
+		clearedCookies: [] as string[],
 		redirectUrl: undefined as string | undefined,
 	};
 
@@ -28,6 +29,10 @@ export function createFakeReply() {
 		}),
 		setCookie: vi.fn((name: string, value: string, options?: unknown) => {
 			state.cookies[name] = { value, options };
+			return reply;
+		}),
+		clearCookie: vi.fn((name: string, _options?: unknown) => {
+			state.clearedCookies.push(name);
 			return reply;
 		}),
 		redirect: vi.fn((url: string) => {

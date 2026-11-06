@@ -334,5 +334,10 @@ export const messages = {
 			description:
 				"Your Google email address has not been verified yet. Verify it and try again.",
 		},
+		gacc_state_mismatch: {
+			title: "Sign-in expired",
+			description:
+				"This Google sign-in was not started from this browser or took too long. Please try again.",
+		},
 	},
 } as const;

@@ -338,5 +338,10 @@ export const messages: Translated<typeof source> = {
 			description:
 				"O seu endereço de e-mail do Google ainda não foi verificado. Verifique seu e-mail e tente novamente.",
 		},
+		gacc_state_mismatch: {
+			title: "Login expirado",
+			description:
+				"Este login com o Google não foi iniciado neste navegador ou demorou demais. Tente novamente.",
+		},
 	},
 } as const;
