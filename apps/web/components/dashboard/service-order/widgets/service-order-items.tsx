@@ -2,7 +2,12 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { createAbility, permissions } from "@fixr/permissions";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useIsMutating,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -44,32 +49,42 @@ type Change =
 	| { kind: "quantity"; itemId: string; quantity: number }
 	| { kind: "remove"; itemId: string };
 
-/**
- * Parts and services used on a service order, priced from the catalog, with
- * the order totals. Editing needs `serviceOrders:update`.
- */
-export function ServiceOrderItems({
+const itemsKey = (subdomain: string, serviceOrderId: string) => [
+	"service-order-items",
+	subdomain,
 	serviceOrderId,
-}: {
-	serviceOrderId: string;
-}) {
-	const { t, format } = useTranslation();
-	const { subdomain } = useParams<{ subdomain: string }>();
+];
+const changeKey = (serviceOrderId: string) => [
+	"service-order-items",
+	"change",
+	serviceOrderId,
+];
+
+function useCanEditItems() {
 	const { session } = useSession();
-	const canEdit = createAbility(session?.company?.role ?? "guest").can(
+	return createAbility(session?.company?.role ?? "guest").can(
 		permissions.serviceOrders.update
 	);
-	const queryClient = useQueryClient();
-	const toastError = useApiErrorToast();
-	const queryKey = ["service-order-items", subdomain, serviceOrderId];
+}
 
-	const { data, isPending, error } = useQuery({
-		queryKey,
+function useItems(serviceOrderId: string) {
+	const { subdomain } = useParams<{ subdomain: string }>();
+	return useQuery({
+		queryKey: itemsKey(subdomain, serviceOrderId),
 		queryFn: () => serviceOrderItemsApi.list(subdomain, serviceOrderId),
 		retry: false,
 	});
+}
+
+/** Add, requantify or remove a line; the list and the header picker share it. */
+function useItemChange(serviceOrderId: string) {
+	const { subdomain } = useParams<{ subdomain: string }>();
+	const queryClient = useQueryClient();
+	const toastError = useApiErrorToast();
+	const changing = useIsMutating({ mutationKey: changeKey(serviceOrderId) });
 
 	const change = useMutation({
+		mutationKey: changeKey(serviceOrderId),
 		mutationFn: (action: Change) => {
 			if (action.kind === "add") {
 				return serviceOrderItemsApi.add(subdomain, serviceOrderId, {
@@ -92,9 +107,49 @@ export function ServiceOrderItems({
 			);
 		},
 		onSuccess: (items: ServiceOrderItemsData) =>
-			queryClient.setQueryData(queryKey, items),
+			queryClient.setQueryData(itemsKey(subdomain, serviceOrderId), items),
 		onError: toastError,
 	});
+
+	return { change, busy: changing > 0 };
+}
+
+/** The "add item" control for the card header, for who can edit the order. */
+export function ServiceOrderAddItem({
+	serviceOrderId,
+}: {
+	serviceOrderId: string;
+}) {
+	const canEdit = useCanEditItems();
+	const { isSuccess } = useItems(serviceOrderId);
+	const { change, busy } = useItemChange(serviceOrderId);
+
+	if (!(canEdit && isSuccess)) {
+		return null;
+	}
+
+	return (
+		<AddItemPicker
+			disabled={busy}
+			onPick={(type, itemId) => change.mutate({ kind: "add", type, itemId })}
+		/>
+	);
+}
+
+/**
+ * Parts and services used on a service order, priced from the catalog, with
+ * the order totals. Editing needs `serviceOrders:update`; adding lives in the
+ * card header ({@link ServiceOrderAddItem}).
+ */
+export function ServiceOrderItems({
+	serviceOrderId,
+}: {
+	serviceOrderId: string;
+}) {
+	const { t, format } = useTranslation();
+	const canEdit = useCanEditItems();
+	const { data, isPending, error } = useItems(serviceOrderId);
+	const { change, busy } = useItemChange(serviceOrderId);
 
 	if (isPending) {
 		return <Skeleton className="h-32 w-full" />;
@@ -115,15 +170,6 @@ export function ServiceOrderItems({
 
 	return (
 		<div className="space-y-3">
-			{canEdit ? (
-				<AddItemPicker
-					disabled={change.isPending}
-					onPick={(type, itemId) =>
-						change.mutate({ kind: "add", type, itemId })
-					}
-				/>
-			) : null}
-
 			{data.items.length === 0 ? (
 				<p className="text-2xs text-muted-foreground">
 					{t("serviceOrders.items.empty")}
@@ -133,7 +179,7 @@ export function ServiceOrderItems({
 					{groupItems(data.items).map(({ item, parts }) => {
 						const rowProps = (line: ServiceOrderItem) => ({
 							canEdit,
-							disabled: change.isPending,
+							disabled: busy,
 							item: line,
 							onQuantity: (quantity: number) =>
 								change.mutate({ kind: "quantity", itemId: line.id, quantity }),
@@ -338,18 +384,12 @@ function AddItemPicker({
 	return (
 		<Popover onOpenChange={setOpen} open={open}>
 			<PopoverTrigger asChild>
-				<Button
-					className="w-full"
-					disabled={disabled}
-					size="sm"
-					type="button"
-					variant="outline"
-				>
-					<Plus className="size-4" />
+				<Button disabled={disabled} size="sm" type="button" variant="ghost">
+					<Plus className="size-3.5" />
 					{t("serviceOrders.items.add")}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent align="start" className="w-80 p-0">
+			<PopoverContent align="end" className="w-80 p-0">
 				<Command shouldFilter={false}>
 					<CommandInput
 						onValueChange={setSearch}

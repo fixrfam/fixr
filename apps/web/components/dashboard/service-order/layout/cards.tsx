@@ -7,7 +7,6 @@ import {
 	Image as ImageIcon,
 	Package,
 	User,
-	Wrench,
 } from "lucide-react";
 import { CopyableValue } from "@/components/dashboard/copyable-value";
 import { CustomerAvatar } from "@/components/dashboard/customers/customer-avatar";
@@ -16,7 +15,10 @@ import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
 import { ServiceOrderIssue } from "@/components/dashboard/service-order/widgets/service-order-issue";
-import { ServiceOrderItems } from "@/components/dashboard/service-order/widgets/service-order-items";
+import {
+	ServiceOrderAddItem,
+	ServiceOrderItems,
+} from "@/components/dashboard/service-order/widgets/service-order-items";
 import {
 	ServiceOrderKeyValueItem,
 	ServiceOrderKeyValueList,
@@ -106,12 +108,8 @@ export function getCards(
 			</ServiceOrderDetailsCard>
 		),
 		device: (
-			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.deviceDescription")}
-				icon={Wrench}
-				title={t("serviceOrders.cards.deviceTitle")}
-			>
-				<div className="space-y-3">
+			<ServiceOrderIssue order={order}>
+				{(order.device.imei || order.device.serialNumber) && (
 					<ServiceOrderKeyValueList>
 						{order.device.imei && (
 							<ServiceOrderKeyValueItem
@@ -126,9 +124,8 @@ export function getCards(
 							/>
 						)}
 					</ServiceOrderKeyValueList>
-					<ServiceOrderIssue order={order} />
-				</div>
-			</ServiceOrderDetailsCard>
+				)}
+			</ServiceOrderIssue>
 		),
 		technician: (
 			<ServiceOrderDetailsCard
@@ -192,6 +189,7 @@ export function getCards(
 		),
 		parts: (
 			<ServiceOrderDetailsCard
+				action={<ServiceOrderAddItem serviceOrderId={order.id} />}
 				description={t("serviceOrders.items.description")}
 				icon={Package}
 				title={t("serviceOrders.items.title")}
