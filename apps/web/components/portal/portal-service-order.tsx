@@ -26,7 +26,7 @@ import { usePortalServiceOrder } from "./store";
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
 		<section className="space-y-2.5">
-			<h2 className="px-1 font-semibold text-sm">{title}</h2>
+			<h2 className="font-semibold text-sm">{title}</h2>
 			{children}
 		</section>
 	);
@@ -123,7 +123,7 @@ export function PortalServiceOrder({ id }: { id: string }) {
 						/>
 					) : (
 						<Section title={t("portal.detail.items")}>
-							<p className="px-1 text-muted-foreground text-sm">
+							<p className="text-muted-foreground text-sm">
 								{t("portal.detail.noItems")}
 							</p>
 						</Section>
@@ -131,7 +131,7 @@ export function PortalServiceOrder({ id }: { id: string }) {
 				</div>
 				<div className="space-y-7">
 					<Section title={t("portal.detail.progress")}>
-						<div className="px-1">
+						<div>
 							<PortalTimeline history={order.history} status={order.status} />
 						</div>
 					</Section>
@@ -166,7 +166,7 @@ function Hero({ order }: { order: Order }) {
 						<ShopMark className="size-4" shop={order.company} />
 						<span className="truncate">{order.company.name}</span>
 						<span aria-hidden>·</span>
-						<span className="shrink-0 tabular-nums">{order.code}</span>
+						<span className="shrink-0">{order.code}</span>
 					</p>
 				</div>
 			</div>
@@ -191,7 +191,7 @@ function EstimatesSection({ order }: { order: Order }) {
 	return (
 		<Section title={t("portal.detail.estimates")}>
 			{order.estimates.length === 0 ? (
-				<p className="px-1 text-muted-foreground text-sm">
+				<p className="text-muted-foreground text-sm">
 					{t("portal.detail.noEstimates")}
 				</p>
 			) : (

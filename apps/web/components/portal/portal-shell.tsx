@@ -8,6 +8,7 @@ import { type ReactNode, useCallback, useLayoutEffect, useRef } from "react";
 import { Avatar } from "@/components/account/profile-avatar";
 import { Logo } from "@/components/svg/logo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Wallpaper } from "@/components/wallpaper";
 import { cn } from "@/lib/utils";
 import {
 	firstName,
@@ -26,34 +27,6 @@ const PROFILE = "/portal/profile";
 
 function isActive(pathname: string, href: string) {
 	return href === "/portal" ? pathname === href : pathname.startsWith(href);
-}
-
-/** The wallpaper behind the portal's header and the pages before signing in. */
-export function PortalCover({
-	className,
-	children,
-}: {
-	className?: string;
-	children?: ReactNode;
-}) {
-	return (
-		<div
-			className={cn("relative isolate overflow-hidden bg-[#050b1f]", className)}
-		>
-			<img
-				alt=""
-				aria-hidden
-				className="absolute inset-0 -z-10 size-full object-cover opacity-80"
-				decoding="async"
-				height={900}
-				src="/portal-bg.webp"
-				width={1600}
-			/>
-			{/* Keeps white text readable on the brighter spots of the image. */}
-			<div aria-hidden className="absolute inset-0 -z-10 bg-[#050b1f]/45" />
-			{children}
-		</div>
-	);
 }
 
 /**
@@ -137,7 +110,7 @@ function PortalNav({ email, pending }: { email?: string; pending: number }) {
 							>
 								<Icon className="size-5" strokeWidth={active ? 2.25 : 1.75} />
 								{key === "estimates" && pending > 0 && (
-									<span className="absolute top-1.5 right-1.5 grid min-w-4 place-items-center rounded-full bg-amber-500 px-1 font-semibold text-[0.625rem] text-white tabular-nums ring-2 ring-background">
+									<span className="absolute top-1.5 right-1.5 grid min-w-4 place-items-center rounded-full bg-amber-500 font-semibold text-[0.625rem] text-white tabular-nums ring-2 ring-background">
 										{pending}
 									</span>
 								)}
@@ -187,10 +160,10 @@ export function PortalShell({ children }: { children: ReactNode }) {
 
 	return (
 		<div className="min-h-dvh bg-background">
-			<PortalCover>
+			<Wallpaper>
 				<header
 					className={cn(
-						"mx-auto flex max-w-3xl gap-3 px-5 pt-[max(1.25rem,env(safe-area-inset-top))] text-white",
+						"mx-auto flex max-w-3xl gap-3 px-4 pt-[max(1.25rem,env(safe-area-inset-top))] text-white",
 						home ? "items-start pb-16" : "items-center pb-12"
 					)}
 				>
@@ -230,7 +203,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
 						/>
 					</Link>
 				</header>
-			</PortalCover>
+			</Wallpaper>
 
 			{/* The page rises over the wallpaper like a sheet. */}
 			<main className="relative -mt-8 rounded-t-[2rem] bg-background">
@@ -253,7 +226,7 @@ export function PortalPageTitle({
 	description?: string;
 }) {
 	return (
-		<div className="mb-5 px-1">
+		<div className="mb-5">
 			<h1 className="text-balance font-heading font-semibold text-2xl">
 				{title}
 			</h1>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { daysUntil } from "@/components/dashboard/estimates/store";
 import { ModelImage } from "@/components/dashboard/models/model-image";
+import { Wallpaper } from "@/components/wallpaper";
 import type {
 	PortalEstimateSummary,
 	PortalServiceOrderSummary,
@@ -92,7 +93,7 @@ function ShopLine({
 			<ShopMark className="size-4" shop={shop} />
 			<span className="truncate">{shop.name}</span>
 			<span aria-hidden>·</span>
-			<span className="shrink-0 tabular-nums">{code}</span>
+			<span className="shrink-0">{code}</span>
 		</p>
 	);
 }
@@ -204,5 +205,75 @@ export function PortalEstimateRow({
 				<ChevronRight className="size-4 shrink-0 self-center text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
 			</Link>
 		</li>
+	);
+}
+
+/**
+ * The estimate that waits for the client, on the wallpaper: the shop, the
+ * device, the total and the way in, the first thing on the home.
+ */
+export function PortalEstimateFeature({
+	estimate,
+}: {
+	estimate: PortalEstimateSummary;
+}) {
+	const { t, format } = useTranslation();
+	const days = daysUntil(estimate.validUntil);
+
+	return (
+		<Link
+			className="group block rounded-[1.25rem] transition-[scale] duration-150 ease-out active:scale-[0.99]"
+			href={`/portal/estimates/${estimate.id}`}
+		>
+			<Wallpaper className="rounded-[1.25rem] p-4">
+				<div className="flex items-center gap-1.5 whitespace-nowrap text-white/70 text-xs">
+					<ShopMark className="size-4" shop={estimate.company} />
+					<span className="truncate">{estimate.company.name}</span>
+					<span aria-hidden>·</span>
+					<span className="shrink-0">
+						#{String(estimate.number).padStart(4, "0")}
+					</span>
+				</div>
+				<div className="mt-4 flex items-end justify-between gap-3">
+					<div className="min-w-0">
+						<p className="truncate text-sm text-white/80">
+							{estimate.deviceModel}
+						</p>
+						<p className="font-heading font-semibold text-3xl">
+							{format.currency(estimate.totals.total)}
+						</p>
+					</div>
+					<ModelImage
+						alt=""
+						category={estimate.deviceCategory}
+						className="size-14 shrink-0 rounded-xl bg-white/10"
+						src={estimate.deviceImageUrl}
+					/>
+				</div>
+				<div className="mt-4 flex items-center justify-between gap-3">
+					<p
+						className={cn(
+							"flex min-w-0 items-center gap-1.5 whitespace-nowrap text-xs",
+							days <= 3 ? "text-amber-300" : "text-white/70"
+						)}
+					>
+						<HandCoins className="size-3.5 shrink-0" />
+						<span className="truncate">
+							{t("portal.estimates.validUntil", {
+								date: format.date(estimate.validUntil, {
+									dateStyle: undefined,
+									day: "numeric",
+									month: "short",
+								}),
+							})}
+						</span>
+					</p>
+					<span className="flex h-9 shrink-0 items-center gap-1 rounded-full bg-white pr-3 pl-4 font-medium text-[#050b1f] text-sm">
+						{t("portal.home.seeEstimate")}
+						<ChevronRight className="size-4 transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+					</span>
+				</div>
+			</Wallpaper>
+		</Link>
 	);
 }

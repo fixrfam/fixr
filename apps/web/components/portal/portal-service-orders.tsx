@@ -37,7 +37,7 @@ export function PortalServiceOrders() {
 			<div className="space-y-7">
 				{groups.map((group) => (
 					<section className="space-y-2.5" key={group.title}>
-						<h2 className="px-1 font-semibold text-sm">{group.title}</h2>
+						<h2 className="font-semibold text-sm">{group.title}</h2>
 						<PortalList>
 							{group.list.map((order) => (
 								<PortalServiceOrderRow key={order.id} order={order} />
