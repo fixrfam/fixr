@@ -104,6 +104,8 @@ export const portal: Translated<typeof source> = {
 	},
 	access: {
 		layout: {
+			imageAlt: "Uma pessoa consertando a placa de um smartphone.",
+			photoCredit: "Foto de Clint Bustrillos na Unsplash",
 			headline: {
 				first: "Acompanhando",
 				second: "reparos",
@@ -113,8 +115,7 @@ export const portal: Translated<typeof source> = {
 			cta: "Entre com o link que chega no seu email.",
 		},
 		title: "Seu portal de reparos",
-		description:
-			"Informe o email que você passou para a assistência. Vamos te enviar um link que entra direto no portal, sem senha.",
+		description: "Informe seu email e receba um link para entrar, sem senha.",
 		email: "Email",
 		emailPlaceholder: "voce@email.com",
 		submit: "Receber o link",

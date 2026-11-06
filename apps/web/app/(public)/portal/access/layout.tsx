@@ -3,7 +3,7 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { AuthSplit } from "@/components/auth/auth-split";
 
-/** The customer's sign-in: the employee login, mirrored, on the portal's wallpaper. */
+/** The customer's sign-in: the employee login, mirrored, with its own photo. */
 export default function PortalAccessLayout({
 	children,
 }: Readonly<{
@@ -13,6 +13,10 @@ export default function PortalAccessLayout({
 
 	return (
 		<AuthSplit
+			credit={{
+				label: t("portal.access.layout.photoCredit"),
+				href: "https://unsplash.com/pt-br/fotografias/homem-reparando-smartphone-android-K7OUs6y_cm8",
+			}}
 			cta={t("portal.access.layout.cta")}
 			headline={[
 				t("portal.access.layout.headline.first"),
@@ -21,10 +25,10 @@ export default function PortalAccessLayout({
 				t("portal.access.layout.headline.fourth"),
 			]}
 			image={{
-				src: "/portal-bg.webp",
-				alt: "",
-				width: 1600,
-				height: 900,
+				src: "/portal_login_bg.webp",
+				alt: t("portal.access.layout.imageAlt"),
+				width: 1410,
+				height: 2506,
 			}}
 			imageSide="right"
 		>
