@@ -238,7 +238,10 @@ describe("/estimate-links/:token", () => {
 			status: "sent",
 			expired: false,
 			client: { name: "Maria Oliveira" },
-			device: { maker: "Apple", model: "iPhone 13" },
+			serviceOrder: {
+				code: `${ctx.company.subdomain.toUpperCase()}-${ctx.serviceOrder.number}`,
+			},
+			device: { maker: "Apple", model: "iPhone 13", imageUrl: null },
 			items: [{ name: "Troca de tela", total: 150 }],
 			totals: { total: 150 },
 		});

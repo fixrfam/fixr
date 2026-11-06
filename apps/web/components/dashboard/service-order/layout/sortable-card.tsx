@@ -50,7 +50,7 @@ export function SortableCard({ id, children }: SortableCardProps) {
 	return (
 		<div
 			className={cn(
-				"relative cursor-grab touch-none bg-background transition-shadow",
+				"group relative cursor-grab touch-none bg-background transition-shadow",
 				isDragging && "opacity-50"
 			)}
 			data-card-id={id}
@@ -59,7 +59,8 @@ export function SortableCard({ id, children }: SortableCardProps) {
 			{...attributes}
 			{...guardedListeners}
 		>
-			<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full border bg-card px-2 py-1 text-muted-foreground text-xs">
+			{/* On the top border, out of the way of the header actions. */}
+			<div className="pointer-events-none absolute -top-2.5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-2xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
 				<GripVertical className="size-3" />
 				{t("serviceOrders.layout.drag")}
 			</div>

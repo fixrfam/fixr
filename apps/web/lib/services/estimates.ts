@@ -7,6 +7,7 @@ import type {
 import type { ApiResponse, PaginatedData } from "@fixr/schemas/utils";
 import type { z } from "zod";
 import { axios } from "../auth/axios";
+import type { ServiceOrderStatus } from "./service-orders";
 
 export type EstimateStatus = z.infer<typeof estimateStatuses>;
 
@@ -23,7 +24,21 @@ export interface Estimate {
 	respondedAt: string | null;
 	rejectionReason: string | null;
 	createdAt: string;
-	client: { id: string; name: string } | null;
+	updatedAt: string;
+	client: {
+		id: string;
+		name: string;
+		phone: string | null;
+		email: string | null;
+	} | null;
+	/** The order the estimate was made from. */
+	serviceOrder: { id: string; number: number; status: string };
+	device: {
+		model: { id: string; name: string; slug: string; imageUrl: string | null };
+		maker: string;
+		category: string | null;
+	};
+	itemsCount: number;
 	totals: EstimateTotals;
 }
 
@@ -33,6 +48,30 @@ export interface EstimateTotals {
 	subtotal: number;
 	discount: number;
 	total: number;
+}
+
+export interface EstimateItem {
+	id: string;
+	parentItemId: string | null;
+	type: "part" | "service";
+	name: string;
+	quantity: number;
+	unitPrice: number;
+	total: number;
+}
+
+export interface EstimateDetail extends Estimate {
+	/** In reading order: the parts a service uses come right after it. */
+	items: EstimateItem[];
+}
+
+export interface EstimatesQuery {
+	page: number;
+	perPage?: number;
+	query?: string;
+	status?: EstimateStatus;
+	clientId?: string;
+	serviceOrderId?: string;
 }
 
 /** What the client sees through the link sent by email. */
@@ -54,7 +93,14 @@ export interface PublicEstimate {
 		logoUrl: string | null;
 	};
 	client: { name: string } | null;
-	device: { maker: string; model: string; reportedDefect: string };
+	serviceOrder: { code: string; status: ServiceOrderStatus; openedAt: string };
+	device: {
+		maker: string;
+		model: string;
+		category: string | null;
+		imageUrl: string | null;
+		reportedDefect: string;
+	};
 	/** In reading order: the parts a service uses come right after it. */
 	items: {
 		type: "part" | "service";
@@ -76,14 +122,20 @@ async function data<T>(request: Promise<{ data: ApiResponse<T> }>) {
 }
 
 export const estimatesApi = {
-	list: (subdomain: string, page: number, status?: EstimateStatus) =>
+	list: (subdomain: string, { perPage = 20, ...query }: EstimatesQuery) =>
 		data<PaginatedData<Estimate>>(
 			axios.get(base(subdomain), {
-				params: { page, perPage: 20, ...(status ? { status } : {}) },
+				params: Object.fromEntries(
+					Object.entries({ perPage, ...query }).filter(
+						([, value]) => value !== undefined && value !== ""
+					)
+				),
 			})
 		),
+	get: (subdomain: string, id: string) =>
+		data<EstimateDetail>(axios.get(`${base(subdomain)}/${id}`)),
 	create: (subdomain: string, values: z.input<typeof createEstimateSchema>) =>
-		data<Estimate>(axios.post(base(subdomain), values)),
+		data<EstimateDetail>(axios.post(base(subdomain), values)),
 	updateStatus: (subdomain: string, id: string, status: EstimateStatus) =>
 		data<Estimate>(axios.patch(`${base(subdomain)}/${id}/status`, { status })),
 	/** Email the estimate to the client (with the approval link). */

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { EstimateStatusBadge } from "@/components/dashboard/estimates/estimate-status-badge";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
-import { RejectDialog } from "@/components/estimates/public-estimate";
+import { RejectDialog } from "@/components/estimates/customer-estimate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

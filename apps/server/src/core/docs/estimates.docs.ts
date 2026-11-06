@@ -38,7 +38,31 @@ const { publicTokenHash: _hash, ...estimateShape } = estimateSelectSchema.shape;
 
 const estimateRecordSchema = z.object({
 	...estimateShape,
-	client: z.object({ id: z.string(), name: z.string() }).nullable(),
+	client: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+			phone: z.string().nullable(),
+			email: z.string().nullable(),
+		})
+		.nullable(),
+	serviceOrder: z.object({
+		id: z.string(),
+		number: z.number(),
+		status: z.string(),
+		createdAt: z.coerce.date(),
+	}),
+	device: z.object({
+		model: z.object({
+			id: z.string(),
+			name: z.string(),
+			slug: z.string(),
+			imageUrl: z.string().nullable(),
+		}),
+		maker: z.string(),
+		category: z.string().nullable(),
+	}),
+	itemsCount: z.number(),
 	totals: totalsSchema,
 });
 
@@ -82,6 +106,7 @@ Optional filters (query string):
 - \`status\`: one of ${estimateStatuses.options.join(", ")}
 - \`serviceOrderId\`: estimates of one service order
 - \`query\`: client name or estimate number
+- \`clientId\`: estimates of one client
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`)
 `,
 	params: getCompanyNestedDataSchema,
@@ -304,9 +329,16 @@ const publicEstimateSchema = z.object({
 		logoUrl: z.string().nullable(),
 	}),
 	client: z.object({ name: z.string() }).nullable(),
+	serviceOrder: z.object({
+		code: z.string(),
+		status: z.string(),
+		openedAt: z.coerce.date(),
+	}),
 	device: z.object({
 		maker: z.string(),
 		model: z.string(),
+		category: z.string().nullable(),
+		imageUrl: z.string().nullable(),
 		reportedDefect: z.string(),
 	}),
 	items: z.array(
