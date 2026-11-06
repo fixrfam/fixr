@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
+	PortalEstimateFeature,
 	PortalEstimateRow,
 	PortalList,
 	PortalServiceOrderRow,
@@ -30,7 +31,7 @@ function Section({
 			className="fade-in-0 slide-in-from-bottom-2 animate-in space-y-2.5 duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] [animation-fill-mode:both] motion-reduce:animate-none"
 			style={{ animationDelay: `${index * 60}ms` }}
 		>
-			<div className="flex items-center justify-between px-1">
+			<div className="flex items-center justify-between">
 				<h2 className="font-semibold text-sm">{title}</h2>
 				{action}
 			</div>
@@ -58,6 +59,7 @@ export function PortalHome() {
 	const pending = (estimates.data ?? []).filter(
 		(estimate) => estimate.status === "sent" && !estimate.expired
 	);
+	const [featured, ...otherPending] = pending;
 	const ready = all.filter((order) => order.status === "ready");
 	const active = all.filter(
 		(order) => order.status !== "ready" && order.status !== "delivered"
@@ -85,7 +87,7 @@ export function PortalHome() {
 				<dl className="grid grid-cols-3 divide-x">
 					{stats.map((stat) => (
 						<div
-							className="flex flex-col-reverse px-3 first:pl-1"
+							className="flex flex-col-reverse px-3 first:pl-0"
 							key={stat.label}
 						>
 							<dt className="truncate text-muted-foreground text-xs">
@@ -111,13 +113,18 @@ export function PortalHome() {
 				</div>
 			)}
 
-			{pending.length > 0 && (
+			{featured && (
 				<Section index={0} title={t("portal.home.pendingTitle")}>
-					<PortalList>
-						{pending.map((estimate) => (
-							<PortalEstimateRow estimate={estimate} key={estimate.id} />
-						))}
-					</PortalList>
+					<div className="space-y-3">
+						<PortalEstimateFeature estimate={featured} />
+						{otherPending.length > 0 && (
+							<PortalList>
+								{otherPending.map((estimate) => (
+									<PortalEstimateRow estimate={estimate} key={estimate.id} />
+								))}
+							</PortalList>
+						)}
+					</div>
 				</Section>
 			)}
 

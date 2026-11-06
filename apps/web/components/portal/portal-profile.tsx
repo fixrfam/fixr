@@ -9,6 +9,7 @@ import { LanguageToggle } from "@/components/language-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Wallpaper } from "@/components/wallpaper";
 import { formatCpf, formatPhone } from "@/lib/format";
 import { portalApi } from "@/lib/services/portal";
 import { PortalList, ShopMark } from "./portal-cards";
@@ -40,28 +41,30 @@ export function PortalProfile() {
 
 	return (
 		<div className="space-y-5">
-			<section className="flex flex-col items-center pb-2 text-center">
+			<Wallpaper className="flex items-center gap-4 rounded-[1.25rem] p-4">
 				<Avatar
-					className="size-20 shadow-[0_0_0_4px_var(--color-background),0_4px_12px_oklch(0_0_0/0.15)]"
+					className="size-16 shrink-0 shadow-[0_0_0_2px_oklch(1_0_0/0.35)]"
 					fallbackHash={me.email}
 					fallbackType="beam"
 				/>
-				<h1 className="mt-3 max-w-full truncate font-heading font-semibold text-xl">
-					{me.name ?? me.email}
-				</h1>
-				<dl className="mt-1 flex max-w-full flex-col items-center text-muted-foreground text-sm">
-					<dt className="sr-only">{t("portal.profile.email")}</dt>
-					<dd className="max-w-full truncate">{me.email}</dd>
-					<dt className="sr-only">{t("portal.profile.cpf")}</dt>
-					<dd className="whitespace-nowrap">
-						{t("portal.profile.cpf")} {maskCpf(me.cpf)}
-					</dd>
-				</dl>
-			</section>
+				<div className="min-w-0">
+					<h1 className="truncate font-heading font-semibold text-xl">
+						{me.name ?? me.email}
+					</h1>
+					<dl className="flex min-w-0 flex-col text-sm text-white/70">
+						<dt className="sr-only">{t("portal.profile.email")}</dt>
+						<dd className="max-w-full truncate">{me.email}</dd>
+						<dt className="sr-only">{t("portal.profile.cpf")}</dt>
+						<dd className="whitespace-nowrap">
+							{t("portal.profile.cpf")} {maskCpf(me.cpf)}
+						</dd>
+					</dl>
+				</div>
+			</Wallpaper>
 
 			{me.shops.length > 0 && (
 				<section className="space-y-2.5">
-					<div className="px-1">
+					<div>
 						<h2 className="font-semibold text-sm">
 							{t("portal.profile.shops")}
 						</h2>
@@ -118,7 +121,7 @@ export function PortalProfile() {
 			)}
 
 			<section className="space-y-2.5">
-				<h2 className="px-1 font-semibold text-sm">
+				<h2 className="font-semibold text-sm">
 					{t("portal.profile.preferences")}
 				</h2>
 				<PortalList>
