@@ -54,14 +54,12 @@ export function PortalAccessForm() {
 	if (request.isSuccess) {
 		return (
 			<PortalCenter>
-				<section className="space-y-3 text-center">
-					<span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-						<MailCheck className="size-7" />
-					</span>
-					<h1 className="font-heading font-semibold text-2xl">
+				<section className="space-y-3">
+					<MailCheck className="size-8 text-primary" />
+					<h1 className="text-balance font-heading font-semibold text-2xl">
 						{t("portal.access.sentTitle")}
 					</h1>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-pretty text-muted-foreground text-sm">
 						{t("portal.access.sentDescription")}
 					</p>
 				</section>
@@ -75,30 +73,42 @@ export function PortalAccessForm() {
 		{ Icon: Store, text: t("portal.access.perks.shops") },
 	];
 
+	const perksList = (
+		<ul className="space-y-3 text-base text-white/90">
+			{perks.map(({ Icon, text }) => (
+				<li className="flex items-center gap-3" key={text}>
+					<Icon className="size-5 shrink-0 text-white" />
+					{text}
+				</li>
+			))}
+		</ul>
+	);
+
 	return (
-		<PortalCenter>
+		<PortalCenter
+			aside={
+				<div className="space-y-6">
+					<p className="max-w-sm text-balance font-heading font-semibold text-4xl">
+						{t("portal.access.title")}
+					</p>
+					{perksList}
+				</div>
+			}
+		>
 			<Form {...form}>
 				<form
 					className="space-y-6"
 					noValidate
 					onSubmit={form.handleSubmit((values) => request.mutate(values))}
 				>
-					<div className="space-y-2 text-center">
-						<h1 className="font-heading font-semibold text-2xl">
+					<div className="space-y-2">
+						<h1 className="text-balance font-heading font-semibold text-2xl lg:sr-only">
 							{t("portal.access.title")}
 						</h1>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-pretty text-muted-foreground text-sm">
 							{t("portal.access.description")}
 						</p>
 					</div>
-					<ul className="space-y-2 rounded-2xl bg-muted/40 p-4 text-sm">
-						{perks.map(({ Icon, text }) => (
-							<li className="flex items-center gap-2.5" key={text}>
-								<Icon className="size-4 shrink-0 text-primary" />
-								{text}
-							</li>
-						))}
-					</ul>
 					<FormField
 						control={form.control}
 						name="email"

@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { ChevronRight, Clock } from "lucide-react";
+import { ChevronRight, HandCoins } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { daysUntil } from "@/components/dashboard/estimates/store";
 import { ModelImage } from "@/components/dashboard/models/model-image";
 import type {
@@ -13,12 +14,35 @@ import { cn } from "@/lib/utils";
 import { PortalProgressBar } from "./portal-progress";
 import { PortalStatusBadge } from "./portal-status-badge";
 
-const ESTIMATE_TONE = {
+export const ESTIMATE_TONE = {
 	draft: "bg-muted text-muted-foreground",
 	sent: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
 	approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
 	rejected: "bg-red-500/15 text-red-700 dark:text-red-300",
 } as const;
+
+/** One surface holding rows, instead of a card per item. */
+export function PortalList({
+	children,
+	className,
+}: {
+	children: ReactNode;
+	className?: string;
+}) {
+	return (
+		<ul
+			className={cn(
+				"divide-y overflow-hidden rounded-2xl bg-card shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_1px_2px_oklch(0_0_0/0.04)] dark:shadow-[0_0_0_1px_oklch(1_0_0/0.08)]",
+				className
+			)}
+		>
+			{children}
+		</ul>
+	);
+}
+
+const row =
+	"group flex gap-3 px-4 py-3.5 transition-[background-color] duration-150 ease-out hover:bg-muted/50 active:bg-muted";
 
 /** A shop's logo, or its initial on the brand color. */
 export function ShopMark({
@@ -33,7 +57,7 @@ export function ShopMark({
 			<img
 				alt=""
 				className={cn(
-					"size-5 shrink-0 rounded-md border bg-background object-contain",
+					"size-5 shrink-0 rounded-md bg-background object-contain outline outline-1 outline-black/10 -outline-offset-1 dark:outline-white/10",
 					className
 				)}
 				height={20}
@@ -55,8 +79,36 @@ export function ShopMark({
 	);
 }
 
+/** `Shop · CODE` on one line, the shop name truncating first. */
+function ShopLine({
+	shop,
+	code,
+}: {
+	shop: { name: string; logoUrl: string | null };
+	code: string;
+}) {
+	return (
+		<p className="flex min-w-0 items-center gap-1.5 whitespace-nowrap text-muted-foreground text-xs">
+			<ShopMark className="size-4" shop={shop} />
+			<span className="truncate">{shop.name}</span>
+			<span aria-hidden>·</span>
+			<span className="shrink-0 tabular-nums">{code}</span>
+		</p>
+	);
+}
+
+/** The warning line of something that waits for the customer. */
+export function WaitingForYou({ children }: { children: ReactNode }) {
+	return (
+		<p className="flex items-center gap-1.5 whitespace-nowrap font-medium text-amber-700 text-xs dark:text-amber-300">
+			<HandCoins className="size-3.5 shrink-0" />
+			<span className="truncate">{children}</span>
+		</p>
+	);
+}
+
 /** One repair: the device, the shop, where it stands and how far it is. */
-export function PortalServiceOrderCard({
+export function PortalServiceOrderRow({
 	order,
 }: {
 	order: PortalServiceOrderSummary;
@@ -64,135 +116,93 @@ export function PortalServiceOrderCard({
 	const { t, format } = useTranslation();
 
 	return (
-		<Link
-			className={cn(
-				"group block rounded-2xl border bg-card p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]",
-				order.pendingEstimate && "border-amber-500/40",
-				order.status === "ready" && "border-emerald-500/40"
-			)}
-			href={`/portal/service-orders/${order.id}`}
-		>
-			<div className="flex items-start gap-3">
+		<li>
+			<Link className={row} href={`/portal/service-orders/${order.id}`}>
 				<ModelImage
 					alt={order.deviceModel}
 					category={order.deviceCategory}
-					className="size-14 rounded-xl"
+					className="size-12 rounded-xl"
 					src={order.deviceImageUrl}
 				/>
-				<div className="min-w-0 flex-1">
-					<div className="flex items-start justify-between gap-2">
-						<div className="min-w-0">
-							<p className="truncate font-semibold">{order.deviceModel}</p>
-							<p className="flex items-center gap-1.5 truncate text-muted-foreground text-xs">
-								<ShopMark className="size-4" shop={order.company} />
-								<span className="truncate">{order.company.name}</span>
-								<span aria-hidden>·</span>
-								<span className="tabular-nums">{order.code}</span>
-							</p>
-						</div>
-						<ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+				<div className="min-w-0 flex-1 space-y-1.5">
+					<div className="flex items-center justify-between gap-2">
+						<p className="truncate font-medium">{order.deviceModel}</p>
+						<PortalStatusBadge status={order.status} />
 					</div>
+					<ShopLine code={order.code} shop={order.company} />
+					<PortalProgressBar status={order.status} />
+					{order.pendingEstimate ? (
+						<WaitingForYou>{t("portal.list.pendingEstimate")}</WaitingForYou>
+					) : (
+						<p className="truncate whitespace-nowrap text-muted-foreground text-xs">
+							{t("portal.list.updated", {
+								time: format.relativeTime(order.updatedAt),
+							})}
+						</p>
+					)}
 				</div>
-			</div>
-			<PortalProgressBar className="mt-4" status={order.status} />
-			<div className="mt-2.5 flex items-center justify-between gap-2">
-				<PortalStatusBadge status={order.status} />
-				<span className="flex items-center gap-1 text-muted-foreground text-xs">
-					<Clock className="size-3" />
-					{t("portal.list.updated", {
-						time: format.relativeTime(order.updatedAt),
-					})}
-				</span>
-			</div>
-			{order.pendingEstimate && (
-				<p className="mt-3 rounded-xl bg-amber-500/10 px-3 py-2 font-medium text-amber-800 text-xs dark:text-amber-200">
-					{t("portal.list.pendingEstimate")}
-				</p>
-			)}
-		</Link>
+				<ChevronRight className="mt-0.5 size-4 shrink-0 self-center text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+			</Link>
+		</li>
 	);
 }
 
 /** One estimate: the shop, the device, the total and whether it waits for an answer. */
-export function PortalEstimateCard({
+export function PortalEstimateRow({
 	estimate,
-	highlight = false,
 }: {
 	estimate: PortalEstimateSummary;
-	highlight?: boolean;
 }) {
 	const { t, format } = useTranslation();
 	const days = daysUntil(estimate.validUntil);
 	const open = estimate.status === "sent" && !estimate.expired;
+	const expired = estimate.expired && estimate.status === "sent";
 
 	return (
-		<Link
-			className={cn(
-				"group block rounded-2xl border bg-card p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]",
-				highlight &&
-					"border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-card to-card"
-			)}
-			href={`/portal/estimates/${estimate.id}`}
-		>
-			<div className="flex items-center gap-2 text-muted-foreground text-xs">
-				<ShopMark className="size-4" shop={estimate.company} />
-				<span className="truncate">{estimate.company.name}</span>
-				<span aria-hidden>·</span>
-				<span className="tabular-nums">
-					#{String(estimate.number).padStart(4, "0")}
-				</span>
-				<span
-					className={cn(
-						"ml-auto shrink-0 rounded-full px-2.5 py-0.5 font-medium",
-						estimate.expired && estimate.status === "sent"
-							? "bg-muted text-muted-foreground"
-							: ESTIMATE_TONE[estimate.status]
-					)}
-				>
-					{estimate.expired && estimate.status === "sent"
-						? t("portal.estimates.expired")
-						: t(`estimates.status.${estimate.status}`)}
-				</span>
-			</div>
-			<div className="mt-3 flex items-end justify-between gap-3">
-				<div className="flex min-w-0 items-center gap-3">
-					<ModelImage
-						alt={estimate.deviceModel}
-						category={estimate.deviceCategory}
-						className="size-11 rounded-xl"
-						src={estimate.deviceImageUrl}
-					/>
-					<div className="min-w-0">
-						<p className="truncate font-medium text-sm">
-							{estimate.deviceModel}
-						</p>
-						<p className="text-muted-foreground text-xs tabular-nums">
-							{estimate.serviceOrderCode}
+		<li>
+			<Link className={row} href={`/portal/estimates/${estimate.id}`}>
+				<ModelImage
+					alt={estimate.deviceModel}
+					category={estimate.deviceCategory}
+					className="size-12 rounded-xl"
+					src={estimate.deviceImageUrl}
+				/>
+				<div className="min-w-0 flex-1 space-y-1">
+					<div className="flex items-baseline justify-between gap-2">
+						<p className="truncate font-medium">{estimate.deviceModel}</p>
+						<p className="shrink-0 font-heading font-semibold text-lg">
+							{format.currency(estimate.totals.total)}
 						</p>
 					</div>
+					<ShopLine
+						code={`#${String(estimate.number).padStart(4, "0")}`}
+						shop={estimate.company}
+					/>
+					{open ? (
+						<WaitingForYou>
+							{t("portal.estimates.pending")}
+							{days <= 7 &&
+								` · ${t("portal.estimates.validUntil", {
+									date: format.date(estimate.validUntil),
+								})}`}
+						</WaitingForYou>
+					) : (
+						<span
+							className={cn(
+								"inline-flex rounded-full px-2 py-0.5 font-medium text-xs",
+								expired
+									? "bg-muted text-muted-foreground"
+									: ESTIMATE_TONE[estimate.status]
+							)}
+						>
+							{expired
+								? t("portal.estimates.expired")
+								: t(`estimates.status.${estimate.status}`)}
+						</span>
+					)}
 				</div>
-				<p className="shrink-0 font-heading font-semibold text-xl tabular-nums">
-					{format.currency(estimate.totals.total)}
-				</p>
-			</div>
-			{open && (
-				<div className="mt-3 flex items-center justify-between gap-2 border-t pt-3 text-xs">
-					<span
-						className={cn(
-							"text-muted-foreground",
-							days <= 3 && "text-amber-700 dark:text-amber-300"
-						)}
-					>
-						{t("portal.estimates.validUntil", {
-							date: format.date(estimate.validUntil),
-						})}
-					</span>
-					<span className="flex items-center gap-1 font-medium text-primary">
-						{t("portal.home.seeEstimate")}
-						<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-					</span>
-				</div>
-			)}
-		</Link>
+				<ChevronRight className="size-4 shrink-0 self-center text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+			</Link>
+		</li>
 	);
 }

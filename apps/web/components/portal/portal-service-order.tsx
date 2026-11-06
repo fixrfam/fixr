@@ -13,32 +13,20 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PortalServiceOrder as Order } from "@/lib/services/portal";
 import { cn } from "@/lib/utils";
-import { ShopMark } from "./portal-cards";
+import {
+	ESTIMATE_TONE,
+	PortalList,
+	ShopMark,
+	WaitingForYou,
+} from "./portal-cards";
 import { PortalProgressBar, PortalTimeline } from "./portal-progress";
 import { PortalStatusBadge } from "./portal-status-badge";
 import { usePortalServiceOrder } from "./store";
 
-const ESTIMATE_TONE = {
-	draft: "bg-muted text-muted-foreground",
-	sent: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
-	approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-	rejected: "bg-red-500/15 text-red-700 dark:text-red-300",
-} as const;
-
-function Card({
-	title,
-	children,
-	className,
-}: {
-	title: string;
-	children: ReactNode;
-	className?: string;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
-		<section className={cn("rounded-2xl border bg-card p-4", className)}>
-			<h2 className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-				{title}
-			</h2>
+		<section className="space-y-2.5">
+			<h2 className="px-1 font-semibold text-sm">{title}</h2>
 			{children}
 		</section>
 	);
@@ -71,7 +59,12 @@ export function PortalBackLink({
 	label: string;
 }) {
 	return (
-		<Button asChild className="mb-3 -ml-2.5" size="sm" variant="ghost">
+		<Button
+			asChild
+			className="mb-3 -ml-2.5 transition-[scale] active:scale-[0.96]"
+			size="sm"
+			variant="ghost"
+		>
 			<Link href={href}>
 				<ArrowLeft className="size-4" />
 				{label}
@@ -88,7 +81,7 @@ export function PortalServiceOrder({ id }: { id: string }) {
 	if (isPending) {
 		return (
 			<div className="space-y-4">
-				<Skeleton className="h-40 rounded-2xl" />
+				<Skeleton className="h-24 rounded-2xl" />
 				<Skeleton className="h-72 rounded-2xl" />
 			</div>
 		);
@@ -101,7 +94,7 @@ export function PortalServiceOrder({ id }: { id: string }) {
 					href="/portal/service-orders"
 					label={t("portal.detail.back")}
 				/>
-				<p className="rounded-2xl border border-dashed bg-card p-8 text-center text-muted-foreground text-sm">
+				<p className="py-12 text-center text-muted-foreground text-sm">
 					{t("portal.detail.notFound")}
 				</p>
 			</div>
@@ -114,32 +107,34 @@ export function PortalServiceOrder({ id }: { id: string }) {
 				href="/portal/service-orders"
 				label={t("portal.detail.back")}
 			/>
-			<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
-				<div className="min-w-0 space-y-4">
-					<Hero order={order} />
-					<Card title={t("portal.detail.reportedDefect")}>
-						<p className="whitespace-pre-line text-sm">
+			<Hero order={order} />
+			<div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_18rem]">
+				<div className="min-w-0 space-y-7">
+					<Section title={t("portal.detail.reportedDefect")}>
+						<blockquote className="text-pretty border-l-2 pl-3 text-sm">
 							{order.reportedDefect}
-						</p>
-					</Card>
-					<EstimatesCard order={order} />
+						</blockquote>
+					</Section>
+					<EstimatesSection order={order} />
 					{order.items.length > 0 ? (
 						<ItemsSection
 							estimate={itemsSummary(order.items)}
 							title={t("portal.detail.items")}
 						/>
 					) : (
-						<Card title={t("portal.detail.items")}>
-							<p className="text-muted-foreground text-sm">
+						<Section title={t("portal.detail.items")}>
+							<p className="px-1 text-muted-foreground text-sm">
 								{t("portal.detail.noItems")}
 							</p>
-						</Card>
+						</Section>
 					)}
 				</div>
-				<div className="space-y-4">
-					<Card title={t("portal.detail.progress")}>
-						<PortalTimeline history={order.history} status={order.status} />
-					</Card>
+				<div className="space-y-7">
+					<Section title={t("portal.detail.progress")}>
+						<div className="px-1">
+							<PortalTimeline history={order.history} status={order.status} />
+						</div>
+					</Section>
 					<ContactSection company={order.company} />
 				</div>
 			</div>
@@ -151,8 +146,8 @@ function Hero({ order }: { order: Order }) {
 	const { t, format } = useTranslation();
 
 	return (
-		<header className="overflow-hidden rounded-2xl border bg-card">
-			<div className="flex items-center gap-4 p-4">
+		<header className="space-y-4">
+			<div className="flex items-center gap-4">
 				<ModelImage
 					alt={order.deviceModel}
 					category={order.deviceCategory}
@@ -161,22 +156,24 @@ function Hero({ order }: { order: Order }) {
 					src={order.deviceImageUrl}
 				/>
 				<div className="min-w-0 flex-1">
-					<p className="font-heading font-semibold text-xl leading-tight">
+					<h1 className="truncate font-heading font-semibold text-2xl">
 						{order.deviceModel}
+					</h1>
+					<p className="truncate text-muted-foreground text-sm">
+						{order.deviceMaker}
 					</p>
-					<p className="text-muted-foreground text-sm">{order.deviceMaker}</p>
-					<p className="mt-1.5 flex items-center gap-1.5 text-muted-foreground text-xs">
+					<p className="mt-1 flex min-w-0 items-center gap-1.5 whitespace-nowrap text-muted-foreground text-xs">
 						<ShopMark className="size-4" shop={order.company} />
 						<span className="truncate">{order.company.name}</span>
 						<span aria-hidden>·</span>
-						<span className="tabular-nums">{order.code}</span>
+						<span className="shrink-0 tabular-nums">{order.code}</span>
 					</p>
 				</div>
 			</div>
-			<div className="space-y-2.5 border-t bg-muted/20 px-4 py-3">
+			<div className="space-y-2">
 				<div className="flex items-center justify-between gap-2">
 					<PortalStatusBadge status={order.status} />
-					<span className="text-muted-foreground text-xs">
+					<span className="truncate whitespace-nowrap text-muted-foreground text-xs">
 						{t("portal.detail.openedAt", {
 							date: format.date(order.createdAt),
 						})}
@@ -188,59 +185,61 @@ function Hero({ order }: { order: Order }) {
 	);
 }
 
-function EstimatesCard({ order }: { order: Order }) {
+function EstimatesSection({ order }: { order: Order }) {
 	const { t, format } = useTranslation();
 
 	return (
-		<Card title={t("portal.detail.estimates")}>
+		<Section title={t("portal.detail.estimates")}>
 			{order.estimates.length === 0 ? (
-				<p className="text-muted-foreground text-sm">
+				<p className="px-1 text-muted-foreground text-sm">
 					{t("portal.detail.noEstimates")}
 				</p>
 			) : (
-				<ul className="-mx-1 space-y-1">
+				<PortalList>
 					{order.estimates.map((estimate) => {
 						const expired = estimate.expired && estimate.status === "sent";
+						const open = estimate.status === "sent" && !estimate.expired;
 						return (
 							<li key={estimate.id}>
 								<Link
-									className="group flex items-center gap-3 rounded-xl px-1 py-2 transition-colors hover:bg-muted/50"
+									className="group flex items-center gap-3 px-4 py-3 transition-[background-color] duration-150 ease-out hover:bg-muted/50"
 									href={`/portal/estimates/${estimate.id}`}
 								>
-									<div className="min-w-0 flex-1">
-										<p className="font-medium text-sm">
+									<div className="min-w-0 flex-1 space-y-1">
+										<p className="truncate font-medium text-sm">
 											{t("portal.detail.estimateNumber", {
 												number: String(estimate.number).padStart(4, "0"),
 											})}
 										</p>
-										<p className="text-muted-foreground text-xs">
-											{t("portal.detail.validUntil", {
-												date: format.date(estimate.validUntil),
-											})}
-										</p>
-									</div>
-									<span
-										className={cn(
-											"rounded-full px-2.5 py-0.5 font-medium text-xs",
-											expired
-												? "bg-muted text-muted-foreground"
-												: ESTIMATE_TONE[estimate.status]
+										{open ? (
+											<WaitingForYou>
+												{t("portal.estimates.pending")}
+											</WaitingForYou>
+										) : (
+											<span
+												className={cn(
+													"inline-flex whitespace-nowrap rounded-full px-2 py-0.5 font-medium text-xs",
+													expired
+														? "bg-muted text-muted-foreground"
+														: ESTIMATE_TONE[estimate.status]
+												)}
+											>
+												{expired
+													? t("portal.estimates.expired")
+													: t(`estimates.status.${estimate.status}`)}
+											</span>
 										)}
-									>
-										{expired
-											? t("portal.estimates.expired")
-											: t(`estimates.status.${estimate.status}`)}
-									</span>
-									<span className="font-semibold text-sm tabular-nums">
+									</div>
+									<span className="shrink-0 font-semibold text-sm tabular-nums">
 										{format.currency(estimate.totals.total)}
 									</span>
-									<ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+									<ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
 								</Link>
 							</li>
 						);
 					})}
-				</ul>
+				</PortalList>
 			)}
-		</Card>
+		</Section>
 	);
 }

@@ -194,9 +194,9 @@ describe("PortalHome", () => {
 		renderWithQuery(<PortalHome />);
 
 		expect(
-			await screen.findByText("Aguardando sua resposta")
+			await screen.findByRole("heading", { name: "Aguardando sua resposta" })
 		).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /Ver orçamento/ })).toHaveAttribute(
+		expect(screen.getByRole("link", { name: /650,00/ })).toHaveAttribute(
 			"href",
 			"/portal/estimates/est-1"
 		);
