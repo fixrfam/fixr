@@ -106,17 +106,4 @@ describe("UploadsService.createPresignedUpload", () => {
 		).rejects.toMatchObject({ code: "company_not_found", status: 404 });
 		expect(repo.createPresignedUpload).not.toHaveBeenCalled();
 	});
-
-	// Known gap (tracked in the #95 findings): any well-formed MIME type is accepted,
-	// including text/html; there is no allowlist of image types.
-	it("currently accepts any content type", async () => {
-		await UploadsService.createPresignedUpload({
-			purpose: "avatar",
-			data: { ...file, contentType: "text/html" },
-			userId: "u1",
-			response: asReply(createFakeReply()),
-		});
-
-		expect(repo.createPresignedUpload).toHaveBeenCalled();
-	});
 });

@@ -22,6 +22,9 @@ describe("createUploadPresignSchema", () => {
 	it.each([
 		["contentType", "jpeg"],
 		["contentType", "image/jpeg/x"],
+		["contentType", "text/html"],
+		["contentType", "image/svg+xml"],
+		["contentType", "application/pdf"],
 		["size", 0],
 		["size", 1.5],
 		["size", MAX_UPLOAD_SIZE_BYTES + 1],
@@ -31,6 +34,26 @@ describe("createUploadPresignSchema", () => {
 		expect(
 			issuePaths(createUploadPresignSchema, { ...validUpload, [field]: value })
 		).toEqual([field]);
+	});
+
+	it.each([
+		"image/png",
+		"image/webp",
+		"image/heic",
+	])("accepts the image type %s", (contentType) => {
+		expect(
+			createUploadPresignSchema.safeParse({ ...validUpload, contentType })
+				.success
+		).toBe(true);
+	});
+
+	it("stores the content type in lowercase", () => {
+		expect(
+			createUploadPresignSchema.parse({
+				...validUpload,
+				contentType: "IMAGE/PNG",
+			}).contentType
+		).toBe("image/png");
 	});
 
 	it("accepts exactly the max size", () => {
