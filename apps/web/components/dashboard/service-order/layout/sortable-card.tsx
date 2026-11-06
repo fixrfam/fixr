@@ -27,19 +27,40 @@ export function SortableCard({ id, children }: SortableCardProps) {
 		transition,
 	};
 
+	/**
+	 * React events bubble through portals, so keys typed in a dialog opened
+	 * from a card (or in a field inside it) would reach these listeners and
+	 * start a keyboard drag on Space/Enter. Only the card itself starts one,
+	 * and only pointers that land on the card's own DOM start a pointer drag.
+	 */
+	const guardedListeners = {
+		...listeners,
+		onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+			if (event.target === event.currentTarget) {
+				listeners?.onKeyDown?.(event);
+			}
+		},
+		onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+			if (event.currentTarget.contains(event.target as Node)) {
+				listeners?.onPointerDown?.(event);
+			}
+		},
+	};
+
 	return (
 		<div
 			className={cn(
-				"relative cursor-grab touch-none bg-background transition-shadow",
+				"group relative cursor-grab touch-none bg-background transition-shadow",
 				isDragging && "opacity-50"
 			)}
 			data-card-id={id}
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
-			{...listeners}
+			{...guardedListeners}
 		>
-			<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full border bg-card px-2 py-1 text-muted-foreground text-xs">
+			{/* On the top border, out of the way of the header actions. */}
+			<div className="pointer-events-none absolute -top-2.5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-2xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
 				<GripVertical className="size-3" />
 				{t("serviceOrders.layout.drag")}
 			</div>

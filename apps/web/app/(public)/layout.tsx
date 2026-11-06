@@ -1,3 +1,4 @@
+import { cookieKey } from "@fixr/constants/cookies";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { cookies } from "next/headers";
@@ -52,7 +53,12 @@ export default async function RootLayout({
 }>) {
 	const locale = await getLocale();
 	// Read on the server so the header shows the session on first paint.
-	const session = getSession(await cookies());
+	const cookieStore = await cookies();
+	const session = getSession(cookieStore);
+	// The portal cookie is httpOnly: the header only learns that it exists.
+	const hasPortalSession = Boolean(
+		cookieStore.get(cookieKey("portalSession"))?.value
+	);
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
@@ -75,7 +81,7 @@ export default async function RootLayout({
 						>
 							<div className="min-h-screen items-center justify-items-center gap-16">
 								<ApiDowntimeBanner />
-								<Header />
+								<Header hasPortalSession={hasPortalSession} />
 								{children}
 								<Footer className="z-2" />
 							</div>

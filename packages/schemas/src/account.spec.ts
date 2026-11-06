@@ -9,12 +9,12 @@ const validAccount = () => ({
 	avatarUrl: null,
 	displayName: null,
 	cpf: "52998224725",
-	profileType: "client",
+	profileType: "customer",
 	createdAt: "2024-01-01T00:00:00.000Z",
 });
 
 describe("accountSchema", () => {
-	it("accepts a client account", () => {
+	it("accepts a customer account", () => {
 		expect(accountSchema.safeParse(validAccount()).success).toBe(true);
 	});
 

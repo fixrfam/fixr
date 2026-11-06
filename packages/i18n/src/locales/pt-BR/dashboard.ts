@@ -23,6 +23,7 @@ export const dashboard: Translated<typeof source> = {
 		company: "Empresa",
 		security: "Segurança",
 		apiKeys: "Chaves de API",
+		roles: "Cargos e permissões",
 		serviceOrders: "Ordens de Serviço",
 		estimates: "Orçamentos",
 		suppliers: "Fornecedores",

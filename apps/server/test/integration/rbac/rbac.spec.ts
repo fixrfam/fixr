@@ -70,6 +70,14 @@ const PUBLIC_ROUTES = new Set([
 	"PUT /credentials/password/reset", // Turnstile + one-time token
 	"GET /credentials/password/reset", // one-time token
 	"GET /account/confirm-deletion", // one-time token
+	"GET /estimate-links/:token", // estimate link token from the email
+	"GET /estimate-links/:token/pdf", // estimate link token from the email
+	"POST /estimate-links/:token/approve", // estimate link token from the email
+	"POST /estimate-links/:token/reject", // estimate link token from the email
+	"POST /portal/session", // portal link token from the email
+	"POST /portal/session/estimate", // estimate link token from the email
+	"DELETE /portal/session", // only ends the caller's own portal session
+	"POST /portal/access", // Turnstile-protected, same answer for any email
 ]);
 
 /** Authenticated routes that intentionally have no RBAC permission. */
@@ -82,6 +90,46 @@ const AUTH_ONLY_ROUTES = new Map([
 		"POST /companies",
 		"internal admin panel, authenticated through Clerk (authenticateAdmin)",
 	],
+	[
+		"GET /portal/me",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"GET /portal/service-orders",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"GET /portal/service-orders/:serviceOrderId",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"GET /portal/employee-access",
+		"self-service: only checks the signed-in user's own email",
+	],
+	[
+		"POST /portal/employee-access",
+		"self-service: only emails the signed-in user's own address",
+	],
+	[
+		"GET /portal/estimates",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"GET /portal/estimates/:estimateId",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"GET /portal/estimates/:estimateId/pdf",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"POST /portal/estimates/:estimateId/approve",
+		"customer portal session: the customer only sees their own service orders",
+	],
+	[
+		"POST /portal/estimates/:estimateId/reject",
+		"customer portal session: the customer only sees their own service orders",
+	],
 ]);
 
 /** Routes whose guard is a custom preHandler; verified dynamically below. */
@@ -92,6 +140,7 @@ const AUTH_MIDDLEWARES = new Set([
 	"authenticateEmployee",
 	"authenticateEmployeeOrApiKey",
 	"authenticateAdmin",
+	"authenticatePortal",
 ]);
 
 const guardedRoutes = routes
@@ -160,17 +209,23 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		email: "novo@fixr.test",
 	},
 	"POST /companies/:subdomain/service-orders": {
-		clientId: createId(),
-		deviceBrandId: createId(),
-		deviceCategoryId: createId(),
-		deviceModel: "iPhone",
+		deviceId: createId(),
 		reportedDefect: "Tela",
 	},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId": {},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/status": {
+		status: "ready",
+	},
+	"POST /companies/:subdomain/devices": {
+		customerId: createId(),
+		modelId: createId(),
+	},
+	"PATCH /companies/:subdomain/devices/:deviceId": {},
 	"POST /companies/:subdomain/models": { name: "Model", makerId: "x" },
 	"PATCH /companies/:subdomain/models/:modelId": {},
 	"POST /companies/:subdomain/api-keys": { name: "Integração" },
 	"POST /companies/:subdomain/models/:modelId/images": { uploadId: "x" },
-	"POST /companies/:subdomain/clients": {
+	"POST /companies/:subdomain/customers": {
 		name: "Cliente",
 		email: "cliente@fixr.test",
 		cpf: "52998224725",
@@ -179,8 +234,24 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		state: "SP",
 		city: "São Paulo",
 	},
-	"PATCH /companies/:subdomain/clients/:clientId": {},
+	"PATCH /companies/:subdomain/customers/:customerId": {},
+	"POST /companies/:subdomain/customers/:customerId/portal-access": {},
 	"PATCH /companies/:subdomain": {},
+	"POST /companies/:subdomain/estimates": { serviceOrderId: createId() },
+	"PATCH /companies/:subdomain/estimates/:estimateId": {},
+	"POST /companies/:subdomain/estimates/:estimateId/send": {},
+	"PATCH /companies/:subdomain/estimates/:estimateId/status": {
+		status: "sent",
+	},
+	"POST /companies/:subdomain/service-orders/:serviceOrderId/photos": {
+		photos: [{ uploadId: "x" }],
+	},
+	"POST /companies/:subdomain/service-orders/:serviceOrderId/items": {
+		type: "part",
+		itemId: createId(),
+	},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/items/:itemId":
+		{},
 	"POST /companies/:subdomain/suppliers": {
 		name: "Fornecedor",
 		cnpj: "11222333000181",

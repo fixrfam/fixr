@@ -2,8 +2,16 @@ import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
-	createServiceOrderMockSchema,
+	addServiceOrderItemSchema,
+	addServiceOrderPhotosSchema,
+	changeServiceOrderStatusSchema,
+	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
+	patchServiceOrderItemSchema,
+	patchServiceOrderSchema,
+	serviceOrderIdParamsSchema,
+	serviceOrderItemParamsSchema,
+	serviceOrderPhotoParamsSchema,
 } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import { serviceOrdersDocs } from "../../../core/docs/service-orders.docs";
@@ -49,13 +57,251 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
-			const body = await createServiceOrderMockSchema.parseAsync(request.body);
+			const body = await createServiceOrderSchema.parseAsync(request.body);
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
 			await ServiceOrdersController.createServiceOrder({
 				userJwt,
 				data: body,
 				subdomain,
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/:serviceOrderId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.read),
+			],
+			schema: serviceOrdersDocs.getServiceOrderSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.getServiceOrder({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:serviceOrderId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.patchServiceOrderSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = patchServiceOrderSchema.parse(request.body);
+
+			await ServiceOrdersController.patchServiceOrder({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:serviceOrderId/status",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.changeStatus),
+			],
+			schema: serviceOrdersDocs.changeServiceOrderStatusSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = changeServiceOrderStatusSchema.parse(request.body);
+
+			await ServiceOrdersController.changeStatus({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:serviceOrderId/photos",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.addServiceOrderPhotosSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = addServiceOrderPhotosSchema.parse(request.body);
+
+			await ServiceOrdersController.addPhotos({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/:serviceOrderId/photos/:photoId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.deleteServiceOrderPhotoSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, photoId } = serviceOrderPhotoParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.deletePhoto({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				photoId,
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/:serviceOrderId/items",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.read),
+			],
+			schema: serviceOrdersDocs.listServiceOrderItemsSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.listItems({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:serviceOrderId/items",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.addServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = addServiceOrderItemSchema.parse(request.body);
+
+			await ServiceOrdersController.addItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:serviceOrderId/items/:itemId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.patchServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, itemId } = serviceOrderItemParamsSchema.parse(
+				request.params
+			);
+			const data = patchServiceOrderItemSchema.parse(request.body);
+
+			await ServiceOrdersController.patchItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				itemId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/:serviceOrderId/items/:itemId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.update),
+			],
+			schema: serviceOrdersDocs.deleteServiceOrderItemSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId, itemId } = serviceOrderItemParamsSchema.parse(
+				request.params
+			);
+
+			await ServiceOrdersController.deleteItem({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				itemId,
 				response,
 			});
 		})

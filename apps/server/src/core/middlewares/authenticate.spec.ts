@@ -23,7 +23,7 @@ function payload(role?: string) {
 		email: "a@fixr.test",
 		displayName: null,
 		avatarUrl: null,
-		profileType: role ? "employee" : "client",
+		profileType: role ? "employee" : "customer",
 		company: role
 			? { id: createId(), name: "Fixr", subdomain: "fixr", role }
 			: undefined,
@@ -162,7 +162,7 @@ describe.each([
 
 describe("authenticateEmployee", () => {
 	it("rejects a non-employee account with 403", async () => {
-		queryUserById.mockResolvedValue({ id: userId, profileType: "client" });
+		queryUserById.mockResolvedValue({ id: userId, profileType: "customer" });
 		const app = await appWith(authenticateEmployee);
 
 		const response = await app.inject({
@@ -177,8 +177,8 @@ describe("authenticateEmployee", () => {
 });
 
 describe("authenticate", () => {
-	it("accepts client accounts", async () => {
-		queryUserById.mockResolvedValue({ id: userId, profileType: "client" });
+	it("accepts customer accounts", async () => {
+		queryUserById.mockResolvedValue({ id: userId, profileType: "customer" });
 		const app = await appWith(authenticate);
 
 		const response = await app.inject({

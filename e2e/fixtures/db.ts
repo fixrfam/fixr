@@ -67,7 +67,7 @@ export async function latestToken(
 	});
 }
 
-/** Create an unverified client account plus a confirmation token for it. */
+/** Create an unverified customer account plus a confirmation token for it. */
 export async function createUnverifiedAccount(email: string) {
 	return await withDb(async (db) => {
 		const userId = createId();
@@ -77,7 +77,7 @@ export async function createUnverifiedAccount(email: string) {
 			[userId, email, bcrypt.hashSync(PASSWORD, 10)]
 		);
 		await db.query(
-			"INSERT INTO clients (id, name, cpf, user_id) VALUES (?, ?, ?, ?)",
+			"INSERT INTO customers (id, name, cpf, user_id) VALUES (?, ?, ?, ?)",
 			[
 				createId(),
 				"Cliente Não Verificado",

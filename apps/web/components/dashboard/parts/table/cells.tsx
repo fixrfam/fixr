@@ -71,6 +71,29 @@ export function PriceCell({ value }: { value: number }) {
 	);
 }
 
+/** What an order charges for the service, with the labor and parts behind it. */
+export function ServicePriceCell({
+	service,
+}: {
+	service: { price: number; partsPrice: number; totalPrice: number };
+}) {
+	const { t, format } = useTranslation();
+
+	return (
+		<div className="flex flex-col whitespace-nowrap tabular-nums">
+			<span>{format.currency(service.totalPrice)}</span>
+			{service.partsPrice > 0 && (
+				<span className="text-muted-foreground text-xs">
+					{t("services.table.priceBreakdown", {
+						labor: format.currency(service.price),
+						parts: format.currency(service.partsPrice),
+					})}
+				</span>
+			)}
+		</div>
+	);
+}
+
 export function StockCell({
 	stock,
 	status,

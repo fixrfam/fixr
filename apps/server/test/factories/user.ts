@@ -19,7 +19,7 @@ export interface MakeUserInput {
 
 /**
  * A bare `users` row. The API expects every user to also be an employee or a
- * client (profileType), so prefer `makeEmployee()` / `makeClient()` in tests.
+ * customer (profileType), so prefer `makeEmployee()` / `makeCustomerAccount()` in tests.
  */
 export async function makeUser(input: MakeUserInput = {}) {
 	const id = createId();

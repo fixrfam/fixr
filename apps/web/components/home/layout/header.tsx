@@ -21,11 +21,54 @@ const NAV_LINKS = [
 	{ key: "faq", href: "/#faq" },
 ] as const;
 
-export default function Header() {
+/**
+ * The site header. Its main button follows who is signed in: the dashboard
+ * for an employee, the portal for a customer, the login for nobody.
+ */
+export default function Header({
+	hasPortalSession = false,
+}: {
+	hasPortalSession?: boolean;
+}) {
 	const { t } = useTranslation();
 	const { hasScrolled } = useScrollPosition();
 	const { session } = useSession();
 	const name = session?.displayName || session?.email;
+
+	let account = (
+		<Link href="/auth/login" prefetch>
+			<Button size="sm">{t("common.auth.login")}</Button>
+		</Link>
+	);
+	if (session) {
+		account = (
+			<Link
+				className="flex items-center gap-2"
+				href={dashboardHref(session)}
+				prefetch
+				title={t("common.auth.signedInAs", { name: name ?? "" })}
+			>
+				<Avatar
+					className="size-8!"
+					fallbackHash={session.id}
+					src={session.avatarUrl}
+				/>
+				<Button size="sm">
+					{t("common.auth.goToDashboard")}
+					<ArrowRight className="size-4" />
+				</Button>
+			</Link>
+		);
+	} else if (hasPortalSession) {
+		account = (
+			<Link href="/portal">
+				<Button size="sm">
+					{t("common.auth.goToPortal")}
+					<ArrowRight className="size-4" />
+				</Button>
+			</Link>
+		);
+	}
 
 	return (
 		<header
@@ -69,28 +112,7 @@ export default function Header() {
 							<ExternalLink className="inline-block h-3.5 w-3.5" />
 						</Button>
 					</Link>
-					{session ? (
-						<Link
-							className="flex items-center gap-2"
-							href={dashboardHref(session)}
-							prefetch
-							title={t("common.auth.signedInAs", { name: name ?? "" })}
-						>
-							<Avatar
-								className="size-8!"
-								fallbackHash={session.id}
-								src={session.avatarUrl}
-							/>
-							<Button size="sm">
-								{t("common.auth.goToDashboard")}
-								<ArrowRight className="size-4" />
-							</Button>
-						</Link>
-					) : (
-						<Link href="/auth/login" prefetch>
-							<Button size="sm">{t("common.auth.login")}</Button>
-						</Link>
-					)}
+					{account}
 					<LanguageToggle size={"sm"} />
 					<ModeToggle size={"sm"} />
 				</div>

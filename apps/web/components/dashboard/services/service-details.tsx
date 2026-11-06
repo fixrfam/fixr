@@ -59,9 +59,25 @@ export function ServiceDetails({
 						{t("services.details.price")}
 					</span>
 					<span className="font-medium">
-						<PriceCell value={service.price} />
+						<PriceCell value={service.totalPrice} />
 					</span>
 				</div>
+				{service.partsPrice > 0 && (
+					<>
+						<div className="flex flex-col gap-1">
+							<span className="text-muted-foreground text-xs">
+								{t("services.details.laborPrice")}
+							</span>
+							<PriceCell value={service.price} />
+						</div>
+						<div className="flex flex-col gap-1">
+							<span className="text-muted-foreground text-xs">
+								{t("services.details.partsPrice")}
+							</span>
+							<PriceCell value={service.partsPrice} />
+						</div>
+					</>
+				)}
 			</div>
 
 			<Section title={t("services.details.deviceCategories")}>

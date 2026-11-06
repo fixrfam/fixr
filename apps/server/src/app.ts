@@ -25,6 +25,7 @@ import {
 } from "fastify-type-provider-zod";
 import { ZodError, z } from "zod";
 import { apiDescription } from "./core/docs/main";
+import { registerEffects } from "./core/events";
 import type { FastifyTypedInstance } from "./core/interfaces/fastify";
 import { AppError } from "./core/lib/app-error";
 import { bindJWT } from "./core/lib/jwt";
@@ -33,14 +34,23 @@ import { accountRoutes } from "./modules/account/routes";
 import { apiKeysRoutes } from "./modules/api-keys/routes";
 import { authRoutes } from "./modules/auth/routes";
 import { categoriesRoutes } from "./modules/categories/routes";
-import { clientsRoutes } from "./modules/clients/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
+import { customersRoutes } from "./modules/customers/routes";
+import { devicesRoutes } from "./modules/devices/routes";
 import { employeesRoutes } from "./modules/employees/routes";
+import {
+	estimateLinksRoutes,
+	estimatesRoutes,
+} from "./modules/estimates/routes";
 import { healthRoutes } from "./modules/health/routes";
 import { makersRoutes } from "./modules/makers/routes";
 import { modelsRoutes } from "./modules/models/routes";
 import { partsRoutes } from "./modules/parts/routes";
+import {
+	customerPortalAccessRoutes,
+	portalRoutes,
+} from "./modules/portal/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
 import { servicesRoutes } from "./modules/services/routes";
 import { suppliersRoutes } from "./modules/suppliers/routes";
@@ -92,12 +102,27 @@ const OPENAPI_TAGS = [
 		description: "Manage company employees.",
 	},
 	{
-		name: "Clients",
-		description: "Manage the company's clients (customers).",
+		name: "Customers",
+		description: "Manage the company's customers (customers).",
+	},
+	{
+		name: "Customer Devices",
+		description:
+			"The customers' devices: a catalog model owned by a customer, with where it is now.",
 	},
 	{
 		name: "Service Orders",
 		description: "Manage company service orders.",
+	},
+	{
+		name: "Estimates",
+		description:
+			"Estimates (orçamentos) built from service orders, with PDF generation.",
+	},
+	{
+		name: "Customer portal",
+		description:
+			"Passwordless area where customers follow their service orders, opened from emailed links.",
 	},
 	{
 		name: "Parts",
@@ -203,6 +228,7 @@ export async function buildApp(
 	const { logger = envToLogger.development, docs = true, onRoute } = options;
 
 	registerSchemas();
+	registerEffects();
 
 	const app = fastify({
 		logger,
@@ -272,8 +298,11 @@ export async function buildApp(
 	await app.register(employeesRoutes, {
 		prefix: "/companies/:subdomain/employees",
 	});
-	await app.register(clientsRoutes, {
-		prefix: "/companies/:subdomain/clients",
+	await app.register(customersRoutes, {
+		prefix: "/companies/:subdomain/customers",
+	});
+	await app.register(devicesRoutes, {
+		prefix: "/companies/:subdomain/devices",
 	});
 	await app.register(serviceOrdersRoutes, {
 		prefix: "/companies/:subdomain/service-orders",
@@ -286,6 +315,14 @@ export async function buildApp(
 	});
 	await app.register(modelsRoutes, {
 		prefix: "/companies/:subdomain/models",
+	});
+	await app.register(estimateLinksRoutes, { prefix: "/estimate-links" });
+	await app.register(portalRoutes, { prefix: "/portal" });
+	await app.register(customerPortalAccessRoutes, {
+		prefix: "/companies/:subdomain/customers",
+	});
+	await app.register(estimatesRoutes, {
+		prefix: "/companies/:subdomain/estimates",
 	});
 	await app.register(partsRoutes, {
 		prefix: "/companies/:subdomain/parts",

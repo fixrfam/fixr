@@ -18,6 +18,7 @@ export const services: Translated<typeof source> = {
 		create: "Novo serviço",
 		noCategory: "Sem categoria",
 		noParts: "Sem peças",
+		priceBreakdown: "{{labor}} de mão de obra + {{parts}} em peças",
 		editLabel: "Editar {{name}}",
 		headers: {
 			name: "Nome",
@@ -38,7 +39,11 @@ export const services: Translated<typeof source> = {
 		deviceCategoriesDescription:
 			"Em quais tipos de aparelho este serviço é feito.",
 		durationLabel: "Duração estimada (minutos)",
-		priceLabel: "Preço (R$)",
+		priceLabel: "Mão de obra (R$)",
+		priceDescription:
+			"O que você cobra pelo trabalho. As peças são somadas a este valor.",
+		totalHint:
+			"Cobrado na OS: {{labor}} de mão de obra + {{parts}} em peças = {{total}}",
 		partsLabel: "Peças vinculadas",
 		partsPlaceholder: "Selecione as peças usadas no serviço",
 		partsSelected_one: "{{count}} peça selecionada",
@@ -63,6 +68,8 @@ export const services: Translated<typeof source> = {
 	details: {
 		duration: "Duração estimada",
 		price: "Preço",
+		laborPrice: "Mão de obra",
+		partsPrice: "Peças",
 		deviceCategories: "Categorias de aparelho",
 		testInstructions: "O que testar após o reparo",
 		testParameters: "Parâmetros de teste",

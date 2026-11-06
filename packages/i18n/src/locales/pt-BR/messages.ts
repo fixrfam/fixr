@@ -14,6 +14,131 @@ export const messages: Translated<typeof source> = {
 		},
 	},
 	codes: {
+		create_estimate_success: {
+			title: "Orçamento gerado",
+			description: "Ele foi salvo como rascunho. Abra o PDF para conferir.",
+		},
+		update_estimate_status_success: {
+			title: "Orçamento atualizado",
+			description: "O status foi alterado.",
+		},
+		delete_estimate_success: {
+			title: "Orçamento excluído",
+			description: "O rascunho foi removido.",
+		},
+		estimate_service_order_empty: {
+			title: "Nada para orçar",
+			description: "Adicione peças ou serviços à ordem de serviço primeiro.",
+		},
+		estimate_service_order_not_found: {
+			title: "Ordem de serviço não encontrada",
+			description: "Esta ordem de serviço não existe na sua empresa.",
+		},
+		estimate_not_editable: {
+			title: "Orçamento bloqueado",
+			description: "Só rascunhos podem ser alterados ou excluídos.",
+		},
+		estimate_invalid_transition: {
+			title: "Status não permitido",
+			description: "O orçamento não pode ir para este status agora.",
+		},
+		send_estimate_success: {
+			title: "Orçamento enviado",
+			description:
+				"O cliente vai receber um email com o PDF e o link de aprovação.",
+		},
+		estimate_no_recipient: {
+			title: "Sem email para envio",
+			description:
+				"O cliente não tem email. Informe um para enviar o orçamento.",
+		},
+		estimate_expired: {
+			title: "Orçamento vencido",
+			description:
+				"A validade já passou. Volte para rascunho e atualize a data.",
+		},
+		estimate_link_invalid: {
+			title: "Link indisponível",
+			description:
+				"Este link de orçamento é inválido ou foi substituído por um mais novo.",
+		},
+		estimate_already_answered: {
+			title: "Orçamento já respondido",
+			description: "Este orçamento já foi aprovado ou recusado.",
+		},
+		approve_estimate_success: {
+			title: "Orçamento aprovado",
+			description: "Obrigado! A assistência foi avisada.",
+		},
+		reject_estimate_success: {
+			title: "Orçamento recusado",
+			description: "Obrigado pela resposta. A assistência foi avisada.",
+		},
+		portal_link_invalid: {
+			title: "Link indisponível",
+			description: "Este link é inválido ou foi substituído. Peça um novo.",
+		},
+		portal_unauthorized: {
+			title: "Sessão encerrada",
+			description: "Abra de novo o link do seu email.",
+		},
+		portal_access_requested: {
+			title: "Confira seu email",
+			description: "Se o email estiver cadastrado, um link está a caminho.",
+		},
+		send_portal_access_success: {
+			title: "Acesso enviado",
+			description: "O cliente vai receber um email com o link do portal.",
+		},
+		portal_customer_no_email: {
+			title: "Sem email",
+			description:
+				"Cadastre o email do cliente antes de enviar o acesso ao portal.",
+		},
+		estimate_not_found: {
+			title: "Orçamento não encontrado",
+			description: "Este orçamento não existe ou foi removido.",
+		},
+		customer_not_found: {
+			title: "Cliente não encontrado",
+			description: "Este cliente não existe ou foi removido.",
+		},
+		customer_cpf_conflict: {
+			title: "CPF já cadastrado",
+			description: "Outro cliente da loja já tem este CPF.",
+		},
+		customer_phone_invalid: {
+			title: "Telefone inválido",
+			description: "O telefone deve ter 10 ou 11 dígitos.",
+		},
+		device_not_found: {
+			title: "Aparelho não encontrado",
+			description: "Este aparelho não existe ou foi removido.",
+		},
+		device_customer_not_found: {
+			title: "Cliente não encontrado",
+			description: "Escolha um dos clientes da loja.",
+		},
+		device_model_not_found: {
+			title: "Modelo não encontrado",
+			description: "Escolha um modelo do catálogo.",
+		},
+		service_order_device_not_found: {
+			title: "Aparelho não encontrado",
+			description: "Escolha um dos aparelhos do cliente.",
+		},
+		service_order_catalog_item_not_found: {
+			title: "Item não encontrado",
+			description: "Esta peça ou serviço não está mais no catálogo.",
+		},
+		service_order_item_not_found: {
+			title: "Item não encontrado",
+			description: "Este item já foi removido da ordem.",
+		},
+		service_order_not_found: {
+			title: "Ordem de serviço não encontrada",
+			description: "Esta ordem de serviço não existe ou foi removida.",
+		},
 		part_stock_insufficient: {
 			title: "Estoque insuficiente",
 			description: "O ajuste deixaria o estoque abaixo de zero.",

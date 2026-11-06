@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="58%" r="60%">
+      <stop offset="0" stop-color="#dbe7ff"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </radialGradient>
+    
+  </defs>
+  <rect width="960" height="440" rx="28" fill="url(#bg)"/>
+  <circle cx="170" cy="110" r="5" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="790" cy="90" r="6" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="840" cy="300" r="4" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="120" cy="300" r="4" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="720" cy="60" r="3" fill="#89c4ff" opacity="0.5"/>
+  <circle cx="250" cy="60" r="3" fill="#89c4ff" opacity="0.5"/>
+  <ellipse cx="480" cy="276.0" rx="315.0" ry="96.0" fill="#0b45ea" opacity="0.07"/>
+  <polygon points="220.2,250.0 480.0,400.0 480.0,426.0 220.2,276.0" fill="#c9dbff" />
+  <polygon points="739.8,250.0 480.0,400.0 480.0,426.0 739.8,276.0" fill="#a9c4ff" />
+  <polygon points="480.0,100.0 739.8,250.0 480.0,400.0 220.2,250.0" fill="#ffffff" />
+  <line x1="523.3" y1="125.0" x2="263.5" y2="275.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="436.7" y1="125.0" x2="696.5" y2="275.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="566.6" y1="150.0" x2="306.8" y2="300.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="393.4" y1="150.0" x2="653.2" y2="300.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="609.9" y1="175.0" x2="350.1" y2="325.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="350.1" y1="175.0" x2="609.9" y2="325.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="653.2" y1="200.0" x2="393.4" y2="350.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="306.8" y1="200.0" x2="566.6" y2="350.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="696.5" y1="225.0" x2="436.7" y2="375.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <line x1="263.5" y1="225.0" x2="523.3" y2="375.0" stroke="#e3ecff" stroke-width="2" stroke-linecap="round" />
+  <polygon points="391.7,21.0 521.6,96.0 521.6,286.0 391.7,211.0" fill="#ffffff" />
+  <polygon points="532.0,90.0 521.6,96.0 521.6,286.0 532.0,280.0" fill="#c9dbff" />
+  <polygon points="402.1,15.0 532.0,90.0 521.6,96.0 391.7,21.0" fill="#51a3ff" />
+  <circle cx="456.6" cy="123.1" r="30" fill="#89c4ff"/><circle cx="456.6" cy="115.1" r="11" fill="#ffffff"/><path d="M437.6,143.1 a19,15 0 0 1 38,0" fill="#ffffff"/>
+  <polygon points="413.3,163.5 499.9,213.5 499.9,225.5 413.3,175.5" fill="#1F65FE" />
+  <polygon points="426.3,195.0 486.9,230.0 486.9,238.0 426.3,203.0" fill="#89c4ff" />
+  <polygon points="446.2,34.5 467.0,46.5 467.0,64.5 446.2,52.5" fill="#0b45ea" />
+  <polygon points="477.4,40.5 467.0,46.5 467.0,64.5 477.4,58.5" fill="#11225a" />
+  <polygon points="456.6,28.5 477.4,40.5 467.0,46.5 446.2,34.5" fill="#11225a" />
+  <path d="M607.3,265.0 A19.9,11.5 0 0 0 647.1,265.0 L647.1,219.0 L607.3,219.0 Z" fill="#1F65FE"/>
+  <path d="M627.2,276.5 A19.9,11.5 0 0 0 647.1,265.0 L647.1,219.0 L627.2,219.0 Z" fill="#11225a" opacity="0.35"/>
+  <ellipse cx="627.2" cy="219.0" rx="19.9" ry="11.5" fill="#89c4ff" stroke="#1F65FE" stroke-width="1.5"/>
+  <circle cx="627.2" cy="195.0" r="16" fill="#ffd7b5"/>
+  <path d="M529.4,330.0 A19.9,11.5 0 0 0 569.2,330.0 L569.2,284.0 L529.4,284.0 Z" fill="#51a3ff"/>
+  <path d="M549.3,341.5 A19.9,11.5 0 0 0 569.2,330.0 L569.2,284.0 L549.3,284.0 Z" fill="#11225a" opacity="0.35"/>
+  <ellipse cx="549.3" cy="284.0" rx="19.9" ry="11.5" fill="#89c4ff" stroke="#51a3ff" stroke-width="1.5"/>
+  <circle cx="549.3" cy="260.0" r="16" fill="#ffd7b5"/>
+  <circle cx="640" cy="116" r="38" fill="#0b2a7a" opacity="0.12"/>
+  <circle cx="640" cy="110" r="38" fill="#1F65FE" stroke="#ffffff" stroke-width="5"/>
+  <path d="M624.8,110 H655.2 M640,94.8 V125.2" stroke="#ffffff" stroke-width="7.6" stroke-linecap="round"/>
+</svg>

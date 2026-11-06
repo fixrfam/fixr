@@ -10,7 +10,7 @@ web
 
 Primary users are employees of small and medium electronics repair shops ("assistência técnica") in Brazil, each operating their own tenant under a subdomain (`/dashboard/[subdomain]`). Roles, from the shared permissions model, are: technician, warehouse (estoquista), financial, manager, and admin, each scoped to only the functions their role needs (e.g. technicians work service orders and devices; warehouse works inventory; financial works estimates; manager and admin have broad read/write across service orders, customers, inventory, estimates, suppliers, and employees).
 
-A customer-facing portal (clients tracking their own repair/service order) is planned but not yet built. Today, customers are informed only through automated email notifications, not through an authenticated view in this app. Do not design or imply customer-facing screens in this app until that surface is explicitly scoped.
+A customer-facing portal (customers tracking their own repair/service order) is planned but not yet built. Today, customers are informed only through automated email notifications, not through an authenticated view in this app. Do not design or imply customer-facing screens in this app until that surface is explicitly scoped.
 
 ## Product Purpose
 

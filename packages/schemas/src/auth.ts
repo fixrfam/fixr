@@ -15,7 +15,7 @@ export const userSchema = z.object({
 	email: z.string().email({ message: i18nMessage("validation.email.invalid") }),
 	displayName: z.string().min(3).max(100).nullable(),
 	avatarUrl: z.string().url().nullable(),
-	profileType: z.union([z.literal("client"), z.literal("employee")]),
+	profileType: z.union([z.literal("customer"), z.literal("employee")]),
 	passwordHash: z.string(),
 	verified: z.boolean(),
 	createdAt: z.coerce.date(),
@@ -48,6 +48,15 @@ export const loginUserSchema = z.object({
 	cfTurnstileToken: z.string().optional(),
 });
 
+/**
+ * Profile type in a session token. Tokens issued before the client to customer
+ * rename carry "client"; it still reads as "customer" until they expire.
+ */
+const jwtProfileType = z.preprocess(
+	(value) => (value === "client" ? "customer" : value),
+	z.union([z.literal("customer"), z.literal("employee")])
+);
+
 export const jwtPayload = z
 	.object({
 		id: z.string().cuid2(),
@@ -56,7 +65,7 @@ export const jwtPayload = z
 			.email({ message: i18nMessage("validation.email.invalid") }),
 		displayName: z.string().min(3).max(100).nullable(),
 		avatarUrl: z.string().url().nullable(),
-		profileType: z.union([z.literal("client"), z.literal("employee")]),
+		profileType: jwtProfileType,
 		company: z
 			.object({
 				id: z.string().cuid2(),

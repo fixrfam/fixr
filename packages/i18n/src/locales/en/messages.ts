@@ -15,6 +15,128 @@ export const messages = {
 		},
 	},
 	codes: {
+		create_estimate_success: {
+			title: "Estimate created",
+			description: "It was saved as a draft. Open the PDF to review it.",
+		},
+		update_estimate_status_success: {
+			title: "Estimate updated",
+			description: "The status was changed.",
+		},
+		delete_estimate_success: {
+			title: "Estimate deleted",
+			description: "The draft was removed.",
+		},
+		estimate_service_order_empty: {
+			title: "Nothing to estimate",
+			description: "Add parts or services to the service order first.",
+		},
+		estimate_service_order_not_found: {
+			title: "Service order not found",
+			description: "This service order does not exist in your company.",
+		},
+		estimate_not_editable: {
+			title: "Estimate locked",
+			description: "Only drafts can be changed or deleted.",
+		},
+		estimate_invalid_transition: {
+			title: "Status not allowed",
+			description: "The estimate can't move to this status now.",
+		},
+		send_estimate_success: {
+			title: "Estimate sent",
+			description:
+				"The customer will get an email with the PDF and the approval link.",
+		},
+		estimate_no_recipient: {
+			title: "No email to send to",
+			description: "The customer has no email. Enter one to send the estimate.",
+		},
+		estimate_expired: {
+			title: "Estimate expired",
+			description: "The validity date has passed. Back to draft and update it.",
+		},
+		estimate_link_invalid: {
+			title: "Link not available",
+			description:
+				"This estimate link is invalid or was replaced by a newer one.",
+		},
+		estimate_already_answered: {
+			title: "Estimate already answered",
+			description: "This estimate was already approved or rejected.",
+		},
+		approve_estimate_success: {
+			title: "Estimate approved",
+			description: "Thank you! The shop was notified.",
+		},
+		reject_estimate_success: {
+			title: "Estimate rejected",
+			description: "Thank you for the answer. The shop was notified.",
+		},
+		portal_link_invalid: {
+			title: "Link not available",
+			description: "This link is invalid or was replaced. Ask for a new one.",
+		},
+		portal_unauthorized: {
+			title: "Session ended",
+			description: "Open the link from your email again.",
+		},
+		portal_access_requested: {
+			title: "Check your email",
+			description: "If the email is registered, a link is on the way.",
+		},
+		send_portal_access_success: {
+			title: "Access sent",
+			description: "The customer will get an email with the portal link.",
+		},
+		portal_customer_no_email: {
+			title: "No email",
+			description: "Add the customer's email before sending portal access.",
+		},
+		estimate_not_found: {
+			title: "Estimate not found",
+			description: "This estimate does not exist or was removed.",
+		},
+		customer_not_found: {
+			title: "Customer not found",
+			description: "This customer does not exist or was removed.",
+		},
+		customer_cpf_conflict: {
+			title: "CPF already registered",
+			description: "Another customer of the shop already has this CPF.",
+		},
+		customer_phone_invalid: {
+			title: "Invalid phone",
+			description: "Phone numbers must have 10 or 11 digits.",
+		},
+		device_not_found: {
+			title: "Device not found",
+			description: "This device does not exist or was removed.",
+		},
+		device_customer_not_found: {
+			title: "Customer not found",
+			description: "Pick one of the shop's customers.",
+		},
+		device_model_not_found: {
+			title: "Model not found",
+			description: "Pick a model from the catalog.",
+		},
+		service_order_device_not_found: {
+			title: "Device not found",
+			description: "Pick one of the customer's devices.",
+		},
+		service_order_catalog_item_not_found: {
+			title: "Item not found",
+			description: "This part or service is no longer in the catalog.",
+		},
+		service_order_item_not_found: {
+			title: "Item not found",
+			description: "This item was already removed from the order.",
+		},
+		service_order_not_found: {
+			title: "Service order not found",
+			description: "This service order does not exist or was removed.",
+		},
 		part_stock_insufficient: {
 			title: "Not enough stock",
 			description: "The adjustment would leave the stock below zero.",
@@ -205,7 +327,7 @@ export const messages = {
 		gacc_user_not_found: {
 			title: "Could not access your account",
 			description:
-				"The email linked to your Google account is not registered as an employee or client of any company.",
+				"The email linked to your Google account is not registered as an employee or customer of any company.",
 		},
 		gacc_email_not_verified: {
 			title: "Email not verified",

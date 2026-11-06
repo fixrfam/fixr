@@ -1,7 +1,7 @@
 import { createTranslator, hasTranslation } from "@fixr/i18n";
 import { employeeRoles } from "@fixr/schemas/roles";
+import { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import { describe, expect, it } from "vitest";
-import { STATUS_STYLE_MAP } from "@/lib/utils/service-orders";
 import { roleLabelKeys, serviceOrderStatusKeys } from "./labels";
 
 describe("roleLabelKeys", () => {
@@ -26,9 +26,9 @@ describe("roleLabelKeys", () => {
 });
 
 describe("serviceOrderStatusKeys", () => {
-	it("maps every styled status", () => {
+	it("maps every status the API reports", () => {
 		expect(Object.keys(serviceOrderStatusKeys).sort()).toEqual(
-			Object.keys(STATUS_STYLE_MAP).sort()
+			[...serviceOrderStatuses.options].sort()
 		);
 	});
 

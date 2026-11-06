@@ -65,7 +65,7 @@ apps/server/
      │   ├─ app.ts            createTestApp() → buildApp({ logger: false, docs: false })
      │   ├─ auth.ts           createEmployeeSession(app, { role }), signSession(), authedInject()
      │   └─ db.ts             truncateAll(), resetState()
-     └─ factories/            makeCompany(), makeEmployee({ role }), makeClient(), makeMaker(), ...
+     └─ factories/            makeCompany(), makeEmployee({ role }), makeCustomerAccount(), makeMaker(), ...
 ```
 
 - `@fixr/db/connection` creates its pool from `env.DB_URL` **at import time**, so the containers are started in Vitest's `globalSetup` (main process) and the URLs are handed to the workers with `provide()`/`inject()` before any app module is imported.

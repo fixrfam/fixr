@@ -20,6 +20,7 @@ export const dashboard = {
 		company: "Company",
 		security: "Security",
 		apiKeys: "API keys",
+		roles: "Roles and permissions",
 		serviceOrders: "Service orders",
 		estimates: "Estimates",
 		suppliers: "Suppliers",

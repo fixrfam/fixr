@@ -13,7 +13,7 @@ export const accountSchema = z
 		displayName: z.string().min(3).max(100).nullable(),
 		cpf: documentSchema("cpf"),
 		phone: z.string().length(11).optional().nullable(),
-		profileType: z.union([z.literal("client"), z.literal("employee")]),
+		profileType: z.union([z.literal("customer"), z.literal("employee")]),
 		company: z
 			.object({
 				id: z.string().cuid2(),
