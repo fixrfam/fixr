@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { employeePortal } from "@/lib/services/portal";
 import { api, cn, type Nullable, parseJwt } from "@/lib/utils";
 import CookieAlert from "../cookie-alert";
 import { Google } from "../svg/google";
@@ -29,6 +30,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "../ui/form";
+import { LoginChooser } from "./login-chooser";
 import { Turnstile } from "./turnstile";
 
 export function LoginForm({ errors }: { errors?: { google?: string } }) {
@@ -55,6 +57,22 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 	const { formState } = form;
 
 	const router = useRouter();
+	const [chooser, setChooser] = useState<{
+		company: string;
+		email: string;
+		dashboardUrl: string;
+	} | null>(null);
+
+	/** Straight to the dashboard, unless the email is also a customer's somewhere. */
+	async function enter(jwt: ReturnType<typeof parseJwt>, email: string) {
+		const dashboardUrl = `/dashboard/${jwt?.company?.subdomain}/account`;
+		const match = await employeePortal.match().catch(() => null);
+		if (match?.customer && jwt?.company) {
+			setChooser({ company: jwt.company.name, email, dashboardUrl });
+			return;
+		}
+		router.push(dashboardUrl);
+	}
 
 	async function onSubmit(values: z.infer<typeof loginUserSchema>) {
 		setLoading(true);
@@ -73,8 +91,7 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 					text: feedback.title,
 					description: feedback.description,
 				});
-				const jwt = parseJwt(res.data.data?.token);
-				router.push(`/dashboard/${jwt?.company?.subdomain}/account`);
+				await enter(parseJwt(res.data.data?.token), values.email);
 			}
 		} catch (error) {
 			if (error instanceof AxiosError) {
@@ -94,6 +111,10 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 	function handleGoogleLogin() {
 		setGoogleLoading(true);
 		router.push(`${env.NEXT_PUBLIC_API_URL}/auth/google`);
+	}
+
+	if (chooser) {
+		return <LoginChooser {...chooser} />;
 	}
 
 	return (
@@ -238,6 +259,15 @@ export function LoginForm({ errors }: { errors?: { google?: string } }) {
 						</CookieAlert>
 					)}
 				</div>
+				<p className="text-center text-2xs text-muted-foreground">
+					{t("auth.login.areYouCustomer")}{" "}
+					<Link
+						className="font-medium text-primary hover:underline"
+						href="/portal/access"
+					>
+						{t("auth.login.customerPortal")}
+					</Link>
+				</p>
 				<div className="text-center text-2xs opacity-30">
 					{t("auth.login.disclaimer")}
 				</div>

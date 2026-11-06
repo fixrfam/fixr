@@ -60,6 +60,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			"customer",
 			"lifecycle",
 			"parts",
+			"estimates",
 			"images",
 		];
 		return new Set(cards);

@@ -6,4 +6,5 @@ export type CardId =
 	| "customer"
 	| "lifecycle"
 	| "parts"
+	| "estimates"
 	| "images";

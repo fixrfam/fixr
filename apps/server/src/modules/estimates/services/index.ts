@@ -20,6 +20,7 @@ import { redis } from "../../../config/redis";
 import { events } from "../../../core/events";
 import { AppError } from "../../../core/lib/app-error";
 import { inReadingOrder } from "../../../core/lib/item-order";
+import { withModelImageUrl } from "../../../core/lib/model-image";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	generateOpaqueToken,
@@ -83,21 +84,37 @@ function copyItems(
 	}));
 }
 
-function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
-	const { customerName, ...estimate } = row;
+async function toRecord(row: EstimateRow, items: EstimateItemRow[]) {
+	const {
+		customerName,
+		customerPhone,
+		customerEmail,
+		makerName,
+		categorySlug,
+		model,
+		...estimate
+	} = row;
+	const { model: device } = await withModelImageUrl({ model });
 	return {
 		...estimate,
 		customer:
 			estimate.customerId && customerName
-				? { id: estimate.customerId, name: customerName }
+				? {
+						id: estimate.customerId,
+						name: customerName,
+						phone: customerPhone,
+						email: customerEmail,
+					}
 				: null,
+		device: { model: device, maker: makerName, category: categorySlug },
+		itemsCount: items.length,
 		totals: estimateTotals(items, estimate.discountPercentage),
 	};
 }
 
-function withItems(row: EstimateRow, items: EstimateItemRow[]) {
+async function withItems(row: EstimateRow, items: EstimateItemRow[]) {
 	return {
-		...toRecord(row, items),
+		...(await toRecord(row, items)),
 		items: items.map((item) => ({ ...item, total: lineTotal(item) })),
 	};
 }
@@ -146,6 +163,7 @@ export class EstimatesService {
 		sort,
 		status,
 		serviceOrderId,
+		customerId,
 		response,
 	}: {
 		userJwt: UserJwt;
@@ -158,6 +176,7 @@ export class EstimatesService {
 			query,
 			status,
 			serviceOrderId,
+			customerId,
 		});
 
 		const [rows, totalRecords] = await Promise.all([
@@ -191,7 +210,9 @@ export class EstimatesService {
 		const items = await EstimatesRepository.queryItemsByEstimateIds(
 			rows.map((row) => row.id)
 		);
-		const records = rows.map((row) => toRecord(row, items.get(row.id) ?? []));
+		const records = await Promise.all(
+			rows.map((row) => toRecord(row, items.get(row.id) ?? []))
+		);
 
 		return response.status(200).send(
 			apiResponse({
@@ -556,8 +577,11 @@ export class EstimatesService {
 		return estimate;
 	}
 
-	/** What the customer sees on the public page: no internal ids or staff data. */
-	private static async publicView(estimate: EstimateRow) {
+	/**
+	 * What the customer sees (the link page and the portal): no internal ids or
+	 * staff data.
+	 */
+	static async customerView(estimate: EstimateRow) {
 		const [items, context] = await Promise.all([
 			EstimatesRepository.queryItemsByEstimateIds([estimate.id]),
 			EstimatesRepository.queryPdfContext(estimate.id),
@@ -565,7 +589,7 @@ export class EstimatesService {
 		if (!context) {
 			throw new AppError("ESTIMATE_LINK_INVALID");
 		}
-		const record = withItems(estimate, items.get(estimate.id) ?? []);
+		const record = await withItems(estimate, items.get(estimate.id) ?? []);
 
 		return {
 			number: record.number,
@@ -585,7 +609,19 @@ export class EstimatesService {
 				logoUrl: context.company.logoUrl,
 			},
 			customer: record.customer ? { name: record.customer.name } : null,
-			device: context.device,
+			serviceOrder: {
+				code: formatServiceOrderCode(
+					context.subdomain,
+					record.serviceOrder.number
+				),
+				status: record.serviceOrder.status,
+				openedAt: record.serviceOrder.createdAt,
+			},
+			device: {
+				...context.device,
+				category: record.device.category,
+				imageUrl: record.device.model.imageUrl,
+			},
 			// Items are stored in reading order: a part a service uses comes right
 			// after it, flagged instead of pointing at an internal id.
 			items: record.items.map((item) => ({
@@ -615,7 +651,7 @@ export class EstimatesService {
 				error: null,
 				code: "get_estimate_success",
 				message: "Estimate retrieved successfully.",
-				data: await EstimatesService.publicView(estimate),
+				data: await EstimatesService.customerView(estimate),
 			})
 		);
 	}
@@ -685,7 +721,7 @@ export class EstimatesService {
 						? "approve_estimate_success"
 						: "reject_estimate_success",
 				message: "Answer recorded.",
-				data: await EstimatesService.publicView(updated),
+				data: await EstimatesService.customerView(updated),
 			})
 		);
 	}

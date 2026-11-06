@@ -15,13 +15,16 @@ import {
 	customers,
 	devices,
 	estimates,
+	modelCategories,
 	modelMakers,
 	models,
 	portalLinks,
 	portalSessions,
+	serviceOrderHistory,
 	serviceOrderItems,
 	serviceOrders,
 } from "@fixr/db/schema";
+import { modelImageKey } from "../../../core/lib/model-image";
 
 /** Who a portal session belongs to: the CPF and the email the link reached. */
 export interface PortalIdentity {
@@ -51,12 +54,17 @@ export class PortalRepository {
 			);
 	}
 
-	static async queryActiveLink(tokenHash: string) {
+	/** A link that was not revoked and was issued after `issuedAfter`. */
+	static async queryActiveLink(tokenHash: string, issuedAfter: Date) {
 		const [link] = await db
 			.select()
 			.from(portalLinks)
 			.where(
-				and(eq(portalLinks.tokenHash, tokenHash), isNull(portalLinks.revokedAt))
+				and(
+					eq(portalLinks.tokenHash, tokenHash),
+					isNull(portalLinks.revokedAt),
+					gt(portalLinks.createdAt, issuedAfter)
+				)
 			)
 			.limit(1);
 		return link ?? null;
@@ -166,6 +174,8 @@ export class PortalRepository {
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,
 				deviceModel: models.name,
+				deviceCategory: modelCategories.slug,
+				model: { imageKey: modelImageKey },
 				createdAt: serviceOrders.createdAt,
 				updatedAt: serviceOrders.updatedAt,
 				company: { name: companies.name, logoUrl: companies.logoUrl },
@@ -180,6 +190,7 @@ export class PortalRepository {
 			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
 			.innerJoin(models, eq(models.id, devices.modelId))
 			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId))
 			.where(inArray(serviceOrders.customerId, customerIds))
 			.orderBy(desc(serviceOrders.createdAt));
 	}
@@ -200,6 +211,8 @@ export class PortalRepository {
 				status: serviceOrders.status,
 				deviceMaker: modelMakers.name,
 				deviceModel: models.name,
+				deviceCategory: modelCategories.slug,
+				model: { imageKey: modelImageKey },
 				reportedDefect: serviceOrders.reportedDefect,
 				createdAt: serviceOrders.createdAt,
 				updatedAt: serviceOrders.updatedAt,
@@ -217,6 +230,7 @@ export class PortalRepository {
 			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
 			.innerJoin(models, eq(models.id, devices.modelId))
 			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId))
 			.where(
 				and(
 					eq(serviceOrders.id, serviceOrderId),
@@ -288,5 +302,76 @@ export class PortalRepository {
 			)
 			.limit(1);
 		return estimate ?? null;
+	}
+
+	/** When the order reached each status, oldest first (no staff data). */
+	static async queryServiceOrderHistory(serviceOrderId: string) {
+		return await db
+			.select({
+				status: serviceOrderHistory.toStatus,
+				at: serviceOrderHistory.createdAt,
+			})
+			.from(serviceOrderHistory)
+			.where(eq(serviceOrderHistory.serviceOrderId, serviceOrderId))
+			.orderBy(serviceOrderHistory.createdAt, serviceOrderHistory.id);
+	}
+
+	/** Every estimate the identity was sent, in any shop, newest first. */
+	static async queryEstimates(customerIds: string[]) {
+		if (customerIds.length === 0) {
+			return [];
+		}
+		return await db
+			.select({
+				id: estimates.id,
+				number: estimates.number,
+				status: estimates.status,
+				discountPercentage: estimates.discountPercentage,
+				validUntil: estimates.validUntil,
+				sentAt: estimates.sentAt,
+				respondedAt: estimates.respondedAt,
+				serviceOrderId: serviceOrders.id,
+				serviceOrderNumber: serviceOrders.number,
+				subdomain: companies.subdomain,
+				company: { name: companies.name, logoUrl: companies.logoUrl },
+				deviceMaker: modelMakers.name,
+				deviceModel: models.name,
+				deviceCategory: modelCategories.slug,
+				model: { imageKey: modelImageKey },
+			})
+			.from(estimates)
+			.innerJoin(serviceOrders, eq(serviceOrders.id, estimates.serviceOrderId))
+			.innerJoin(companies, eq(companies.id, estimates.companyId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId))
+			.where(
+				and(
+					inArray(serviceOrders.customerId, customerIds),
+					ne(estimates.status, "draft")
+				)
+			)
+			.orderBy(desc(estimates.sentAt), desc(estimates.number));
+	}
+
+	/** The shops the identity is a customer of, with their contact data. */
+	static async queryScopeCompanies(customerIds: string[]) {
+		if (customerIds.length === 0) {
+			return [];
+		}
+		return await db
+			.selectDistinct({
+				id: companies.id,
+				name: companies.name,
+				logoUrl: companies.logoUrl,
+				email: companies.email,
+				phone: companies.phone,
+				website: companies.website,
+			})
+			.from(customers)
+			.innerJoin(companies, eq(companies.id, customers.companyId))
+			.where(inArray(customers.id, customerIds))
+			.orderBy(companies.name);
 	}
 }

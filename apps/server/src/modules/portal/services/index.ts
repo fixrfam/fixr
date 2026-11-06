@@ -9,6 +9,7 @@ import type { z } from "zod";
 import { redis } from "../../../config/redis";
 import { AppError } from "../../../core/lib/app-error";
 import { inReadingOrder } from "../../../core/lib/item-order";
+import { withModelImageUrl } from "../../../core/lib/model-image";
 import { estimateTotals, lineTotal } from "../../../core/lib/money";
 import {
 	generateOpaqueToken,
@@ -24,6 +25,11 @@ type UserJwt = z.infer<typeof jwtPayload>;
 
 /** How long a browser stays signed in to the portal after opening a link. */
 const SESSION_DAYS = 30;
+/**
+ * How long an emailed portal link keeps signing people in. It can be opened
+ * many times (from the phone, then the computer) until then.
+ */
+export const LINK_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
@@ -46,7 +52,9 @@ export class PortalService {
 	/** Sign the browser in with the identity of a link and set the cookie. */
 	private static async openSession(
 		response: FastifyReply,
-		identity: PortalIdentity & { portalLinkId: string | null }
+		identity: PortalIdentity & { portalLinkId: string | null },
+		/** Where the portal should land, e.g. the estimate the link was for. */
+		landing: { estimateId: string } | null = null
 	) {
 		const token = generateOpaqueToken();
 		const expiresAt = new Date(Date.now() + SESSION_DAYS * DAY_MS);
@@ -68,7 +76,7 @@ export class PortalService {
 					error: null,
 					code: "portal_session_opened",
 					message: "Portal session opened.",
-					data: null,
+					data: landing,
 				})
 			);
 	}
@@ -81,7 +89,10 @@ export class PortalService {
 		token: string;
 		response: FastifyReply;
 	}) {
-		const link = await PortalRepository.queryActiveLink(hashOpaqueToken(token));
+		const link = await PortalRepository.queryActiveLink(
+			hashOpaqueToken(token),
+			new Date(Date.now() - LINK_DAYS * DAY_MS)
+		);
 		if (!link) {
 			throw new AppError("PORTAL_LINK_INVALID");
 		}
@@ -116,12 +127,16 @@ export class PortalService {
 			throw new AppError("PORTAL_LINK_INVALID");
 		}
 
-		return PortalService.openSession(response, {
-			cpf: customer.cpf,
-			email: normalizeEmail(estimate.sentTo),
-			customerId: customer.id,
-			portalLinkId: null,
-		});
+		return PortalService.openSession(
+			response,
+			{
+				cpf: customer.cpf,
+				email: normalizeEmail(estimate.sentTo),
+				customerId: customer.id,
+				portalLinkId: null,
+			},
+			{ estimateId: estimate.id }
+		);
 	}
 
 	static async signOut({
@@ -163,7 +178,21 @@ export class PortalService {
 		locale: Locale;
 		response: FastifyReply;
 	}) {
-		const normalized = normalizeEmail(email);
+		await PortalService.sendLinksTo(normalizeEmail(email), locale);
+
+		return response.status(202).send(
+			apiResponse({
+				status: 202,
+				error: null,
+				code: "portal_access_requested",
+				message: "If the email is registered, a link was sent.",
+				data: null,
+			})
+		);
+	}
+
+	/** One new portal link per CPF registered with the email, by email. */
+	private static async sendLinksTo(normalized: string, locale: Locale) {
 		const records = await PortalRepository.queryCustomersByEmail(normalized);
 
 		const byCpf = new Map<string, string>();
@@ -193,6 +222,49 @@ export class PortalService {
 				},
 			});
 		}
+		return byCpf.size;
+	}
+
+	/**
+	 * Whether the signed-in user's email is also a customer's in some shop, so
+	 * the login can offer the portal next to the company.
+	 */
+	static async employeePortalMatch({
+		userJwt,
+		response,
+	}: {
+		userJwt: UserJwt;
+		response: FastifyReply;
+	}) {
+		const records = await PortalRepository.queryCustomersByEmail(
+			normalizeEmail(userJwt.email)
+		);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "portal_employee_match_success",
+				message: "Portal match checked.",
+				data: { customer: records.length > 0 },
+			})
+		);
+	}
+
+	/**
+	 * Email portal links to the signed-in user. The password proves the
+	 * account, not the inbox, so the portal is still opened from the email.
+	 */
+	static async employeePortalAccess({
+		userJwt,
+		locale,
+		response,
+	}: {
+		userJwt: UserJwt;
+		locale: Locale;
+		response: FastifyReply;
+	}) {
+		await PortalService.sendLinksTo(normalizeEmail(userJwt.email), locale);
 
 		return response.status(202).send(
 			apiResponse({
@@ -283,7 +355,8 @@ export class PortalService {
 		identity: PortalIdentity;
 		response: FastifyReply;
 	}) {
-		const { customers } = await PortalService.scope(identity);
+		const { customers, customerIds } = await PortalService.scope(identity);
+		const shops = await PortalRepository.queryScopeCompanies(customerIds);
 
 		return response.status(200).send(
 			apiResponse({
@@ -291,7 +364,12 @@ export class PortalService {
 				error: null,
 				code: "portal_me_success",
 				message: "Portal profile retrieved.",
-				data: { name: customers[0]?.name ?? null, email: identity.email },
+				data: {
+					name: customers[0]?.name ?? null,
+					email: identity.email,
+					cpf: identity.cpf,
+					shops: shops.map(({ id: _id, ...shop }) => shop),
+				},
 			})
 		);
 	}
@@ -312,11 +390,17 @@ export class PortalService {
 				error: null,
 				code: "portal_service_orders_success",
 				message: "Service orders retrieved.",
-				data: rows.map(({ number, subdomain, ...row }) => ({
-					...row,
-					code: formatServiceOrderCode(subdomain, number),
-					pendingEstimate: Boolean(Number(row.pendingEstimate)),
-				})),
+				data: await Promise.all(
+					rows.map(async ({ number, subdomain, ...row }) => {
+						const { model, ...summary } = await withModelImageUrl(row);
+						return {
+							...summary,
+							deviceImageUrl: model.imageUrl,
+							code: formatServiceOrderCode(subdomain, number),
+							pendingEstimate: Boolean(Number(row.pendingEstimate)),
+						};
+					})
+				),
 			})
 		);
 	}
@@ -333,19 +417,29 @@ export class PortalService {
 			throw new AppError("PORTAL_SERVICE_ORDER_NOT_FOUND");
 		}
 
-		const [items, estimateRows] = await Promise.all([
+		const [items, estimateRows, history, withImage] = await Promise.all([
 			PortalRepository.queryServiceOrderItems(serviceOrder.id),
 			PortalRepository.queryServiceOrderEstimates(serviceOrder.id),
+			PortalRepository.queryServiceOrderHistory(serviceOrder.id),
+			withModelImageUrl(serviceOrder),
 		]);
 		const estimateItems = await EstimatesRepository.queryItemsByEstimateIds(
 			estimateRows.map((row) => row.id)
 		);
 		const now = Date.now();
-		const { companyId: _companyId, number, subdomain, ...rest } = serviceOrder;
+		const {
+			companyId: _companyId,
+			number,
+			subdomain,
+			model,
+			...rest
+		} = withImage;
 
 		return {
 			...rest,
+			deviceImageUrl: model.imageUrl,
 			code: formatServiceOrderCode(subdomain, number),
+			history,
 			// Reading order, the parts of a service flagged to show under it; the
 			// order's internal ids stay out of the portal.
 			items: inReadingOrder(items).map(
@@ -443,10 +537,7 @@ export class PortalService {
 		answer: { status: "approved" } | { status: "rejected"; reason?: string };
 		response: FastifyReply;
 	}) {
-		const { estimate, customerIds } = await PortalService.ownEstimate(
-			identity,
-			estimateId
-		);
+		const { estimate } = await PortalService.ownEstimate(identity, estimateId);
 		if (estimate.status !== "sent") {
 			throw new AppError("ESTIMATE_ALREADY_ANSWERED");
 		}
@@ -475,10 +566,97 @@ export class PortalService {
 						? "approve_estimate_success"
 						: "reject_estimate_success",
 				message: "Answer recorded.",
-				data: await PortalService.serviceOrderDetail(
-					estimate.serviceOrderId,
-					customerIds
+				data: await PortalService.estimateView(estimate),
+			})
+		);
+	}
+
+	/** The estimate as the customer sees it, with the ids the portal links by. */
+	private static async estimateView(estimate: {
+		id: string;
+		companyId: string;
+		serviceOrderId: string;
+	}) {
+		const row = await EstimatesRepository.queryEstimate(
+			estimate.id,
+			estimate.companyId
+		);
+		if (!row) {
+			throw new AppError("PORTAL_ESTIMATE_NOT_FOUND");
+		}
+		return {
+			id: estimate.id,
+			serviceOrderId: estimate.serviceOrderId,
+			...(await EstimatesService.customerView(row)),
+		};
+	}
+
+	static async listEstimates({
+		identity,
+		response,
+	}: {
+		identity: PortalIdentity;
+		response: FastifyReply;
+	}) {
+		const { customerIds } = await PortalService.scope(identity);
+		const rows = await PortalRepository.queryEstimates(customerIds);
+		const items = await EstimatesRepository.queryItemsByEstimateIds(
+			rows.map((row) => row.id)
+		);
+		const now = Date.now();
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "portal_estimates_success",
+				message: "Estimates retrieved.",
+				data: await Promise.all(
+					rows.map(async (row) => {
+						const {
+							serviceOrderNumber,
+							subdomain,
+							model,
+							discountPercentage,
+							...estimate
+						} = await withModelImageUrl(row);
+						return {
+							...estimate,
+							serviceOrderCode: formatServiceOrderCode(
+								subdomain,
+								serviceOrderNumber
+							),
+							deviceImageUrl: model.imageUrl,
+							expired: row.validUntil.getTime() < now,
+							totals: estimateTotals(
+								items.get(row.id) ?? [],
+								discountPercentage
+							),
+						};
+					})
 				),
+			})
+		);
+	}
+
+	static async getEstimate({
+		identity,
+		estimateId,
+		response,
+	}: {
+		identity: PortalIdentity;
+		estimateId: string;
+		response: FastifyReply;
+	}) {
+		const { estimate } = await PortalService.ownEstimate(identity, estimateId);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "portal_estimate_success",
+				message: "Estimate retrieved.",
+				data: await PortalService.estimateView(estimate),
 			})
 		);
 	}

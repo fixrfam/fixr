@@ -16,6 +16,7 @@ import {
 	employees,
 	estimateItems,
 	estimates,
+	modelCategories,
 	modelMakers,
 	models,
 	serviceOrderItems,
@@ -23,11 +24,12 @@ import {
 } from "@fixr/db/schema";
 import type { getEstimatesQuerySchema } from "@fixr/schemas/estimates";
 import type { z } from "zod";
+import { modelImageKey } from "../../../core/lib/model-image";
 
 export type EstimateInsert = typeof estimates.$inferInsert;
 export type EstimateItemRow = typeof estimateItems.$inferSelect;
 
-/** Estimate columns plus a summary of its customer. */
+/** Estimate columns plus a summary of its customer, service order and device. */
 export const estimatesListSelect = {
 	id: estimates.id,
 	companyId: estimates.companyId,
@@ -46,6 +48,22 @@ export const estimatesListSelect = {
 	createdAt: estimates.createdAt,
 	updatedAt: estimates.updatedAt,
 	customerName: customers.name,
+	customerPhone: customers.phone,
+	customerEmail: customers.email,
+	serviceOrder: {
+		id: serviceOrders.id,
+		number: serviceOrders.number,
+		status: serviceOrders.status,
+		createdAt: serviceOrders.createdAt,
+	},
+	model: {
+		id: models.id,
+		name: models.name,
+		slug: models.slug,
+		imageKey: modelImageKey,
+	},
+	makerName: modelMakers.name,
+	categorySlug: modelCategories.slug,
 };
 
 export const estimatesListJoins = [
@@ -54,7 +72,45 @@ export const estimatesListJoins = [
 		table: customers,
 		on: eq(customers.id, estimates.customerId),
 	},
+	{
+		type: "inner" as const,
+		table: serviceOrders,
+		on: eq(serviceOrders.id, estimates.serviceOrderId),
+	},
+	{
+		type: "inner" as const,
+		table: devices,
+		on: eq(devices.id, serviceOrders.deviceId),
+	},
+	{
+		type: "inner" as const,
+		table: models,
+		on: eq(models.id, devices.modelId),
+	},
+	{
+		type: "inner" as const,
+		table: modelMakers,
+		on: eq(modelMakers.id, models.makerId),
+	},
+	{
+		type: "left" as const,
+		table: modelCategories,
+		on: eq(modelCategories.id, models.categoryId),
+	},
 ];
+
+/** One estimate row with the same columns and joins as the list. */
+function selectEstimates() {
+	return db
+		.select(estimatesListSelect)
+		.from(estimates)
+		.leftJoin(customers, eq(customers.id, estimates.customerId))
+		.innerJoin(serviceOrders, eq(serviceOrders.id, estimates.serviceOrderId))
+		.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+		.innerJoin(models, eq(models.id, devices.modelId))
+		.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+		.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId));
+}
 
 /** @description Data access layer for estimates */
 export class EstimatesRepository {
@@ -62,7 +118,7 @@ export class EstimatesRepository {
 		companyId: string,
 		filters: Pick<
 			z.infer<typeof getEstimatesQuerySchema>,
-			"query" | "status" | "serviceOrderId"
+			"query" | "status" | "serviceOrderId" | "customerId"
 		>
 	) {
 		const conditions: SQL[] = [eq(estimates.companyId, companyId)];
@@ -72,6 +128,9 @@ export class EstimatesRepository {
 		}
 		if (filters.serviceOrderId) {
 			conditions.push(eq(estimates.serviceOrderId, filters.serviceOrderId));
+		}
+		if (filters.customerId) {
+			conditions.push(eq(estimates.customerId, filters.customerId));
 		}
 		if (filters.query) {
 			const number = Number.parseInt(filters.query, 10);
@@ -87,10 +146,7 @@ export class EstimatesRepository {
 	}
 
 	static async queryEstimate(estimateId: string, companyId: string) {
-		const [estimate] = await db
-			.select(estimatesListSelect)
-			.from(estimates)
-			.leftJoin(customers, eq(customers.id, estimates.customerId))
+		const [estimate] = await selectEstimates()
 			.where(
 				and(eq(estimates.id, estimateId), eq(estimates.companyId, companyId))
 			)
@@ -193,10 +249,7 @@ export class EstimatesRepository {
 
 	/** Estimate behind a public link, with the company it belongs to. */
 	static async queryByTokenHash(tokenHash: string) {
-		const [estimate] = await db
-			.select({ ...estimatesListSelect, companyId: estimates.companyId })
-			.from(estimates)
-			.leftJoin(customers, eq(customers.id, estimates.customerId))
+		const [estimate] = await selectEstimates()
 			.where(eq(estimates.publicTokenHash, tokenHash))
 			.limit(1);
 		return estimate ?? null;

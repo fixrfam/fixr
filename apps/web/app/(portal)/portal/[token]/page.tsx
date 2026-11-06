@@ -1,6 +1,6 @@
 import { PortalEntry } from "@/components/portal/portal-entry";
 
-/** The link from the portal email: opens the session, then shows the portal. */
+/** The magic link from the portal email: signs the browser in, then opens the portal. */
 export default async function PortalLinkPage(props: {
 	params: Promise<{ token: string }>;
 }) {

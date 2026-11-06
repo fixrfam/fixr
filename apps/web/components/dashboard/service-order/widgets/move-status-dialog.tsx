@@ -404,8 +404,8 @@ export function MoveStatusDialog({ order }: { order: ServiceOrderDetail }) {
 			open={open}
 			title={t("serviceOrders.statusCard.moveTitle")}
 			trigger={
-				<Button className="w-full" type="button" variant="outline">
-					<Route />
+				<Button type="button">
+					<Route className="size-3.5" />
 					{t("serviceOrders.statusCard.move")}
 				</Button>
 			}
