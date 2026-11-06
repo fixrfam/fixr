@@ -360,11 +360,18 @@ function DeviceSection({ estimate }: { estimate: PublicEstimate }) {
 	);
 }
 
-function ItemsSection({ estimate }: { estimate: PublicEstimate }) {
+/** The lines with the parts of a service under it, and the totals. */
+export function ItemsSection({
+	estimate,
+	title,
+}: {
+	estimate: Pick<PublicEstimate, "items" | "totals" | "discountPercentage">;
+	title?: string;
+}) {
 	const { t, format } = useTranslation();
 
 	return (
-		<Section title={t("estimates.public.whatWillBeDone")}>
+		<Section title={title ?? t("estimates.public.whatWillBeDone")}>
 			<div className="overflow-hidden rounded-2xl border bg-card">
 				<ul className="divide-y">
 					{estimate.items.map((item, index) => (
@@ -490,7 +497,12 @@ function PdfSection({
 	);
 }
 
-function ContactSection({ company }: { company: PublicEstimate["company"] }) {
+/** Call, email or visit the shop: whichever contact it has. */
+export function ContactSection({
+	company,
+}: {
+	company: Pick<PublicEstimate["company"], "phone" | "email" | "website">;
+}) {
 	const { t } = useTranslation();
 	const links = [
 		company.phone && {
