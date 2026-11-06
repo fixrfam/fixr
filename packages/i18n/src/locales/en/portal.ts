@@ -100,9 +100,18 @@ export const portal = {
 		requestNew: "Get a new link",
 	},
 	access: {
-		title: "Your repairs, in one place",
+		layout: {
+			headline: {
+				first: "Following",
+				second: "repairs",
+				third: "with",
+				fourth: "clarity.",
+			},
+			cta: "Sign in with the link sent to your email.",
+		},
+		title: "Your repairs portal",
 		description:
-			"Type the email you gave the shop. We'll send you a link that signs you in, no password needed.",
+			"Type the email you gave the shop. We'll send you a link that signs you in to the portal, no password needed.",
 		email: "Email",
 		emailPlaceholder: "you@email.com",
 		submit: "Send me the link",
@@ -110,8 +119,8 @@ export const portal = {
 		sentTitle: "Check your email",
 		sentDescription:
 			"If this email is registered at a shop that uses Fixr, a link arrives in a moment. It works for 30 days.",
-		employee: "Do you work at a shop?",
-		employeeLink: "Sign in to the dashboard",
+		employee: "Work at a shop?",
+		employeeLink: "Go to the dashboard",
 		perks: {
 			track: "Follow each step of your repair",
 			answer: "Approve or reject estimates in one tap",

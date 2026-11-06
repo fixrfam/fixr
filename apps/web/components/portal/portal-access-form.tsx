@@ -4,19 +4,14 @@ import { useTranslation } from "@fixr/i18n/react";
 import { requestPortalAccessSchema } from "@fixr/schemas/portal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import {
-	BellRing,
-	CheckCircle2,
-	Loader2,
-	MailCheck,
-	Store,
-} from "lucide-react";
+import { Loader2, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Turnstile } from "@/components/auth/turnstile";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
+import { Logo } from "@/components/svg/logo";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -28,87 +23,67 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { portalApi } from "@/lib/services/portal";
-import { PortalCenter } from "./portal-center";
 
 type FormValues = z.input<typeof requestPortalAccessSchema>;
 
-/** The client asks for a new portal link with their email. */
+/**
+ * The customer's sign-in, built like the employee login: the email gets a
+ * link that signs them in to the portal, no password.
+ */
 export function PortalAccessForm() {
 	const { t } = useTranslation();
 	const toastError = useApiErrorToast();
-	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-	const [turnstileError, setTurnstileError] = useState(false);
+	const [turnstile, setTurnstile] = useState<{
+		token: string | null;
+		loading: boolean;
+		error: boolean;
+		interactive: boolean;
+	}>({ token: null, loading: true, error: false, interactive: false });
 	const form = useForm<FormValues>({
 		resolver: zodResolver(requestPortalAccessSchema),
 		defaultValues: { email: "" },
+		mode: "all",
 	});
 	const request = useMutation({
 		mutationFn: (values: FormValues) =>
 			portalApi.requestAccess({
 				...values,
-				cfTurnstileToken: turnstileToken ?? undefined,
+				cfTurnstileToken: turnstile.token ?? undefined,
 			}),
 		onError: toastError,
 	});
 
 	if (request.isSuccess) {
 		return (
-			<PortalCenter>
-				<section className="space-y-3">
-					<MailCheck className="size-8 text-primary" />
-					<h1 className="text-balance font-heading font-semibold text-2xl">
-						{t("portal.access.sentTitle")}
-					</h1>
-					<p className="text-pretty text-muted-foreground text-sm">
-						{t("portal.access.sentDescription")}
-					</p>
-				</section>
-			</PortalCenter>
+			<div className="flex flex-col items-center gap-2 text-center">
+				<MailCheck className="size-8 text-primary" />
+				<h1 className="font-bold text-2xl tracking-tight">
+					{t("portal.access.sentTitle")}
+				</h1>
+				<p className="text-balance text-2xs text-muted-foreground">
+					{t("portal.access.sentDescription")}
+				</p>
+			</div>
 		);
 	}
 
-	const perks = [
-		{ Icon: CheckCircle2, text: t("portal.access.perks.track") },
-		{ Icon: BellRing, text: t("portal.access.perks.answer") },
-		{ Icon: Store, text: t("portal.access.perks.shops") },
-	];
-
-	const perksList = (
-		<ul className="space-y-3 text-base text-white/90">
-			{perks.map(({ Icon, text }) => (
-				<li className="flex items-center gap-3" key={text}>
-					<Icon className="size-5 shrink-0 text-white" />
-					{text}
-				</li>
-			))}
-		</ul>
-	);
-
 	return (
-		<PortalCenter
-			aside={
-				<div className="space-y-6">
-					<p className="max-w-sm text-balance font-heading font-semibold text-4xl">
+		<Form {...form}>
+			<form
+				className="flex flex-col gap-6"
+				noValidate
+				onSubmit={form.handleSubmit((values) => request.mutate(values))}
+			>
+				<div className="flex flex-col items-center gap-2 text-center">
+					<Logo className="size-8 text-primary" />
+					<h1 className="font-bold text-2xl tracking-tight">
 						{t("portal.access.title")}
+					</h1>
+					<p className="text-balance text-2xs text-muted-foreground">
+						{t("portal.access.description")}
 					</p>
-					{perksList}
 				</div>
-			}
-		>
-			<Form {...form}>
-				<form
-					className="space-y-6"
-					noValidate
-					onSubmit={form.handleSubmit((values) => request.mutate(values))}
-				>
-					<div className="space-y-2">
-						<h1 className="text-balance font-heading font-semibold text-2xl lg:sr-only">
-							{t("portal.access.title")}
-						</h1>
-						<p className="text-pretty text-muted-foreground text-sm">
-							{t("portal.access.description")}
-						</p>
-					</div>
+				<div className="grid gap-6">
 					<FormField
 						control={form.control}
 						name="email"
@@ -119,6 +94,7 @@ export function PortalAccessForm() {
 									<Input
 										autoComplete="email"
 										placeholder={t("portal.access.emailPlaceholder")}
+										required
 										type="email"
 										{...field}
 									/>
@@ -128,41 +104,67 @@ export function PortalAccessForm() {
 						)}
 					/>
 					<Turnstile
-						onError={() => setTurnstileError(true)}
-						onToken={(token) => {
-							setTurnstileToken(token);
-							setTurnstileError(false);
-						}}
+						onError={() =>
+							setTurnstile({
+								token: null,
+								loading: false,
+								error: true,
+								interactive: false,
+							})
+						}
+						onInteractive={() =>
+							setTurnstile((prev) => ({ ...prev, interactive: true }))
+						}
+						onLoad={() => setTurnstile((prev) => ({ ...prev, loading: false }))}
+						onToken={(token) =>
+							setTurnstile({
+								token,
+								loading: false,
+								error: false,
+								interactive: false,
+							})
+						}
 					/>
-					{turnstileError ? (
+					{turnstile.error && (
 						<p className="text-destructive text-xs">
 							{t("auth.turnstile.error")}
 						</p>
-					) : null}
+					)}
+					{turnstile.interactive && (
+						<p className="text-muted-foreground text-xs">
+							{t("auth.turnstile.interactive")}
+						</p>
+					)}
 					<Button
-						className="w-full rounded-full"
-						disabled={request.isPending || !turnstileToken}
-						size="lg"
+						className="w-full"
+						disabled={
+							request.isPending ||
+							!form.formState.isValid ||
+							turnstile.loading ||
+							!turnstile.token
+						}
 						type="submit"
 					>
-						{request.isPending ? (
+						{request.isPending || turnstile.loading ? (
 							<Loader2 className="size-4 animate-spin" />
-						) : null}
-						{request.isPending
-							? t("portal.access.sending")
-							: t("portal.access.submit")}
+						) : (
+							t("portal.access.submit")
+						)}
 					</Button>
-					<p className="text-center text-muted-foreground text-xs">
-						{t("portal.access.employee")}{" "}
-						<Link
-							className="font-medium text-primary hover:underline"
-							href="/auth/login"
-						>
-							{t("portal.access.employeeLink")}
-						</Link>
-					</p>
-				</form>
-			</Form>
-		</PortalCenter>
+				</div>
+				<p className="text-center text-2xs text-muted-foreground">
+					{t("portal.access.employee")}{" "}
+					<Link
+						className="font-medium text-primary hover:underline"
+						href="/auth/login"
+					>
+						{t("portal.access.employeeLink")}
+					</Link>
+				</p>
+				<div className="text-center text-2xs opacity-30">
+					{t("auth.login.disclaimer")}
+				</div>
+			</form>
+		</Form>
 	);
 }
