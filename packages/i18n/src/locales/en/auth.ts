@@ -24,8 +24,8 @@ export const auth = {
 		submit: "Log in",
 		orContinueWith: "Or continue with",
 		google: "Log in with Google",
-		areYouCustomer: "Are you a shop's customer?",
-		customerPortal: "Follow your repairs",
+		areYouCustomer: "Are you a customer?",
+		customerPortal: "Go to the portal",
 		disclaimer: "Non-profit university project.",
 	},
 	register: {

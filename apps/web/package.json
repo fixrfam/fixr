@@ -54,6 +54,7 @@
     "dotenv": "catalog:",
     "framer-motion": "^12.12.1",
     "google-auth-library": "^10.4.1",
+    "loading-dev": "0.3.7",
     "lucide-react": "^1.14.0",
     "motion": "^12.38.0",
     "nanoid": "^5.1.11",

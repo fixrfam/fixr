@@ -23,8 +23,8 @@ export const auth: Translated<typeof source> = {
 		submit: "Entrar",
 		orContinueWith: "Ou continue com",
 		google: "Entrar com Google",
-		areYouCustomer: "É cliente de uma assistência?",
-		customerPortal: "Acompanhe seus reparos",
+		areYouCustomer: "É cliente?",
+		customerPortal: "Acesse o portal",
 		disclaimer: "Projeto universitário sem fins lucrativos.",
 	},
 	register: {

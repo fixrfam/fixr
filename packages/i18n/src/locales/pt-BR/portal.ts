@@ -103,9 +103,18 @@ export const portal: Translated<typeof source> = {
 		requestNew: "Receber um novo link",
 	},
 	access: {
-		title: "Seus reparos, num só lugar",
+		layout: {
+			headline: {
+				first: "Acompanhando",
+				second: "reparos",
+				third: "com",
+				fourth: "transparência.",
+			},
+			cta: "Entre com o link que chega no seu email.",
+		},
+		title: "Seu portal de reparos",
 		description:
-			"Informe o email que você passou para a assistência. Vamos te enviar um link que já entra na sua conta, sem senha.",
+			"Informe o email que você passou para a assistência. Vamos te enviar um link que entra direto no portal, sem senha.",
 		email: "Email",
 		emailPlaceholder: "voce@email.com",
 		submit: "Receber o link",
@@ -113,8 +122,8 @@ export const portal: Translated<typeof source> = {
 		sentTitle: "Confira seu email",
 		sentDescription:
 			"Se este email estiver cadastrado em alguma assistência que usa o Fixr, o link chega em instantes. Ele funciona por 30 dias.",
-		employee: "Trabalha numa assistência?",
-		employeeLink: "Entrar no painel",
+		employee: "É funcionário?",
+		employeeLink: "Acesse o painel",
 		perks: {
 			track: "Acompanhe cada etapa do seu reparo",
 			answer: "Aprove ou recuse orçamentos com um toque",

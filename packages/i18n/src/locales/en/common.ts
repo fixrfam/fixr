@@ -61,6 +61,7 @@ export const common = {
 		logout: "Log out",
 		register: "Sign up",
 		goToDashboard: "Go to dashboard",
+		goToPortal: "My portal",
 		signedInAs: "Signed in as {{name}}",
 	},
 	logo: {
