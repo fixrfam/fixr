@@ -105,7 +105,7 @@ export const portal: Translated<typeof source> = {
 	access: {
 		layout: {
 			imageAlt: "Uma pessoa consertando a placa de um smartphone.",
-			photoCredit: "Foto na Unsplash",
+			photoCredit: "Foto de Clint Bustrillos na Unsplash",
 			headline: {
 				first: "Acompanhando",
 				second: "reparos",
@@ -115,7 +115,7 @@ export const portal: Translated<typeof source> = {
 			cta: "Entre com o link que chega no seu email.",
 		},
 		title: "Seu portal de reparos",
-		description: "Receba um link de acesso no seu email",
+		description: "Informe seu email e receba um link para entrar, sem senha.",
 		email: "Email",
 		emailPlaceholder: "voce@email.com",
 		submit: "Receber o link",

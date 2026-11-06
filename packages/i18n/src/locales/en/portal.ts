@@ -102,7 +102,7 @@ export const portal = {
 	access: {
 		layout: {
 			imageAlt: "A person repairing a smartphone board.",
-			photoCredit: "Photo on Unsplash",
+			photoCredit: "Photo by Clint Bustrillos on Unsplash",
 			headline: {
 				first: "Following",
 				second: "repairs",
@@ -112,7 +112,7 @@ export const portal = {
 			cta: "Sign in with the link sent to your email.",
 		},
 		title: "Your repairs portal",
-		description: "Get a sign-in link in your email",
+		description: "Enter your email and get a link to sign in, no password.",
 		email: "Email",
 		emailPlaceholder: "you@email.com",
 		submit: "Send me the link",
