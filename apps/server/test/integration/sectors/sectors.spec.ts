@@ -30,7 +30,11 @@ async function setup() {
 
 	async function createSector(name: string) {
 		const response = await call("POST", "/sectors", { name });
-		expect(response.statusCode).toBe(201);
+		if (response.statusCode !== 201) {
+			throw new Error(
+				`Creating sector "${name}" answered ${response.statusCode}`
+			);
+		}
 		return response
 			.json()
 			.data.find((sector: { name: string }) => sector.name === name);
