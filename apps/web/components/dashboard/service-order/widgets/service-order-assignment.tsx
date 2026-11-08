@@ -146,9 +146,15 @@ function ReassignForm({
 	);
 }
 
-function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
+/** The card header's reassign button; nothing without `serviceOrders:assign`. */
+export function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
+	const canAssign = useCatalogAbility().can(permissions.serviceOrders.assign);
+
+	if (!canAssign) {
+		return null;
+	}
 
 	return (
 		<ResponsiveDialogDrawer
@@ -159,8 +165,8 @@ function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
 			open={open}
 			title={t("serviceOrders.assignment.reassignTitle")}
 			trigger={
-				<Button className="w-full" type="button" variant="outline">
-					<UserRoundCog />
+				<Button size="sm" type="button" variant="ghost">
+					<UserRoundCog className="size-3.5" />
 					{t("serviceOrders.assignment.reassign")}
 				</Button>
 			}
@@ -170,14 +176,16 @@ function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
 	);
 }
 
-/** Who has the order (sector and employee), who opened it, and every reassignment. */
+/**
+ * Who has the order (sector and employee), who opened it, and every
+ * reassignment. Reassigning lives in the card header ({@link ReassignDialog}).
+ */
 export function ServiceOrderAssignment({
 	order,
 }: {
 	order: ServiceOrderDetail;
 }) {
 	const { t, format } = useTranslation();
-	const canAssign = useCatalogAbility().can(permissions.serviceOrders.assign);
 	const history = [...order.assignments].reverse();
 
 	return (
@@ -198,8 +206,6 @@ export function ServiceOrderAssignment({
 					value={order.employee.name}
 				/>
 			</ServiceOrderKeyValueList>
-
-			{canAssign && <ReassignDialog order={order} />}
 
 			<div className="space-y-2">
 				<p className="font-medium text-xs">
