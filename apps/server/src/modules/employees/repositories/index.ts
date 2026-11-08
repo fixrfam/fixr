@@ -54,7 +54,8 @@ export class EmployeesRepository {
 	 * @param data - The employee registration data
 	 * @param companyId - The company ID
 	 */
-	@InvalidateCache({ patterns: ["employees:*"] })
+	// `user:*` too: a login tried before the account existed cached "no user" for its email.
+	@InvalidateCache({ patterns: ["employees:*", "user:*"] })
 	static async createEmployeeAndAccount({
 		data,
 		companyId,

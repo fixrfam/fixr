@@ -81,7 +81,8 @@ export class CompaniesRepository {
 	/**
 	 * @description Create a company, user, and employee (admin) in sequence
 	 */
-	@InvalidateCache({ patterns: ["company:*"] })
+	// `user:*` too: a login tried before the account existed cached "no user" for its email.
+	@InvalidateCache({ patterns: ["company:*", "user:*"] })
 	static async createOrgWithAdmin(data: z.infer<typeof createCompanySchema>) {
 		const [orgId] = await db
 			.insert(companies)
