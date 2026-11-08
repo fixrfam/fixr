@@ -42,7 +42,6 @@ export const sectors: Translated<typeof en> = {
 		employee: "Funcionário",
 		noSector: "Manter o setor",
 		noEmployee: "Pool do setor",
-		save: "Salvar etapas",
 		saved: "Responsáveis salvos!",
 	},
 };

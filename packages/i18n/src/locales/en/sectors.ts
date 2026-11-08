@@ -39,7 +39,6 @@ export const sectors = {
 		employee: "Employee",
 		noSector: "Keep the sector",
 		noEmployee: "Sector pool",
-		save: "Save stages",
 		saved: "Stage owners saved!",
 	},
 } as const;
