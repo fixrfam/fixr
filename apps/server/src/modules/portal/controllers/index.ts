@@ -58,6 +58,29 @@ export class PortalController {
 		return PortalService.getEstimatePdf(params);
 	}
 
+	static employeePortalMatch(params: {
+		userJwt: UserJwt;
+		response: FastifyReply;
+	}) {
+		return PortalService.employeePortalMatch(params);
+	}
+
+	static employeePortalAccess(params: {
+		userJwt: UserJwt;
+		locale: Locale;
+		response: FastifyReply;
+	}) {
+		return PortalService.employeePortalAccess(params);
+	}
+
+	static listEstimates(params: PortalParams) {
+		return PortalService.listEstimates(params);
+	}
+
+	static getEstimate(params: PortalParams & { estimateId: string }) {
+		return PortalService.getEstimate(params);
+	}
+
 	static approveEstimate(params: PortalParams & { estimateId: string }) {
 		return PortalService.answerEstimate({
 			...params,

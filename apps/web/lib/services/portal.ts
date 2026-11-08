@@ -5,7 +5,11 @@ import type { ApiResponse } from "@fixr/schemas/utils";
 import axiosBase from "axios";
 import type { z } from "zod";
 import { axios } from "../auth/axios";
-import type { EstimateStatus, EstimateTotals } from "./estimates";
+import type {
+	EstimateStatus,
+	EstimateTotals,
+	PublicEstimate,
+} from "./estimates";
 
 /**
  * Customer portal requests. Customers are not employees, so this is a separate
@@ -33,10 +37,51 @@ export interface PortalServiceOrderSummary {
 	status: PortalServiceOrderStatus;
 	deviceMaker: string;
 	deviceModel: string;
+	deviceCategory: string | null;
+	deviceImageUrl: string | null;
 	createdAt: string;
 	updatedAt: string;
 	company: { name: string; logoUrl: string | null };
 	pendingEstimate: boolean;
+}
+
+/** An estimate as the customer sees it, with the ids the portal links by. */
+export interface PortalEstimateView extends PublicEstimate {
+	id: string;
+	serviceOrderId: string;
+}
+
+export interface PortalEstimateSummary {
+	id: string;
+	number: number;
+	status: EstimateStatus;
+	validUntil: string;
+	sentAt: string | null;
+	respondedAt: string | null;
+	expired: boolean;
+	serviceOrderId: string;
+	serviceOrderCode: string;
+	company: { name: string; logoUrl: string | null };
+	deviceMaker: string;
+	deviceModel: string;
+	deviceCategory: string | null;
+	deviceImageUrl: string | null;
+	totals: EstimateTotals;
+}
+
+export interface PortalShop {
+	name: string;
+	logoUrl: string | null;
+	email: string | null;
+	phone: string | null;
+	website: string | null;
+}
+
+export interface PortalMe {
+	name: string | null;
+	email: string;
+	cpf: string;
+	shops: PortalShop[];
 }
 
 export interface PortalEstimate {
@@ -58,9 +103,13 @@ export interface PortalServiceOrder {
 	status: PortalServiceOrderStatus;
 	deviceMaker: string;
 	deviceModel: string;
+	deviceCategory: string | null;
+	deviceImageUrl: string | null;
 	reportedDefect: string;
 	createdAt: string;
 	updatedAt: string;
+	/** When the order reached each status, oldest first. */
+	history: { status: PortalServiceOrderStatus; at: string }[];
 	company: {
 		name: string;
 		email: string | null;
@@ -91,14 +140,15 @@ export const portalApi = {
 	/** Sign this browser in from the link in a portal email. */
 	openFromLink: (token: string) =>
 		portalAxios.post("/portal/session", { token }),
-	/** Sign this browser in from the link in an estimate email. */
+	/** Sign this browser in from the link in an estimate email; lands on that estimate. */
 	openFromEstimate: (token: string) =>
-		portalAxios.post("/portal/session/estimate", { token }),
+		data<{ estimateId: string }>(
+			portalAxios.post("/portal/session/estimate", { token })
+		),
 	signOut: () => portalAxios.delete("/portal/session"),
 	requestAccess: (values: z.input<typeof requestPortalAccessSchema>) =>
 		portalAxios.post("/portal/access", values),
-	me: () =>
-		data<{ name: string | null; email: string }>(portalAxios.get("/portal/me")),
+	me: () => data<PortalMe>(portalAxios.get("/portal/me")),
 	serviceOrders: () =>
 		data<PortalServiceOrderSummary[]>(
 			portalAxios.get("/portal/service-orders")
@@ -107,22 +157,35 @@ export const portalApi = {
 		data<PortalServiceOrder>(
 			portalAxios.get(`/portal/service-orders/${encodeURIComponent(id)}`)
 		),
+	estimates: () =>
+		data<PortalEstimateSummary[]>(portalAxios.get("/portal/estimates")),
+	estimate: (id: string) =>
+		data<PortalEstimateView>(
+			portalAxios.get(`/portal/estimates/${encodeURIComponent(id)}`)
+		),
 	/** Direct URL of an estimate PDF (the session cookie goes with the navigation). */
 	estimatePdfUrl: (estimateId: string) =>
 		portalAxios.getUri({
 			url: `/portal/estimates/${encodeURIComponent(estimateId)}/pdf`,
 		}),
 	approveEstimate: (estimateId: string) =>
-		data<PortalServiceOrder>(
+		data<PortalEstimateView>(
 			portalAxios.post(`/portal/estimates/${estimateId}/approve`, {})
 		),
 	rejectEstimate: (
 		estimateId: string,
 		values: z.input<typeof rejectEstimateSchema>
 	) =>
-		data<PortalServiceOrder>(
+		data<PortalEstimateView>(
 			portalAxios.post(`/portal/estimates/${estimateId}/reject`, values)
 		),
+};
+
+/** Employee side: is the signed-in email also a customer's, and send it the portal link. */
+export const employeePortal = {
+	match: () =>
+		data<{ customer: boolean }>(axios.get("/portal/employee-access")),
+	sendLink: () => axios.post("/portal/employee-access"),
 };
 
 /** Shop side: email portal access to one of the company's customers. */

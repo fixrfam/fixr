@@ -149,7 +149,7 @@ export const validation = {
 		fileNameMax: "The file name exceeds {{count}} characters.",
 		contentTypeRequired: "The content type is required.",
 		contentTypeMax: "The content type exceeds {{count}} characters.",
-		contentTypeInvalid: "The content type must be a valid MIME type.",
+		contentTypeInvalid: "The file must be a PNG, JPEG, WebP or HEIC image.",
 		sizeRequired: "The file size is required.",
 		sizeInteger: "The size must be a whole number.",
 		sizePositive: "The size must be greater than zero.",

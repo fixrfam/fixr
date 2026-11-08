@@ -14,6 +14,7 @@ import { portalDocs } from "../../../core/docs/portal.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { AppError } from "../../../core/lib/app-error";
 import { requestLocale } from "../../../core/lib/locale";
+import { authenticate } from "../../../core/middlewares/authenticate";
 import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import {
 	authenticatePortal,
@@ -87,6 +88,29 @@ export function portalRoutes(fastify: FastifyTypedInstance) {
 	);
 
 	fastify.get(
+		"/employee-access",
+		{ preHandler: [authenticate], schema: portalDocs.employeeMatchSchema },
+		withErrorHandler(async (request, response) => {
+			await PortalController.employeePortalMatch({
+				userJwt: request.user as z.infer<typeof userJWT>,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/employee-access",
+		{ preHandler: [authenticate], schema: portalDocs.employeeAccessSchema },
+		withErrorHandler(async (request, response) => {
+			await PortalController.employeePortalAccess({
+				userJwt: request.user as z.infer<typeof userJWT>,
+				locale: requestLocale(request),
+				response,
+			});
+		})
+	);
+
+	fastify.get(
 		"/me",
 		{ preHandler: [authenticatePortal], schema: portalDocs.meSchema },
 		withErrorHandler(async (request, response) => {
@@ -119,6 +143,35 @@ export function portalRoutes(fastify: FastifyTypedInstance) {
 				identity: identity(request),
 				serviceOrderId: portalServiceOrderParamsSchema.parse(request.params)
 					.serviceOrderId,
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/estimates",
+		{
+			preHandler: [authenticatePortal],
+			schema: portalDocs.listEstimatesSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			await PortalController.listEstimates({
+				identity: identity(request),
+				response,
+			});
+		})
+	);
+
+	fastify.get(
+		"/estimates/:estimateId",
+		{
+			preHandler: [authenticatePortal],
+			schema: portalDocs.getEstimateSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			await PortalController.getEstimate({
+				identity: identity(request),
+				estimateId: portalEstimateParamsSchema.parse(request.params).estimateId,
 				response,
 			});
 		})

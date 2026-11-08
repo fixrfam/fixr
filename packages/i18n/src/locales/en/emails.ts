@@ -20,6 +20,7 @@ export const emails = {
 		cta: "Access",
 		passwordHint:
 			"Change the default password in your account settings after the first login.",
+		passwordLabel: "Your temporary password",
 		footer: "If you do not recognize this company, please ignore this email.",
 	},
 	portalAccess: {
@@ -30,6 +31,7 @@ export const emails = {
 		heading: "Follow your service orders.",
 		body: "Use the button below to see the status of your service orders and answer estimates. <b>Do not share this link</b>: it gives access to your history.",
 		cta: "See my service orders",
+		validity: "The link works for 30 days, on any device.",
 		footer: "If you did not expect this email, please ignore it.",
 	},
 	estimate: {
@@ -41,6 +43,12 @@ export const emails = {
 		instructions:
 			"Open the estimate to review the items and <b>approve or reject</b> it. It is valid until <b>{{date}}</b>.",
 		cta: "Review estimate",
+		numberLabel: "Estimate",
+		deviceLabel: "Device",
+		totalLabel: "Total",
+		validUntilLabel: "Valid until",
+		portalHint:
+			"The button opens your area in the client portal, where you also follow the repair and see the PDF.",
 		footer: "If you did not request this estimate, please ignore this email.",
 	},
 	verification: {

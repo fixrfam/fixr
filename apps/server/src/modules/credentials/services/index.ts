@@ -20,19 +20,23 @@ import { CredentialsRepository } from "../repositories";
 /** @description Credentials business logic */
 export class CredentialsService {
 	/**
-	 * Change password for an authenticated user
+	 * Change password for an authenticated user. Every other session of the
+	 * account ends; the one that changed it stays signed in.
 	 *
 	 * @param user - The authenticated user JWT
 	 * @param body - Change password request body
+	 * @param refreshToken - The caller's refresh token, kept
 	 * @param response - Fastify reply
 	 */
 	static async changePasswordAuthenticated({
 		user,
 		body,
+		refreshToken,
 		response,
 	}: {
 		user: z.infer<typeof userJWT>;
 		body: { old: string; new: string };
+		refreshToken?: string;
 		response: FastifyReply;
 	}) {
 		const userData = await AuthRepository.queryUserById(user.id);
@@ -50,6 +54,7 @@ export class CredentialsService {
 		const hashedPassword = await hashPassword(body.new);
 
 		await CredentialsRepository.updateUserPassword(user.id, hashedPassword);
+		await TokensRepository.deleteUserRefreshTokens(user.id, refreshToken);
 
 		return response.status(200).send(
 			apiResponse({
@@ -153,7 +158,8 @@ export class CredentialsService {
 			throw new AppError("CREDENTIALS_INVALID_TOKEN");
 		}
 
-		//If all checks succeed, update the user password and delete the token
+		//If all checks succeed, update the user password, delete the token and
+		//end every session: whoever had one may be why the password was reset.
 		const hashedPassword = await hashPassword(body.password);
 
 		const updatePass = CredentialsRepository.updateUserPassword(
@@ -161,8 +167,11 @@ export class CredentialsService {
 			hashedPassword
 		);
 		const deleteToken = TokensRepository.deleteOneTimeToken(oneTimeToken.token);
+		const endSessions = TokensRepository.deleteUserRefreshTokens(
+			oneTimeToken.user.id
+		);
 
-		await Promise.all([updatePass, deleteToken]);
+		await Promise.all([updatePass, deleteToken, endSessions]);
 
 		return response.status(200).send(
 			apiResponse({

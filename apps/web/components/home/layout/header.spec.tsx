@@ -41,4 +41,21 @@ describe("Header", () => {
 		expect(link).toHaveAttribute("title", "Conectado como Maria");
 		expect(screen.queryByRole("link", { name: "Entrar" })).toBeNull();
 	});
+
+	it("takes a signed in customer to the portal", () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response("null", { status: 200 })
+		);
+		render(
+			<SessionProvider>
+				<Header hasPortalSession />
+			</SessionProvider>
+		);
+
+		expect(screen.getByRole("link", { name: /Meu portal/ })).toHaveAttribute(
+			"href",
+			"/portal"
+		);
+		expect(screen.queryByRole("link", { name: "Entrar" })).toBeNull();
+	});
 });

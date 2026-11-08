@@ -38,7 +38,31 @@ const { publicTokenHash: _hash, ...estimateShape } = estimateSelectSchema.shape;
 
 const estimateRecordSchema = z.object({
 	...estimateShape,
-	customer: z.object({ id: z.string(), name: z.string() }).nullable(),
+	customer: z
+		.object({
+			id: z.string(),
+			name: z.string(),
+			phone: z.string().nullable(),
+			email: z.string().nullable(),
+		})
+		.nullable(),
+	serviceOrder: z.object({
+		id: z.string(),
+		number: z.number(),
+		status: z.string(),
+		createdAt: z.coerce.date(),
+	}),
+	device: z.object({
+		model: z.object({
+			id: z.string(),
+			name: z.string(),
+			slug: z.string(),
+			imageUrl: z.string().nullable(),
+		}),
+		maker: z.string(),
+		category: z.string().nullable(),
+	}),
+	itemsCount: z.number(),
 	totals: totalsSchema,
 });
 
@@ -82,6 +106,7 @@ Optional filters (query string):
 - \`status\`: one of ${estimateStatuses.options.join(", ")}
 - \`serviceOrderId\`: estimates of one service order
 - \`query\`: customer name or estimate number
+- \`customerId\`: estimates of one customer
 - \`page\`, \`perPage\`, \`sort\` (\`newer\` | \`older\`)
 `,
 	params: getCompanyNestedDataSchema,
@@ -286,7 +311,7 @@ const linkNotFound = notFoundError(
 	"This estimate link is invalid or was replaced."
 );
 
-const publicEstimateSchema = z.object({
+export const publicEstimateSchema = z.object({
 	number: z.number(),
 	status: estimateStatuses,
 	validUntil: z.coerce.date(),
@@ -304,9 +329,16 @@ const publicEstimateSchema = z.object({
 		logoUrl: z.string().nullable(),
 	}),
 	customer: z.object({ name: z.string() }).nullable(),
+	serviceOrder: z.object({
+		code: z.string(),
+		status: z.string(),
+		openedAt: z.coerce.date(),
+	}),
 	device: z.object({
 		maker: z.string(),
 		model: z.string(),
+		category: z.string().nullable(),
+		imageUrl: z.string().nullable(),
 		reportedDefect: z.string(),
 	}),
 	items: z.array(

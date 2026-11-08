@@ -178,29 +178,28 @@ export function CustomerDetails({ id }: { id: string }) {
 				</ServiceOrderDetailsCard>
 
 				<ServiceOrderDetailsCard
-					description={t("customers.detail.devicesDescription")}
-					icon={Smartphone}
-					title={t("customers.detail.devicesTitle")}
-				>
-					<div className="space-y-3">
-						<CustomerDevicesList
-							devices={devices}
-							loading={devicesLoading}
-							onDelete={(d) => setDeletingDevice(d.id)}
-							onEdit={setEditingDevice}
-						/>
-						{ability.can(permissions.devices.create) && (
+					action={
+						ability.can(permissions.devices.create) && (
 							<Button
-								className="w-full"
 								onClick={() => setAddingDevice(true)}
 								size="sm"
-								variant="outline"
+								variant="ghost"
 							>
 								<Plus className="size-3.5" />
 								{t("customers.detail.addDevice")}
 							</Button>
-						)}
-					</div>
+						)
+					}
+					description={t("customers.detail.devicesDescription")}
+					icon={Smartphone}
+					title={t("customers.detail.devicesTitle")}
+				>
+					<CustomerDevicesList
+						devices={devices}
+						loading={devicesLoading}
+						onDelete={(d) => setDeletingDevice(d.id)}
+						onEdit={setEditingDevice}
+					/>
 				</ServiceOrderDetailsCard>
 
 				<ServiceOrderDetailsCard

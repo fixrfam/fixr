@@ -182,6 +182,23 @@ describe("GET /auth/verify", () => {
 		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
 	});
 
+	it("does not redirect to another site", async () => {
+		const { user } = await makeCustomerAccount({ verified: false });
+		const { token } = await TokensService.createOneTimeToken({
+			userId: user.id,
+			email: user.email,
+			tokenType: "confirmation",
+		});
+
+		const response = await app.inject({
+			method: "GET",
+			url: `/auth/verify?token=${encodeURIComponent(token)}&redirectUrl=${encodeURIComponent("https://attacker.example/phish")}`,
+		});
+
+		expect(response.statusCode).toBe(302);
+		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
+	});
+
 	it("rejects a password reset token", async () => {
 		const { user } = await makeCustomerAccount({ verified: false });
 		const { token } = await TokensService.createOneTimeToken({
@@ -281,12 +298,35 @@ describe("refresh token lifecycle", () => {
 });
 
 describe("GET /auth/google", () => {
-	it("redirects to Google", async () => {
+	it("redirects to Google with the state stored in the browser", async () => {
 		const response = await app.inject({ method: "GET", url: "/auth/google" });
 
 		expect(response.statusCode).toBe(302);
 		expect(response.headers.location).toMatch(
 			/^https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?/
 		);
+		const state = new URL(response.headers.location as string).searchParams.get(
+			"state"
+		);
+		const stored = cookie(response, cookieKey("googleOAuthState"));
+		expect(state).toBeTruthy();
+		expect(stored?.value).toBe(state);
+		expect(stored?.httpOnly).toBe(true);
+	});
+});
+
+describe("GET /auth/google/callback", () => {
+	it("refuses a callback this browser did not start (login CSRF)", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: "/auth/google/callback?code=attacker-code&state=attacker-state",
+		});
+
+		expect(response.statusCode).toBe(302);
+		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
+		expect(cookie(response, cookieKey("googleAuthError"))?.value).toBe(
+			"gacc_state_mismatch"
+		);
+		expect(cookie(response, SESSION_COOKIE)).toBeUndefined();
 	});
 });

@@ -5,23 +5,16 @@
  * design asks for.
  */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import {
-	Body,
-	Button,
-	Container,
-	Head,
-	Heading,
-	Hr,
-	Html,
-	Preview,
-	Section,
-	Tailwind,
-	Text,
-} from "@react-email/components";
+import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
-import { FixrHeader } from "../components/fixr-header";
+import {
+	EmailButton,
+	EmailLayout,
+	EmailNote,
+	EmailSummary,
+} from "../components/email-layout";
 
 export interface EmailProps {
 	customerName: string;
@@ -33,12 +26,13 @@ export interface EmailProps {
 	total: string;
 	/** Validity date already formatted for the recipient. */
 	validUntil: string;
-	/** Public page where the customer approves or rejects the estimate. */
+	/** Link that opens the estimate in the customer portal. */
 	ctaUrl: string;
 	/** Language of the recipient. Defaults to the app's default locale. */
 	locale?: Locale;
 }
 
+/** Asks the customer to answer: the total and the deadline lead the email. */
 export const Estimate = ({
 	customerName,
 	companyName,
@@ -53,67 +47,47 @@ export const Estimate = ({
 	const { t } = createTranslator(locale, { escapeValues: true });
 
 	return (
-		<Tailwind
-			config={{
-				theme: {
-					extend: {
-						colors: {
-							brand: "#1F65FE",
-							border: "#dedede",
-						},
-					},
-				},
-			}}
+		<EmailLayout
+			footer={t("emails.estimate.footer")}
+			illustration="estimate"
+			preview={t("emails.estimate.preview", { company: companyName, number })}
+			tone="action"
 		>
-			<Html>
-				<Head />
-				<Preview>
-					{t("emails.estimate.preview", { company: companyName, number })}
-				</Preview>
-				<Body style={main}>
-					<Container className="mx-auto max-w-[480px]">
-						<FixrHeader />
-
-						<Text
-							className="my-0 text-lg tracking-tight"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.estimate.greeting", { name: customerName }),
-							}}
-						/>
-						<Heading
-							className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:mb-[32px] md:text-3xl"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.estimate.heading", { company: companyName }),
-							}}
-						/>
-						<Section className="gap-0">
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.estimate.body", { number, device, total }),
-								}}
-							/>
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.estimate.instructions", {
-										date: validUntil,
-									}),
-								}}
-							/>
-							<Button
-								className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
-								href={ctaUrl}
-							>
-								{t("emails.estimate.cta")}
-							</Button>
-						</Section>
-						<Hr className="my-12" />
-						<Text className="text-center text-[#6a737d] text-sm">
-							{t("emails.estimate.footer")}
-						</Text>
-					</Container>
-				</Body>
-			</Html>
-		</Tailwind>
+			<Text
+				className="mb-0 text-[15px] text-muted"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.estimate.greeting", { name: customerName }),
+				}}
+			/>
+			<Heading
+				className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.estimate.heading", { company: companyName }),
+				}}
+			/>
+			<EmailSummary
+				rows={[
+					{
+						label: t("emails.estimate.totalLabel"),
+						value: total,
+						strong: true,
+					},
+					{ label: t("emails.estimate.deviceLabel"), value: device },
+					{ label: t("emails.estimate.numberLabel"), value: `#${number}` },
+					{ label: t("emails.estimate.validUntilLabel"), value: validUntil },
+				]}
+			/>
+			<Text
+				className="text-[15px] leading-6"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.estimate.instructions", { date: validUntil }),
+				}}
+			/>
+			<EmailButton href={ctaUrl} tone="action">
+				{t("emails.estimate.cta")}
+			</EmailButton>
+			<EmailNote>{t("emails.estimate.portalHint")}</EmailNote>
+		</EmailLayout>
 	);
 };
 
@@ -129,13 +103,6 @@ Estimate.PreviewProps = {
 } as EmailProps;
 
 export default Estimate;
-
-const main = {
-	backgroundColor: "#ffffff",
-	color: "#24292e",
-	fontFamily:
-		'-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-};
 
 export async function renderEmail({ ...props }: EmailProps): Promise<string> {
 	try {

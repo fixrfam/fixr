@@ -27,6 +27,12 @@ export const env = createEnv({
 			.enum(["development", "production", "test"])
 			.default("development")
 			.describe("Node environment"),
+		API_URL: z
+			.url()
+			.optional()
+			.describe(
+				"Public URL of this API for links sent by email (defaults to the origin of GOOGLE_AUTH_REDIRECT_URI)"
+			),
 		FRONTEND_URL: z.url().describe("Frontend application URL"),
 		ADMIN_URL: z.url().describe("Admin panel URL for CORS"),
 		CLERK_SECRET_KEY: z

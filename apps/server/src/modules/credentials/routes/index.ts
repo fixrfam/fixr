@@ -1,3 +1,4 @@
+import { cookieKey } from "@fixr/constants/cookies";
 import type { userJWT } from "@fixr/schemas/auth";
 import {
 	changePasswordAuthenticatedSchema as changePasswordBodySchema,
@@ -29,6 +30,7 @@ export function credentialsRoutes(fastify: FastifyTypedInstance) {
 			await CredentialsController.changePasswordAuthenticated({
 				user: userJwt,
 				body,
+				refreshToken: request.cookies[cookieKey("refreshToken")],
 				response,
 			});
 		})

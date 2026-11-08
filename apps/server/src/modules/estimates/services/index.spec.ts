@@ -13,6 +13,7 @@ const { repo, pdf, queueEmail, emit } = vi.hoisted(() => ({
 		queryEmployee: vi.fn(),
 		createWithItems: vi.fn(),
 		updateEstimate: vi.fn(),
+		returnToDraft: vi.fn(),
 		deleteEstimate: vi.fn(),
 		queryPdfContext: vi.fn(),
 		queryCustomer: vi.fn(),
@@ -67,6 +68,22 @@ const estimate = {
 	serviceOrderId,
 	customerId: createId(),
 	customerName: "Maria",
+	customerPhone: "11999990000",
+	customerEmail: "maria@example.com",
+	serviceOrder: {
+		id: serviceOrderId,
+		number: 12,
+		status: "in_repair",
+		createdAt: new Date(),
+	},
+	model: {
+		id: createId(),
+		name: "iPhone 13",
+		slug: "iphone-13",
+		imageKey: null,
+	},
+	makerName: "Apple",
+	categorySlug: "smartphone",
 	createdBy: null,
 	number: 3,
 	status: "draft" as const,
@@ -224,6 +241,10 @@ describe("EstimatesService.updateStatus", () => {
 			publicTokenHash: null,
 			sentTo: null,
 		});
+		expect(emit).toHaveBeenCalledWith("TX", "estimate.linkRevoked", {
+			estimateId,
+			companyId,
+		});
 		expect(emit).toHaveBeenCalledWith(
 			"TX",
 			"estimate.sent",
@@ -266,9 +287,10 @@ describe("EstimatesService.updateStatus", () => {
 
 		await move("draft");
 
-		expect(repo.updateEstimate).toHaveBeenCalledWith(estimateId, {
-			status: "draft",
-			publicTokenHash: null,
+		expect(repo.returnToDraft).toHaveBeenCalledWith("TX", estimateId);
+		expect(emit).toHaveBeenCalledWith("TX", "estimate.linkRevoked", {
+			estimateId,
+			companyId,
 		});
 	});
 
@@ -506,7 +528,17 @@ describe("EstimatesService.getEstimate", () => {
 
 		expect(reply.state.body).toMatchObject({
 			data: {
-				customer: { id: estimate.customerId, name: "Maria" },
+				customer: {
+					id: estimate.customerId,
+					name: "Maria",
+					phone: "11999990000",
+				},
+				serviceOrder: { id: serviceOrderId, number: 12 },
+				device: {
+					maker: "Apple",
+					model: { name: "iPhone 13", imageUrl: null },
+				},
+				itemsCount: 1,
 				items: [{ total: 200 }],
 				totals: { subtotal: 200, discount: 20, total: 180 },
 			},

@@ -2,6 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { index, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 import { companies } from "./companies";
 import { customers } from "./customers";
+import { estimates } from "./estimates";
 
 /**
  * Access links to the customer portal, sent by email.
@@ -46,7 +47,9 @@ export const portalLinks = mysqlTable(
 /**
  * A browser signed in to the customer portal (opaque token in an httpOnly
  * cookie, only its SHA-256 stored). It carries the identity of the link it was
- * opened from, and ends when that link is revoked.
+ * opened from, and ends when that link is revoked: a portal link's
+ * `revoked_at`, or an estimate link replaced or taken back (the session row is
+ * deleted).
  */
 export const portalSessions = mysqlTable("portal_sessions", {
 	id: varchar("id", { length: 25 })
@@ -56,6 +59,11 @@ export const portalSessions = mysqlTable("portal_sessions", {
 	/** Portal link the session was opened from; null when opened from an estimate link. */
 	portalLinkId: varchar("portal_link_id", { length: 25 }).references(
 		() => portalLinks.id,
+		{ onDelete: "cascade" }
+	),
+	/** Estimate whose emailed link opened the session; null when opened from a portal link. */
+	estimateId: varchar("estimate_id", { length: 25 }).references(
+		() => estimates.id,
 		{ onDelete: "cascade" }
 	),
 	/** Digits only. */

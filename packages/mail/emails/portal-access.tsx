@@ -5,23 +5,15 @@
  * design asks for.
  */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import {
-	Body,
-	Button,
-	Container,
-	Head,
-	Heading,
-	Hr,
-	Html,
-	Preview,
-	Section,
-	Tailwind,
-	Text,
-} from "@react-email/components";
+import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
-import { FixrHeader } from "../components/fixr-header";
+import {
+	EmailButton,
+	EmailLayout,
+	EmailNote,
+} from "../components/email-layout";
 
 export interface EmailProps {
 	customerName: string;
@@ -33,6 +25,7 @@ export interface EmailProps {
 	locale?: Locale;
 }
 
+/** A friendly welcome to the portal: what they can do there and the magic link. */
 export const PortalAccess = ({
 	customerName,
 	ctaUrl,
@@ -40,59 +33,42 @@ export const PortalAccess = ({
 }: EmailProps) => {
 	/** Values are escaped: part of the copy carries inline markup. */
 	const { t } = createTranslator(locale, { escapeValues: true });
+	const perks = [
+		t("portal.access.perks.track"),
+		t("portal.access.perks.answer"),
+		t("portal.access.perks.shops"),
+	];
 
 	return (
-		<Tailwind
-			config={{
-				theme: {
-					extend: {
-						colors: {
-							brand: "#1F65FE",
-							border: "#dedede",
-						},
-					},
-				},
-			}}
+		<EmailLayout
+			footer={t("emails.portalAccess.footer")}
+			illustration="portal-access"
+			preview={t("emails.portalAccess.preview")}
 		>
-			<Html>
-				<Head />
-				<Preview>{t("emails.portalAccess.preview")}</Preview>
-				<Body style={main}>
-					<Container className="mx-auto max-w-[480px]">
-						<FixrHeader />
-
-						<Text
-							className="my-0 text-lg tracking-tight"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.portalAccess.greeting", {
-									name: customerName,
-								}),
-							}}
-						/>
-						<Heading className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:mb-[32px] md:text-3xl">
-							{t("emails.portalAccess.heading")}
-						</Heading>
-						<Section className="gap-0">
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.portalAccess.body"),
-								}}
-							/>
-							<Button
-								className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
-								href={ctaUrl}
-							>
-								{t("emails.portalAccess.cta")}
-							</Button>
-						</Section>
-						<Hr className="my-12" />
-						<Text className="text-center text-[#6a737d] text-sm">
-							{t("emails.portalAccess.footer")}
-						</Text>
-					</Container>
-				</Body>
-			</Html>
-		</Tailwind>
+			<Text
+				className="mb-0 text-[15px] text-muted"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.portalAccess.greeting", { name: customerName }),
+				}}
+			/>
+			<Heading className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8">
+				{t("emails.portalAccess.heading")}
+			</Heading>
+			{perks.map((perk) => (
+				<Text className="my-1.5 text-[15px] leading-6" key={perk}>
+					<span style={{ color: "#10b981", fontWeight: 700 }}>✓</span>
+					&nbsp;&nbsp;
+					{perk}
+				</Text>
+			))}
+			<EmailButton href={ctaUrl}>{t("emails.portalAccess.cta")}</EmailButton>
+			<EmailNote>
+				<span
+					dangerouslySetInnerHTML={{ __html: t("emails.portalAccess.body") }}
+				/>{" "}
+				{t("emails.portalAccess.validity")}
+			</EmailNote>
+		</EmailLayout>
 	);
 };
 
@@ -104,13 +80,6 @@ PortalAccess.PreviewProps = {
 } as EmailProps;
 
 export default PortalAccess;
-
-const main = {
-	backgroundColor: "#ffffff",
-	color: "#24292e",
-	fontFamily:
-		'-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-};
 
 export async function renderEmail({ ...props }: EmailProps): Promise<string> {
 	try {

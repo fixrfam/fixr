@@ -74,6 +74,24 @@ describe("POST /uploads/:purpose/presign", () => {
 		expect(await db.select().from(uploads)).toHaveLength(0);
 	});
 
+	it.each([
+		"text/html",
+		"image/svg+xml",
+	])("refuses to sign %s, which would run as a page on the public bucket", async (contentType) => {
+		const { user } = await makeCustomerAccount();
+
+		const token = signSession(app, { id: user.id, email: user.email });
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url: "/uploads/avatar/presign",
+			payload: { ...file, contentType },
+		});
+
+		expect(response.statusCode).toBe(400);
+		expect(await db.select().from(uploads)).toHaveLength(0);
+	});
+
 	it("rejects an unknown purpose", async () => {
 		const { token } = await createEmployeeSession(app, { role: "manager" });
 

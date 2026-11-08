@@ -148,7 +148,8 @@ export const validation: Translated<typeof source> = {
 		fileNameMax: "Nome do arquivo excede {{count}} caracteres.",
 		contentTypeRequired: "Tipo de conteúdo é obrigatório.",
 		contentTypeMax: "Tipo de conteúdo excede {{count}} caracteres.",
-		contentTypeInvalid: "Tipo de conteúdo deve ser um MIME válido.",
+		contentTypeInvalid:
+			"O arquivo deve ser uma imagem PNG, JPEG, WebP ou HEIC.",
 		sizeRequired: "Tamanho do arquivo é obrigatório.",
 		sizeInteger: "Tamanho deve ser um número inteiro.",
 		sizePositive: "Tamanho deve ser maior que zero.",

@@ -29,6 +29,14 @@ export interface DomainEvents {
 		/** Who did it; null when the customer did (the public link). */
 		employeeId: string | null;
 	};
+	/**
+	 * The estimate's emailed link stopped working: it was sent again (a new
+	 * link replaces it) or taken back to draft.
+	 */
+	"estimate.linkRevoked": {
+		estimateId: string;
+		companyId: string;
+	};
 	/** The customer (or the staff on their behalf) approved an estimate. */
 	"estimate.approved": {
 		estimateId: string;

@@ -20,7 +20,11 @@ export const routeRules: RouteRule[] = [
 	{ path: "/portal", public: true },
 	{ path: "/portal/access", public: true },
 	{ path: "/portal/:token", public: true },
+	{ path: "/portal/service-orders", public: true },
 	{ path: "/portal/service-orders/:id", public: true },
+	{ path: "/portal/estimates", public: true },
+	{ path: "/portal/estimates/:id", public: true },
+	{ path: "/portal/profile", public: true },
 
 	{
 		path: "/dashboard/:subdomain/home",

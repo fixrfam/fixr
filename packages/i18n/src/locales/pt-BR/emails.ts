@@ -17,6 +17,7 @@ export const emails: Translated<typeof source> = {
 		cta: "Acessar",
 		passwordHint:
 			"Altere a senha padrão no painel de conta após o primeiro acesso.",
+		passwordLabel: "Sua senha temporária",
 		footer: "Se você não reconhece essa empresa, por favor, ignore este email.",
 	},
 	portalAccess: {
@@ -27,6 +28,7 @@ export const emails: Translated<typeof source> = {
 		heading: "Acompanhe suas ordens de serviço.",
 		body: "Use o botão abaixo para ver o status das suas ordens de serviço e responder orçamentos. <b>Não compartilhe este link</b>: ele dá acesso ao seu histórico.",
 		cta: "Ver minhas ordens de serviço",
+		validity: "O link funciona por 30 dias, em qualquer aparelho.",
 		footer: "Se você não esperava este email, por favor, ignore-o.",
 	},
 	estimate: {
@@ -38,6 +40,12 @@ export const emails: Translated<typeof source> = {
 		instructions:
 			"Abra o orçamento para conferir os itens e <b>aprovar ou recusar</b>. Ele é válido até <b>{{date}}</b>.",
 		cta: "Ver orçamento",
+		numberLabel: "Orçamento",
+		deviceLabel: "Aparelho",
+		totalLabel: "Total",
+		validUntilLabel: "Válido até",
+		portalHint:
+			"O botão abre sua área no portal do cliente, onde você também acompanha o reparo e vê o PDF.",
 		footer: "Se você não pediu este orçamento, por favor, ignore este email.",
 	},
 	verification: {

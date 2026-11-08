@@ -145,7 +145,7 @@ describe("AccountService.requestAccountDeletion", () => {
 		});
 		const [email] = mocks.sendAccountDeletionEmail.mock.calls[0]!;
 		expect(email.verificationUrl).toContain(
-			`https://api.test/account/confirm-deletion?token=${encodeURIComponent("t+1")}`
+			`http://localhost:3333/account/confirm-deletion?token=${encodeURIComponent("t+1")}`
 		);
 		expect(email.locale).toBe("pt-BR");
 		expect(reply.state.statusCode).toBe(201);
@@ -197,14 +197,29 @@ describe("AccountService.confirmAccountDeletion", () => {
 
 		await AccountService.confirmAccountDeletion({
 			token: "tok",
-			redirectUrl: encodeURIComponent("https://app.test/login"),
+			redirectUrl: encodeURIComponent("http://localhost:3000/auth/login?x=1"),
 			response: asReply(reply),
 		});
 
-		expect(reply.state.redirectUrl).toBe("https://app.test/login");
+		expect(reply.state.redirectUrl).toBe(
+			"http://localhost:3000/auth/login?x=1"
+		);
 		expect(reply.state.cookies[cookieKey("showDeletedDialog")]?.value).toBe(
 			"true"
 		);
+	});
+
+	it("sends a redirectUrl on another site to the login page instead", async () => {
+		mocks.TokensRepository.queryOneTimeToken.mockResolvedValue(token());
+		const reply = createFakeReply();
+
+		await AccountService.confirmAccountDeletion({
+			token: "tok",
+			redirectUrl: encodeURIComponent("https://attacker.example/phish"),
+			response: asReply(reply),
+		});
+
+		expect(reply.state.redirectUrl).toBe("http://localhost:3000/auth/login");
 	});
 
 	it.each([

@@ -16,15 +16,18 @@ export class CredentialsController {
 	static changePasswordAuthenticated({
 		user,
 		body,
+		refreshToken,
 		response,
 	}: {
 		user: z.infer<typeof userJWT>;
 		body: z.infer<typeof changePasswordAuthenticatedSchema>;
+		refreshToken?: string;
 		response: FastifyReply;
 	}) {
 		return CredentialsService.changePasswordAuthenticated({
 			user,
 			body,
+			refreshToken,
 			response,
 		});
 	}

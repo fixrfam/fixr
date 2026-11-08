@@ -11,7 +11,7 @@ import { apiUrl, envelope } from "@/test/msw/handlers";
 import { serveInventory } from "@/test/msw/inventory";
 import { server } from "@/test/msw/server";
 import { render } from "@/test/render";
-import { ServiceOrderItems } from "./service-order-items";
+import { ServiceOrderAddItem, ServiceOrderItems } from "./service-order-items";
 
 const ITEMS_URL = apiUrl("/companies/fixr/service-orders/so-1/items");
 
@@ -55,6 +55,7 @@ function renderWidget(role = "manager") {
 					} as never
 				}
 			>
+				<ServiceOrderAddItem serviceOrderId="so-1" />
 				<ServiceOrderItems serviceOrderId="so-1" />
 			</SessionProvider>
 		</QueryClientProvider>

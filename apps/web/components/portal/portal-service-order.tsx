@@ -1,316 +1,245 @@
 "use client";
 
-import { useMessage, useTranslation } from "@fixr/i18n/react";
-import { toast } from "@pheralb/toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, FileText, X } from "lucide-react";
+import { useTranslation } from "@fixr/i18n/react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { EstimateStatusBadge } from "@/components/dashboard/estimates/estimate-status-badge";
-import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
-import { RejectDialog } from "@/components/estimates/public-estimate";
+import type { ReactNode } from "react";
+import { ModelImage } from "@/components/dashboard/models/model-image";
+import {
+	ContactSection,
+	ItemsSection,
+} from "@/components/estimates/customer-estimate";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { deviceName, formatPhone } from "@/lib/format";
-import {
-	type PortalEstimate,
-	portalApi,
-	type PortalServiceOrder as ServiceOrder,
-} from "@/lib/services/portal";
+import type { PortalServiceOrder as Order } from "@/lib/services/portal";
 import { cn } from "@/lib/utils";
-import { portalServiceOrdersKey } from "./portal-home";
+import {
+	ESTIMATE_TONE,
+	PortalList,
+	ShopMark,
+	WaitingForYou,
+} from "./portal-cards";
+import { PortalProgressBar, PortalTimeline } from "./portal-progress";
 import { PortalStatusBadge } from "./portal-status-badge";
-import { useRedirectWithoutSession } from "./use-portal-session";
+import { usePortalServiceOrder } from "./store";
 
-const padNumber = (number: number) => String(number).padStart(4, "0");
-
-function EstimateCard({
-	estimate,
-	onAnswered,
-}: {
-	estimate: PortalEstimate;
-	onAnswered: (serviceOrder: ServiceOrder) => void;
-}) {
-	const { t, format } = useTranslation();
-	const message = useMessage();
-	const toastError = useApiErrorToast();
-	const [rejecting, setRejecting] = useState(false);
-	const number = padNumber(estimate.number);
-
-	const answer = useMutation({
-		mutationFn: (
-			value: { approve: true } | { approve: false; reason: string }
-		) =>
-			value.approve
-				? portalApi.approveEstimate(estimate.id)
-				: portalApi.rejectEstimate(estimate.id, {
-						reason: value.reason || undefined,
-					}),
-		onSuccess: (serviceOrder, value) => {
-			setRejecting(false);
-			onAnswered(serviceOrder);
-			const feedback = message(
-				value.approve ? "approve_estimate_success" : "reject_estimate_success",
-				"success"
-			);
-			toast.success({
-				text: feedback.title,
-				description: feedback.description,
-			});
-		},
-		onError: toastError,
-	});
-
-	const canAnswer = estimate.status === "sent" && !estimate.expired;
-
+function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
-		<li className="space-y-3 rounded-lg border p-4">
-			<div className="flex flex-wrap items-center justify-between gap-2">
-				<span className="font-medium">
-					{t("portal.detail.estimateNumber", { number })}
-				</span>
-				<div className="flex items-center gap-2">
-					{estimate.expired && estimate.status === "sent" ? (
-						<span className="text-destructive text-xs">
-							{t("portal.detail.expired")}
-						</span>
-					) : null}
-					<EstimateStatusBadge status={estimate.status} />
-				</div>
-			</div>
-			<div className="flex flex-wrap justify-between gap-2 text-muted-foreground text-sm">
-				<span>
-					{t("portal.detail.validUntil", {
-						date: format.date(estimate.validUntil),
-					})}
-				</span>
-				<span className="font-semibold text-foreground tabular-nums">
-					{t("portal.detail.total", {
-						total: format.currency(estimate.totals.total),
-					})}
-				</span>
-			</div>
-			{estimate.rejectionReason ? (
-				<p className="text-muted-foreground text-sm italic">
-					{estimate.rejectionReason}
-				</p>
-			) : null}
-			<div className="flex flex-col gap-2 md:flex-row md:justify-end">
-				<Button asChild size="sm" variant="outline">
-					<a
-						href={portalApi.estimatePdfUrl(estimate.id)}
-						rel="noopener"
-						target="_blank"
-					>
-						<FileText className="size-4" />
-						{t("portal.detail.openPdf")}
-					</a>
-				</Button>
-				{canAnswer ? (
-					<>
-						<Button
-							disabled={answer.isPending}
-							onClick={() => setRejecting(true)}
-							size="sm"
-							variant="outline"
-						>
-							<X className="size-4" />
-							{t("portal.detail.reject")}
-						</Button>
-						<Button
-							disabled={answer.isPending}
-							onClick={() => answer.mutate({ approve: true })}
-							size="sm"
-						>
-							<Check className="size-4" />
-							{t("portal.detail.approve")}
-						</Button>
-					</>
-				) : null}
-			</div>
-			<RejectDialog
-				number={number}
-				onConfirm={(reason) => answer.mutate({ approve: false, reason })}
-				onOpenChange={setRejecting}
-				open={rejecting}
-				pending={answer.isPending}
-			/>
-		</li>
+		<section className="space-y-2.5">
+			<h2 className="font-semibold text-sm">{title}</h2>
+			{children}
+		</section>
 	);
 }
 
-/** One service order as the customer sees it, with its estimates to answer. */
-export function PortalServiceOrder({ id }: { id: string }) {
-	const { t, format } = useTranslation();
-	const queryClient = useQueryClient();
-	const queryKey = ["portal", "service-order", id];
-	const {
-		data: order,
-		isPending,
-		error,
-	} = useQuery({
-		queryKey,
-		queryFn: () => portalApi.serviceOrder(id),
-		retry: false,
-	});
-	const redirecting = useRedirectWithoutSession(error);
+/** The order's lines as the items section reads them: no discount on an order. */
+function itemsSummary(items: Order["items"]) {
+	const sum = (lines: Order["items"]) =>
+		lines.reduce((cents, line) => cents + Math.round(line.total * 100), 0) /
+		100;
+	const total = sum(items);
+	return {
+		items,
+		discountPercentage: 0,
+		totals: {
+			parts: sum(items.filter((item) => item.type === "part")),
+			services: sum(items.filter((item) => item.type === "service")),
+			subtotal: total,
+			discount: 0,
+			total,
+		},
+	};
+}
 
-	if (isPending || redirecting) {
-		return <Skeleton className="h-96 w-full max-w-3xl rounded-lg" />;
-	}
-
-	const back = (
-		<Button asChild className="-translate-x-3" size="sm" variant="ghost">
-			<Link href="/portal">
+export function PortalBackLink({
+	href,
+	label,
+}: {
+	href: string;
+	label: string;
+}) {
+	return (
+		<Button
+			asChild
+			className="mb-3 -ml-2.5 transition-[scale] active:scale-[0.96]"
+			size="sm"
+			variant="ghost"
+		>
+			<Link href={href}>
 				<ArrowLeft className="size-4" />
-				{t("portal.detail.back")}
+				{label}
 			</Link>
 		</Button>
 	);
+}
+
+/** One repair for the customer: where it stands, what was found and what it costs. */
+export function PortalServiceOrder({ id }: { id: string }) {
+	const { t } = useTranslation();
+	const { data: order, isPending } = usePortalServiceOrder(id);
+
+	if (isPending) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-24 rounded-2xl" />
+				<Skeleton className="h-72 rounded-2xl" />
+			</div>
+		);
+	}
 
 	if (!order) {
 		return (
-			<div className="w-full max-w-3xl space-y-4">
-				{back}
-				<p className="text-muted-foreground">
-					{t("messages.codes.service_order_not_found.description")}
+			<div>
+				<PortalBackLink
+					href="/portal/service-orders"
+					label={t("portal.detail.back")}
+				/>
+				<p className="py-12 text-center text-muted-foreground text-sm">
+					{t("portal.detail.notFound")}
 				</p>
 			</div>
 		);
 	}
 
-	const onAnswered = (updated: ServiceOrder) => {
-		queryClient.setQueryData(queryKey, updated);
-		queryClient.invalidateQueries({ queryKey: portalServiceOrdersKey });
-	};
-	const contact = [
-		order.company.phone ? formatPhone(order.company.phone) : null,
-		order.company.email,
-		order.company.website,
-	].filter(Boolean);
+	return (
+		<div>
+			<PortalBackLink
+				href="/portal/service-orders"
+				label={t("portal.detail.back")}
+			/>
+			<Hero order={order} />
+			<div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_18rem]">
+				<div className="min-w-0 space-y-7">
+					<Section title={t("portal.detail.reportedDefect")}>
+						<blockquote className="text-pretty border-l-2 pl-3 text-sm">
+							{order.reportedDefect}
+						</blockquote>
+					</Section>
+					<EstimatesSection order={order} />
+					{order.items.length > 0 ? (
+						<ItemsSection
+							estimate={itemsSummary(order.items)}
+							title={t("portal.detail.items")}
+						/>
+					) : (
+						<Section title={t("portal.detail.items")}>
+							<p className="text-muted-foreground text-sm">
+								{t("portal.detail.noItems")}
+							</p>
+						</Section>
+					)}
+				</div>
+				<div className="space-y-7">
+					<Section title={t("portal.detail.progress")}>
+						<div>
+							<PortalTimeline history={order.history} status={order.status} />
+						</div>
+					</Section>
+					<ContactSection company={order.company} />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function Hero({ order }: { order: Order }) {
+	const { t, format } = useTranslation();
 
 	return (
-		<article className="w-full max-w-3xl space-y-6">
-			{back}
-			<header className="flex flex-wrap items-start justify-between gap-3">
-				<div>
-					<h1 className="font-heading font-semibold text-2xl md:text-3xl">
-						{t("portal.detail.title", {
-							device: deviceName(order.deviceMaker, order.deviceModel),
-						})}
+		<header className="space-y-4">
+			<div className="flex items-center gap-4">
+				<ModelImage
+					alt={order.deviceModel}
+					category={order.deviceCategory}
+					className="size-20 rounded-2xl"
+					loading="eager"
+					src={order.deviceImageUrl}
+				/>
+				<div className="min-w-0 flex-1">
+					<h1 className="truncate font-heading font-semibold text-2xl">
+						{order.deviceModel}
 					</h1>
-					<p className="text-muted-foreground text-sm">
-						<span className="font-medium text-foreground tabular-nums">
-							{order.code}
-						</span>{" "}
-						·{" "}
-						{t("portal.list.openedAt", { date: format.date(order.createdAt) })}
+					<p className="truncate text-muted-foreground text-sm">
+						{order.deviceMaker}
+					</p>
+					<p className="mt-1 flex min-w-0 items-center gap-1.5 whitespace-nowrap text-muted-foreground text-xs">
+						<ShopMark className="size-4" shop={order.company} />
+						<span className="truncate">{order.company.name}</span>
+						<span aria-hidden>·</span>
+						<span className="shrink-0">{order.code}</span>
 					</p>
 				</div>
-				<PortalStatusBadge status={order.status} />
-			</header>
-
-			<section className="grid gap-4 rounded-lg border p-4 md:grid-cols-2">
-				<div className="space-y-1">
-					<h2 className="font-medium text-sm">{t("portal.detail.shop")}</h2>
-					<p className="text-sm">{order.company.name}</p>
-					{order.company.address ? (
-						<p className="text-muted-foreground text-sm">
-							{order.company.address}
-						</p>
-					) : null}
-					{contact.length > 0 ? (
-						<p className="text-muted-foreground text-sm">
-							{contact.join(" · ")}
-						</p>
-					) : null}
+			</div>
+			<div className="space-y-2">
+				<div className="flex items-center justify-between gap-2">
+					<PortalStatusBadge status={order.status} />
+					<span className="truncate whitespace-nowrap text-muted-foreground text-xs">
+						{t("portal.detail.openedAt", {
+							date: format.date(order.createdAt),
+						})}
+					</span>
 				</div>
-				<div className="space-y-1">
-					<h2 className="font-medium text-sm">
-						{t("portal.detail.reportedDefect")}
-					</h2>
-					<p className="whitespace-pre-line text-muted-foreground text-sm">
-						{order.reportedDefect}
-					</p>
-				</div>
-			</section>
+				<PortalProgressBar status={order.status} />
+			</div>
+		</header>
+	);
+}
 
-			<section className="space-y-2">
-				<h2 className="font-medium">{t("portal.detail.estimates")}</h2>
-				{order.estimates.length > 0 ? (
-					<ul className="space-y-3">
-						{order.estimates.map((estimate) => (
-							<EstimateCard
-								estimate={estimate}
-								key={estimate.id}
-								onAnswered={onAnswered}
-							/>
-						))}
-					</ul>
-				) : (
-					<p className="text-muted-foreground text-sm">
-						{t("portal.detail.noEstimates")}
-					</p>
-				)}
-			</section>
+function EstimatesSection({ order }: { order: Order }) {
+	const { t, format } = useTranslation();
 
-			<section className="space-y-2">
-				<h2 className="font-medium">{t("portal.detail.items")}</h2>
-				{order.items.length > 0 ? (
-					<div className="overflow-x-auto rounded-md border">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>{t("estimates.pdf.headers.item")}</TableHead>
-									<TableHead className="text-right">
-										{t("estimates.pdf.headers.quantity")}
-									</TableHead>
-									<TableHead className="text-right">
-										{t("estimates.pdf.headers.total")}
-									</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{order.items.map((item, index) => (
-									<TableRow
-										className={cn(
-											item.nested && "border-t-0 text-muted-foreground"
-										)}
-										key={`${item.name}-${index}`}
-									>
-										<TableCell className={cn(item.nested && "pl-8")}>
-											{item.name}
-											<span className="block text-muted-foreground text-xs">
-												{item.nested
-													? t("portal.detail.servicePart")
-													: t(`estimates.pdf.${item.type}`)}
+	return (
+		<Section title={t("portal.detail.estimates")}>
+			{order.estimates.length === 0 ? (
+				<p className="text-muted-foreground text-sm">
+					{t("portal.detail.noEstimates")}
+				</p>
+			) : (
+				<PortalList>
+					{order.estimates.map((estimate) => {
+						const expired = estimate.expired && estimate.status === "sent";
+						const open = estimate.status === "sent" && !estimate.expired;
+						return (
+							<li key={estimate.id}>
+								<Link
+									className="group flex items-center gap-3 px-4 py-3 transition-[background-color] duration-150 ease-out hover:bg-muted/50"
+									href={`/portal/estimates/${estimate.id}`}
+								>
+									<div className="min-w-0 flex-1 space-y-1">
+										<p className="truncate font-medium text-sm">
+											{t("portal.detail.estimateNumber", {
+												number: String(estimate.number).padStart(4, "0"),
+											})}
+										</p>
+										{open ? (
+											<WaitingForYou>
+												{t("portal.estimates.pending")}
+											</WaitingForYou>
+										) : (
+											<span
+												className={cn(
+													"inline-flex whitespace-nowrap rounded-full px-2 py-0.5 font-medium text-xs",
+													expired
+														? "bg-muted text-muted-foreground"
+														: ESTIMATE_TONE[estimate.status]
+												)}
+											>
+												{expired
+													? t("portal.estimates.expired")
+													: t(`estimates.status.${estimate.status}`)}
 											</span>
-										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{item.quantity}
-										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{format.currency(item.total)}
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
-				) : (
-					<p className="text-muted-foreground text-sm">
-						{t("portal.detail.noItems")}
-					</p>
-				)}
-			</section>
-		</article>
+										)}
+									</div>
+									<span className="shrink-0 font-semibold text-sm tabular-nums">
+										{format.currency(estimate.totals.total)}
+									</span>
+									<ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+								</Link>
+							</li>
+						);
+					})}
+				</PortalList>
+			)}
+		</Section>
 	);
 }

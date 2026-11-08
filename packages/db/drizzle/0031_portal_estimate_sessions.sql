@@ -1,0 +1,2 @@
+ALTER TABLE `portal_sessions` ADD `estimate_id` varchar(25);--> statement-breakpoint
+ALTER TABLE `portal_sessions` ADD CONSTRAINT `portal_sessions_estimate_id_estimates_id_fk` FOREIGN KEY (`estimate_id`) REFERENCES `estimates`(`id`) ON DELETE cascade ON UPDATE no action;
