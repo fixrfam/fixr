@@ -59,20 +59,27 @@ export async function middleware(request: NextRequest) {
 			return NextResponse.next();
 		}
 
-		// If the user is at the loginPath and has a valid token, they need to go to dashboard.
-		if (token || refreshToken) {
+		// A live session, or a refresh token that can renew one, goes to the
+		// dashboard. A session cookie that is expired or not a JWT (e.g. left
+		// from a database that was reset) is dropped instead: sending it to the
+		// dashboard would bounce it straight back here, forever.
+		if (isLive(parseJwt(token)) || refreshToken) {
 			return NextResponse.redirect(
 				new URL("/dashboard/account", env.NEXT_PUBLIC_APP_URL)
 			);
 		}
 
-		return NextResponse.next();
+		const response = NextResponse.next();
+		if (token) {
+			response.cookies.delete(cookieKey("session"));
+		}
+		return response;
 	}
 
 	const payload = parseJwt(token);
 
 	//Revalidate the user JWT if its not present (cookie vanished) or expired
-	if (!(token && payload) || payload.exp * 1000 < Date.now()) {
+	if (!(token && isLive(payload))) {
 		try {
 			const response = await revalidate(request, isProtectedRoute);
 			return response;
@@ -80,9 +87,7 @@ export async function middleware(request: NextRequest) {
 			console.error("Error during token revalidation:", error);
 
 			if (isProtectedRoute) {
-				return NextResponse.redirect(
-					new URL("/auth/login", env.NEXT_PUBLIC_APP_URL)
-				);
+				return signOut();
 			}
 
 			return NextResponse.next();
@@ -204,21 +209,31 @@ async function revalidate(request: NextRequest, isProtectedRoute: boolean) {
 		}
 	}
 
-	// Handle invalid refresh token: redirect to signout route which will clear cookies and redirect to login
-	if (revalidateResponse.status === 401) {
-		return NextResponse.redirect(
-			new URL("/api/auth/signout", env.NEXT_PUBLIC_APP_URL)
-		);
-	}
-
-	// Revalidation failed: redirect to login
-	if (isProtectedRoute) {
-		return NextResponse.redirect(
-			new URL("/auth/login", env.NEXT_PUBLIC_APP_URL)
-		);
+	/**
+	 * Any failure (401, but also 400 for a missing token, 404 for a user that
+	 * no longer exists...) means the session can't be renewed. The signout
+	 * route clears both cookies before going to the login: leaving them would
+	 * make the login send the user back to the dashboard, in a loop.
+	 */
+	if (isProtectedRoute || revalidateResponse.status === 401) {
+		return signOut();
 	}
 
 	return NextResponse.next();
+}
+
+/** A decoded session that hasn't expired. */
+function isLive(
+	payload: ReturnType<typeof parseJwt>
+): payload is NonNullable<ReturnType<typeof parseJwt>> {
+	return Boolean(payload && payload.exp * 1000 >= Date.now());
+}
+
+/** Clear the session cookies and go to the login (see `app/api/auth/signout`). */
+function signOut() {
+	return NextResponse.redirect(
+		new URL("/api/auth/signout", env.NEXT_PUBLIC_APP_URL)
+	);
 }
 
 async function validatePasswordResetToken(
