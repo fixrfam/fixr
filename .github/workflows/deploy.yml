@@ -1,8 +1,9 @@
 name: Deploy
 
-# Pull requests get an Alchemy preview. A push to main is production: migrations first,
-# then the web apps (Alchemy/Cloudflare) and the API and workers (Coolify).
-# Migrations run before the new code ships, so they must stay compatible with the code still live.
+# Pull requests get an Alchemy preview. A push to main is production: the API and workers
+# (Coolify) first, then the web apps (Alchemy/Cloudflare).
+# TiDB only accepts the Coolify server, so migrations run there: the API's post-deployment
+# command applies them in the new container. They must stay compatible with the code still live.
 
 on:
   push:
@@ -26,36 +27,8 @@ env:
   STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || (github.ref == 'refs/heads/main' && 'prod' || github.ref_name) }}
 
 jobs:
-  migrate:
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.6
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Apply migrations
-        run: bun run --filter @fixr/db db:migrate
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-          MYSQL_USER: ${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-
   coolify:
-    needs: [migrate]
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,10 +58,10 @@ jobs:
           .github/scripts/coolify-deploy.sh "${{ matrix.uuid }}"
 
   deploy:
-    needs: [migrate]
+    needs: [coolify]
     # skip this job when a PR is closed (cleanup job handles destruction),
-    # and on main only ship once the migrations went through
-    if: ${{ !cancelled() && github.event.action != 'closed' && needs.migrate.result != 'failure' }}
+    # and on main only ship once the API is live with its migrations
+    if: ${{ !cancelled() && github.event.action != 'closed' && needs.coolify.result != 'failure' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
