@@ -1,0 +1,376 @@
+import {
+	and,
+	db,
+	eq,
+	inArray,
+	like,
+	or,
+	type SQL,
+	sql,
+	type Transaction,
+} from "@fixr/db/connection";
+import {
+	companies,
+	customers,
+	devices,
+	employees,
+	estimateItems,
+	estimates,
+	modelCategories,
+	modelMakers,
+	models,
+	serviceOrderItems,
+	serviceOrders,
+} from "@fixr/db/schema";
+import type { getEstimatesQuerySchema } from "@fixr/schemas/estimates";
+import type { z } from "zod";
+import { modelImageKey } from "../../../core/lib/model-image";
+
+export type EstimateInsert = typeof estimates.$inferInsert;
+export type EstimateItemRow = typeof estimateItems.$inferSelect;
+
+/** Estimate columns plus a summary of its customer, service order and device. */
+export const estimatesListSelect = {
+	id: estimates.id,
+	companyId: estimates.companyId,
+	serviceOrderId: estimates.serviceOrderId,
+	customerId: estimates.customerId,
+	createdBy: estimates.createdBy,
+	number: estimates.number,
+	status: estimates.status,
+	discountPercentage: estimates.discountPercentage,
+	validUntil: estimates.validUntil,
+	notes: estimates.notes,
+	sentTo: estimates.sentTo,
+	sentAt: estimates.sentAt,
+	respondedAt: estimates.respondedAt,
+	rejectionReason: estimates.rejectionReason,
+	createdAt: estimates.createdAt,
+	updatedAt: estimates.updatedAt,
+	customerName: customers.name,
+	customerPhone: customers.phone,
+	customerEmail: customers.email,
+	serviceOrder: {
+		id: serviceOrders.id,
+		number: serviceOrders.number,
+		status: serviceOrders.status,
+		createdAt: serviceOrders.createdAt,
+	},
+	model: {
+		id: models.id,
+		name: models.name,
+		slug: models.slug,
+		imageKey: modelImageKey,
+	},
+	makerName: modelMakers.name,
+	categorySlug: modelCategories.slug,
+};
+
+export const estimatesListJoins = [
+	{
+		type: "left" as const,
+		table: customers,
+		on: eq(customers.id, estimates.customerId),
+	},
+	{
+		type: "inner" as const,
+		table: serviceOrders,
+		on: eq(serviceOrders.id, estimates.serviceOrderId),
+	},
+	{
+		type: "inner" as const,
+		table: devices,
+		on: eq(devices.id, serviceOrders.deviceId),
+	},
+	{
+		type: "inner" as const,
+		table: models,
+		on: eq(models.id, devices.modelId),
+	},
+	{
+		type: "inner" as const,
+		table: modelMakers,
+		on: eq(modelMakers.id, models.makerId),
+	},
+	{
+		type: "left" as const,
+		table: modelCategories,
+		on: eq(modelCategories.id, models.categoryId),
+	},
+];
+
+/** One estimate row with the same columns and joins as the list. */
+function selectEstimates() {
+	return db
+		.select(estimatesListSelect)
+		.from(estimates)
+		.leftJoin(customers, eq(customers.id, estimates.customerId))
+		.innerJoin(serviceOrders, eq(serviceOrders.id, estimates.serviceOrderId))
+		.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+		.innerJoin(models, eq(models.id, devices.modelId))
+		.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+		.leftJoin(modelCategories, eq(modelCategories.id, models.categoryId));
+}
+
+/** @description Data access layer for estimates */
+export class EstimatesRepository {
+	static buildListFilter(
+		companyId: string,
+		filters: Pick<
+			z.infer<typeof getEstimatesQuerySchema>,
+			"query" | "status" | "serviceOrderId" | "customerId"
+		>
+	) {
+		const conditions: SQL[] = [eq(estimates.companyId, companyId)];
+
+		if (filters.status) {
+			conditions.push(eq(estimates.status, filters.status));
+		}
+		if (filters.serviceOrderId) {
+			conditions.push(eq(estimates.serviceOrderId, filters.serviceOrderId));
+		}
+		if (filters.customerId) {
+			conditions.push(eq(estimates.customerId, filters.customerId));
+		}
+		if (filters.query) {
+			const number = Number.parseInt(filters.query, 10);
+			conditions.push(
+				or(
+					like(customers.name, `%${filters.query}%`),
+					...(Number.isNaN(number) ? [] : [eq(estimates.number, number)])
+				)!
+			);
+		}
+
+		return and(...conditions);
+	}
+
+	static async queryEstimate(estimateId: string, companyId: string) {
+		const [estimate] = await selectEstimates()
+			.where(
+				and(eq(estimates.id, estimateId), eq(estimates.companyId, companyId))
+			)
+			.limit(1);
+		return estimate ?? null;
+	}
+
+	/** Items of each estimate, in their original order. */
+	static async queryItemsByEstimateIds(estimateIds: string[]) {
+		const byEstimate = new Map<string, EstimateItemRow[]>(
+			estimateIds.map((id) => [id, []])
+		);
+		if (estimateIds.length === 0) {
+			return byEstimate;
+		}
+
+		const rows = await db
+			.select()
+			.from(estimateItems)
+			.where(inArray(estimateItems.estimateId, estimateIds))
+			.orderBy(estimateItems.position);
+
+		for (const row of rows) {
+			byEstimate.get(row.estimateId)?.push(row);
+		}
+		return byEstimate;
+	}
+
+	static async queryServiceOrderOfCompany(
+		serviceOrderId: string,
+		companyId: string
+	) {
+		const [serviceOrder] = await db
+			.select({ id: serviceOrders.id, customerId: serviceOrders.customerId })
+			.from(serviceOrders)
+			.where(
+				and(
+					eq(serviceOrders.id, serviceOrderId),
+					eq(serviceOrders.companyId, companyId)
+				)
+			)
+			.limit(1);
+		return serviceOrder ?? null;
+	}
+
+	static async queryServiceOrderItems(serviceOrderId: string) {
+		return await db
+			.select()
+			.from(serviceOrderItems)
+			.where(eq(serviceOrderItems.serviceOrderId, serviceOrderId))
+			// Same tiebreaker as the service order list, so the copy keeps its order.
+			.orderBy(serviceOrderItems.createdAt, serviceOrderItems.id);
+	}
+
+	/**
+	 * Create the estimate with the next number of the company and its items.
+	 * The company row is locked so concurrent estimates can't take the same number.
+	 */
+	static async createWithItems(
+		values: Omit<EstimateInsert, "number">,
+		items: Omit<typeof estimateItems.$inferInsert, "estimateId">[]
+	) {
+		return await db.transaction(async (tx) => {
+			await tx
+				.select({ id: companies.id })
+				.from(companies)
+				.where(eq(companies.id, values.companyId))
+				.for("update");
+
+			const [{ next }] = await tx
+				.select({
+					next: sql<number>`COALESCE(MAX(${estimates.number}), 0) + 1`,
+				})
+				.from(estimates)
+				.where(eq(estimates.companyId, values.companyId));
+
+			const [inserted] = await tx
+				.insert(estimates)
+				.values({ ...values, number: Number(next) })
+				.$returningId();
+
+			await tx.insert(estimateItems).values(
+				items.map((item, position) => ({
+					...item,
+					estimateId: inserted.id,
+					position,
+				}))
+			);
+
+			return inserted.id;
+		});
+	}
+
+	static async updateEstimate(
+		estimateId: string,
+		values: Partial<EstimateInsert>
+	) {
+		await db.update(estimates).set(values).where(eq(estimates.id, estimateId));
+	}
+
+	/** Estimate behind a public link, with the company it belongs to. */
+	static async queryByTokenHash(tokenHash: string) {
+		const [estimate] = await selectEstimates()
+			.where(eq(estimates.publicTokenHash, tokenHash))
+			.limit(1);
+		return estimate ?? null;
+	}
+
+	/**
+	 * Take the estimate back to draft and disable its emailed link. Runs in the
+	 * caller's transaction, which emits `estimate.linkRevoked`.
+	 */
+	static async returnToDraft(tx: Transaction, estimateId: string) {
+		await tx
+			.update(estimates)
+			.set({ status: "draft", publicTokenHash: null })
+			.where(eq(estimates.id, estimateId));
+	}
+
+	/**
+	 * Mark the estimate as sent, with the public link's token hash (or none when
+	 * it was delivered outside the app). Runs in the caller's transaction,
+	 * which also emits `estimate.sent`.
+	 */
+	static async markSent(
+		tx: Transaction,
+		estimateId: string,
+		values: { publicTokenHash: string | null; sentTo: string | null }
+	) {
+		await tx
+			.update(estimates)
+			.set({
+				...values,
+				status: "sent",
+				sentAt: new Date(),
+				respondedAt: null,
+				rejectionReason: null,
+			})
+			.where(eq(estimates.id, estimateId));
+	}
+
+	/**
+	 * Record the customer's answer. Only a sent estimate can be answered,
+	 * checked in the update itself so two answers at the same time can't both
+	 * win. Runs in the caller's transaction, which emits `estimate.approved`.
+	 *
+	 * @returns whether the answer was recorded
+	 */
+	static async recordAnswer(
+		tx: Transaction,
+		estimateId: string,
+		answer:
+			| { status: "approved" }
+			| { status: "rejected"; rejectionReason: string | null }
+	) {
+		const [result] = await tx
+			.update(estimates)
+			.set({ ...answer, respondedAt: new Date() })
+			.where(and(eq(estimates.id, estimateId), eq(estimates.status, "sent")));
+		return result.affectedRows > 0;
+	}
+
+	static async deleteEstimate(estimateId: string) {
+		await db.delete(estimates).where(eq(estimates.id, estimateId));
+	}
+
+	/** Everything the PDF prints besides the estimate itself. */
+	static async queryPdfContext(estimateId: string) {
+		const [row] = await db
+			.select({
+				serviceOrderNumber: serviceOrders.number,
+				subdomain: companies.subdomain,
+				company: {
+					name: companies.name,
+					cnpj: companies.cnpj,
+					address: companies.address,
+					email: companies.email,
+					phone: companies.phone,
+					website: companies.website,
+					logoUrl: companies.logoUrl,
+				},
+				device: {
+					maker: modelMakers.name,
+					model: models.name,
+					reportedDefect: serviceOrders.reportedDefect,
+				},
+			})
+			.from(estimates)
+			.innerJoin(companies, eq(companies.id, estimates.companyId))
+			.innerJoin(serviceOrders, eq(serviceOrders.id, estimates.serviceOrderId))
+			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
+			.innerJoin(models, eq(models.id, devices.modelId))
+			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
+			.where(eq(estimates.id, estimateId))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	static async queryCustomer(customerId: string) {
+		const [customer] = await db
+			.select({
+				name: customers.name,
+				cpf: customers.cpf,
+				email: customers.email,
+				phone: customers.phone,
+				address: customers.address,
+				city: customers.city,
+				state: customers.state,
+			})
+			.from(customers)
+			.where(eq(customers.id, customerId))
+			.limit(1);
+		return customer ?? null;
+	}
+
+	static async queryEmployee(userId: string, companyId: string) {
+		const [employee] = await db
+			.select({ id: employees.id })
+			.from(employees)
+			.where(
+				and(eq(employees.userId, userId), eq(employees.companyId, companyId))
+			)
+			.limit(1);
+		return employee ?? null;
+	}
+}

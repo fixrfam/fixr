@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 		getUserOneTimeTokensWithEmail: vi.fn(),
 		queryOneTimeToken: vi.fn(),
 		deleteOneTimeToken: vi.fn(),
+		deleteUserRefreshTokens: vi.fn(),
 	},
 	TokensService: { createOneTimeToken: vi.fn() },
 	CredentialsRepository: { updateUserPassword: vi.fn() },
@@ -102,6 +103,33 @@ describe("CredentialsService.changePasswordAuthenticated", () => {
 		expect(id).toBe(userId);
 		expect(await bcrypt.compare(NEW, hash)).toBe(true);
 		expect(reply.state.body).toMatchObject({ code: "password_update_success" });
+	});
+
+	it("ends every other session and keeps the caller's", async () => {
+		await CredentialsService.changePasswordAuthenticated({
+			user: jwtUser,
+			body: { old: OLD, new: NEW },
+			refreshToken: "current",
+			response: asReply(createFakeReply()),
+		});
+
+		expect(mocks.TokensRepository.deleteUserRefreshTokens).toHaveBeenCalledWith(
+			userId,
+			"current"
+		);
+	});
+
+	it("does not end sessions when the current password is wrong", async () => {
+		await expect(
+			CredentialsService.changePasswordAuthenticated({
+				user: jwtUser,
+				body: { old: "Wr0ng!Pass", new: NEW },
+				response: asReply(createFakeReply()),
+			})
+		).rejects.toMatchObject({ code: "invalid_password" });
+		expect(
+			mocks.TokensRepository.deleteUserRefreshTokens
+		).not.toHaveBeenCalled();
 	});
 });
 
@@ -264,6 +292,9 @@ describe("CredentialsService.confirmPasswordReset", () => {
 		expect(await bcrypt.compare(NEW, hash)).toBe(true);
 		expect(mocks.TokensRepository.deleteOneTimeToken).toHaveBeenCalledWith(
 			"tok"
+		);
+		expect(mocks.TokensRepository.deleteUserRefreshTokens).toHaveBeenCalledWith(
+			userId
 		);
 	});
 

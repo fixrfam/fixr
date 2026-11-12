@@ -1,9 +1,11 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
+import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashLink } from "../dash-link";
@@ -23,6 +25,7 @@ export function TableToolbar({
 }: TableToolbarProps) {
 	const { t } = useTranslation();
 	const params = useParams<{ subdomain: string }>();
+	const ability = useCatalogAbility();
 
 	return (
 		<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -41,15 +44,17 @@ export function TableToolbar({
 			</div>
 			<div className="flex items-center justify-start gap-4">
 				{children}
-				<Button asChild className="shrink-0">
-					<DashLink
-						href={"/service-orders/new"}
-						prefetch
-						subdomain={params.subdomain}
-					>
-						{t("serviceOrders.table.newOrder")} <Plus className="size-3.5" />
-					</DashLink>
-				</Button>
+				{ability.can(permissions.serviceOrders.create) && (
+					<Button asChild className="shrink-0">
+						<DashLink
+							href={"/service-orders/new"}
+							prefetch
+							subdomain={params.subdomain}
+						>
+							{t("serviceOrders.table.newOrder")} <Plus className="size-3.5" />
+						</DashLink>
+					</Button>
+				)}
 			</div>
 		</div>
 	);

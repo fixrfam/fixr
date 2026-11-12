@@ -11,6 +11,7 @@ import { AppError } from "../../../core/lib/app-error";
 import { signJWT } from "../../../core/lib/jwt";
 import { requestLocale } from "../../../core/lib/locale";
 import { apiResponse } from "../../../core/lib/response";
+import { apiUrl, frontendRedirect } from "../../../core/lib/urls";
 import { AuthRepository } from "../../auth/repositories";
 import { TokensRepository } from "../../tokens/repositories";
 import { TokensService } from "../../tokens/services";
@@ -120,7 +121,7 @@ export class AccountService {
 	 * Creates a one-time deletion token and sends a confirmation email.
 	 *
 	 * @param userId - The authenticated user ID
-	 * @param request - Fastify request (used to build confirmation URL)
+	 * @param request - Fastify request (used for the email locale)
 	 * @param response - Fastify reply
 	 */
 	static async requestAccountDeletion({
@@ -150,7 +151,9 @@ export class AccountService {
 
 		const redirectUrl = `${env.FRONTEND_URL}/auth/login`;
 
-		const verificationUrl = `${request.protocol}://${request.host}/account/confirm-deletion?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+		const verificationUrl = apiUrl(
+			`/account/confirm-deletion?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`
+		);
 
 		await sendAccountDeletionEmail({
 			to: account.email,
@@ -214,7 +217,7 @@ export class AccountService {
 					secure: true,
 				})
 				.status(302)
-				.redirect(decodeURIComponent(redirectUrl));
+				.redirect(frontendRedirect(decodeURIComponent(redirectUrl)));
 		}
 
 		return response.status(200).send(

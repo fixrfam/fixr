@@ -18,6 +18,10 @@ Fastify + `fastify-type-provider-zod` (Zod is the source of truth for both valid
 - Refresh tokens and one-time tokens (email confirmation, password reset, account deletion) are separate DB tables (`refresh_tokens`, `one_time_tokens`) — see `modules/auth` and `modules/account` for the patterns before adding another token-based flow.
 - `request.ability` (RBAC) is populated in two places: the `authenticate` middleware and `setupRBAC`'s `onRequest` hook. If you touch one, check the other stays consistent.
 
+## Domain events
+
+Cross-module consequences of a write (service order status → device status, later → inventory) go through the typed event bus in `src/core/events`: the service emits inside `inTransaction`, effects live in the reacting module's `effects/` and run in the same transaction. Read `src/core/events/README.md` before adding an event or an effect, and keep its table up to date.
+
 ## Errors
 
 Central error handling lives in a single `setErrorHandler` in `src/app.ts`, in this order: `AppError` (domain errors, see `core/lib/app-error.ts`) → `ZodError` (request/response shape) → Fastify schema validation errors → response serialization errors. New domain errors go through a module's `defineErrors({...})` registry, not a new ad-hoc handler.

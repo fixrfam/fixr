@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@pheralb/toast";
 import { Check, ChevronsUpDown, Loader2, Plus, Save, X } from "lucide-react";
 import { type ComponentPropsWithoutRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { type Control, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { numberInputProps } from "@/components/dashboard/parts/forms/number-input";
@@ -44,12 +44,45 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import type { ServiceRow } from "@/lib/services/inventory";
+import type { PartRow, ServiceRow } from "@/lib/services/inventory";
 import { cn } from "@/lib/utils";
 import { TopicsInput } from "./topics-input";
 
 function toggle(ids: string[], id: string) {
 	return ids.includes(id) ? ids.filter((v) => v !== id) : [...ids, id];
+}
+
+/** Labor plus the chosen parts: what an order will charge for the service. */
+function TotalHint({
+	control,
+	parts,
+}: {
+	control: Control<z.infer<typeof createServiceSchema>>;
+	parts: PartRow[];
+}) {
+	const { t, format } = useTranslation();
+	const price = useWatch({ control, name: "price" });
+
+	if (parts.length === 0 || typeof price !== "number") {
+		return null;
+	}
+
+	// Through cents, like the API, so the hint matches what it charges.
+	const partsCents = parts.reduce(
+		(cents, part) => cents + Math.round(part.salePrice * 100),
+		0
+	);
+	const partsPrice = partsCents / 100;
+
+	return (
+		<p className="text-emerald-700 text-xs dark:text-emerald-400">
+			{t("services.form.totalHint", {
+				labor: format.currency(price),
+				parts: format.currency(partsPrice),
+				total: format.currency((Math.round(price * 100) + partsCents) / 100),
+			})}
+		</p>
+	);
 }
 
 export function NewServiceForm({
@@ -59,7 +92,7 @@ export function NewServiceForm({
 	...props
 }: ComponentPropsWithoutRef<"form"> & {
 	/** When given, the form edits this service instead of creating a new one. */
-	service?: ServiceRow;
+	service?: Omit<ServiceRow, "partsPrice" | "totalPrice">;
 	onSuccess?: () => void;
 }) {
 	const { t, format } = useTranslation();
@@ -223,6 +256,9 @@ export function NewServiceForm({
 										{...numberInputProps(field)}
 									/>
 								</FormControl>
+								<FormDescription>
+									{t("services.form.priceDescription")}
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -328,6 +364,7 @@ export function NewServiceForm({
 									<FormDescription>
 										{t("services.form.partsDescription")}
 									</FormDescription>
+									<TotalHint control={form.control} parts={selected} />
 									<FormMessage />
 								</FormItem>
 							);

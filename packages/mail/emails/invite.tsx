@@ -5,23 +5,15 @@
  * design asks for.
  */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import {
-	Body,
-	Button,
-	Container,
-	Head,
-	Heading,
-	Hr,
-	Html,
-	Preview,
-	Section,
-	Tailwind,
-	Text,
-} from "@react-email/components";
+import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
-import { FixrHeader } from "../components/fixr-header";
+import {
+	EmailButton,
+	EmailLayout,
+	EmailNote,
+} from "../components/email-layout";
 
 export interface EmailProps {
 	displayName: string;
@@ -33,6 +25,7 @@ export interface EmailProps {
 	locale?: Locale;
 }
 
+/** Welcome to the team: the temporary password stands out, then the way in. */
 export const Invite = ({
 	displayName,
 	appName,
@@ -45,79 +38,48 @@ export const Invite = ({
 	const { t } = createTranslator(locale, { escapeValues: true });
 
 	return (
-		<Tailwind
-			config={{
-				theme: {
-					extend: {
-						colors: {
-							brand: "#1F65FE",
-							border: "#dedede",
-						},
-					},
-				},
-			}}
+		<EmailLayout
+			footer={t("emails.invite.footer")}
+			illustration="invite"
+			preview={t("emails.invite.preview", { name: displayName, app: appName })}
 		>
-			<Html>
-				<Head />
-				<Preview>
-					{t("emails.invite.preview", { name: displayName, app: appName })}
-				</Preview>
-				<Body style={main}>
-					<Container className="mx-auto max-w-[480px]">
-						<FixrHeader />
-
-						<Text
-							className="my-0 text-lg tracking-tight"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.invite.greeting", { name: displayName }),
-							}}
-						/>
-						<Heading
-							className="my-0 mb-4 text-left font-semibold text-2xl tracking-tight md:mb-[32px] md:text-3xl"
-							dangerouslySetInnerHTML={{
-								__html: t("emails.invite.heading", {
-									company: companyName,
-									app: appName,
-								}),
-							}}
-						/>
-						<Section className="gap-0">
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.invite.body", { company: companyName }),
-								}}
-							/>
-
-							<Text
-								dangerouslySetInnerHTML={{
-									__html: t("emails.invite.instructions"),
-								}}
-							/>
-
-							<Container>
-								<Text className="w-full rounded-md bg-border/25 text-center font-semibold text-2xl tracking-tight md:py-8">
-									{password}
-								</Text>
-								<Container className="flex w-full items-center justify-center text-center" />
-								<Button
-									className="my-4 box-border w-full rounded-[8px] bg-brand px-[20px] py-[12px] text-center font-semibold text-white"
-									href={ctaUrl}
-								>
-									{t("emails.invite.cta")}
-								</Button>
-								<Text className="my-0 text-center font-bold">
-									{t("emails.invite.passwordHint")}
-								</Text>
-							</Container>
-						</Section>
-						<Hr className="my-12" />
-						<Text className="text-center text-[#6a737d] text-sm">
-							{t("emails.invite.footer")}
-						</Text>
-					</Container>
-				</Body>
-			</Html>
-		</Tailwind>
+			<Text
+				className="mb-0 text-[15px] text-muted"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.invite.greeting", { name: displayName }),
+				}}
+			/>
+			<Heading
+				className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.invite.heading", {
+						company: companyName,
+						app: appName,
+					}),
+				}}
+			/>
+			<Text
+				className="text-[15px] leading-6"
+				dangerouslySetInnerHTML={{
+					__html: t("emails.invite.body", { company: companyName }),
+				}}
+			/>
+			<Text
+				className="text-[15px] leading-6"
+				dangerouslySetInnerHTML={{ __html: t("emails.invite.instructions") }}
+			/>
+			<Text className="mb-1 text-muted text-xs">
+				{t("emails.invite.passwordLabel")}
+			</Text>
+			<Text
+				className="mt-0 rounded-[12px] bg-[#f6f8fc] py-4 text-center font-bold text-[22px] text-ink tracking-wide"
+				style={{ fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" }}
+			>
+				{password}
+			</Text>
+			<EmailButton href={ctaUrl}>{t("emails.invite.cta")}</EmailButton>
+			<EmailNote>{t("emails.invite.passwordHint")}</EmailNote>
+		</EmailLayout>
 	);
 };
 
@@ -130,13 +92,6 @@ Invite.PreviewProps = {
 } as EmailProps;
 
 export default Invite;
-
-const main = {
-	backgroundColor: "#ffffff",
-	color: "#24292e",
-	fontFamily:
-		'-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"',
-};
 
 export async function renderEmail({ ...props }: EmailProps): Promise<string> {
 	try {

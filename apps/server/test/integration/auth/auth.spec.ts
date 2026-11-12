@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { TokensService } from "@/src/modules/tokens/services";
 import {
 	DEFAULT_PASSWORD,
-	makeClient,
 	makeCompany,
+	makeCustomerAccount,
 	makeEmployee,
 } from "../../factories";
 import { createTestApp } from "../../helpers/app";
@@ -91,7 +91,7 @@ describe("POST /auth/login", () => {
 	});
 
 	it("matches the email case-insensitively", async () => {
-		const { user } = await makeClient({ email: "mixed@fixr.test" });
+		const { user } = await makeCustomerAccount({ email: "mixed@fixr.test" });
 
 		const response = await login("MIXED@fixr.test", user.password);
 
@@ -99,7 +99,7 @@ describe("POST /auth/login", () => {
 	});
 
 	it("rejects a wrong password with 401", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 
 		const response = await login(user.email, "Wr0ng!Pass");
 
@@ -116,7 +116,7 @@ describe("POST /auth/login", () => {
 	});
 
 	it("rejects an unverified account with 403", async () => {
-		const { user } = await makeClient({ verified: false });
+		const { user } = await makeCustomerAccount({ verified: false });
 
 		const response = await login(user.email, user.password);
 
@@ -141,7 +141,7 @@ describe("POST /auth/login", () => {
 
 describe("GET /auth/verify", () => {
 	it("verifies the account with a real confirmation token and consumes it", async () => {
-		const { user } = await makeClient({ verified: false });
+		const { user } = await makeCustomerAccount({ verified: false });
 		const { token } = await TokensService.createOneTimeToken({
 			userId: user.id,
 			email: user.email,
@@ -166,7 +166,7 @@ describe("GET /auth/verify", () => {
 	});
 
 	it("redirects when a redirectUrl is given", async () => {
-		const { user } = await makeClient({ verified: false });
+		const { user } = await makeCustomerAccount({ verified: false });
 		const { token } = await TokensService.createOneTimeToken({
 			userId: user.id,
 			email: user.email,
@@ -182,8 +182,25 @@ describe("GET /auth/verify", () => {
 		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
 	});
 
+	it("does not redirect to another site", async () => {
+		const { user } = await makeCustomerAccount({ verified: false });
+		const { token } = await TokensService.createOneTimeToken({
+			userId: user.id,
+			email: user.email,
+			tokenType: "confirmation",
+		});
+
+		const response = await app.inject({
+			method: "GET",
+			url: `/auth/verify?token=${encodeURIComponent(token)}&redirectUrl=${encodeURIComponent("https://attacker.example/phish")}`,
+		});
+
+		expect(response.statusCode).toBe(302);
+		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
+	});
+
 	it("rejects a password reset token", async () => {
-		const { user } = await makeClient({ verified: false });
+		const { user } = await makeCustomerAccount({ verified: false });
 		const { token } = await TokensService.createOneTimeToken({
 			userId: user.id,
 			email: user.email,
@@ -201,7 +218,7 @@ describe("GET /auth/verify", () => {
 
 describe("refresh token lifecycle", () => {
 	it("POST /auth/token rotates the refresh token and the old one stops working", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const first = await login(user.email, user.password);
 		const oldRefresh = cookie(first, REFRESH_COOKIE)!.value;
 
@@ -233,7 +250,7 @@ describe("refresh token lifecycle", () => {
 	});
 
 	it("GET /auth/signout revokes the refresh token in the database", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const refresh = cookie(
 			await login(user.email, user.password),
 			REFRESH_COOKIE
@@ -255,7 +272,7 @@ describe("refresh token lifecycle", () => {
 	});
 
 	it("keeps other sessions of the same user alive", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const a = cookie(
 			await login(user.email, user.password),
 			REFRESH_COOKIE
@@ -281,12 +298,35 @@ describe("refresh token lifecycle", () => {
 });
 
 describe("GET /auth/google", () => {
-	it("redirects to Google", async () => {
+	it("redirects to Google with the state stored in the browser", async () => {
 		const response = await app.inject({ method: "GET", url: "/auth/google" });
 
 		expect(response.statusCode).toBe(302);
 		expect(response.headers.location).toMatch(
 			/^https:\/\/accounts\.google\.com\/o\/oauth2\/v2\/auth\?/
 		);
+		const state = new URL(response.headers.location as string).searchParams.get(
+			"state"
+		);
+		const stored = cookie(response, cookieKey("googleOAuthState"));
+		expect(state).toBeTruthy();
+		expect(stored?.value).toBe(state);
+		expect(stored?.httpOnly).toBe(true);
+	});
+});
+
+describe("GET /auth/google/callback", () => {
+	it("refuses a callback this browser did not start (login CSRF)", async () => {
+		const response = await app.inject({
+			method: "GET",
+			url: "/auth/google/callback?code=attacker-code&state=attacker-state",
+		});
+
+		expect(response.statusCode).toBe(302);
+		expect(response.headers.location).toBe("http://localhost:3000/auth/login");
+		expect(cookie(response, cookieKey("googleAuthError"))?.value).toBe(
+			"gacc_state_mismatch"
+		);
+		expect(cookie(response, SESSION_COOKIE)).toBeUndefined();
 	});
 });

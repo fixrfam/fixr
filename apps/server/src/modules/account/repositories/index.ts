@@ -1,5 +1,5 @@
 import { db, eq, sql } from "@fixr/db/connection";
-import { clients, companies, employees, users } from "@fixr/db/schema";
+import { companies, customers, employees, users } from "@fixr/db/schema";
 import { accountSchema } from "@fixr/schemas/account";
 import { Cached, InvalidateCache } from "../../../shared/infra/cache";
 
@@ -17,13 +17,13 @@ export class AccountRepository {
 			.select({
 				id: users.id,
 				email: users.email,
-				displayName: sql`COALESCE(${employees.name}, ${clients.name})`,
+				displayName: sql`COALESCE(${employees.name}, ${customers.name})`,
 				avatarUrl: users.avatarUrl,
-				cpf: sql`COALESCE(${employees.cpf}, ${clients.cpf})`,
-				phone: sql`COALESCE(${employees.phone}, ${clients.phone})`,
+				cpf: sql`COALESCE(${employees.cpf}, ${customers.cpf})`,
+				phone: sql`COALESCE(${employees.phone}, ${customers.phone})`,
 				profileType: sql`CASE
                       WHEN ${employees.id} IS NOT NULL THEN 'employee'
-                      WHEN ${clients.id} IS NOT NULL THEN 'client'
+                      WHEN ${customers.id} IS NOT NULL THEN 'customer'
                       ELSE 'unknown'
                     END`,
 				company: sql`CASE
@@ -39,7 +39,7 @@ export class AccountRepository {
 			})
 			.from(users)
 			.leftJoin(employees, eq(employees.userId, users.id))
-			.leftJoin(clients, eq(clients.userId, users.id))
+			.leftJoin(customers, eq(customers.userId, users.id))
 			.leftJoin(companies, eq(companies.id, employees.companyId))
 			.where(eq(users.id, id))
 			.limit(1);

@@ -1,7 +1,7 @@
 import { db } from "@fixr/db/connection";
 import { uploads } from "@fixr/db/schema";
 import { describe, expect, it } from "vitest";
-import { makeClient } from "../../factories";
+import { makeCustomerAccount } from "../../factories";
 import { createTestApp } from "../../helpers/app";
 import {
 	authedInject,
@@ -48,7 +48,7 @@ describe("POST /uploads/:purpose/presign", () => {
 	});
 
 	it("presigns an avatar for any signed-in user, without company scope", async () => {
-		const { user } = await makeClient();
+		const { user } = await makeCustomerAccount();
 		const token = signSession(app, { id: user.id, email: user.email });
 
 		const response = await authedInject(app, token, {
@@ -68,6 +68,24 @@ describe("POST /uploads/:purpose/presign", () => {
 			method: "POST",
 			url: "/uploads/models/presign",
 			payload: { ...file, size: 50 * 1024 * 1024 },
+		});
+
+		expect(response.statusCode).toBe(400);
+		expect(await db.select().from(uploads)).toHaveLength(0);
+	});
+
+	it.each([
+		"text/html",
+		"image/svg+xml",
+	])("refuses to sign %s, which would run as a page on the public bucket", async (contentType) => {
+		const { user } = await makeCustomerAccount();
+
+		const token = signSession(app, { id: user.id, email: user.email });
+
+		const response = await authedInject(app, token, {
+			method: "POST",
+			url: "/uploads/avatar/presign",
+			payload: { ...file, contentType },
 		});
 
 		expect(response.statusCode).toBe(400);

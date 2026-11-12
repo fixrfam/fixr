@@ -47,6 +47,14 @@
       "types": "./src/companies.ts",
       "default": "./src/companies.ts"
     },
+    "./portal": {
+      "types": "./src/portal.ts",
+      "default": "./src/portal.ts"
+    },
+    "./estimates": {
+      "types": "./src/estimates.ts",
+      "default": "./src/estimates.ts"
+    },
     "./employees": {
       "types": "./src/employees.ts",
       "default": "./src/employees.ts"
@@ -55,9 +63,13 @@
       "types": "./src/common.ts",
       "default": "./src/common.ts"
     },
-    "./clients": {
-      "types": "./src/clients.ts",
-      "default": "./src/clients.ts"
+    "./customers": {
+      "types": "./src/customers.ts",
+      "default": "./src/customers.ts"
+    },
+    "./devices": {
+      "types": "./src/devices.ts",
+      "default": "./src/devices.ts"
     },
     "./service-orders": {
       "types": "./src/service-orders.ts",

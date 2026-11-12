@@ -47,7 +47,7 @@ vi.mock("google-auth-library", () => ({
 	}),
 }));
 
-const { AuthService } = await import(".");
+const { AuthService, GOOGLE_STATE_COOKIE } = await import(".");
 
 const PASSWORD = "Str0ng!Pass";
 const passwordHash = bcrypt.hashSync(PASSWORD, 4);
@@ -149,7 +149,7 @@ describe("AuthService.register", () => {
 		);
 		const [email] = mocks.sendAccountVerificationEmail.mock.calls[0]!;
 		expect(email.verificationUrl).toBe(
-			`https://api.fixr.test/auth/verify?token=${encodeURIComponent("a/b+c")}&redirectUrl=${encodeURIComponent("http://localhost:3000/auth/login")}`
+			`http://localhost:3333/auth/verify?token=${encodeURIComponent("a/b+c")}&redirectUrl=${encodeURIComponent("http://localhost:3000/auth/login")}`
 		);
 	});
 
@@ -305,14 +305,29 @@ describe("AuthService.verify", () => {
 
 		await AuthService.verify({
 			token: "tok",
-			redirectUrl: encodeURIComponent("https://app.test/login"),
+			redirectUrl: encodeURIComponent("http://localhost:3000/auth/login?x=1"),
 			response: asReply(reply),
 		});
 
-		expect(reply.state.redirectUrl).toBe("https://app.test/login");
+		expect(reply.state.redirectUrl).toBe(
+			"http://localhost:3000/auth/login?x=1"
+		);
 		expect(reply.state.cookies[cookieKey("showVerifiedDialog")]?.value).toBe(
 			"true"
 		);
+	});
+
+	it("sends a redirectUrl on another site to the login page instead", async () => {
+		mocks.TokensRepository.queryOneTimeToken.mockResolvedValue(token());
+		const reply = createFakeReply();
+
+		await AuthService.verify({
+			token: "tok",
+			redirectUrl: encodeURIComponent("https://attacker.example/phish"),
+			response: asReply(reply),
+		});
+
+		expect(reply.state.redirectUrl).toBe("http://localhost:3000/auth/login");
 	});
 
 	it.each([
@@ -425,20 +440,33 @@ describe("AuthService.googleLogin", () => {
 		expect(url.searchParams.get("scope")).toBe("openid email profile");
 	});
 
-	// Known gap (tracked in the #95 findings): no `state` parameter is sent/validated,
-	// so the OAuth flow has no CSRF protection.
-	it("does not send an OAuth state parameter yet", () => {
+	it("sends a random state and keeps it in an httpOnly cookie", () => {
 		const reply = createFakeReply();
 
 		AuthService.googleLogin({ response: asReply(reply) });
 
-		expect(new URL(reply.state.redirectUrl!).searchParams.has("state")).toBe(
-			false
+		const state = new URL(reply.state.redirectUrl!).searchParams.get("state");
+		const cookie = reply.state.cookies[GOOGLE_STATE_COOKIE];
+		expect(state).toMatch(/^[A-Za-z0-9_-]{43}$/);
+		expect(cookie?.value).toBe(state);
+		expect(cookie?.options).toMatchObject({ httpOnly: true, secure: true });
+	});
+
+	it("sends a different state on every sign-in", () => {
+		const first = createFakeReply();
+		const second = createFakeReply();
+
+		AuthService.googleLogin({ response: asReply(first) });
+		AuthService.googleLogin({ response: asReply(second) });
+
+		expect(first.state.cookies[GOOGLE_STATE_COOKIE]?.value).not.toBe(
+			second.state.cookies[GOOGLE_STATE_COOKIE]?.value
 		);
 	});
 });
 
 describe("AuthService.googleCallback", () => {
+	const sameState = { state: "st", expectedState: "st" };
 	const ticket = (payload: Record<string, unknown> | undefined) => ({
 		getPayload: () => payload,
 	});
@@ -452,9 +480,31 @@ describe("AuthService.googleCallback", () => {
 		await expect(
 			AuthService.googleCallback({
 				code: "",
+				...sameState,
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "missing_code" });
+	});
+
+	it.each([
+		["the state differs from the cookie", { state: "a", expectedState: "b" }],
+		["the browser has no state cookie", { state: "a" }],
+		["Google sent no state", { expectedState: "a" }],
+	])("refuses the sign-in before exchanging the code when %s", async (_label, states) => {
+		const reply = createFakeReply();
+
+		await AuthService.googleCallback({
+			code: "c",
+			...states,
+			response: asReply(reply),
+		});
+
+		expect(mocks.google.getToken).not.toHaveBeenCalled();
+		expect(reply.state.redirectUrl).toBe("http://localhost:3000/auth/login");
+		expect(reply.state.cookies[cookieKey("googleAuthError")]?.value).toBe(
+			"gacc_state_mismatch"
+		);
+		expect(reply.state.clearedCookies).toContain(GOOGLE_STATE_COOKIE);
 	});
 
 	it("fails with google_auth_failed when Google rejects the token", async () => {
@@ -463,6 +513,7 @@ describe("AuthService.googleCallback", () => {
 		await expect(
 			AuthService.googleCallback({
 				code: "c",
+				...sameState,
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "google_auth_failed" });
@@ -474,6 +525,7 @@ describe("AuthService.googleCallback", () => {
 		await expect(
 			AuthService.googleCallback({
 				code: "c",
+				...sameState,
 				response: asReply(createFakeReply()),
 			})
 		).rejects.toMatchObject({ code: "google_auth_failed" });
@@ -504,7 +556,11 @@ describe("AuthService.googleCallback", () => {
 		mocks.AuthRepository.queryUserByEmail.mockResolvedValue(existing);
 		const reply = createFakeReply();
 
-		await AuthService.googleCallback({ code: "c", response: asReply(reply) });
+		await AuthService.googleCallback({
+			code: "c",
+			...sameState,
+			response: asReply(reply),
+		});
 
 		expect(reply.state.redirectUrl).toBe("http://localhost:3000/auth/login");
 		expect(reply.state.cookies[cookieKey("googleAuthError")]?.value).toBe(
@@ -524,7 +580,11 @@ describe("AuthService.googleCallback", () => {
 		mocks.AuthRepository.queryUserByEmail.mockResolvedValue(user());
 		const reply = createFakeReply();
 
-		await AuthService.googleCallback({ code: "c", response: asReply(reply) });
+		await AuthService.googleCallback({
+			code: "c",
+			...sameState,
+			response: asReply(reply),
+		});
 
 		expect(mocks.AuthRepository.queryUserByEmail).toHaveBeenCalledWith(
 			"john@fixr.test"

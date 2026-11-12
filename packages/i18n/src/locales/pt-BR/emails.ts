@@ -17,7 +17,36 @@ export const emails: Translated<typeof source> = {
 		cta: "Acessar",
 		passwordHint:
 			"Altere a senha padrão no painel de conta após o primeiro acesso.",
+		passwordLabel: "Sua senha temporária",
 		footer: "Se você não reconhece essa empresa, por favor, ignore este email.",
+	},
+	portalAccess: {
+		subject: "Suas ordens de serviço na {{company}}",
+		subjectSelf: "Seu link para acompanhar suas ordens de serviço",
+		preview: "Acompanhe suas ordens de serviço e orçamentos.",
+		greeting: "Olá, <i>{{name}}</i>!",
+		heading: "Acompanhe suas ordens de serviço.",
+		body: "Use o botão abaixo para ver o status das suas ordens de serviço e responder orçamentos. <b>Não compartilhe este link</b>: ele dá acesso ao seu histórico.",
+		cta: "Ver minhas ordens de serviço",
+		validity: "O link funciona por 30 dias, em qualquer aparelho.",
+		footer: "Se você não esperava este email, por favor, ignore-o.",
+	},
+	estimate: {
+		subject: "Orçamento #{{number}} da {{company}}",
+		preview: "A {{company}} enviou o orçamento #{{number}}.",
+		greeting: "Olá, <i>{{name}}</i>!",
+		heading: "A <b>{{company}}</b> te enviou um orçamento.",
+		body: "O orçamento <b>#{{number}}</b> do seu <b>{{device}}</b> ficou em <b>{{total}}</b>. O PDF está em anexo.",
+		instructions:
+			"Abra o orçamento para conferir os itens e <b>aprovar ou recusar</b>. Ele é válido até <b>{{date}}</b>.",
+		cta: "Ver orçamento",
+		numberLabel: "Orçamento",
+		deviceLabel: "Aparelho",
+		totalLabel: "Total",
+		validUntilLabel: "Válido até",
+		portalHint:
+			"O botão abre sua área no portal do cliente, onde você também acompanha o reparo e vê o PDF.",
+		footer: "Se você não pediu este orçamento, por favor, ignore este email.",
 	},
 	verification: {
 		subject: "Confirme seu email, @{{name}}!",

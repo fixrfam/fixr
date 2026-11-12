@@ -8,6 +8,10 @@ export function useMediaQuery(query: string) {
 			setValue(event.matches);
 		}
 
+		// Environments without it (jsdom) keep the default.
+		if (typeof window.matchMedia !== "function") {
+			return;
+		}
 		const result = matchMedia(query);
 		result.addEventListener("change", onChange);
 		setValue(result.matches);

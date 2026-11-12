@@ -272,9 +272,13 @@ This endpoint exchanges the received \`code\` for tokens, verifies the ID token,
 - Issues a new JWT and refresh token.
 - Redirects to the dashboard on success.
 
-In case of errors (missing email, unverified email, etc.), it sets a cookie with the error code (\`googleAuthError\`) and redirects the user back to \`/auth/login\`.`,
+In case of errors (state mismatch, missing email, unverified email, etc.), it sets a cookie with the error code (\`googleAuthError\`) and redirects the user back to \`/auth/login\`.`,
 	querystring: z.object({
 		code: z.string(),
+		state: z
+			.string()
+			.optional()
+			.describe("Must match the state cookie set by GET /auth/google."),
 	}),
 	response: {
 		422: zodResponseSchema({

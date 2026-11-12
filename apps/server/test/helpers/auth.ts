@@ -27,7 +27,7 @@ export function signSession(
 			email: subject.email,
 			displayName: subject.name ?? null,
 			avatarUrl: null,
-			profileType: subject.company ? "employee" : "client",
+			profileType: subject.company ? "employee" : "customer",
 			company: subject.company,
 			createdAt: subject.createdAt ?? new Date(),
 		},

@@ -4,6 +4,19 @@ import { z } from "zod";
 export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
 export const MAX_AVATAR_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
+/**
+ * Content types an upload may be stored with. Every purpose is an image, and the
+ * bucket is public: anything that a browser renders as a page (HTML, SVG) would
+ * run as a site on the bucket's domain, so only raster images are signed.
+ */
+export const UPLOAD_CONTENT_TYPES = [
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/heic",
+	"image/heif",
+] as const;
+
 export const uploadPurpose = z.enum([
 	"avatar",
 	"service-orders",
@@ -28,9 +41,14 @@ export const createUploadPresignSchema = z.object({
 		.max(255, {
 			message: i18nMessage("validation.upload.contentTypeMax", { count: 255 }),
 		})
-		.regex(/^[^/]+\/[^/]+$/, {
-			message: i18nMessage("validation.upload.contentTypeInvalid"),
-		}),
+		.refine(
+			(value) =>
+				(UPLOAD_CONTENT_TYPES as readonly string[]).includes(
+					value.toLowerCase()
+				),
+			{ message: i18nMessage("validation.upload.contentTypeInvalid") }
+		)
+		.transform((value) => value.toLowerCase()),
 	size: z
 		.number({ error: i18nMessage("validation.upload.sizeRequired") })
 		.int({ message: i18nMessage("validation.upload.sizeInteger") })

@@ -100,4 +100,49 @@ describe("web middleware session refresh", () => {
 		expect(forwarded).toContain(`${cookieKey("session")}=${fresh}`);
 		expect(forwarded).toContain(`${cookieKey("refreshToken")}=r2`);
 	});
+
+	it.each([
+		["401", 401],
+		["400 (no refresh token)", 400],
+		["404 (user no longer exists)", 404],
+	])("signs out when the refresh fails with %s", async (_, status) => {
+		const { server } = await import("@/test/msw/server");
+		const { HttpResponse, http } = await import("msw");
+		server.use(
+			http.post("http://api.test/auth/token", () =>
+				HttpResponse.json({ status }, { status })
+			)
+		);
+		const req = new NextRequest(`${APP}/dashboard/fixr/home`);
+		req.cookies.set(cookieKey("session"), "not-a-jwt");
+
+		expect(await location(req)).toBe(`${APP}/api/auth/signout`);
+	});
+});
+
+describe("web middleware login page", () => {
+	it("sends a live session to the dashboard", async () => {
+		expect(await location(request("/auth/login", "manager"))).toBe(
+			`${APP}/dashboard/account`
+		);
+	});
+
+	it("drops a session cookie that is not a live JWT instead of looping", async () => {
+		const req = new NextRequest(`${APP}/auth/login`);
+		req.cookies.set(cookieKey("session"), "left-from-a-reset-database");
+
+		const res = await middleware(req);
+
+		expect(res.headers.get("location")).toBeNull();
+		expect(res.headers.getSetCookie().join("\n")).toContain(
+			`${cookieKey("session")}=;`
+		);
+	});
+
+	it("drops an expired session cookie", async () => {
+		const req = new NextRequest(`${APP}/auth/login`);
+		req.cookies.set(cookieKey("session"), fakeJwt({ exp: 1 }));
+
+		expect(await location(req)).toBeNull();
+	});
 });

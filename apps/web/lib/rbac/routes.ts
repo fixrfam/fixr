@@ -16,6 +16,15 @@ export const routeRules: RouteRule[] = [
 
 	{ path: "/", public: true },
 	{ path: "/downtime", public: true },
+	{ path: "/estimate/:token", public: true },
+	{ path: "/portal", public: true },
+	{ path: "/portal/access", public: true },
+	{ path: "/portal/:token", public: true },
+	{ path: "/portal/service-orders", public: true },
+	{ path: "/portal/service-orders/:id", public: true },
+	{ path: "/portal/estimates", public: true },
+	{ path: "/portal/estimates/:id", public: true },
+	{ path: "/portal/profile", public: true },
 
 	{
 		path: "/dashboard/:subdomain/home",
@@ -134,7 +143,7 @@ export const routeRules: RouteRule[] = [
 	// Specific routes first: a rule also matches every path below it
 	{
 		path: "/dashboard/:subdomain/devices/customers",
-		permission: permissions.customers.read,
+		permission: permissions.devices.read,
 	},
 	{
 		path: "/dashboard/:subdomain/devices/models",
@@ -148,6 +157,10 @@ export const routeRules: RouteRule[] = [
 	{
 		path: "/dashboard/:subdomain/settings/company",
 		permission: permissions.companies.update,
+	},
+	{
+		path: "/dashboard/:subdomain/settings/roles",
+		permission: permissions.employees.read,
 	},
 	{
 		path: "/dashboard/:subdomain/settings",

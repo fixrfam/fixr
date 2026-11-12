@@ -11,23 +11,14 @@ const badgeVariants = cva(
 			variant: {
 				default:
 					"border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-				registered:
-					"bg-sky-600/35 text-sky-800 dark:text-sky-300 [a&]:hover:bg-sky-100",
-				parts_pending: "bg-blue-600/35 text-blue-800 dark:text-blue-300",
-				analysis:
-					"bg-amber-600/35 text-amber-800 dark:text-amber-300 [a&]:hover:bg-amber-100",
-				finished:
-					"bg-emerald-600/35 text-emerald-800 dark:text-emerald-300 [a&]:hover:bg-emerald-100",
-				canceled:
-					"bg-rose-600/35 text-rose-800 dark:text-rose-300 [a&]:hover:bg-rose-100",
-				quote_pending:
-					"bg-yellow-600/35 text-yellow-800 dark:text-yellow-300 [a&]:hover:bg-yellow-100",
-				approval_pending:
-					"bg-yellow-600/35 text-yellow-800 dark:text-yellow-300 [a&]:hover:bg-yellow-100",
-				in_progress:
-					"bg-blue-600/35 text-blue-800 dark:text-blue-300 [a&]:hover:bg-blue-100",
-				ready_for_pickup:
-					"bg-green-600/35 text-green-800 dark:text-green-300 [a&]:hover:bg-green-100",
+				pending: "bg-sky-600/25 text-sky-800 dark:text-sky-300",
+				diagnosing: "bg-amber-600/25 text-amber-800 dark:text-amber-300",
+				waiting_approval:
+					"bg-yellow-600/25 text-yellow-800 dark:text-yellow-300",
+				approved: "bg-indigo-600/25 text-indigo-800 dark:text-indigo-300",
+				fixing: "bg-blue-600/25 text-blue-800 dark:text-blue-300",
+				ready: "bg-emerald-600/25 text-emerald-800 dark:text-emerald-300",
+				delivered: "bg-muted text-muted-foreground",
 			},
 		},
 		defaultVariants: {

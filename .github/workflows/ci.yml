@@ -124,7 +124,8 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.base_ref == 'main')
-    runs-on: ubuntu-latest
+    # Playwright 1.56 has no browsers for ubuntu-latest (26.04) yet.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

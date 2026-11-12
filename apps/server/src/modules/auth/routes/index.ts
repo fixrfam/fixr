@@ -12,6 +12,7 @@ import { AppError } from "../../../core/lib/app-error";
 import { requireTurnstile } from "../../../core/middlewares/turnstile";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
 import { AuthController } from "../controllers";
+import { GOOGLE_STATE_COOKIE } from "../services";
 
 /** @description Auth routes plugin */
 export function authRoutes(fastify: FastifyTypedInstance) {
@@ -94,11 +95,20 @@ export function authRoutes(fastify: FastifyTypedInstance) {
 		{ schema: authDocs.googleCallbackSchema },
 		withErrorHandler(
 			async (
-				request: FastifyRequest<{ Querystring: { code: string } }>,
+				request: FastifyRequest<{
+					Querystring: { code: string; state?: string };
+				}>,
 				response
 			) => {
-				const { code } = await googleCallbackSchema.parseAsync(request.query);
-				await AuthController.googleCallback({ response, code });
+				const { code, state } = await googleCallbackSchema.parseAsync(
+					request.query
+				);
+				await AuthController.googleCallback({
+					response,
+					code,
+					state,
+					expectedState: request.cookies[GOOGLE_STATE_COOKIE],
+				});
 			}
 		)
 	);

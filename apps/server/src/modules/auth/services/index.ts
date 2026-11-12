@@ -1,3 +1,4 @@
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { CookieSerializeOptions } from "@fastify/cookie";
 import { APP_NAME } from "@fixr/constants/app";
 import { cookieKey } from "@fixr/constants/cookies";
@@ -16,6 +17,7 @@ import { signJWT } from "../../../core/lib/jwt";
 import { requestLocale } from "../../../core/lib/locale";
 import { apiResponse } from "../../../core/lib/response";
 import { generateRefreshToken } from "../../../core/lib/tokens";
+import { apiUrl, frontendRedirect } from "../../../core/lib/urls";
 import { TokensRepository } from "../../tokens/repositories";
 import { TokensService } from "../../tokens/services";
 import { AuthRepository } from "../repositories";
@@ -28,6 +30,31 @@ const GOOGLE_CREDS = {
 
 const client = new OAuth2Client(GOOGLE_CREDS);
 
+/**
+ * Cookie holding the OAuth `state` of a Google sign-in started in this browser.
+ * The callback only runs for the browser that started the flow, so nobody can
+ * make a victim's browser finish a sign-in into the attacker's account.
+ */
+export const GOOGLE_STATE_COOKIE = cookieKey("googleOAuthState");
+const GOOGLE_STATE_TTL_SECONDS = 10 * 60;
+
+const googleStateCookieOptions: CookieSerializeOptions = {
+	path: "/auth/google",
+	httpOnly: true,
+	secure: true,
+	// Google sends the browser back with a top-level GET, which Lax allows.
+	sameSite: "lax",
+};
+
+function sameState(received: string | undefined, expected: string | undefined) {
+	if (!(received && expected)) {
+		return false;
+	}
+	const a = Buffer.from(received);
+	const b = Buffer.from(expected);
+	return a.length === b.length && timingSafeEqual(a, b);
+}
+
 /** @description Authentication business logic */
 export class AuthService {
 	/**
@@ -35,7 +62,7 @@ export class AuthService {
 	 * Creates the user, generates a confirmation token, and sends a verification email.
 	 *
 	 * @param body - Registration form data
-	 * @param request - Fastify request (used to build verification URL)
+	 * @param request - Fastify request (used for the email locale)
 	 * @param response - Fastify reply
 	 */
 	static async register({
@@ -72,7 +99,9 @@ export class AuthService {
 
 		const redirectUrl = `${env.FRONTEND_URL}/auth/login`;
 
-		const verificationUrl = `${request.protocol}://${request.host}/auth/verify?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+		const verificationUrl = apiUrl(
+			`/auth/verify?token=${encodeURIComponent(oneTimeToken.token)}&redirectUrl=${encodeURIComponent(redirectUrl)}`
+		);
 
 		await sendAccountVerificationEmail({
 			to: newUser.email,
@@ -201,7 +230,7 @@ export class AuthService {
 					secure: true,
 				})
 				.status(302)
-				.redirect(decodeURIComponent(redirectUrl));
+				.redirect(frontendRedirect(decodeURIComponent(redirectUrl)));
 		}
 
 		return response.status(200).send(
@@ -337,17 +366,24 @@ export class AuthService {
 	 * @param response - Fastify reply
 	 */
 	static googleLogin({ response }: { response: FastifyReply }) {
+		const state = randomBytes(32).toString("base64url");
 		const params = {
 			client_id: GOOGLE_CREDS.clientId,
 			redirect_uri: GOOGLE_CREDS.redirectUri,
 			response_type: "code",
 			scope: "openid email profile",
+			state,
 		};
 
 		const query = new URLSearchParams(params).toString();
 		const url = `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
 
-		return response.redirect(url);
+		return response
+			.setCookie(GOOGLE_STATE_COOKIE, state, {
+				...googleStateCookieOptions,
+				maxAge: GOOGLE_STATE_TTL_SECONDS,
+			})
+			.redirect(url);
 	}
 
 	/**
@@ -367,13 +403,34 @@ export class AuthService {
 	 */
 	static async googleCallback({
 		code,
+		state,
+		expectedState,
 		response,
 	}: {
 		code: string;
+		/** `state` Google sent back. */
+		state?: string;
+		/** `state` stored in this browser's cookie by `googleLogin`. */
+		expectedState?: string;
 		response: FastifyReply;
 	}) {
 		if (!code) {
 			throw new AppError("AUTH_MISSING_CODE");
+		}
+
+		// The state is single use: whatever the outcome, this flow is over.
+		response.clearCookie(GOOGLE_STATE_COOKIE, googleStateCookieOptions);
+
+		if (!sameState(state, expectedState)) {
+			return response
+				.setCookie(cookieKey("googleAuthError"), "gacc_state_mismatch", {
+					path: "/",
+					httpOnly: false,
+					sameSite: "none",
+					secure: true,
+				})
+				.status(302)
+				.redirect(`${env.FRONTEND_URL}/auth/login`);
 		}
 
 		try {

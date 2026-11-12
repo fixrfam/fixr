@@ -1,6 +1,10 @@
 import { accountSchema } from "@fixr/schemas/account";
 import { describe, expect, it } from "vitest";
-import { makeClient, makeCompany, makeEmployee } from "../../factories";
+import {
+	makeCompany,
+	makeCustomerAccount,
+	makeEmployee,
+} from "../../factories";
 import { createTestApp } from "../../helpers/app";
 import {
 	authedInject,
@@ -39,9 +43,9 @@ describe("GET /account", () => {
 		expect(response.json().code).toBe("auth_jwt_invalid");
 	});
 
-	// A client (non-employee) has the guest ability, which lacks account:read.
-	it("is forbidden for client accounts (guest ability)", async () => {
-		const { user } = await makeClient();
+	// A customer (non-employee) has the guest ability, which lacks account:read.
+	it("is forbidden for customer accounts (guest ability)", async () => {
+		const { user } = await makeCustomerAccount();
 		const token = signSession(app, { id: user.id, email: user.email });
 
 		const response = await authedInject(app, token, {

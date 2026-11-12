@@ -50,6 +50,40 @@ describe("services", () => {
 		});
 	});
 
+	it("prices the service as labor plus the current sale price of its parts", async () => {
+		const { token, company } = await session();
+		const supplier = await makeSupplier({ companyId: company.id });
+		const [screen, glue] = await Promise.all([
+			makePart({
+				companyId: company.id,
+				supplierId: supplier.id,
+				salePrice: 890.5,
+			}),
+			makePart({
+				companyId: company.id,
+				supplierId: supplier.id,
+				salePrice: 9.9,
+			}),
+		]);
+		const service = await makeService({
+			companyId: company.id,
+			price: 150,
+			partIds: [screen.id, glue.id],
+		});
+		const url = `/companies/${company.subdomain}/services`;
+
+		const [one, list] = await Promise.all([
+			authedInject(app, token, { method: "GET", url: `${url}/${service.id}` }),
+			authedInject(app, token, { method: "GET", url: `${url}?page=1` }),
+		]);
+
+		const pricing = { price: 150, partsPrice: 900.4, totalPrice: 1050.4 };
+		expect(one.json().data).toMatchObject(pricing);
+		expect(list.json().data.records).toEqual([
+			expect.objectContaining(pricing),
+		]);
+	});
+
 	it("refuses parts from another company", async () => {
 		const { token, company } = await session();
 		const other = await makeCompany();

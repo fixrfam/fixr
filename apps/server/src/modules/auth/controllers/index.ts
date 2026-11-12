@@ -89,13 +89,12 @@ export class AuthController {
 	/**
 	 * @description Handle Google OAuth callback
 	 */
-	static googleCallback({
-		code,
-		response,
-	}: {
+	static googleCallback(params: {
 		code: string;
+		state?: string;
+		expectedState?: string;
 		response: FastifyReply;
 	}) {
-		return AuthService.googleCallback({ code, response });
+		return AuthService.googleCallback(params);
 	}
 }
