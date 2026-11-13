@@ -52,10 +52,15 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				),
 				meta: { label: t("serviceOrders.table.columns.category") },
 			}),
-			columnHelper.accessor((row) => row.employee.name, {
+			columnHelper.accessor((row) => row.assignee?.name ?? "—", {
 				id: "technician",
 				header: t("serviceOrders.table.columns.technician"),
 				meta: { label: t("serviceOrders.table.columns.technician") },
+			}),
+			columnHelper.accessor((row) => row.sector?.name ?? "—", {
+				id: "sector",
+				header: t("serviceOrders.table.columns.sector"),
+				meta: { label: t("serviceOrders.table.columns.sector") },
 			}),
 			columnHelper.display({
 				id: "status",

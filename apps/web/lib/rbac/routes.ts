@@ -53,6 +53,14 @@ export const routeRules: RouteRule[] = [
 		permission: permissions.serviceOrders.read,
 	},
 	{
+		path: "/dashboard/:subdomain/service-orders/pool/:scope",
+		permission: permissions.serviceOrders.read,
+	},
+	{
+		path: "/dashboard/:subdomain/sectors",
+		permission: permissions.sectors.read,
+	},
+	{
 		path: "/dashboard/:subdomain/service-orders/new",
 		permission: permissions.serviceOrders.create,
 	},

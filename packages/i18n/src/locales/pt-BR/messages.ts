@@ -175,6 +175,31 @@ export const messages: Translated<typeof source> = {
 			title: "Fornecedor em uso",
 			description: "Mova ou remova as peças dele antes de excluir.",
 		},
+		service_order_sector_not_found: {
+			title: "Setor não encontrado",
+			description: "Escolha um dos setores da empresa.",
+		},
+		service_order_assignee_not_found: {
+			title: "Funcionário não encontrado",
+			description: "Escolha um dos funcionários da empresa.",
+		},
+		sector_not_found: {
+			title: "Setor não encontrado",
+			description: "Este setor não existe ou foi removido.",
+		},
+		sector_name_conflict: {
+			title: "Setor já existe",
+			description: "Sua empresa já tem um setor com esse nome.",
+		},
+		sector_employee_not_found: {
+			title: "Funcionário não encontrado",
+			description: "Este funcionário não faz parte da sua empresa.",
+		},
+		sector_stage_owner_invalid: {
+			title: "Responsável inválido",
+			description:
+				"Uma etapa aponta para um setor ou funcionário que não existe mais.",
+		},
 		supplier_not_found: {
 			title: "Fornecedor não encontrado",
 			description: "Este fornecedor não existe ou foi removido.",

@@ -46,11 +46,11 @@ EstimatesService (customer approves)
 
 | Event | Emitted by | When | Effects |
 | --- | --- | --- | --- |
-| `serviceOrder.opened` | `ServiceOrdersService.createServiceOrder` | A service order was opened for a device | `devices.checkIn`: the device is `in_shop` |
+| `serviceOrder.opened` | `ServiceOrdersService.createServiceOrder` | A service order was opened for a device | `devices.checkIn`: the device is `in_shop`; `sectors.routeToStageOwner`: the order goes to the default owner of `pending`, if set |
 | `estimate.sent` | `EstimatesService` (send by email, or staff marks as sent) | An estimate was sent to the customer | `serviceOrders.awaitApproval`: the order goes to `waiting_approval` if it wasn't answered yet, recorded as moved by who sent it |
 | `estimate.linkRevoked` | `EstimatesService` (sent again, or staff takes it back to draft) | The estimate's emailed link stopped working | `portal.endEstimateSessions`: portal sessions opened from that link end |
 | `estimate.approved` | `EstimatesService.recordAnswer` (staff, emailed link or customer portal) | An estimate was approved | `serviceOrders.approve`: the order goes to `approved` if it wasn't answered yet, by the staff member or, from the customer's link or portal, by nobody |
-| `serviceOrder.statusChanged` | `moveServiceOrder` (used by `ServiceOrdersService.changeStatus`) | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop` |
+| `serviceOrder.statusChanged` | `moveServiceOrder` (used by `ServiceOrdersService.changeStatus`) | The order moved to another status (not emitted when the status is the same) | `devices.followServiceOrder`: `ready` → `ready_for_pickup`, `delivered` → `with_customer`, anything else → `in_shop`; `sectors.routeToStageOwner`: the order goes to the default owner (sector and/or employee) of the stage it entered, if set, recorded as reassigned by nobody |
 
 Keep this table up to date: it is the map of what happens when.
 

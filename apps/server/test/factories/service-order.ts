@@ -91,6 +91,8 @@ export async function makeServiceOrder(input: {
 		companyId: input.companyId,
 		customerId: input.customerId,
 		employeeId: input.employeeId,
+		// The API assigns a new order to whoever opened it.
+		assigneeId: input.employeeId,
 		deviceId,
 		reportedDefect: "Tela quebrada",
 		status: input.status ?? "pending",

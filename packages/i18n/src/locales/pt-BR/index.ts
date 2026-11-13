@@ -20,6 +20,7 @@ import { parts } from "./parts";
 import { permissions } from "./permissions";
 import { portal } from "./portal";
 import { roles } from "./roles";
+import { sectors } from "./sectors";
 import { serviceOrders } from "./service-orders";
 import { services } from "./services";
 import { suppliers } from "./suppliers";
@@ -46,6 +47,7 @@ export const ptBR: Translated<typeof en> = {
 	permissions,
 	portal,
 	roles,
+	sectors,
 	serviceOrders,
 	services,
 	suppliers,

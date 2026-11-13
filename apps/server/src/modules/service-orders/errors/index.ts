@@ -52,4 +52,14 @@ export const serviceOrdersErrors = defineErrors({
 		message: "The part or service does not exist in this company.",
 		status: 400,
 	},
+	SERVICE_ORDER_SECTOR_NOT_FOUND: {
+		code: "service_order_sector_not_found",
+		message: "The sector does not exist in this company.",
+		status: 400,
+	},
+	SERVICE_ORDER_ASSIGNEE_NOT_FOUND: {
+		code: "service_order_assignee_not_found",
+		message: "The employee does not exist in this company.",
+		status: 400,
+	},
 });

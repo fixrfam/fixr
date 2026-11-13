@@ -8,6 +8,7 @@ import {
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { companies } from "./companies";
+import { sectors } from "./sectors";
 import { users } from "./users";
 
 export const rolesEnum = mysqlEnum("roles", [
@@ -34,6 +35,10 @@ export const employees = mysqlTable("employees", {
 	companyId: varchar("company_id", { length: 25 })
 		.references(() => companies.id, { onDelete: "cascade" })
 		.notNull(),
+	/** The employee's own sector ("my sector"); none until an admin sets it. */
+	sectorId: varchar("sector_id", { length: 25 }).references(() => sectors.id, {
+		onDelete: "set null",
+	}),
 });
 
 /**

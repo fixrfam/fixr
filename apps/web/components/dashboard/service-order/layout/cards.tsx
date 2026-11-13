@@ -14,6 +14,10 @@ import { ServiceOrderEstimates } from "@/components/dashboard/estimates/service-
 import { ModelImage } from "@/components/dashboard/models/model-image";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
+import {
+	ReassignDialog,
+	ServiceOrderAssignment,
+} from "@/components/dashboard/service-order/widgets/service-order-assignment";
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
 import { ServiceOrderIssue } from "@/components/dashboard/service-order/widgets/service-order-issue";
 import {
@@ -130,16 +134,12 @@ export function getCards(
 		),
 		technician: (
 			<ServiceOrderDetailsCard
-				description={t("serviceOrders.cards.technicianDescription")}
+				action={<ReassignDialog order={order} />}
+				description={t("serviceOrders.assignment.description")}
 				icon={User}
-				title={t("serviceOrders.cards.technicianTitle")}
+				title={t("serviceOrders.assignment.title")}
 			>
-				<ServiceOrderKeyValueList>
-					<ServiceOrderKeyValueItem
-						label={t("serviceOrders.fields.assignee")}
-						value={order.employee.name}
-					/>
-				</ServiceOrderKeyValueList>
+				<ServiceOrderAssignment order={order} />
 			</ServiceOrderDetailsCard>
 		),
 		customer: (
