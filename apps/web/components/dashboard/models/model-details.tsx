@@ -18,6 +18,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { Reveal } from "@/components/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -282,7 +283,11 @@ export function ModelDetails({ slug }: { slug: string }) {
 	const listHref = `/dashboard/${subdomain}/devices/models`;
 
 	if (query.isPending) {
-		return <DetailsSkeleton />;
+		return (
+			<Reveal id="model-details" loading>
+				<DetailsSkeleton />
+			</Reveal>
+		);
 	}
 
 	if (query.isError || !query.data) {
@@ -322,135 +327,138 @@ export function ModelDetails({ slug }: { slug: string }) {
 	const filterHref = (params: Record<string, string>) =>
 		`${listHref}?${new URLSearchParams(params).toString()}`;
 
+	// Same element as while loading, so the skeleton reveals into it.
 	return (
-		<div className="space-y-6">
-			<nav
-				aria-label={t("models.details.breadcrumb")}
-				className="flex flex-wrap items-center gap-1 text-muted-foreground text-sm"
-			>
-				<Link className="hover:text-foreground" href={listHref}>
-					{t("dashboard.nav.models")}
-				</Link>
-				{category && (
-					<>
-						<ChevronRight className="size-3.5" />
-						<Link
-							className="hover:text-foreground"
-							href={filterHref({ category: category.slug })}
-						>
-							{categoryLabel}
-						</Link>
-					</>
-				)}
-				<ChevronRight className="size-3.5" />
-				<Link
-					className="hover:text-foreground"
-					href={filterHref({
-						maker: model.maker.id,
-						...(category ? { category: category.slug } : {}),
-					})}
+		<Reveal id="model-details" loading={false}>
+			<div className="space-y-6">
+				<nav
+					aria-label={t("models.details.breadcrumb")}
+					className="flex flex-wrap items-center gap-1 text-muted-foreground text-sm"
 				>
-					{model.maker.name}
-				</Link>
-				<ChevronRight className="size-3.5" />
-				<span aria-current="page" className="truncate text-foreground">
-					{model.name}
-				</span>
-			</nav>
-
-			<div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]">
-				<Gallery model={model} />
-
-				<div className="min-w-0 space-y-4">
-					<div className="space-y-1">
-						{categoryLabel && (
-							<p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-								<CategoryIcon className="size-3.5" />
-								{categoryLabel}
-							</p>
-						)}
-						<h1 className="text-balance font-heading font-semibold text-2xl lg:text-3xl">
-							{model.name}
-						</h1>
-						<p className="text-muted-foreground">{model.maker.name}</p>
-					</div>
-
-					<div className="flex flex-wrap items-center gap-2">
-						{model.status && (
-							<Badge
-								className={cn("font-normal", STATUS_STYLES[model.status])}
-								variant="outline"
+					<Link className="hover:text-foreground" href={listHref}>
+						{t("dashboard.nav.models")}
+					</Link>
+					{category && (
+						<>
+							<ChevronRight className="size-3.5" />
+							<Link
+								className="hover:text-foreground"
+								href={filterHref({ category: category.slug })}
 							>
-								{statusLabel(model.status)}
-							</Badge>
+								{categoryLabel}
+							</Link>
+						</>
+					)}
+					<ChevronRight className="size-3.5" />
+					<Link
+						className="hover:text-foreground"
+						href={filterHref({
+							maker: model.maker.id,
+							...(category ? { category: category.slug } : {}),
+						})}
+					>
+						{model.maker.name}
+					</Link>
+					<ChevronRight className="size-3.5" />
+					<span aria-current="page" className="truncate text-foreground">
+						{model.name}
+					</span>
+				</nav>
+
+				<div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[minmax(0,20rem)_1fr]">
+					<Gallery model={model} />
+
+					<div className="min-w-0 space-y-4">
+						<div className="space-y-1">
+							{categoryLabel && (
+								<p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+									<CategoryIcon className="size-3.5" />
+									{categoryLabel}
+								</p>
+							)}
+							<h1 className="text-balance font-heading font-semibold text-2xl lg:text-3xl">
+								{model.name}
+							</h1>
+							<p className="text-muted-foreground">{model.maker.name}</p>
+						</div>
+
+						<div className="flex flex-wrap items-center gap-2">
+							{model.status && (
+								<Badge
+									className={cn("font-normal", STATUS_STYLES[model.status])}
+									variant="outline"
+								>
+									{statusLabel(model.status)}
+								</Badge>
+							)}
+							{(released || announced) && (
+								<Badge className="font-normal" variant="outline">
+									{released
+										? t("models.details.released", { date: released })
+										: t("models.details.announced", { date: announced! })}
+								</Badge>
+							)}
+							{isCustom && (
+								<Badge className="font-normal" variant="secondary">
+									{t("models.explorer.customHint")}
+								</Badge>
+							)}
+						</div>
+
+						{colors.length > 0 && (
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground text-sm">
+									{t("models.details.colors")}
+								</span>
+								<div className="flex flex-wrap items-center gap-1.5">
+									{colors.map((swatch, index) => (
+										<Tooltip key={`${swatch.hex}-${index}`}>
+											<TooltipTrigger asChild>
+												<motion.span
+													animate={{ scale: 1 }}
+													className="block size-6 rounded-full border border-foreground/15 shadow-sm"
+													initial={{ scale: 0 }}
+													style={{ backgroundColor: swatch.hex }}
+													tabIndex={0}
+													transition={{
+														delay: 0.04 * index,
+														type: "spring",
+														bounce: 0.4,
+													}}
+													whileHover={{ scale: 1.15 }}
+												/>
+											</TooltipTrigger>
+											{swatch.name && (
+												<TooltipContent>{swatch.name}</TooltipContent>
+											)}
+										</Tooltip>
+									))}
+								</div>
+							</div>
 						)}
-						{(released || announced) && (
-							<Badge className="font-normal" variant="outline">
-								{released
-									? t("models.details.released", { date: released })
-									: t("models.details.announced", { date: announced! })}
-							</Badge>
-						)}
-						{isCustom && (
-							<Badge className="font-normal" variant="secondary">
-								{t("models.explorer.customHint")}
-							</Badge>
+
+						<Highlights model={model} />
+
+						{!isCustom && model.url.startsWith("http") && (
+							<a
+								className="inline-flex items-center gap-1.5 text-muted-foreground text-xs hover:text-foreground"
+								href={model.url}
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								<ExternalLink className="size-3.5" />
+								{t("models.details.source")}
+							</a>
 						)}
 					</div>
+				</div>
 
-					{colors.length > 0 && (
-						<div className="flex items-center gap-3">
-							<span className="text-muted-foreground text-sm">
-								{t("models.details.colors")}
-							</span>
-							<div className="flex flex-wrap items-center gap-1.5">
-								{colors.map((swatch, index) => (
-									<Tooltip key={`${swatch.hex}-${index}`}>
-										<TooltipTrigger asChild>
-											<motion.span
-												animate={{ scale: 1 }}
-												className="block size-6 rounded-full border border-foreground/15 shadow-sm"
-												initial={{ scale: 0 }}
-												style={{ backgroundColor: swatch.hex }}
-												tabIndex={0}
-												transition={{
-													delay: 0.04 * index,
-													type: "spring",
-													bounce: 0.4,
-												}}
-												whileHover={{ scale: 1.15 }}
-											/>
-										</TooltipTrigger>
-										{swatch.name && (
-											<TooltipContent>{swatch.name}</TooltipContent>
-										)}
-									</Tooltip>
-								))}
-							</div>
-						</div>
-					)}
-
-					<Highlights model={model} />
-
-					{!isCustom && model.url.startsWith("http") && (
-						<a
-							className="inline-flex items-center gap-1.5 text-muted-foreground text-xs hover:text-foreground"
-							href={model.url}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							<ExternalLink className="size-3.5" />
-							{t("models.details.source")}
-						</a>
-					)}
+				<div className="gap-4 md:columns-2">
+					{sections.map((section, index) => (
+						<SpecCard index={index} key={section.key} section={section} />
+					))}
 				</div>
 			</div>
-
-			<div className="gap-4 md:columns-2">
-				{sections.map((section, index) => (
-					<SpecCard index={index} key={section.key} section={section} />
-				))}
-			</div>
-		</div>
+		</Reveal>
 	);
 }

@@ -8,6 +8,7 @@ import { ChevronRight } from "lucide-react";
 import { EmployeePicker } from "@/components/dashboard/employees/employee-picker";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
+import { Reveal } from "@/components/skeleton";
 import {
 	Select,
 	SelectContent,
@@ -15,7 +16,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import type { StageAssigneeMode, StageOwner } from "@/lib/services/departments";
 import type { ServiceOrderStatus } from "@/lib/services/service-orders";
@@ -244,34 +244,32 @@ export function StageOwners() {
 		}
 	}
 
-	if (isPending) {
-		return <Skeleton className="h-64 w-full rounded-md" />;
-	}
-
 	return (
-		<div className="md:grid md:grid-cols-[max-content_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-4">
-			<div
-				aria-hidden
-				className={cn(
-					"hidden border-b pb-2 font-medium text-muted-foreground text-xs md:grid",
-					ROW
-				)}
-			>
-				{/* Same left padding as the badge and the selects' text below. */}
-				<span className="px-2">{t("departments.stages.stage")}</span>
-				<span className="px-3">{t("departments.stages.department")}</span>
-				<span className="px-3">{t("departments.stages.assignee")}</span>
+		<Reveal id="stage-owners" loading={isPending}>
+			<div className="md:grid md:grid-cols-[max-content_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-4">
+				<div
+					aria-hidden
+					className={cn(
+						"hidden border-b pb-2 font-medium text-muted-foreground text-xs md:grid",
+						ROW
+					)}
+				>
+					{/* Same left padding as the badge and the selects' text below. */}
+					<span className="px-2">{t("departments.stages.stage")}</span>
+					<span className="px-3">{t("departments.stages.department")}</span>
+					<span className="px-3">{t("departments.stages.assignee")}</span>
+				</div>
+				{STATUSES.map((status) => (
+					<StageRow
+						canEdit={canEdit}
+						key={status}
+						onChange={(owner) => change(status, owner)}
+						owner={owners?.find((stage) => stage.status === status)}
+						saving={save.isPending}
+						status={status}
+					/>
+				))}
 			</div>
-			{STATUSES.map((status) => (
-				<StageRow
-					canEdit={canEdit}
-					key={status}
-					onChange={(owner) => change(status, owner)}
-					owner={owners?.find((stage) => stage.status === status)}
-					saving={save.isPending}
-					status={status}
-				/>
-			))}
-		</div>
+		</Reveal>
 	);
 }

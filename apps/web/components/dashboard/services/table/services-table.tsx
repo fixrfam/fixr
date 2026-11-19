@@ -21,9 +21,10 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SAMPLE_SERVICES } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { useServiceColumns } from "./columns";
 import { DEVICE_CATEGORY_OPTIONS } from "./filter-options";
@@ -58,7 +59,7 @@ export function ServicesTable() {
 	const rows = useServicesWithParts(query.data?.records ?? EMPTY);
 
 	const table = useCatalogTable({
-		data: rows,
+		data: query.isPending ? SAMPLE_SERVICES : rows,
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -97,9 +98,7 @@ export function ServicesTable() {
 					/>
 				</div>
 			</fieldset>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="services-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -109,7 +108,7 @@ export function ServicesTable() {
 					onRowClick={handleRowClick}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

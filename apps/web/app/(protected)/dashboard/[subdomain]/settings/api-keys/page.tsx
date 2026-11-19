@@ -8,8 +8,9 @@ import { useParams } from "next/navigation";
 import type { ApiKeyRow } from "@/components/dashboard/api-keys/columns";
 import { ApiKeysTable } from "@/components/dashboard/api-keys/data-table";
 import { Heading } from "@/components/dashboard/heading";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
 import { axios } from "@/lib/auth/axios";
+import { SAMPLE_API_KEYS } from "@/lib/samples";
 
 export default function ApiKeysPage() {
 	const { t } = useTranslation();
@@ -31,17 +32,9 @@ export default function ApiKeysPage() {
 				description={t("apiKeys.page.description")}
 				title={t("apiKeys.page.title")}
 			/>
-			{isPending ? (
-				<div className="mt-4 space-y-2">
-					<div className="flex w-full justify-between">
-						<Skeleton className="h-10 w-64" />
-						<Skeleton className="h-10 w-32" />
-					</div>
-					<Skeleton className="h-96 w-full rounded-md" />
-				</div>
-			) : (
-				<ApiKeysTable data={records} />
-			)}
+			<Reveal id="api-keys-table" loading={isPending}>
+				<ApiKeysTable data={isPending ? SAMPLE_API_KEYS : records} />
+			</Reveal>
 		</div>
 	);
 }

@@ -23,6 +23,8 @@ import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedbac
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
+import { Reveal } from "@/components/skeleton";
+import { CardShape, ListShape } from "@/components/skeleton/shapes";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -37,7 +39,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -369,21 +370,28 @@ export function DepartmentDetails({
 				</div>
 			</div>
 
-			{isPending && <Skeleton className="h-64 w-full rounded-md" />}
-			{!(isPending || department) && (
+			{isPending || department ? (
+				<Reveal id="department-details" loading={isPending}>
+					{department ? (
+						<div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
+							<LeaderCard canEdit={canEdit} department={department} />
+							<MembersCard
+								canEdit={canEdit}
+								department={department}
+								subdomain={subdomain}
+							/>
+						</div>
+					) : (
+						<div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
+							<CardShape lines={2} />
+							<ListShape rows={4} />
+						</div>
+					)}
+				</Reveal>
+			) : (
 				<p className="text-muted-foreground text-sm">
 					{t("departments.detail.notFound")}
 				</p>
-			)}
-			{department && (
-				<div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
-					<LeaderCard canEdit={canEdit} department={department} />
-					<MembersCard
-						canEdit={canEdit}
-						department={department}
-						subdomain={subdomain}
-					/>
-				</div>
 			)}
 		</div>
 	);

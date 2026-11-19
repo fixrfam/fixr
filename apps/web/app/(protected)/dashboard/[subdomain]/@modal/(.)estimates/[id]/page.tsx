@@ -7,8 +7,9 @@ import {
 	formatEstimateNumber,
 	useEstimate,
 } from "@/components/dashboard/estimates/store";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EstimateDetailsModal() {
 	const { t } = useTranslation();
@@ -20,10 +21,16 @@ export default function EstimateDetailsModal() {
 			{t("estimates.detail.notFound")}
 		</p>
 	);
-	if (isPending) {
-		body = <Skeleton className="h-[32rem] w-full" />;
-	} else if (estimate) {
-		body = <EstimateDetails estimate={estimate} />;
+	if (isPending || estimate) {
+		body = (
+			<Reveal id="estimate-details" loading={isPending}>
+				{estimate ? (
+					<EstimateDetails estimate={estimate} />
+				) : (
+					<CardsShape cards={4} />
+				)}
+			</Reveal>
+		);
 	}
 
 	return (

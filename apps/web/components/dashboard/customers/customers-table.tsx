@@ -15,9 +15,10 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatCpf, formatPhone } from "@/lib/format";
+import { SAMPLE_CUSTOMERS } from "@/lib/samples";
 import type { CustomerRow } from "@/lib/services/customers";
 import { cn } from "@/lib/utils";
 import { CustomerAvatar } from "./customer-avatar";
@@ -106,7 +107,7 @@ export function CustomersTable() {
 	useOutOfRangePage(query, params, setPagination);
 
 	const table = useCatalogTable({
-		data: query.data?.records ?? [],
+		data: query.isPending ? SAMPLE_CUSTOMERS : (query.data?.records ?? []),
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -129,9 +130,7 @@ export function CustomersTable() {
 			<div className="flex items-center justify-end">
 				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
 			</div>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="customers-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -143,7 +142,7 @@ export function CustomersTable() {
 					}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

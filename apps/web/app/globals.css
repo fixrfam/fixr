@@ -163,6 +163,17 @@
 	--breakpoint-2lg: 1152px;
 }
 
+/* Skeleton colours (skullet). `html` outranks the provider's own defaults. */
+html:root {
+	--skullet-base: color-mix(in oklab, var(--foreground) 7%, transparent);
+	--skullet-highlight: color-mix(in oklab, var(--card) 65%, transparent);
+}
+
+html.dark {
+	--skullet-base: color-mix(in oklab, var(--foreground) 8%, transparent);
+	--skullet-highlight: color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

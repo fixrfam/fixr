@@ -13,9 +13,10 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SAMPLE_DEPARTMENTS } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { useDepartmentColumns } from "./columns";
 import { useDepartmentsPage } from "./store";
@@ -42,7 +43,7 @@ export function DepartmentsTable() {
 	useOutOfRangePage(query, params, setPagination);
 
 	const table = useCatalogTable({
-		data: query.data?.records ?? [],
+		data: query.isPending ? SAMPLE_DEPARTMENTS : (query.data?.records ?? []),
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -65,9 +66,7 @@ export function DepartmentsTable() {
 				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			{query.isPending ? (
-				<Skeleton className="h-64 w-full rounded-md" />
-			) : (
+			<Reveal id="departments-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -81,7 +80,7 @@ export function DepartmentsTable() {
 					}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

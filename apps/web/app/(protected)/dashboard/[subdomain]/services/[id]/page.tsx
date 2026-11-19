@@ -7,6 +7,8 @@ import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
 import { useServiceRow } from "@/components/dashboard/parts/store";
 import { ServiceDetails } from "@/components/dashboard/services/service-details";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServiceDetailsPage() {
@@ -14,11 +16,7 @@ export default function ServiceDetailsPage() {
 	const { id } = useParams<{ id: string }>();
 	const { service, isPending } = useServiceRow(id);
 
-	if (isPending) {
-		return <Skeleton className="h-96 w-full max-w-2xl" />;
-	}
-
-	if (!service) {
+	if (!(isPending || service)) {
 		return notFound();
 	}
 
@@ -28,9 +26,15 @@ export default function ServiceDetailsPage() {
 			<Heading
 				description={t("services.page.detailsDescription")}
 				Icon={Wrench}
-				title={service.name}
+				title={service?.name ?? <Skeleton className="h-8 w-56" />}
 			/>
-			<ServiceDetails className="max-w-2xl" service={service} />
+			<Reveal className="max-w-2xl" id="service-details" loading={isPending}>
+				{service ? (
+					<ServiceDetails service={service} />
+				) : (
+					<CardsShape cards={2} className="lg:grid-cols-1" />
+				)}
+			</Reveal>
 		</div>
 	);
 }

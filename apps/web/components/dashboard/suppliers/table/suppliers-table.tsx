@@ -16,9 +16,10 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SAMPLE_SUPPLIERS } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { useSupplierColumns } from "./columns";
 
@@ -54,7 +55,7 @@ export function SuppliersTable() {
 	);
 
 	const table = useCatalogTable({
-		data: rows,
+		data: query.isPending ? SAMPLE_SUPPLIERS : rows,
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -79,9 +80,7 @@ export function SuppliersTable() {
 			<div className="flex items-center justify-end">
 				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
 			</div>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="suppliers-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -90,7 +89,7 @@ export function SuppliersTable() {
 					)}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

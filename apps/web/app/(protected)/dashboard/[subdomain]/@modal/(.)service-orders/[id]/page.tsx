@@ -9,9 +9,10 @@ import {
 	useOrderCode,
 	useServiceOrder,
 } from "@/components/dashboard/service-order/store";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 /** An order opened from a list or the board, over it; "full screen" goes to its page. */
 export default function ServiceOrderModal() {
@@ -27,25 +28,32 @@ export default function ServiceOrderModal() {
 		</p>
 	);
 	if (isPending) {
-		body = <Skeleton className="h-[32rem] w-full" />;
-	} else if (order) {
 		body = (
-			<div className="space-y-4">
-				<div className="flex flex-wrap items-center justify-between gap-2">
-					<ServiceOrderActions order={order} />
-					<Button
-						// A full load: a client navigation would open this modal again.
-						onClick={() => window.location.assign(fullPage)}
-						size="sm"
-						type="button"
-						variant="ghost"
-					>
-						<Maximize2 className="size-3.5" />
-						{t("serviceOrders.detail.fullScreen")}
-					</Button>
+			<Reveal id="service-order-modal" loading>
+				<CardsShape cards={6} />
+			</Reveal>
+		);
+	} else if (order) {
+		// Same element as while loading, so the skeleton reveals into it.
+		body = (
+			<Reveal id="service-order-modal" loading={false}>
+				<div className="space-y-4">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<ServiceOrderActions order={order} />
+						<Button
+							// A full load: a client navigation would open this modal again.
+							onClick={() => window.location.assign(fullPage)}
+							size="sm"
+							type="button"
+							variant="ghost"
+						>
+							<Maximize2 className="size-3.5" />
+							{t("serviceOrders.detail.fullScreen")}
+						</Button>
+					</div>
+					<ServiceOrderDetailsLayout order={order} subdomain={subdomain} />
 				</div>
-				<ServiceOrderDetailsLayout order={order} subdomain={subdomain} />
-			</div>
+			</Reveal>
 		);
 	}
 

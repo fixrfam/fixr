@@ -10,6 +10,7 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
@@ -21,7 +22,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SAMPLE_ESTIMATES } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { useEstimatesPage } from "../store";
 import { useEstimateColumns } from "./columns";
@@ -57,7 +58,7 @@ export function EstimatesTable() {
 	useOutOfRangePage(query, params, setPagination);
 
 	const table = useCatalogTable({
-		data: query.data?.records ?? [],
+		data: query.isPending ? SAMPLE_ESTIMATES : (query.data?.records ?? []),
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -113,9 +114,7 @@ export function EstimatesTable() {
 				</div>
 				<DataTableViewOptions align="end" table={table} />
 			</div>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="estimates-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -127,7 +126,7 @@ export function EstimatesTable() {
 					}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

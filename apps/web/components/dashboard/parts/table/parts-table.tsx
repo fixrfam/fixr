@@ -5,10 +5,11 @@ import { permissions } from "@fixr/permissions";
 import { useParams } from "next/navigation";
 import { parseAsString } from "nuqs";
 import { useMemo, useState } from "react";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { SAMPLE_PARTS } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import {
 	PICKER_PAGE_SIZE,
@@ -82,7 +83,7 @@ export function PartsTable() {
 	);
 
 	const table = useCatalogTable({
-		data: rows,
+		data: query.isPending ? SAMPLE_PARTS : rows,
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -140,9 +141,7 @@ export function PartsTable() {
 					/>
 				</div>
 			</fieldset>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="parts-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -151,7 +150,7 @@ export function PartsTable() {
 					)}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

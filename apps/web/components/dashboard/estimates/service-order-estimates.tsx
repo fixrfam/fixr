@@ -6,7 +6,8 @@ import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { SAMPLE_ESTIMATES } from "@/lib/samples";
 import { EstimateStatusBadge } from "./estimate-status-badge";
 import { formatEstimateNumber, useEstimatesPage } from "./store";
 
@@ -26,45 +27,47 @@ export function ServiceOrderEstimates({
 		perPage: 50,
 		serviceOrderId,
 	});
-	const estimates = data?.records ?? [];
+	const estimates = isPending
+		? SAMPLE_ESTIMATES.slice(0, 2)
+		: (data?.records ?? []);
 
 	let body = (
-		<ul className="space-y-1.5">
-			{estimates.map((estimate) => (
-				<li key={estimate.id}>
-					<DashLink
-						className="group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-2xs transition-colors hover:border-primary/50"
-						href={`/estimates/${estimate.id}`}
-						subdomain={subdomain}
-					>
-						<div className="min-w-0 flex-1">
-							<div className="flex items-center gap-2">
-								<span className="font-semibold text-xs tabular-nums">
-									{formatEstimateNumber(estimate.number)}
+		<Reveal id="service-order-estimates" loading={isPending}>
+			<ul className="space-y-1.5">
+				{estimates.map((estimate) => (
+					<li key={estimate.id}>
+						<DashLink
+							className="group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-2xs transition-colors hover:border-primary/50"
+							href={`/estimates/${estimate.id}`}
+							subdomain={subdomain}
+						>
+							<div className="min-w-0 flex-1">
+								<div className="flex items-center gap-2">
+									<span className="font-semibold text-xs tabular-nums">
+										{formatEstimateNumber(estimate.number)}
+									</span>
+									<EstimateStatusBadge status={estimate.status} />
+								</div>
+								<span className="text-muted-foreground">
+									{format.date(estimate.createdAt)} ·{" "}
+									{estimate.itemsCount === 1
+										? t("estimates.table.itemsCountOne")
+										: t("estimates.table.itemsCount", {
+												count: estimate.itemsCount,
+											})}
 								</span>
-								<EstimateStatusBadge status={estimate.status} />
 							</div>
-							<span className="text-muted-foreground">
-								{format.date(estimate.createdAt)} ·{" "}
-								{estimate.itemsCount === 1
-									? t("estimates.table.itemsCountOne")
-									: t("estimates.table.itemsCount", {
-											count: estimate.itemsCount,
-										})}
+							<span className="font-medium text-xs tabular-nums">
+								{format.currency(estimate.totals.total)}
 							</span>
-						</div>
-						<span className="font-medium text-xs tabular-nums">
-							{format.currency(estimate.totals.total)}
-						</span>
-						<ChevronRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-					</DashLink>
-				</li>
-			))}
-		</ul>
+							<ChevronRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+						</DashLink>
+					</li>
+				))}
+			</ul>
+		</Reveal>
 	);
-	if (isPending) {
-		body = <Skeleton className="h-16 w-full" />;
-	} else if (isError) {
+	if (isError) {
 		body = (
 			<p className="text-2xs text-muted-foreground">
 				{t("messages.fallback.error.description")}

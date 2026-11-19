@@ -7,7 +7,8 @@ import { BackButton } from "@/components/dashboard/back-button";
 import { Heading } from "@/components/dashboard/heading";
 import { NewPartForm } from "@/components/dashboard/parts/forms/new-part-form";
 import { usePart } from "@/components/dashboard/parts/store";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { FormShape } from "@/components/skeleton/shapes";
 
 export default function EditPartPage() {
 	const router = useRouter();
@@ -15,11 +16,7 @@ export default function EditPartPage() {
 	const params = useParams<{ subdomain: string; id: string }>();
 	const { data: part, isPending } = usePart(params.id);
 
-	if (isPending) {
-		return <Skeleton className="h-96 w-full max-w-2xl" />;
-	}
-
-	if (!part) {
+	if (!(isPending || part)) {
 		return notFound();
 	}
 
@@ -31,13 +28,19 @@ export default function EditPartPage() {
 				Icon={Puzzle}
 				title={t("parts.page.editTitle")}
 			/>
-			<div>
-				<NewPartForm
-					className="max-w-2xl"
-					onSuccess={() => router.push(`/dashboard/${params.subdomain}/parts`)}
-					part={part}
-				/>
-			</div>
+			<Reveal id="part-form" loading={isPending}>
+				{part ? (
+					<NewPartForm
+						className="max-w-2xl"
+						onSuccess={() =>
+							router.push(`/dashboard/${params.subdomain}/parts`)
+						}
+						part={part}
+					/>
+				) : (
+					<FormShape className="max-w-2xl" fields={6} />
+				)}
+			</Reveal>
 		</div>
 	);
 }

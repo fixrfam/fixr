@@ -1,11 +1,27 @@
+"use client";
+
+import { SkeletonBox } from "skullet/react";
 import { cn } from "@/lib/utils";
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+/**
+ * A loose placeholder box, sized by `className`. It shimmers in step with
+ * skullet's measured skeletons; prefer `Reveal` (`@/components/skeleton`)
+ * over real content wherever there is a sample to draw from.
+ */
+function Skeleton({
+	className,
+	style,
+}: Pick<React.ComponentProps<"div">, "className" | "style">) {
 	return (
-		<div
-			className={cn("animate-pulse rounded-md bg-accent", className)}
-			data-slot="skeleton"
-			{...props}
+		<SkeletonBox
+			className={cn("block rounded-md", className)}
+			// Sizes and corners come from `className`, not skullet's defaults.
+			style={{
+				width: undefined,
+				height: undefined,
+				borderRadius: undefined,
+				...style,
+			}}
 		/>
 	);
 }

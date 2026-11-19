@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Header } from "@/components/dashboard/sidebar/header";
 import { I18nProvider } from "@/components/i18n-provider";
+import { SkeletonProvider } from "@/components/skeleton/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { getSession } from "@/lib/auth/utils";
@@ -67,23 +68,25 @@ export default async function RootLayout({
 						enableSystem
 					>
 						<QueryClientWrapper>
-							<NuqsAdapter>
-								<SessionProvider session={session}>
-									<Sidebar session={session} />
-									<Header />
-									<div className="lg:py-2">
-										<main
-											className={cn(
-												"h-[calc(100dvh-1rem)] overflow-auto bg-card px-5 py-6 pt-20 transition-all",
-												"lg:ml-[286px] lg:w-[calc(100%-(286px+0.5rem))] lg:rounded-md lg:border lg:border-border lg:px-10 lg:py-8"
-											)}
-										>
-											{children}
-										</main>
-									</div>
-									{modal}
-								</SessionProvider>
-							</NuqsAdapter>
+							<SkeletonProvider>
+								<NuqsAdapter>
+									<SessionProvider session={session}>
+										<Sidebar session={session} />
+										<Header />
+										<div className="lg:py-2">
+											<main
+												className={cn(
+													"h-[calc(100dvh-1rem)] overflow-auto bg-card px-5 py-6 pt-20 transition-all",
+													"lg:ml-[286px] lg:w-[calc(100%-(286px+0.5rem))] lg:rounded-md lg:border lg:border-border lg:px-10 lg:py-8"
+												)}
+											>
+												{children}
+											</main>
+										</div>
+										{modal}
+									</SessionProvider>
+								</NuqsAdapter>
+							</SkeletonProvider>
 							<ThemedToaster />
 						</QueryClientWrapper>
 					</ThemeProvider>

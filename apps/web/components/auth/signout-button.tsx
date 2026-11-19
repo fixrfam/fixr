@@ -5,6 +5,7 @@ import { toast } from "@pheralb/toast";
 import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { type FormEvent, useState } from "react";
+import { forgetShapes } from "skullet";
 import { Button, type ButtonProps } from "../ui/button";
 
 const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -19,6 +20,8 @@ const SignOutButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 			const fetchSignout = async () => {
 				setLoading(true);
+				// Skeleton shapes remember the last layouts seen; they belong to this session.
+				forgetShapes();
 				const response = await fetch("/api/auth/signout", {
 					method: "GET",
 					credentials: "include",

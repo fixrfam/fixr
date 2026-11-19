@@ -11,6 +11,7 @@ import { EmployeeChip } from "@/components/dashboard/employees/employee-chip";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { useSearchInput } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,8 +23,8 @@ import {
 	KanbanItemHandle,
 	KanbanOverlay,
 } from "@/components/ui/kanban";
-import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import { SAMPLE_SERVICE_ORDERS } from "@/lib/samples";
 import type {
 	ServiceOrderRow,
 	ServiceOrderScope,
@@ -53,6 +54,14 @@ function byStatus(records: ServiceOrderRow[]): Columns {
 	}
 	return columns;
 }
+
+/** What the board is drawn from while it loads: a few cards in the first stages. */
+const SAMPLE_COLUMNS = byStatus(
+	SAMPLE_SERVICE_ORDERS.map((order, index) => ({
+		...order,
+		status: STATUSES[index % 3] ?? order.status,
+	}))
+);
 
 function OrderCard({
 	order,
@@ -131,10 +140,13 @@ export function ServiceOrdersBoard({
 	});
 	const records = query.data?.records;
 
-	const [columns, setColumns] = useState<Columns>(() => byStatus([]));
+	const [columns, setColumns] = useState<Columns>(SAMPLE_COLUMNS);
+	const pending = query.isPending;
 	useEffect(() => {
-		setColumns(byStatus(records ?? []));
-	}, [records]);
+		if (!pending) {
+			setColumns(byStatus(records ?? []));
+		}
+	}, [pending, records]);
 
 	const open = (order: ServiceOrderRow) =>
 		router.push(`/dashboard/${subdomain}/service-orders/${order.id}`);
@@ -191,9 +203,7 @@ export function ServiceOrdersBoard({
 				</p>
 			)}
 
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="service-orders-board" loading={query.isPending}>
 				<Kanban
 					getItemValue={(order) => order.id}
 					onValueChange={(value) => setColumns(value as Columns)}
@@ -257,7 +267,7 @@ export function ServiceOrdersBoard({
 						}}
 					</KanbanOverlay>
 				</Kanban>
-			)}
+			</Reveal>
 		</div>
 	);
 }

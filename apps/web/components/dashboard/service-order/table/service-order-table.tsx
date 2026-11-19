@@ -10,6 +10,7 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import {
@@ -19,8 +20,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import { SAMPLE_SERVICE_ORDERS } from "@/lib/samples";
 import type { ServiceOrderScope } from "@/lib/services/service-orders";
 import { cn } from "@/lib/utils";
 import {
@@ -64,7 +65,7 @@ export function ServiceOrdersTable({ subdomain, scope = "all" }: Props) {
 	useOutOfRangePage(query, params, setPagination);
 
 	const table = useCatalogTable({
-		data: query.data?.records ?? [],
+		data: query.isPending ? SAMPLE_SERVICE_ORDERS : (query.data?.records ?? []),
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -110,9 +111,7 @@ export function ServiceOrdersTable({ subdomain, scope = "all" }: Props) {
 				<DataTableViewOptions align="end" table={table} />
 				<ViewToggle />
 			</TableToolbar>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="service-orders-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -126,7 +125,7 @@ export function ServiceOrdersTable({ subdomain, scope = "all" }: Props) {
 					}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

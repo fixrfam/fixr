@@ -4,7 +4,8 @@ import { useMessage, useTranslation } from "@fixr/i18n/react";
 import { toast } from "@pheralb/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { CardShape } from "@/components/skeleton/shapes";
 import { estimateLinksApi } from "@/lib/services/estimates";
 import { CustomerEstimate } from "./customer-estimate";
 
@@ -52,10 +53,12 @@ export function PublicEstimate({ token }: { token: string }) {
 
 	if (isPending) {
 		return (
-			<div className="w-full space-y-4">
-				<Skeleton className="h-48 w-full rounded-2xl" />
-				<Skeleton className="h-64 w-full rounded-2xl" />
-			</div>
+			<Reveal id="public-estimate" loading>
+				<div className="w-full space-y-4">
+					<CardShape className="rounded-2xl" lines={2} />
+					<CardShape className="rounded-2xl" lines={5} />
+				</div>
+			</Reveal>
 		);
 	}
 
@@ -72,13 +75,16 @@ export function PublicEstimate({ token }: { token: string }) {
 		);
 	}
 
+	// Same element as while loading, so the skeleton reveals into it.
 	return (
-		<CustomerEstimate
-			estimate={estimate}
-			onApprove={() => answer.mutate({ approve: true })}
-			onReject={(reason) => answer.mutate({ approve: false, reason })}
-			pdfUrl={estimateLinksApi.pdfUrl(token)}
-			pending={answer.isPending}
-		/>
+		<Reveal id="public-estimate" loading={false}>
+			<CustomerEstimate
+				estimate={estimate}
+				onApprove={() => answer.mutate({ approve: true })}
+				onReject={(reason) => answer.mutate({ approve: false, reason })}
+				pdfUrl={estimateLinksApi.pdfUrl(token)}
+				pending={answer.isPending}
+			/>
+		</Reveal>
 	);
 }

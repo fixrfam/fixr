@@ -9,6 +9,8 @@ import {
 	useEstimate,
 } from "@/components/dashboard/estimates/store";
 import { Heading } from "@/components/dashboard/heading";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EstimateDetailsPage() {
@@ -16,11 +18,7 @@ export default function EstimateDetailsPage() {
 	const { id } = useParams<{ id: string }>();
 	const { data: estimate, isPending } = useEstimate(id);
 
-	if (isPending) {
-		return <Skeleton className="h-[32rem] w-full" />;
-	}
-
-	if (!estimate) {
+	if (!(isPending || estimate)) {
 		return notFound();
 	}
 
@@ -29,11 +27,23 @@ export default function EstimateDetailsPage() {
 			<BackButton className="-translate-x-3" />
 			<Heading
 				description={t("estimates.detail.description")}
-				title={t("estimates.detail.title", {
-					number: formatEstimateNumber(estimate.number),
-				})}
+				title={
+					estimate ? (
+						t("estimates.detail.title", {
+							number: formatEstimateNumber(estimate.number),
+						})
+					) : (
+						<Skeleton className="h-8 w-56" />
+					)
+				}
 			/>
-			<EstimateDetails estimate={estimate} />
+			<Reveal id="estimate-details" loading={isPending}>
+				{estimate ? (
+					<EstimateDetails estimate={estimate} />
+				) : (
+					<CardsShape cards={4} />
+				)}
+			</Reveal>
 		</div>
 	);
 }

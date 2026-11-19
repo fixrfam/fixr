@@ -5,8 +5,9 @@ import { Wrench } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useService } from "@/components/dashboard/parts/store";
 import { NewServiceForm } from "@/components/dashboard/services/forms/new-service-form";
+import { Reveal } from "@/components/skeleton";
+import { FormShape } from "@/components/skeleton/shapes";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditServiceModal() {
 	const router = useRouter();
@@ -19,10 +20,16 @@ export default function EditServiceModal() {
 			{t("services.page.notFound")}
 		</p>
 	);
-	if (isPending) {
-		body = <Skeleton className="h-64 w-full" />;
-	} else if (service) {
-		body = <NewServiceForm onSuccess={() => router.back()} service={service} />;
+	if (isPending || service) {
+		body = (
+			<Reveal id="service-form" loading={isPending}>
+				{service ? (
+					<NewServiceForm onSuccess={() => router.back()} service={service} />
+				) : (
+					<FormShape fields={6} />
+				)}
+			</Reveal>
+		);
 	}
 
 	return (
