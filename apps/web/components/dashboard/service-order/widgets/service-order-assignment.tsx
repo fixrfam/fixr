@@ -168,8 +168,15 @@ function ReassignForm({
 	);
 }
 
-/** The card header's reassign button; nothing without `serviceOrders:assign`. */
-export function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
+/** The reassign button; nothing without `serviceOrders:assign`. */
+export function ReassignDialog({
+	order,
+	compact = false,
+}: {
+	order: ServiceOrderDetail;
+	/** A small ghost button, for a card header. */
+	compact?: boolean;
+}) {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const canAssign = useCatalogAbility().can(permissions.serviceOrders.assign);
@@ -187,7 +194,11 @@ export function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
 			open={open}
 			title={t("serviceOrders.assignment.reassignTitle")}
 			trigger={
-				<Button size="sm" type="button" variant="ghost">
+				<Button
+					size={compact ? "sm" : "default"}
+					type="button"
+					variant={compact ? "ghost" : "outline"}
+				>
 					<UserRoundCog className="size-3.5" />
 					{t("serviceOrders.assignment.reassign")}
 				</Button>

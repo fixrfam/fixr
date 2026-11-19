@@ -51,7 +51,8 @@ export default function ServiceOrderModal() {
 
 	return (
 		<ResponsiveDialogDrawer
-			className="max-w-6xl!"
+			// As wide as the order's own page, shrinking with a gutter on smaller screens.
+			className="max-w-[min(96rem,calc(100vw-2rem))]! overflow-x-hidden lg:max-w-[min(96rem,calc(100vw-4rem))]! lg:p-8"
 			description={t("serviceOrders.detail.description")}
 			icon={<Wrench />}
 			title={

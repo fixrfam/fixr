@@ -14,6 +14,7 @@ import { ServiceOrderEstimates } from "@/components/dashboard/estimates/service-
 import { ModelImage } from "@/components/dashboard/models/model-image";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
+import { MoveStatusDialog } from "@/components/dashboard/service-order/widgets/move-status-dialog";
 import {
 	ReassignDialog,
 	ServiceOrderAssignment,
@@ -21,6 +22,7 @@ import {
 import { ServiceOrderImageGrid } from "@/components/dashboard/service-order/widgets/service-order-image-grid";
 import { ServiceOrderIssue } from "@/components/dashboard/service-order/widgets/service-order-issue";
 import {
+	CreateEstimateButton,
 	ServiceOrderAddItem,
 	ServiceOrderItems,
 } from "@/components/dashboard/service-order/widgets/service-order-items";
@@ -40,7 +42,8 @@ type CardsMap = Record<CardId, React.ReactNode>;
 export function getCards(
 	order: ServiceOrderDetail,
 	{ t, format }: Pick<Translator, "t" | "format">,
-	subdomain: string
+	subdomain: string,
+	{ canChangeStatus }: { canChangeStatus: boolean }
 ): CardsMap {
 	return {
 		summary: (
@@ -134,7 +137,7 @@ export function getCards(
 		),
 		technician: (
 			<ServiceOrderDetailsCard
-				action={<ReassignDialog order={order} />}
+				action={<ReassignDialog compact order={order} />}
 				description={t("serviceOrders.assignment.description")}
 				icon={User}
 				title={t("serviceOrders.assignment.title")}
@@ -181,6 +184,7 @@ export function getCards(
 		),
 		lifecycle: (
 			<ServiceOrderDetailsCard
+				action={canChangeStatus && <MoveStatusDialog compact order={order} />}
 				description={t("serviceOrders.statusCard.description")}
 				icon={History}
 				title={t("serviceOrders.statusCard.title")}
@@ -198,7 +202,12 @@ export function getCards(
 				<ServiceOrderItems serviceOrderId={order.id} />
 			</ServiceOrderDetailsCard>
 		),
-		estimates: <ServiceOrderEstimates serviceOrderId={order.id} />,
+		estimates: (
+			<ServiceOrderEstimates
+				action={<CreateEstimateButton compact serviceOrderId={order.id} />}
+				serviceOrderId={order.id}
+			/>
+		),
 		images: (
 			<ServiceOrderDetailsCard
 				description={t("serviceOrders.cards.imagesDescription")}

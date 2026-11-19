@@ -3,6 +3,7 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { ChevronRight, HandCoins } from "lucide-react";
 import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
 import { ServiceOrderDetailsCard } from "@/components/dashboard/service-order/service-order-details-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,8 +13,11 @@ import { formatEstimateNumber, useEstimatesPage } from "./store";
 /** The estimates made from a service order, newest first, each opening its details. */
 export function ServiceOrderEstimates({
 	serviceOrderId,
+	action,
 }: {
 	serviceOrderId: string;
+	/** Compact control on the right of the card header. */
+	action?: ReactNode;
 }) {
 	const { t, format } = useTranslation();
 	const { subdomain } = useParams<{ subdomain: string }>();
@@ -76,6 +80,7 @@ export function ServiceOrderEstimates({
 
 	return (
 		<ServiceOrderDetailsCard
+			action={action}
 			description={t("estimates.serviceOrderCard.description")}
 			icon={HandCoins}
 			title={t("estimates.serviceOrderCard.title")}

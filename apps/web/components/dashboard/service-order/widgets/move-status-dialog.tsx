@@ -391,7 +391,14 @@ function MoveStatusForm({
  * any), see what happens to the order and the device, and leave a note for
  * the history.
  */
-export function MoveStatusDialog({ order }: { order: ServiceOrderDetail }) {
+export function MoveStatusDialog({
+	order,
+	compact = false,
+}: {
+	order: ServiceOrderDetail;
+	/** A small ghost button, for a card header. */
+	compact?: boolean;
+}) {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 
@@ -404,7 +411,11 @@ export function MoveStatusDialog({ order }: { order: ServiceOrderDetail }) {
 			open={open}
 			title={t("serviceOrders.statusCard.moveTitle")}
 			trigger={
-				<Button type="button">
+				<Button
+					size={compact ? "sm" : "default"}
+					type="button"
+					variant={compact ? "ghost" : "default"}
+				>
 					<Route className="size-3.5" />
 					{t("serviceOrders.statusCard.move")}
 				</Button>

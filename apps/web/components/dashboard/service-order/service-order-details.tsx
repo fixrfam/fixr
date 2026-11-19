@@ -12,6 +12,7 @@ import { DashLink } from "./dash-link";
 import { ServiceOrderDetailsLayout } from "./layout";
 import { useOrderCode, useServiceOrder } from "./store";
 import { MoveStatusDialog } from "./widgets/move-status-dialog";
+import { ReassignDialog } from "./widgets/service-order-assignment";
 import { CreateEstimateButton } from "./widgets/service-order-items";
 
 /** The order's main actions, next to its title. */
@@ -21,6 +22,7 @@ export function ServiceOrderActions({ order }: { order: ServiceOrderDetail }) {
 	return (
 		<div className="flex flex-wrap gap-2">
 			<CreateEstimateButton serviceOrderId={order.id} />
+			<ReassignDialog order={order} />
 			{ability.can(permissions.serviceOrders.changeStatus) && (
 				<MoveStatusDialog order={order} />
 			)}
