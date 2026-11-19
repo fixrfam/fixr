@@ -3,15 +3,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { EventBus } from "../../../core/events/bus";
 
 const { repo, assign } = vi.hoisted(() => ({
-	repo: { queryStageOwner: vi.fn(), queryEmployeeOfCompany: vi.fn() },
+	repo: { queryStageOwner: vi.fn(), isMember: vi.fn() },
 	assign: vi.fn(),
 }));
-vi.mock("../repositories", () => ({ SectorsRepository: repo }));
+vi.mock("../repositories", () => ({ DepartmentsRepository: repo }));
 vi.mock("../../service-orders/services/assign", () => ({
 	assignServiceOrder: assign,
 }));
 
-const { registerSectorEffects } = await import(".");
+const { registerDepartmentEffects } = await import(".");
 
 const tx = "TX" as unknown as Transaction;
 
@@ -21,7 +21,7 @@ afterEach(() => {
 
 function bus() {
 	const instance = new EventBus();
-	registerSectorEffects(instance);
+	registerDepartmentEffects(instance);
 	return instance;
 }
 
@@ -34,48 +34,70 @@ const statusChanged = {
 	employeeId: "em",
 };
 
-describe("sector effects", () => {
-	it("sends the order to the pool of the sector that owns the stage it entered", async () => {
-		repo.queryStageOwner.mockResolvedValue({
-			sectorId: "bench",
-			employeeId: null,
-		});
+const owner = (overrides: object) => ({
+	departmentId: "bench",
+	assigneeMode: "pool",
+	employeeId: null,
+	leaderId: "lia",
+	...overrides,
+});
+
+describe("department effects", () => {
+	it("sends the order to the pool of the department that owns the stage it entered", async () => {
+		repo.queryStageOwner.mockResolvedValue(owner({}));
 
 		await bus().emit(tx, "serviceOrder.statusChanged", statusChanged);
 
 		expect(repo.queryStageOwner).toHaveBeenCalledWith(tx, "co", "fixing");
 		expect(assign).toHaveBeenCalledWith(tx, {
 			serviceOrderId: "so",
-			sectorId: "bench",
+			departmentId: "bench",
 			assigneeId: null,
 		});
 	});
 
-	it("assigns the stage's employee, in their sector when the stage names none", async () => {
-		repo.queryStageOwner.mockResolvedValue({
-			sectorId: null,
-			employeeId: "bia",
-		});
-		repo.queryEmployeeOfCompany.mockResolvedValue({
-			id: "bia",
-			sectorId: "bench",
-		});
+	it("assigns the department's leader", async () => {
+		repo.queryStageOwner.mockResolvedValue(owner({ assigneeMode: "leader" }));
 
 		await bus().emit(tx, "serviceOrder.statusChanged", statusChanged);
 
-		expect(repo.queryEmployeeOfCompany).toHaveBeenCalledWith("bia", "co", tx);
-		expect(assign).toHaveBeenCalledWith(tx, {
-			serviceOrderId: "so",
-			sectorId: "bench",
-			assigneeId: "bia",
-		});
+		expect(assign).toHaveBeenCalledWith(
+			tx,
+			expect.objectContaining({ assigneeId: "lia" })
+		);
+	});
+
+	it("assigns the stage's employee while they're in the department", async () => {
+		repo.queryStageOwner.mockResolvedValue(
+			owner({ assigneeMode: "employee", employeeId: "bia" })
+		);
+		repo.isMember.mockResolvedValue(true);
+
+		await bus().emit(tx, "serviceOrder.statusChanged", statusChanged);
+
+		expect(repo.isMember).toHaveBeenCalledWith("bench", "bia", tx);
+		expect(assign).toHaveBeenCalledWith(
+			tx,
+			expect.objectContaining({ assigneeId: "bia" })
+		);
+	});
+
+	it("falls back to the pool when the stage's employee left the department", async () => {
+		repo.queryStageOwner.mockResolvedValue(
+			owner({ assigneeMode: "employee", employeeId: "bia" })
+		);
+		repo.isMember.mockResolvedValue(false);
+
+		await bus().emit(tx, "serviceOrder.statusChanged", statusChanged);
+
+		expect(assign).toHaveBeenCalledWith(
+			tx,
+			expect.objectContaining({ assigneeId: null })
+		);
 	});
 
 	it("routes a new order by the owner of the first stage", async () => {
-		repo.queryStageOwner.mockResolvedValue({
-			sectorId: "front-desk",
-			employeeId: null,
-		});
+		repo.queryStageOwner.mockResolvedValue(owner({}));
 
 		await bus().emit(tx, "serviceOrder.opened", {
 			serviceOrderId: "so",

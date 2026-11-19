@@ -28,8 +28,9 @@ const { repo, pagination, emit, moveServiceOrder, assignServiceOrder } =
 			queryLoosePartItems: vi.fn(async (): Promise<unknown[]> => []),
 			updateItem: vi.fn(),
 			deleteItem: vi.fn(),
-			querySectorOfCompany: vi.fn(),
+			queryDepartmentOfCompany: vi.fn(),
 			queryEmployeeOfCompany: vi.fn(),
+			queryEmployeeDepartmentIds: vi.fn(async (): Promise<string[]> => []),
 		},
 		pagination: { getPaginatedRecords: vi.fn(), getPaginatedCount: vi.fn() },
 	}));
@@ -138,16 +139,17 @@ describe("ServiceOrdersService.getCompanyServiceOrders", () => {
 		);
 	});
 
-	it("filters the caller's own orders and sector pool by their employee record", async () => {
-		const employee = { id: createId(), companyId, sectorId: "bench" };
+	it("filters the caller's own orders and department pool by their employee record", async () => {
+		const employee = { id: createId(), companyId };
+		repo.queryEmployeeDepartmentIds.mockResolvedValue(["bench", "lab"]);
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
 
-		await list({ scope: "sector" }).promise;
+		await list({ scope: "department" }).promise;
 
 		expect(repo.buildListFilter).toHaveBeenCalledWith(
 			companyId,
-			expect.objectContaining({ scope: "sector" }),
-			employee
+			expect.objectContaining({ scope: "department" }),
+			{ id: employee.id, departmentIds: ["bench", "lab"] }
 		);
 	});
 
@@ -221,10 +223,12 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		reportedDefect: "Tela quebrada",
 		photos: [] as { uploadId: string; description?: string | null }[],
 	};
-	const employee = { id: createId(), companyId, sectorId: "front-desk" };
+	const employee = { id: createId(), companyId };
 
 	beforeEach(() => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
+		// In exactly one department: the order starts there.
+		repo.queryEmployeeDepartmentIds.mockResolvedValue(["front-desk"]);
 		repo.queryDeviceOfCompany.mockResolvedValue({
 			id: data.deviceId,
 			customerId,
@@ -260,7 +264,7 @@ describe("ServiceOrdersService.createServiceOrder", () => {
 		expect(repo.create).toHaveBeenCalledWith("TX", {
 			companyId,
 			employeeId: employee.id,
-			sectorId: "front-desk",
+			departmentId: "front-desk",
 			customerId,
 			data,
 		});
@@ -700,15 +704,15 @@ describe("ServiceOrdersService.assign", () => {
 		repo.queryEmployeeByUserId.mockResolvedValue(employee);
 		repo.queryServiceOrderOfCompany.mockResolvedValue({ id: serviceOrderId });
 		repo.queryServiceOrderDetail.mockResolvedValue({ id: serviceOrderId });
-		repo.querySectorOfCompany.mockResolvedValue({ id: "bench" });
+		repo.queryDepartmentOfCompany.mockResolvedValue({ id: "bench" });
 		repo.queryEmployeeOfCompany.mockResolvedValue({
 			id: "bia",
-			sectorId: "bench",
+			departmentIds: ["bench"],
 		});
 	});
 
 	const assign = (data: {
-		sectorId: string | null;
+		departmentId: string | null;
 		assigneeId: string | null;
 	}) => {
 		const reply = createFakeReply();
@@ -725,12 +729,15 @@ describe("ServiceOrdersService.assign", () => {
 	};
 
 	it("reassigns through assignServiceOrder, recording who did it", async () => {
-		const { reply, promise } = assign({ sectorId: "bench", assigneeId: "bia" });
+		const { reply, promise } = assign({
+			departmentId: "bench",
+			assigneeId: "bia",
+		});
 		await promise;
 
 		expect(assignServiceOrder).toHaveBeenCalledWith("TX", {
 			serviceOrderId,
-			sectorId: "bench",
+			departmentId: "bench",
 			assigneeId: "bia",
 			employeeId: employee.id,
 		});
@@ -739,20 +746,48 @@ describe("ServiceOrdersService.assign", () => {
 		});
 	});
 
-	it("takes the employee's sector when no sector is given", async () => {
-		await assign({ sectorId: null, assigneeId: "bia" }).promise;
+	it("takes the employee's department when no department is given and they're in one", async () => {
+		await assign({ departmentId: null, assigneeId: "bia" }).promise;
 
 		expect(assignServiceOrder).toHaveBeenCalledWith(
 			"TX",
-			expect.objectContaining({ sectorId: "bench", assigneeId: "bia" })
+			expect.objectContaining({ departmentId: "bench", assigneeId: "bia" })
 		);
+	});
+
+	it("leaves the department empty when the employee is in several and none is given", async () => {
+		repo.queryEmployeeOfCompany.mockResolvedValue({
+			id: "bia",
+			departmentIds: ["bench", "lab"],
+		});
+
+		await assign({ departmentId: null, assigneeId: "bia" }).promise;
+
+		expect(assignServiceOrder).toHaveBeenCalledWith(
+			"TX",
+			expect.objectContaining({ departmentId: null, assigneeId: "bia" })
+		);
+	});
+
+	it("refuses an employee who isn't in the department", async () => {
+		repo.queryEmployeeOfCompany.mockResolvedValue({
+			id: "bia",
+			departmentIds: ["lab"],
+		});
+
+		await expect(
+			assign({ departmentId: "bench", assigneeId: "bia" }).promise
+		).rejects.toMatchObject({
+			code: "service_order_assignee_not_in_department",
+		});
+		expect(assignServiceOrder).not.toHaveBeenCalled();
 	});
 
 	it.each([
 		[
-			"a sector",
-			"querySectorOfCompany" as const,
-			"service_order_sector_not_found",
+			"a department",
+			"queryDepartmentOfCompany" as const,
+			"service_order_department_not_found",
 		],
 		[
 			"an employee",
@@ -763,7 +798,7 @@ describe("ServiceOrdersService.assign", () => {
 		repo[query].mockResolvedValue(null);
 
 		await expect(
-			assign({ sectorId: "bench", assigneeId: "bia" }).promise
+			assign({ departmentId: "bench", assigneeId: "bia" }).promise
 		).rejects.toMatchObject({ code });
 		expect(assignServiceOrder).not.toHaveBeenCalled();
 	});

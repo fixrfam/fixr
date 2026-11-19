@@ -3,22 +3,22 @@ import { ServiceOrdersRepository } from "../repositories";
 
 /**
  * The one way to change who is responsible for a service order: update its
- * sector and assignee and record the change (who made it, from what to what)
+ * department and assignee and record the change (who made it, from what to what)
  * in the order's assignment history, in the caller's transaction.
  *
  * @param employeeId - who reassigned it; none when a stage's default did
- * @returns whether anything changed (the same sector and assignee change nothing)
+ * @returns whether anything changed (the same department and assignee change nothing)
  */
 export async function assignServiceOrder(
 	tx: Transaction,
 	{
 		serviceOrderId,
-		sectorId,
+		departmentId,
 		assigneeId,
 		employeeId = null,
 	}: {
 		serviceOrderId: string;
-		sectorId: string | null;
+		departmentId: string | null;
 		assigneeId: string | null;
 		employeeId?: string | null;
 	}
@@ -29,19 +29,19 @@ export async function assignServiceOrder(
 	);
 	if (
 		!current ||
-		(current.sectorId === sectorId && current.assigneeId === assigneeId)
+		(current.departmentId === departmentId && current.assigneeId === assigneeId)
 	) {
 		return false;
 	}
 
 	await ServiceOrdersRepository.updateAssignment(tx, serviceOrderId, {
-		sectorId,
+		departmentId,
 		assigneeId,
 	});
 	await ServiceOrdersRepository.insertAssignmentHistory(tx, {
 		serviceOrderId,
-		fromSectorId: current.sectorId,
-		toSectorId: sectorId,
+		fromDepartmentId: current.departmentId,
+		toDepartmentId: departmentId,
 		fromAssigneeId: current.assigneeId,
 		toAssigneeId: assigneeId,
 		employeeId,

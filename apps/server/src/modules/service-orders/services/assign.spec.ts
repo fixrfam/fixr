@@ -16,7 +16,7 @@ const tx = "TX" as unknown as Transaction;
 
 beforeEach(() => {
 	repo.queryAssignmentForUpdate.mockResolvedValue({
-		sectorId: "front-desk",
+		departmentId: "front-desk",
 		assigneeId: "ana",
 	});
 });
@@ -26,10 +26,10 @@ afterEach(() => {
 });
 
 describe("assignServiceOrder", () => {
-	it("updates the sector and assignee and records who changed them, in the same transaction", async () => {
+	it("updates the department and assignee and records who changed them, in the same transaction", async () => {
 		const changed = await assignServiceOrder(tx, {
 			serviceOrderId: "so",
-			sectorId: "bench",
+			departmentId: "bench",
 			assigneeId: "bia",
 			employeeId: "manager",
 		});
@@ -37,13 +37,13 @@ describe("assignServiceOrder", () => {
 		expect(changed).toBe(true);
 		expect(repo.queryAssignmentForUpdate).toHaveBeenCalledWith(tx, "so");
 		expect(repo.updateAssignment).toHaveBeenCalledWith(tx, "so", {
-			sectorId: "bench",
+			departmentId: "bench",
 			assigneeId: "bia",
 		});
 		expect(repo.insertAssignmentHistory).toHaveBeenCalledWith(tx, {
 			serviceOrderId: "so",
-			fromSectorId: "front-desk",
-			toSectorId: "bench",
+			fromDepartmentId: "front-desk",
+			toDepartmentId: "bench",
 			fromAssigneeId: "ana",
 			toAssigneeId: "bia",
 			employeeId: "manager",
@@ -53,7 +53,7 @@ describe("assignServiceOrder", () => {
 	it("records nobody when a stage's default reassigned it", async () => {
 		await assignServiceOrder(tx, {
 			serviceOrderId: "so",
-			sectorId: "bench",
+			departmentId: "bench",
 			assigneeId: null,
 		});
 
@@ -63,10 +63,10 @@ describe("assignServiceOrder", () => {
 		);
 	});
 
-	it("changes nothing when the sector and assignee are the same", async () => {
+	it("changes nothing when the department and assignee are the same", async () => {
 		const changed = await assignServiceOrder(tx, {
 			serviceOrderId: "so",
-			sectorId: "front-desk",
+			departmentId: "front-desk",
 			assigneeId: "ana",
 		});
 
@@ -81,7 +81,7 @@ describe("assignServiceOrder", () => {
 		expect(
 			await assignServiceOrder(tx, {
 				serviceOrderId: "so",
-				sectorId: "bench",
+				departmentId: "bench",
 				assigneeId: null,
 			})
 		).toBe(false);

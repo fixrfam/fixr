@@ -41,11 +41,11 @@ export const permissions = {
 		update: "services:update",
 		delete: "services:delete",
 	},
-	sectors: {
-		read: "sectors:read",
-		create: "sectors:create",
-		update: "sectors:update",
-		delete: "sectors:delete",
+	departments: {
+		read: "departments:read",
+		create: "departments:create",
+		update: "departments:update",
+		delete: "departments:delete",
 	},
 	serviceOrders: {
 		read: "serviceOrders:read",

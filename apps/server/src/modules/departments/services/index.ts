@@ -1,203 +1,362 @@
+import { departments } from "@fixr/db/schema";
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
-	createSectorSchema,
+	addDepartmentMembersSchema,
+	createDepartmentSchema,
+	getDepartmentsQuerySchema,
+	patchDepartmentSchema,
+	putEmployeeDepartmentsSchema,
 	putStageOwnersSchema,
-	setEmployeeSectorSchema,
-} from "@fixr/schemas/sectors";
+} from "@fixr/schemas/departments";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import { AppError } from "../../../core/lib/app-error";
-import { apiResponse } from "../../../core/lib/response";
+import {
+	getPaginatedCount,
+	getPaginatedRecords,
+	paginationMeta,
+} from "../../../core/lib/pagination";
+import { apiResponse, paginatedData } from "../../../core/lib/response";
 import { inTransaction } from "../../../core/lib/transaction";
-import { SectorsRepository } from "../repositories";
+import {
+	DepartmentsRepository,
+	departmentsListJoins,
+	departmentsListSelect,
+} from "../repositories";
 
 type UserJwt = z.infer<typeof jwtPayload>;
 
-/** @description Business logic for sectors and the default owner of each stage */
-export class SectorsService {
+interface Scoped {
+	userJwt: UserJwt;
+	subdomain: string;
+	response: FastifyReply;
+}
+
+/** @description Business logic for departments, their members and the default owner of each stage */
+export class DepartmentsService {
 	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
 	private static resolveCompanyId(userJwt: UserJwt, subdomain: string) {
 		if (!userJwt.company) {
-			throw new AppError("SECTOR_COMPANY_NOT_FOUND");
+			throw new AppError("DEPARTMENT_COMPANY_NOT_FOUND");
 		}
 		if (userJwt.company.subdomain !== subdomain) {
-			throw new AppError("SECTOR_NOT_ALLOWED");
+			throw new AppError("DEPARTMENT_NOT_ALLOWED");
 		}
 		return userJwt.company.id;
 	}
 
-	private static async assertOwnSector(sectorId: string, companyId: string) {
-		const sector = await SectorsRepository.querySectorOfCompany(
-			sectorId,
+	private static async assertOwnDepartment(
+		departmentId: string,
+		companyId: string
+	) {
+		const department = await DepartmentsRepository.queryDepartmentOfCompany(
+			departmentId,
 			companyId
 		);
-		if (!sector) {
-			throw new AppError("SECTOR_NOT_FOUND");
+		if (!department) {
+			throw new AppError("DEPARTMENT_NOT_FOUND");
 		}
-		return sector;
+		return department;
 	}
 
 	private static async assertNameFree(
 		companyId: string,
 		name: string,
-		sectorId?: string
+		departmentId?: string
 	) {
-		const existing = await SectorsRepository.querySectorByName(companyId, name);
-		if (existing && existing.id !== sectorId) {
-			throw new AppError("SECTOR_NAME_CONFLICT");
+		const existing = await DepartmentsRepository.queryDepartmentByName(
+			companyId,
+			name
+		);
+		if (existing && existing.id !== departmentId) {
+			throw new AppError("DEPARTMENT_NAME_CONFLICT");
 		}
 	}
 
-	private static async sendSectors(
+	/** The department with its leader and members. */
+	private static async detail(departmentId: string, companyId: string) {
+		const department = await DepartmentsService.assertOwnDepartment(
+			departmentId,
+			companyId
+		);
+		return {
+			...department,
+			members: await DepartmentsRepository.queryMembers(departmentId),
+		};
+	}
+
+	private static sendDetail(
 		response: FastifyReply,
-		companyId: string,
 		{
 			status,
 			code,
 			message,
-		}: { status: 200 | 201; code: string; message: string }
+			data,
+		}: {
+			status: 200 | 201;
+			code: string;
+			message: string;
+			data: Awaited<ReturnType<typeof DepartmentsService.detail>>;
+		}
 	) {
-		return response.status(status).send(
+		return response
+			.status(status)
+			.send(apiResponse({ status, error: null, code, message, data }));
+	}
+
+	static async listDepartments({
+		userJwt,
+		subdomain,
+		page,
+		perPage,
+		query,
+		sort,
+		response,
+	}: Scoped & z.infer<typeof getDepartmentsQuerySchema>) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		const PER_PAGE = perPage ?? 10;
+		const filter = DepartmentsRepository.buildListFilter(companyId, query);
+
+		const [records, totalRecords] = await Promise.all([
+			getPaginatedRecords({
+				table: departments,
+				select: departmentsListSelect,
+				joins: departmentsListJoins,
+				skip: (page - 1) * PER_PAGE,
+				take: PER_PAGE,
+				where: filter,
+				order: DepartmentsRepository.buildOrder(sort),
+			}),
+			getPaginatedCount({ table: departments, where: filter }),
+		]);
+
+		const pagination = paginationMeta({
+			page,
+			perPage: PER_PAGE,
+			totalRecords,
+			recordsOnPage: records.length,
+		});
+		if (!pagination) {
+			throw new AppError("DEPARTMENT_PAGE_OUT_OF_BOUNDS");
+		}
+
+		const rows = records as { id: string }[];
+		const counts = await DepartmentsRepository.countMembers(
+			rows.map((row) => row.id)
+		);
+
+		return response.status(200).send(
 			apiResponse({
-				status,
+				status: 200,
 				error: null,
-				code,
-				message,
-				data: await SectorsRepository.querySectorsWithEmployees(companyId),
+				code: "list_departments_success",
+				message: "Departments retrieved successfully.",
+				data: paginatedData({
+					records: rows.map((row) => ({
+						...row,
+						membersCount: counts.get(row.id) ?? 0,
+					})),
+					pagination,
+				}),
 			})
 		);
 	}
 
-	static listSectors({
+	static async getDepartment({
 		userJwt,
 		subdomain,
+		departmentId,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		response: FastifyReply;
-	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
-		return SectorsService.sendSectors(response, companyId, {
+	}: Scoped & { departmentId: string }) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		return DepartmentsService.sendDetail(response, {
 			status: 200,
-			code: "list_sectors_success",
-			message: "Sectors retrieved successfully.",
+			code: "get_department_success",
+			message: "Department retrieved successfully.",
+			data: await DepartmentsService.detail(departmentId, companyId),
 		});
 	}
 
-	static async createSector({
+	static async createDepartment({
 		userJwt,
 		subdomain,
 		data,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		data: z.infer<typeof createSectorSchema>;
-		response: FastifyReply;
-	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
-		await SectorsService.assertNameFree(companyId, data.name);
-		await SectorsRepository.insertSector({ companyId, name: data.name });
+	}: Scoped & { data: z.infer<typeof createDepartmentSchema> }) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		await DepartmentsService.assertNameFree(companyId, data.name);
+		const departmentId = await DepartmentsRepository.insertDepartment({
+			companyId,
+			name: data.name,
+		});
 
-		return SectorsService.sendSectors(response, companyId, {
+		return DepartmentsService.sendDetail(response, {
 			status: 201,
-			code: "create_sector_success",
-			message: "Sector created successfully.",
+			code: "create_department_success",
+			message: "Department created successfully.",
+			data: await DepartmentsService.detail(departmentId, companyId),
 		});
 	}
 
-	static async renameSector({
+	/** Rename it and/or change its leader, who must be one of its members. */
+	static async patchDepartment({
 		userJwt,
 		subdomain,
-		sectorId,
+		departmentId,
 		data,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		sectorId: string;
-		data: z.infer<typeof createSectorSchema>;
-		response: FastifyReply;
+	}: Scoped & {
+		departmentId: string;
+		data: z.infer<typeof patchDepartmentSchema>;
 	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
-		await SectorsService.assertOwnSector(sectorId, companyId);
-		await SectorsService.assertNameFree(companyId, data.name, sectorId);
-		await SectorsRepository.updateSector(sectorId, data.name);
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		await DepartmentsService.assertOwnDepartment(departmentId, companyId);
+		if (data.name) {
+			await DepartmentsService.assertNameFree(
+				companyId,
+				data.name,
+				departmentId
+			);
+		}
+		if (
+			data.leaderId &&
+			!(await DepartmentsRepository.isMember(departmentId, data.leaderId))
+		) {
+			throw new AppError("DEPARTMENT_LEADER_NOT_MEMBER");
+		}
+		if (Object.keys(data).length > 0) {
+			await DepartmentsRepository.updateDepartment(departmentId, data);
+		}
 
-		return SectorsService.sendSectors(response, companyId, {
+		return DepartmentsService.sendDetail(response, {
 			status: 200,
-			code: "patch_sector_success",
-			message: "Sector updated successfully.",
+			code: "patch_department_success",
+			message: "Department updated successfully.",
+			data: await DepartmentsService.detail(departmentId, companyId),
 		});
 	}
 
-	/** Its employees and orders are left without a sector; its stages, without a default sector. */
-	static async deleteSector({
+	static async deleteDepartment({
 		userJwt,
 		subdomain,
-		sectorId,
+		departmentId,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		sectorId: string;
-		response: FastifyReply;
-	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
-		await SectorsService.assertOwnSector(sectorId, companyId);
-		await SectorsRepository.deleteSector(sectorId);
+	}: Scoped & { departmentId: string }) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		await DepartmentsService.assertOwnDepartment(departmentId, companyId);
+		await DepartmentsRepository.deleteDepartment(departmentId);
 
-		return SectorsService.sendSectors(response, companyId, {
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "delete_department_success",
+				message: "Department deleted successfully.",
+				data: null,
+			})
+		);
+	}
+
+	static async addMembers({
+		userJwt,
+		subdomain,
+		departmentId,
+		data,
+		response,
+	}: Scoped & {
+		departmentId: string;
+		data: z.infer<typeof addDepartmentMembersSchema>;
+	}) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		await DepartmentsService.assertOwnDepartment(departmentId, companyId);
+		const employeeIds = [...new Set(data.employeeIds)];
+		if (
+			(await DepartmentsRepository.countEmployeesOfCompany(
+				employeeIds,
+				companyId
+			)) !== employeeIds.length
+		) {
+			throw new AppError("DEPARTMENT_EMPLOYEE_NOT_FOUND");
+		}
+		await DepartmentsRepository.addMembers(departmentId, employeeIds);
+
+		return DepartmentsService.sendDetail(response, {
 			status: 200,
-			code: "delete_sector_success",
-			message: "Sector deleted successfully.",
+			code: "add_department_members_success",
+			message: "Employees added to the department successfully.",
+			data: await DepartmentsService.detail(departmentId, companyId),
 		});
 	}
 
-	static async setEmployeeSector({
+	static async removeMember({
+		userJwt,
+		subdomain,
+		departmentId,
+		employeeId,
+		response,
+	}: Scoped & { departmentId: string; employeeId: string }) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		await DepartmentsService.assertOwnDepartment(departmentId, companyId);
+		await DepartmentsRepository.removeMember(departmentId, employeeId);
+
+		return DepartmentsService.sendDetail(response, {
+			status: 200,
+			code: "remove_department_member_success",
+			message: "Employee removed from the department successfully.",
+			data: await DepartmentsService.detail(departmentId, companyId),
+		});
+	}
+
+	/** Set every department of one employee (the employees screen). */
+	static async putEmployeeDepartments({
 		userJwt,
 		subdomain,
 		employeeId,
 		data,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
+	}: Scoped & {
 		employeeId: string;
-		data: z.infer<typeof setEmployeeSectorSchema>;
-		response: FastifyReply;
+		data: z.infer<typeof putEmployeeDepartmentsSchema>;
 	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
-		const employee = await SectorsRepository.queryEmployeeOfCompany(
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
+		if (
+			!(await DepartmentsRepository.queryEmployeeOfCompany(
+				employeeId,
+				companyId
+			))
+		) {
+			throw new AppError("DEPARTMENT_EMPLOYEE_NOT_FOUND");
+		}
+		const departmentIds = [...new Set(data.departmentIds)];
+		if (
+			(await DepartmentsRepository.countDepartmentsOfCompany(
+				departmentIds,
+				companyId
+			)) !== departmentIds.length
+		) {
+			throw new AppError("DEPARTMENT_NOT_FOUND");
+		}
+		await DepartmentsRepository.replaceEmployeeDepartments(
 			employeeId,
-			companyId
+			departmentIds
 		);
-		if (!employee) {
-			throw new AppError("SECTOR_EMPLOYEE_NOT_FOUND");
-		}
-		if (data.sectorId) {
-			await SectorsService.assertOwnSector(data.sectorId, companyId);
-		}
-		await SectorsRepository.updateEmployeeSector(employeeId, data.sectorId);
+		const byEmployee = await DepartmentsRepository.queryEmployeesDepartments([
+			employeeId,
+		]);
 
-		return SectorsService.sendSectors(response, companyId, {
-			status: 200,
-			code: "set_employee_sector_success",
-			message: "Employee moved to the sector successfully.",
-		});
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "put_employee_departments_success",
+				message: "Employee departments updated successfully.",
+				data: byEmployee.get(employeeId) ?? [],
+			})
+		);
 	}
 
-	static async listStageOwners({
-		userJwt,
-		subdomain,
-		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		response: FastifyReply;
-	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
+	static async listStageOwners({ userJwt, subdomain, response }: Scoped) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
 
 		return response.status(200).send(
 			apiResponse({
@@ -205,44 +364,45 @@ export class SectorsService {
 				error: null,
 				code: "list_stage_owners_success",
 				message: "Stage owners retrieved successfully.",
-				data: await SectorsRepository.queryStageOwners(companyId),
+				data: await DepartmentsRepository.queryStageOwners(companyId),
 			})
 		);
 	}
 
-	/** Replace the default owner of every stage; a stage left out has none. */
+	/**
+	 * Replace which department receives an order at each stage, and who inside
+	 * it; a stage left out has none. An employee must be a member of the stage's
+	 * department.
+	 */
 	static async putStageOwners({
 		userJwt,
 		subdomain,
 		data,
 		response,
-	}: {
-		userJwt: UserJwt;
-		subdomain: string;
-		data: z.infer<typeof putStageOwnersSchema>;
-		response: FastifyReply;
-	}) {
-		const companyId = SectorsService.resolveCompanyId(userJwt, subdomain);
+	}: Scoped & { data: z.infer<typeof putStageOwnersSchema> }) {
+		const companyId = DepartmentsService.resolveCompanyId(userJwt, subdomain);
 
-		const sectorIds = [
-			...new Set(data.stages.flatMap((stage) => stage.sectorId ?? [])),
+		const departmentIds = [
+			...new Set(data.stages.map((stage) => stage.departmentId)),
 		];
-		const employeeIds = [
-			...new Set(data.stages.flatMap((stage) => stage.employeeId ?? [])),
-		];
-		const [sectorsFound, employeesFound] = await Promise.all([
-			SectorsRepository.countSectorsOfCompany(sectorIds, companyId),
-			SectorsRepository.countEmployeesOfCompany(employeeIds, companyId),
-		]);
-		if (
-			sectorsFound !== sectorIds.length ||
-			employeesFound !== employeeIds.length
-		) {
-			throw new AppError("SECTOR_STAGE_OWNER_INVALID");
+		const departmentsFound =
+			await DepartmentsRepository.countDepartmentsOfCompany(
+				departmentIds,
+				companyId
+			);
+		const members = await Promise.all(
+			data.stages.map((stage) =>
+				stage.assigneeMode === "employee" && stage.employeeId
+					? DepartmentsRepository.isMember(stage.departmentId, stage.employeeId)
+					: true
+			)
+		);
+		if (departmentsFound !== departmentIds.length || members.includes(false)) {
+			throw new AppError("DEPARTMENT_STAGE_OWNER_INVALID");
 		}
 
 		await inTransaction((tx) =>
-			SectorsRepository.replaceStageOwners(tx, companyId, data.stages)
+			DepartmentsRepository.replaceStageOwners(tx, companyId, data.stages)
 		);
 
 		return response.status(200).send(
@@ -251,7 +411,7 @@ export class SectorsService {
 				error: null,
 				code: "put_stage_owners_success",
 				message: "Stage owners updated successfully.",
-				data: await SectorsRepository.queryStageOwners(companyId),
+				data: await DepartmentsRepository.queryStageOwners(companyId),
 			})
 		);
 	}

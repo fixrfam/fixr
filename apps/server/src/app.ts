@@ -37,6 +37,7 @@ import { categoriesRoutes } from "./modules/categories/routes";
 import { companiesRoutes } from "./modules/companies/routes";
 import { credentialsRoutes } from "./modules/credentials/routes";
 import { customersRoutes } from "./modules/customers/routes";
+import { departmentsRoutes } from "./modules/departments/routes";
 import { devicesRoutes } from "./modules/devices/routes";
 import { employeesRoutes } from "./modules/employees/routes";
 import {
@@ -51,7 +52,6 @@ import {
 	customerPortalAccessRoutes,
 	portalRoutes,
 } from "./modules/portal/routes";
-import { sectorsRoutes } from "./modules/sectors/routes";
 import { serviceOrdersRoutes } from "./modules/service-orders/routes";
 import { servicesRoutes } from "./modules/services/routes";
 import { suppliersRoutes } from "./modules/suppliers/routes";
@@ -134,7 +134,7 @@ const OPENAPI_TAGS = [
 		description: "Repair services the company offers and the parts they use.",
 	},
 	{
-		name: "Sectors",
+		name: "Departments",
 		description:
 			"Teams of the shop, their employees and who owns each stage of a service order by default.",
 	},
@@ -336,8 +336,8 @@ export async function buildApp(
 	await app.register(servicesRoutes, {
 		prefix: "/companies/:subdomain/services",
 	});
-	await app.register(sectorsRoutes, {
-		prefix: "/companies/:subdomain/sectors",
+	await app.register(departmentsRoutes, {
+		prefix: "/companies/:subdomain/departments",
 	});
 	await app.register(suppliersRoutes, {
 		prefix: "/companies/:subdomain/suppliers",

@@ -3,12 +3,13 @@ import type { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import type { z } from "zod";
 import type { EventBus } from "../../../core/events/bus";
 import { assignServiceOrder } from "../../service-orders/services/assign";
-import { SectorsRepository } from "../repositories";
+import { DepartmentsRepository } from "../repositories";
 
 /**
- * Hand the order to the default owner of the stage it entered, if the stage
- * has one: its sector's pool and, when set, its employee (whose sector the
- * order goes to when the stage names no sector). Recorded as done by nobody.
+ * Hand the order to the department that owns the stage it entered, if the
+ * stage has one, and inside it to the pool, the leader (the pool when there's
+ * none) or the stage's employee (the pool when they left the department).
+ * Recorded as done by nobody.
  */
 export async function routeToStageOwner(
 	tx: Transaction,
@@ -22,38 +23,49 @@ export async function routeToStageOwner(
 		status: z.infer<typeof serviceOrderStatuses>;
 	}
 ) {
-	const owner = await SectorsRepository.queryStageOwner(tx, companyId, status);
-	if (!(owner?.sectorId || owner?.employeeId)) {
+	const owner = await DepartmentsRepository.queryStageOwner(
+		tx,
+		companyId,
+		status
+	);
+	if (!owner) {
 		return;
 	}
 
-	const employee = owner.employeeId
-		? await SectorsRepository.queryEmployeeOfCompany(
-				owner.employeeId,
-				companyId,
-				tx
-			)
-		: null;
+	let assigneeId: string | null = null;
+	if (owner.assigneeMode === "leader") {
+		assigneeId = owner.leaderId;
+	} else if (
+		owner.assigneeMode === "employee" &&
+		owner.employeeId &&
+		(await DepartmentsRepository.isMember(
+			owner.departmentId,
+			owner.employeeId,
+			tx
+		))
+	) {
+		assigneeId = owner.employeeId;
+	}
 
 	await assignServiceOrder(tx, {
 		serviceOrderId,
-		sectorId: owner.sectorId ?? employee?.sectorId ?? null,
-		assigneeId: employee?.id ?? null,
+		departmentId: owner.departmentId,
+		assigneeId,
 	});
 }
 
 /** A service order goes to whoever owns each stage it enters, starting with the opening. */
-export function registerSectorEffects(bus: EventBus) {
+export function registerDepartmentEffects(bus: EventBus) {
 	bus.on(
 		"serviceOrder.opened",
-		"sectors.routeToStageOwner",
+		"departments.routeToStageOwner",
 		({ serviceOrderId, companyId }, { tx }) =>
 			routeToStageOwner(tx, { serviceOrderId, companyId, status: "pending" })
 	);
 
 	bus.on(
 		"serviceOrder.statusChanged",
-		"sectors.routeToStageOwner",
+		"departments.routeToStageOwner",
 		({ serviceOrderId, companyId, to }, { tx }) =>
 			routeToStageOwner(tx, { serviceOrderId, companyId, status: to })
 	);

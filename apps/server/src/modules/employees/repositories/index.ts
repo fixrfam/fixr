@@ -71,13 +71,17 @@ export class EmployeesRepository {
 			})
 			.$returningId();
 
-		await db.insert(employees).values({
-			cpf: data.cpf,
-			name: data.name,
-			phone: unmask.phone(data.phone),
-			role: data.role,
-			userId: userId.id,
-			companyId,
-		});
+		const [employee] = await db
+			.insert(employees)
+			.values({
+				cpf: data.cpf,
+				name: data.name,
+				phone: unmask.phone(data.phone),
+				role: data.role,
+				userId: userId.id,
+				companyId,
+			})
+			.$returningId();
+		return employee.id;
 	}
 }

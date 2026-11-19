@@ -2,37 +2,46 @@ import { permissions } from "@fixr/permissions";
 import type { userJWT } from "@fixr/schemas/auth";
 import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
-	createSectorSchema,
-	patchSectorSchema,
+	addDepartmentMembersSchema,
+	createDepartmentSchema,
+	departmentIdParamsSchema,
+	departmentMemberParamsSchema,
+	employeeDepartmentsParamsSchema,
+	getDepartmentsQuerySchema,
+	patchDepartmentSchema,
+	putEmployeeDepartmentsSchema,
 	putStageOwnersSchema,
-	sectorEmployeeParamsSchema,
-	sectorIdParamsSchema,
-	setEmployeeSectorSchema,
-} from "@fixr/schemas/sectors";
+} from "@fixr/schemas/departments";
 import type { z } from "zod";
-import { sectorsDocs } from "../../../core/docs/sectors.docs";
+import { departmentsDocs } from "../../../core/docs/departments.docs";
 import type { FastifyTypedInstance } from "../../../core/interfaces/fastify";
 import { authenticateEmployeeOrApiKey } from "../../../core/middlewares/authenticate-employee-or-api-key";
 import { requirePermission } from "../../../core/middlewares/rbac";
 import { withErrorHandler } from "../../../core/middlewares/with-error-handler";
-import { SectorsController } from "../controllers";
+import { DepartmentsController } from "../controllers";
 
-/** @description Sectors routes plugin */
-export function sectorsRoutes(fastify: FastifyTypedInstance) {
+/** @description Departments routes plugin */
+export function departmentsRoutes(fastify: FastifyTypedInstance) {
 	fastify.get(
 		"/",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.read),
+				requirePermission(permissions.departments.read),
 			],
-			schema: sectorsDocs.listSectorsSchema,
+			schema: departmentsDocs.listDepartmentsSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const query = getDepartmentsQuerySchema.parse(request.query);
 
-			await SectorsController.listSectors({ userJwt, subdomain, response });
+			await DepartmentsController.listDepartments({
+				userJwt,
+				subdomain,
+				...query,
+				response,
+			});
 		})
 	);
 
@@ -41,16 +50,16 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.create),
+				requirePermission(permissions.departments.create),
 			],
-			schema: sectorsDocs.createSectorSchema,
+			schema: departmentsDocs.createDepartmentSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-			const data = createSectorSchema.parse(request.body);
+			const data = createDepartmentSchema.parse(request.body);
 
-			await SectorsController.createSector({
+			await DepartmentsController.createDepartment({
 				userJwt,
 				subdomain,
 				data,
@@ -64,15 +73,19 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.read),
+				requirePermission(permissions.departments.read),
 			],
-			schema: sectorsDocs.listStageOwnersSchema,
+			schema: departmentsDocs.listStageOwnersSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 
-			await SectorsController.listStageOwners({ userJwt, subdomain, response });
+			await DepartmentsController.listStageOwners({
+				userJwt,
+				subdomain,
+				response,
+			});
 		})
 	);
 
@@ -81,16 +94,16 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.update),
+				requirePermission(permissions.departments.update),
 			],
-			schema: sectorsDocs.putStageOwnersSchema,
+			schema: departmentsDocs.putStageOwnersSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
 			const data = putStageOwnersSchema.parse(request.body);
 
-			await SectorsController.putStageOwners({
+			await DepartmentsController.putStageOwners({
 				userJwt,
 				subdomain,
 				data,
@@ -99,22 +112,24 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 		})
 	);
 
-	fastify.patch(
+	fastify.put(
 		"/employees/:employeeId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.update),
+				requirePermission(permissions.departments.update),
 			],
-			schema: sectorsDocs.setEmployeeSectorSchema,
+			schema: departmentsDocs.putEmployeeDepartmentsSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-			const { employeeId } = sectorEmployeeParamsSchema.parse(request.params);
-			const data = setEmployeeSectorSchema.parse(request.body);
+			const { employeeId } = employeeDepartmentsParamsSchema.parse(
+				request.params
+			);
+			const data = putEmployeeDepartmentsSchema.parse(request.body);
 
-			await SectorsController.setEmployeeSector({
+			await DepartmentsController.putEmployeeDepartments({
 				userJwt,
 				subdomain,
 				employeeId,
@@ -124,25 +139,48 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 		})
 	);
 
-	fastify.patch(
-		"/:sectorId",
+	fastify.get(
+		"/:departmentId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.update),
+				requirePermission(permissions.departments.read),
 			],
-			schema: sectorsDocs.patchSectorSchema,
+			schema: departmentsDocs.getDepartmentSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-			const { sectorId } = sectorIdParamsSchema.parse(request.params);
-			const data = patchSectorSchema.parse(request.body);
+			const { departmentId } = departmentIdParamsSchema.parse(request.params);
 
-			await SectorsController.renameSector({
+			await DepartmentsController.getDepartment({
 				userJwt,
 				subdomain,
-				sectorId,
+				departmentId,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:departmentId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.departments.update),
+			],
+			schema: departmentsDocs.patchDepartmentSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { departmentId } = departmentIdParamsSchema.parse(request.params);
+			const data = patchDepartmentSchema.parse(request.body);
+
+			await DepartmentsController.patchDepartment({
+				userJwt,
+				subdomain,
+				departmentId,
 				data,
 				response,
 			});
@@ -150,23 +188,74 @@ export function sectorsRoutes(fastify: FastifyTypedInstance) {
 	);
 
 	fastify.delete(
-		"/:sectorId",
+		"/:departmentId",
 		{
 			preHandler: [
 				authenticateEmployeeOrApiKey,
-				requirePermission(permissions.sectors.delete),
+				requirePermission(permissions.departments.delete),
 			],
-			schema: sectorsDocs.deleteSectorSchema,
+			schema: departmentsDocs.deleteDepartmentSchema,
 		},
 		withErrorHandler(async (request, response) => {
 			const userJwt = request.user as z.infer<typeof userJWT>;
 			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
-			const { sectorId } = sectorIdParamsSchema.parse(request.params);
+			const { departmentId } = departmentIdParamsSchema.parse(request.params);
 
-			await SectorsController.deleteSector({
+			await DepartmentsController.deleteDepartment({
 				userJwt,
 				subdomain,
-				sectorId,
+				departmentId,
+				response,
+			});
+		})
+	);
+
+	fastify.post(
+		"/:departmentId/members",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.departments.update),
+			],
+			schema: departmentsDocs.addDepartmentMembersSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { departmentId } = departmentIdParamsSchema.parse(request.params);
+			const data = addDepartmentMembersSchema.parse(request.body);
+
+			await DepartmentsController.addMembers({
+				userJwt,
+				subdomain,
+				departmentId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.delete(
+		"/:departmentId/members/:employeeId",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.departments.update),
+			],
+			schema: departmentsDocs.removeDepartmentMemberSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { departmentId, employeeId } = departmentMemberParamsSchema.parse(
+				request.params
+			);
+
+			await DepartmentsController.removeMember({
+				userJwt,
+				subdomain,
+				departmentId,
+				employeeId,
 				response,
 			});
 		})

@@ -1,12 +1,15 @@
 import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
-	createSectorSchema,
+	addDepartmentMembersSchema,
+	createDepartmentSchema,
+	getDepartmentsQuerySchema,
+	patchDepartmentSchema,
+	putEmployeeDepartmentsSchema,
 	putStageOwnersSchema,
-	setEmployeeSectorSchema,
-} from "@fixr/schemas/sectors";
+} from "@fixr/schemas/departments";
 import type { FastifyReply } from "fastify";
 import type { z } from "zod";
-import { SectorsService } from "../services";
+import { DepartmentsService } from "../services";
 
 interface Scoped {
 	userJwt: z.infer<typeof jwtPayload>;
@@ -14,47 +17,68 @@ interface Scoped {
 	response: FastifyReply;
 }
 
-/** @description Sectors request handlers */
-export class SectorsController {
-	static listSectors(params: Scoped) {
-		return SectorsService.listSectors(params);
-	}
-
-	static createSector(
-		params: Scoped & { data: z.infer<typeof createSectorSchema> }
+/** @description Departments request handlers */
+export class DepartmentsController {
+	static listDepartments(
+		params: Scoped & z.infer<typeof getDepartmentsQuerySchema>
 	) {
-		return SectorsService.createSector(params);
+		return DepartmentsService.listDepartments(params);
 	}
 
-	static renameSector(
+	static getDepartment(params: Scoped & { departmentId: string }) {
+		return DepartmentsService.getDepartment(params);
+	}
+
+	static createDepartment(
+		params: Scoped & { data: z.infer<typeof createDepartmentSchema> }
+	) {
+		return DepartmentsService.createDepartment(params);
+	}
+
+	static patchDepartment(
 		params: Scoped & {
-			sectorId: string;
-			data: z.infer<typeof createSectorSchema>;
+			departmentId: string;
+			data: z.infer<typeof patchDepartmentSchema>;
 		}
 	) {
-		return SectorsService.renameSector(params);
+		return DepartmentsService.patchDepartment(params);
 	}
 
-	static deleteSector(params: Scoped & { sectorId: string }) {
-		return SectorsService.deleteSector(params);
+	static deleteDepartment(params: Scoped & { departmentId: string }) {
+		return DepartmentsService.deleteDepartment(params);
 	}
 
-	static setEmployeeSector(
+	static addMembers(
+		params: Scoped & {
+			departmentId: string;
+			data: z.infer<typeof addDepartmentMembersSchema>;
+		}
+	) {
+		return DepartmentsService.addMembers(params);
+	}
+
+	static removeMember(
+		params: Scoped & { departmentId: string; employeeId: string }
+	) {
+		return DepartmentsService.removeMember(params);
+	}
+
+	static putEmployeeDepartments(
 		params: Scoped & {
 			employeeId: string;
-			data: z.infer<typeof setEmployeeSectorSchema>;
+			data: z.infer<typeof putEmployeeDepartmentsSchema>;
 		}
 	) {
-		return SectorsService.setEmployeeSector(params);
+		return DepartmentsService.putEmployeeDepartments(params);
 	}
 
 	static listStageOwners(params: Scoped) {
-		return SectorsService.listStageOwners(params);
+		return DepartmentsService.listStageOwners(params);
 	}
 
 	static putStageOwners(
 		params: Scoped & { data: z.infer<typeof putStageOwnersSchema> }
 	) {
-		return SectorsService.putStageOwners(params);
+		return DepartmentsService.putStageOwners(params);
 	}
 }

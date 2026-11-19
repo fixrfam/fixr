@@ -5,6 +5,7 @@ import { categoriesErrors } from "../../modules/categories/errors";
 import { companiesErrors } from "../../modules/companies/errors";
 import { credentialsErrors } from "../../modules/credentials/errors";
 import { customersErrors } from "../../modules/customers/errors";
+import { departmentsErrors } from "../../modules/departments/errors";
 import { devicesErrors } from "../../modules/devices/errors";
 import { employeesErrors } from "../../modules/employees/errors";
 import { estimatesErrors } from "../../modules/estimates/errors";
@@ -12,7 +13,6 @@ import { makersErrors } from "../../modules/makers/errors";
 import { modelsErrors } from "../../modules/models/errors";
 import { partsErrors } from "../../modules/parts/errors";
 import { portalErrors } from "../../modules/portal/errors";
-import { sectorsErrors } from "../../modules/sectors/errors";
 import { serviceOrdersErrors } from "../../modules/service-orders/errors";
 import { servicesErrors } from "../../modules/services/errors";
 import { suppliersErrors } from "../../modules/suppliers/errors";
@@ -33,7 +33,7 @@ export const errors = defineErrors({
 	...modelsErrors,
 	...customersErrors,
 	...devicesErrors,
-	...sectorsErrors,
+	...departmentsErrors,
 	...serviceOrdersErrors,
 	...partsErrors,
 	...portalErrors,

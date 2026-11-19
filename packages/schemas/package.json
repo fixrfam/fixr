@@ -83,9 +83,9 @@
       "types": "./src/services.ts",
       "default": "./src/services.ts"
     },
-    "./sectors": {
-      "types": "./src/sectors.ts",
-      "default": "./src/sectors.ts"
+    "./departments": {
+      "types": "./src/departments.ts",
+      "default": "./src/departments.ts"
     },
     "./suppliers": {
       "types": "./src/suppliers.ts",

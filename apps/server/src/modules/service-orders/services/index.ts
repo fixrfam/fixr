@@ -42,7 +42,7 @@ export class ServiceOrdersService {
 		deviceCategoryId,
 		employeeId,
 		scope,
-		sectorId,
+		departmentId,
 		status,
 		dateFrom,
 		dateTo,
@@ -69,10 +69,10 @@ export class ServiceOrdersService {
 				? desc(serviceOrdersTable.createdAt)
 				: asc(serviceOrdersTable.createdAt);
 
-		// "Mine" and "my sector" are relative to the caller's employee record.
+		// "Mine" and "my department" are relative to the caller's employee record.
 		const viewer =
-			scope === "mine" || scope === "sector"
-				? await ServiceOrdersService.resolveEmployee(userJwt, companyId)
+			scope === "mine" || scope === "department"
+				? await ServiceOrdersService.resolveViewer(userJwt, companyId)
 				: undefined;
 
 		const filter = ServiceOrdersRepository.buildListFilter(
@@ -82,7 +82,7 @@ export class ServiceOrdersService {
 				deviceCategoryId,
 				employeeId,
 				scope,
-				sectorId,
+				departmentId,
 				status,
 				dateFrom,
 				dateTo,
@@ -206,7 +206,7 @@ export class ServiceOrdersService {
 			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
-				sectorId: employee.sectorId,
+				departmentId: await ServiceOrdersService.soleDepartment(employee.id),
 				customerId: device.customerId,
 				data,
 			});
@@ -260,6 +260,30 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
 		}
 		return employee;
+	}
+
+	/** The caller's employee record and the departments they're in ("my departments"). */
+	private static async resolveViewer(
+		userJwt: z.infer<typeof jwtPayload>,
+		companyId: string
+	) {
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+		return {
+			id: employee.id,
+			departmentIds: await ServiceOrdersRepository.queryEmployeeDepartmentIds(
+				employee.id
+			),
+		};
+	}
+
+	/** The employee's department when they're in exactly one; otherwise none. */
+	private static async soleDepartment(employeeId: string) {
+		const departmentIds =
+			await ServiceOrdersRepository.queryEmployeeDepartmentIds(employeeId);
+		return departmentIds.length === 1 ? departmentIds[0]! : null;
 	}
 
 	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
@@ -408,9 +432,10 @@ export class ServiceOrdersService {
 	}
 
 	/**
-	 * Hand the order to another sector and/or employee, recording who did it.
-	 * An employee from another sector brings the order to their sector's pool
-	 * when no sector is given.
+	 * Hand the order to another department and/or employee, recording who did
+	 * it. An employee must be a member of the department the order goes to;
+	 * with no department, the order goes to the employee's department when
+	 * they're in exactly one.
 	 */
 	static async assign({
 		userJwt,
@@ -433,13 +458,13 @@ export class ServiceOrdersService {
 		);
 
 		if (
-			data.sectorId &&
-			!(await ServiceOrdersRepository.querySectorOfCompany(
-				data.sectorId,
+			data.departmentId &&
+			!(await ServiceOrdersRepository.queryDepartmentOfCompany(
+				data.departmentId,
 				companyId
 			))
 		) {
-			throw new AppError("SERVICE_ORDER_SECTOR_NOT_FOUND");
+			throw new AppError("SERVICE_ORDER_DEPARTMENT_NOT_FOUND");
 		}
 		const assignee = data.assigneeId
 			? await ServiceOrdersRepository.queryEmployeeOfCompany(
@@ -450,11 +475,20 @@ export class ServiceOrdersService {
 		if (data.assigneeId && !assignee) {
 			throw new AppError("SERVICE_ORDER_ASSIGNEE_NOT_FOUND");
 		}
+		if (
+			assignee &&
+			data.departmentId &&
+			!assignee.departmentIds.includes(data.departmentId)
+		) {
+			throw new AppError("SERVICE_ORDER_ASSIGNEE_NOT_IN_DEPARTMENT");
+		}
+		const soleDepartment =
+			assignee?.departmentIds.length === 1 ? assignee.departmentIds[0]! : null;
 
 		await inTransaction((tx) =>
 			assignServiceOrder(tx, {
 				serviceOrderId,
-				sectorId: data.sectorId ?? assignee?.sectorId ?? null,
+				departmentId: data.departmentId ?? soleDepartment,
 				assigneeId: data.assigneeId,
 				employeeId: employee.id,
 			})
