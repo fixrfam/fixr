@@ -173,30 +173,39 @@ export const messages = {
 			title: "Supplier in use",
 			description: "Move or remove its parts before deleting the supplier.",
 		},
-		service_order_sector_not_found: {
-			title: "Sector not found",
-			description: "Pick one of the company's sectors.",
+		service_order_department_not_found: {
+			title: "Department not found",
+			description: "Pick one of the company's departments.",
 		},
 		service_order_assignee_not_found: {
 			title: "Employee not found",
 			description: "Pick one of the company's employees.",
 		},
-		sector_not_found: {
-			title: "Sector not found",
-			description: "This sector does not exist or was removed.",
+		department_not_found: {
+			title: "Department not found",
+			description: "This department does not exist or was removed.",
 		},
-		sector_name_conflict: {
-			title: "Sector already exists",
-			description: "Your company already has a sector with this name.",
+		department_name_conflict: {
+			title: "Department already exists",
+			description: "Your company already has a department with this name.",
 		},
-		sector_employee_not_found: {
+		department_employee_not_found: {
 			title: "Employee not found",
 			description: "This employee is not part of your company.",
 		},
-		sector_stage_owner_invalid: {
+		department_stage_owner_invalid: {
 			title: "Invalid owner",
 			description:
-				"A stage points to a sector or employee that no longer exists.",
+				"A stage points to a department that no longer exists, or to an employee outside it.",
+		},
+		department_leader_not_member: {
+			title: "Not in the department",
+			description: "The leader must be one of the department's employees.",
+		},
+		service_order_assignee_not_in_department: {
+			title: "Not in the department",
+			description:
+				"This employee is not in the department. Pick one of their departments.",
 		},
 		supplier_not_found: {
 			title: "Supplier not found",

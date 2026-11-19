@@ -71,7 +71,7 @@ export interface ServiceOrderRow {
 	customerId: string;
 	/** Who opened it. */
 	employeeId: string;
-	sectorId: string | null;
+	departmentId: string | null;
 	assigneeId: string | null;
 	deviceId: string;
 	reportedDefect: string;
@@ -85,10 +85,10 @@ export interface ServiceOrderRow {
 		email: string | null;
 	};
 	employee: Relation;
-	/** The sector whose pool the order is in. */
-	sector: Relation | null;
+	/** The department whose pool the order is in. */
+	department: Relation | null;
 	/** The employee responsible for it now. */
-	assignee: Relation | null;
+	assignee: (Relation & { cpf: string }) | null;
 	device: {
 		id: string;
 		imei: string | null;
@@ -119,12 +119,12 @@ export interface ServiceOrderHistoryEntry {
 	employee: Relation | null;
 }
 
-/** A change of the order's sector or assignee. */
+/** A change of the order's department or assignee. */
 export interface ServiceOrderAssignmentEntry {
 	id: string;
 	createdAt: string;
-	fromSector: Relation | null;
-	toSector: Relation | null;
+	fromDepartment: Relation | null;
+	toDepartment: Relation | null;
 	fromAssignee: Relation | null;
 	toAssignee: Relation | null;
 	/** Null when the stage's default reassigned it. */
@@ -145,7 +145,7 @@ export interface ServiceOrderListParams {
 	query?: string;
 	status?: ServiceOrderStatus;
 	scope?: ServiceOrderScope;
-	sectorId?: string;
+	departmentId?: string;
 	employeeId?: string;
 	sort?: "newer" | "older";
 }

@@ -37,9 +37,9 @@ export const dashboard: Translated<typeof source> = {
 		customerDevices: "Aparelhos de clientes",
 		employees: "Funcionários",
 		allServiceOrders: "Todas",
-		mySector: "Meu setor",
+		myDepartment: "Meus setores",
 		myServiceOrders: "Minhas",
-		sectors: "Setores",
+		departments: "Setores",
 	},
 	account: {
 		manage: "Gerenciar",

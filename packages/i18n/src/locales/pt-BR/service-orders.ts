@@ -10,12 +10,15 @@ export const serviceOrders: Translated<typeof source> = {
 			"Preencha os campos abaixo para criar uma nova ordem de serviço.",
 	},
 	assignment: {
+		pickTheirDepartment:
+			"{{name}} não está neste setor. Escolha um dos setores dele.",
+		backToPool: "Voltar para o pool do setor",
 		title: "Responsável",
 		description:
 			"Quem está com a ordem agora. Cada etapa pode repassá-la automaticamente.",
-		sector: "Setor",
+		department: "Setor",
 		assignee: "Funcionário",
-		noSector: "Sem setor",
+		noDepartment: "Sem setor",
 		noAssignee: "Pool do setor (ninguém ainda)",
 		reassign: "Reatribuir",
 		reassignTitle: "Reatribuir a ordem",
@@ -39,10 +42,10 @@ export const serviceOrders: Translated<typeof source> = {
 	pools: {
 		mineTitle: "Minhas ordens",
 		mineDescription: "As ordens pelas quais você é responsável agora",
-		sectorTitle: "Meu setor",
-		sectorDescription:
-			"O pool do seu setor: ordens esperando alguém pegar e quem está com cada uma",
-		allSectors: "Todos os setores",
+		departmentTitle: "Meus setores",
+		departmentDescription:
+			"O pool dos seus setores: ordens esperando alguém pegar e quem está com cada uma",
+		allDepartments: "Todos os setores",
 	},
 	board: {
 		empty: "Nenhuma ordem",
@@ -85,6 +88,7 @@ export const serviceOrders: Translated<typeof source> = {
 		stepOf: "Etapa {{step}} de {{total}}",
 	},
 	detail: {
+		fullScreen: "Tela cheia",
 		back: "Voltar",
 		title: "Ordem de serviço",
 		description: "Veja os detalhes completos da ordem de serviço abaixo",
@@ -194,7 +198,7 @@ export const serviceOrders: Translated<typeof source> = {
 			device: "Aparelho",
 			category: "Categoria",
 			technician: "Responsável",
-			sector: "Setor",
+			department: "Setor",
 			status: "Status",
 			issue: "Defeito",
 			parts: "Peças",

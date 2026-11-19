@@ -12,7 +12,7 @@ const RESOURCE_KEYS: Record<string, StaticTranslationKey> = {
 	inventory: "permissions.resources.inventory",
 	logs: "permissions.resources.logs",
 	parts: "permissions.resources.parts",
-	sectors: "permissions.resources.sectors",
+	departments: "permissions.resources.departments",
 	serviceOrders: "permissions.resources.serviceOrders",
 	services: "permissions.resources.services",
 	settings: "permissions.resources.settings",

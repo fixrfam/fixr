@@ -5,12 +5,11 @@ import { permissions } from "@fixr/permissions";
 import { toast } from "@pheralb/toast";
 import { ArrowRight, Loader2, UserRoundCog } from "lucide-react";
 import { useState } from "react";
+import { useDepartmentOptions } from "@/components/dashboard/departments/store";
+import { EmployeeChip } from "@/components/dashboard/employees/employee-chip";
+import { EmployeePicker } from "@/components/dashboard/employees/employee-picker";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
-import {
-	useEmployeeOptions,
-	useSectors,
-} from "@/components/dashboard/sectors/store";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
@@ -21,6 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { Person } from "@/lib/services/departments";
 import type { ServiceOrderDetail } from "@/lib/services/service-orders";
 import { useAssignServiceOrder } from "../store";
 import {
@@ -29,6 +29,8 @@ import {
 } from "./service-order-key-value";
 
 const NONE = "none";
+
+type Picked = Person & { departments?: { id: string; name: string }[] };
 
 function ReassignForm({
 	order,
@@ -40,32 +42,41 @@ function ReassignForm({
 	const { t } = useTranslation();
 	const assign = useAssignServiceOrder(order.id);
 	const toastError = useApiErrorToast();
-	const { data: sectors = [] } = useSectors();
-	const { data: employees = [] } = useEmployeeOptions();
-	const [sectorId, setSectorId] = useState(order.sectorId);
-	const [assigneeId, setAssigneeId] = useState(order.assigneeId);
+	const { data: departments } = useDepartmentOptions();
+	const [departmentId, setDepartmentId] = useState(order.departmentId);
+	const [assignee, setAssignee] = useState<Picked | null>(order.assignee);
+
+	// The employee's departments when the picked one isn't among them (decision A).
+	const inPicked = assignee?.departments?.some((d) => d.id === departmentId);
+	const choices =
+		assignee?.departments && departmentId && !inPicked
+			? assignee.departments
+			: null;
 
 	const unchanged =
-		sectorId === order.sectorId && assigneeId === order.assigneeId;
-	// The sector's people first: they are the usual pick.
-	const sorted = [...employees].sort(
-		(a, b) =>
-			Number(b.sectorId === sectorId) - Number(a.sectorId === sectorId) ||
-			a.name.localeCompare(b.name)
-	);
+		departmentId === order.departmentId &&
+		(assignee?.id ?? null) === order.assigneeId;
+	const needsDepartment = Boolean(choices && choices.length > 0);
 
-	function pickAssignee(id: string | null) {
-		setAssigneeId(id);
-		// Picking someone from another sector brings the order to their sector.
-		const employee = employees.find((option) => option.id === id);
-		if (employee?.sectorId) {
-			setSectorId(employee.sectorId);
+	function pickAssignee(employee: Picked) {
+		setAssignee(employee);
+		const own = employee.departments ?? [];
+		// Stays in the order's department when they're in it; otherwise their only one.
+		if (!(departmentId && own.some((d) => d.id === departmentId))) {
+			if (own.length === 1) {
+				setDepartmentId(own[0]!.id);
+			} else if (own.length === 0) {
+				setDepartmentId(null);
+			}
 		}
 	}
 
 	async function submit() {
 		try {
-			await assign.mutateAsync({ sectorId, assigneeId });
+			await assign.mutateAsync({
+				departmentId,
+				assigneeId: assignee?.id ?? null,
+			});
 			toast.success({ text: t("serviceOrders.assignment.changed") });
 			onDone();
 		} catch (error) {
@@ -82,54 +93,65 @@ function ReassignForm({
 			}}
 		>
 			<div className="grid gap-2">
-				<Label htmlFor="assign-sector">
-					{t("serviceOrders.assignment.sector")}
+				<Label htmlFor="assign-department">
+					{t("serviceOrders.assignment.department")}
 				</Label>
 				<Select
-					onValueChange={(value) => setSectorId(value === NONE ? null : value)}
-					value={sectorId ?? NONE}
+					onValueChange={(value) =>
+						setDepartmentId(value === NONE ? null : value)
+					}
+					value={departmentId ?? NONE}
 				>
-					<SelectTrigger className="w-full" id="assign-sector">
+					<SelectTrigger className="w-full" id="assign-department">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value={NONE}>
-							{t("serviceOrders.assignment.noSector")}
+							{t("serviceOrders.assignment.noDepartment")}
 						</SelectItem>
-						{sectors.map((sector) => (
-							<SelectItem key={sector.id} value={sector.id}>
-								{sector.name}
+						{(needsDepartment ? choices! : departments).map((department) => (
+							<SelectItem key={department.id} value={department.id}>
+								{department.name}
 							</SelectItem>
 						))}
 					</SelectContent>
 				</Select>
+				{needsDepartment && assignee && (
+					<p
+						className="text-amber-700 text-xs dark:text-amber-300"
+						role="alert"
+					>
+						{t("serviceOrders.assignment.pickTheirDepartment", {
+							name: assignee.name,
+						})}
+					</p>
+				)}
 			</div>
 			<div className="grid gap-2">
 				<Label htmlFor="assign-employee">
 					{t("serviceOrders.assignment.assignee")}
 				</Label>
-				<Select
-					onValueChange={(value) => pickAssignee(value === NONE ? null : value)}
-					value={assigneeId ?? NONE}
-				>
-					<SelectTrigger className="w-full" id="assign-employee">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value={NONE}>
-							{t("serviceOrders.assignment.noAssignee")}
-						</SelectItem>
-						{sorted.map((employee) => (
-							<SelectItem key={employee.id} value={employee.id}>
-								{employee.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<EmployeePicker
+					id="assign-employee"
+					onChange={pickAssignee}
+					placeholder={t("serviceOrders.assignment.noAssignee")}
+					value={assignee}
+				/>
+				{assignee && (
+					<Button
+						className="w-fit"
+						onClick={() => setAssignee(null)}
+						size="sm"
+						type="button"
+						variant="ghost"
+					>
+						{t("serviceOrders.assignment.backToPool")}
+					</Button>
+				)}
 			</div>
 			<Button
 				className="w-full"
-				disabled={unchanged || assign.isPending}
+				disabled={unchanged || needsDepartment || assign.isPending}
 				size="lg"
 				type="submit"
 			>
@@ -177,7 +199,7 @@ export function ReassignDialog({ order }: { order: ServiceOrderDetail }) {
 }
 
 /**
- * Who has the order (sector and employee), who opened it, and every
+ * Who has the order (department and employee), who opened it, and every
  * reassignment. Reassigning lives in the card header ({@link ReassignDialog}).
  */
 export function ServiceOrderAssignment({
@@ -192,13 +214,19 @@ export function ServiceOrderAssignment({
 		<div className="space-y-4">
 			<ServiceOrderKeyValueList>
 				<ServiceOrderKeyValueItem
-					label={t("serviceOrders.assignment.sector")}
-					value={order.sector?.name ?? t("serviceOrders.assignment.noSector")}
+					label={t("serviceOrders.assignment.department")}
+					value={
+						order.department?.name ?? t("serviceOrders.assignment.noDepartment")
+					}
 				/>
 				<ServiceOrderKeyValueItem
 					label={t("serviceOrders.assignment.assignee")}
 					value={
-						order.assignee?.name ?? t("serviceOrders.assignment.noAssignee")
+						order.assignee ? (
+							<EmployeeChip employee={order.assignee} size="sm" />
+						) : (
+							t("serviceOrders.assignment.noAssignee")
+						)
 					}
 				/>
 				<ServiceOrderKeyValueItem
@@ -220,12 +248,12 @@ export function ServiceOrderAssignment({
 						{history.map((entry) => (
 							<li className="grid gap-0.5 text-xs" key={entry.id}>
 								<span className="flex flex-wrap items-center gap-1">
-									{[entry.fromSector?.name, entry.fromAssignee?.name]
+									{[entry.fromDepartment?.name, entry.fromAssignee?.name]
 										.filter(Boolean)
 										.join(" · ") || t("serviceOrders.assignment.nobody")}
 									<ArrowRight className="size-3 text-muted-foreground" />
 									<span className="font-medium">
-										{[entry.toSector?.name, entry.toAssignee?.name]
+										{[entry.toDepartment?.name, entry.toAssignee?.name]
 											.filter(Boolean)
 											.join(" · ") || t("serviceOrders.assignment.nobody")}
 									</span>

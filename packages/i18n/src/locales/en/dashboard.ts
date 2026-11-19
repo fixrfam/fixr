@@ -34,9 +34,9 @@ export const dashboard = {
 		customerDevices: "Customer devices",
 		employees: "Employees",
 		allServiceOrders: "All",
-		mySector: "My sector",
+		myDepartment: "My departments",
 		myServiceOrders: "Assigned to me",
-		sectors: "Sectors",
+		departments: "Departments",
 	},
 	account: {
 		manage: "Manage",

@@ -6,20 +6,23 @@ export const serviceOrders = {
 		newDescription: "Fill in the fields below to create a new service order.",
 	},
 	assignment: {
+		pickTheirDepartment:
+			"{{name}} isn't in this department. Pick one of theirs.",
+		backToPool: "Back to the department pool",
 		title: "Responsible",
 		description:
 			"Who has the order now. Each stage can hand it on automatically.",
-		sector: "Sector",
+		department: "Department",
 		assignee: "Employee",
-		noSector: "No sector",
-		noAssignee: "Sector pool (nobody yet)",
+		noDepartment: "No department",
+		noAssignee: "Department pool (nobody yet)",
 		reassign: "Reassign",
 		reassignTitle: "Reassign the order",
 		reassignDescription:
-			"Hand the order to another sector or employee. The change is recorded in its history.",
+			"Hand the order to another department or employee. The change is recorded in its history.",
 		submit: "Reassign",
 		changed: "Order reassigned!",
-		sameAsNow: "Pick another sector or employee",
+		sameAsNow: "Pick another department or employee",
 		openedBy: "Opened by",
 		history: "Assignment history",
 		noHistory: "Never reassigned",
@@ -35,10 +38,10 @@ export const serviceOrders = {
 	pools: {
 		mineTitle: "Assigned to me",
 		mineDescription: "The orders you are responsible for now",
-		sectorTitle: "My sector",
-		sectorDescription:
-			"The pool of your sector: orders waiting for someone to take them, and who has each one",
-		allSectors: "All sectors",
+		departmentTitle: "My departments",
+		departmentDescription:
+			"The pool of your departments: orders waiting for someone to take them, and who has each one",
+		allDepartments: "All departments",
 	},
 	board: {
 		empty: "No orders",
@@ -81,6 +84,7 @@ export const serviceOrders = {
 		stepOf: "Step {{step}} of {{total}}",
 	},
 	detail: {
+		fullScreen: "Full screen",
 		back: "Back",
 		title: "Service order",
 		description: "See the full details of the service order below",
@@ -189,7 +193,7 @@ export const serviceOrders = {
 			device: "Device",
 			category: "Category",
 			technician: "Responsible",
-			sector: "Sector",
+			department: "Department",
 			status: "Status",
 			issue: "Issue",
 			parts: "Parts",

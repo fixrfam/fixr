@@ -2,7 +2,7 @@
 
 import { useTranslation } from "@fixr/i18n/react";
 import { parseAsString, useQueryState } from "nuqs";
-import { useSectors } from "@/components/dashboard/sectors/store";
+import { useDepartmentOptions } from "@/components/dashboard/departments/store";
 import {
 	Select,
 	SelectContent,
@@ -13,41 +13,41 @@ import {
 
 const ALL = "all";
 
-/** `?sector=<id>`: one sector's pool inside the list of every order. */
-export function useSectorFilter() {
+/** `?department=<id>`: one department's pool inside the list of every order. */
+export function useDepartmentFilter() {
 	return useQueryState(
-		"sector",
+		"department",
 		parseAsString.withOptions({ history: "replace" })
 	);
 }
 
-export function SectorFilter() {
+export function DepartmentFilter() {
 	const { t } = useTranslation();
-	const [sectorId, setSectorId] = useSectorFilter();
-	const { data: sectors = [] } = useSectors();
+	const [departmentId, setDepartmentId] = useDepartmentFilter();
+	const { data: departments } = useDepartmentOptions();
 
-	if (sectors.length === 0) {
+	if (departments.length === 0) {
 		return null;
 	}
 
 	return (
 		<Select
-			onValueChange={(value) => setSectorId(value === ALL ? null : value)}
-			value={sectorId ?? ALL}
+			onValueChange={(value) => setDepartmentId(value === ALL ? null : value)}
+			value={departmentId ?? ALL}
 		>
 			<SelectTrigger
-				aria-label={t("serviceOrders.table.columns.sector")}
+				aria-label={t("serviceOrders.table.columns.department")}
 				className="w-auto"
 			>
 				<SelectValue />
 			</SelectTrigger>
 			<SelectContent>
 				<SelectItem value={ALL}>
-					{t("serviceOrders.pools.allSectors")}
+					{t("serviceOrders.pools.allDepartments")}
 				</SelectItem>
-				{sectors.map((sector) => (
-					<SelectItem key={sector.id} value={sector.id}>
-						{sector.name}
+				{departments.map((department) => (
+					<SelectItem key={department.id} value={department.id}>
+						{department.name}
 					</SelectItem>
 				))}
 			</SelectContent>

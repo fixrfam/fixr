@@ -13,6 +13,7 @@ export const employees: Translated<typeof source> = {
 		columns: "Colunas",
 		create: "Cadastrar funcionários",
 		headers: {
+			departments: "Setores",
 			name: "Funcionário",
 			role: "Cargo",
 			email: "Email",
@@ -38,5 +39,12 @@ export const employees: Translated<typeof source> = {
 		passwordDescription: "A senha de login do funcionário",
 		generate: "Gerar",
 		submit: "Cadastrar",
+	},
+	picker: {
+		placeholder: "Escolha um funcionário",
+		search: "Buscar por nome ou CPF...",
+		empty: "Nenhum funcionário encontrado.",
+		create: "Novo funcionário",
+		createHint: "O funcionário cadastrado já fica selecionado.",
 	},
 } as const;

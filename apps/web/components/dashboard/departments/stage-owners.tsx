@@ -4,7 +4,8 @@ import { useTranslation } from "@fixr/i18n/react";
 import { permissions } from "@fixr/permissions";
 import { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import { toast } from "@pheralb/toast";
-import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { EmployeePicker } from "@/components/dashboard/employees/employee-picker";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
@@ -16,61 +17,189 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
-import type { StageOwner } from "@/lib/services/sectors";
+import type { StageAssigneeMode, StageOwner } from "@/lib/services/departments";
+import type { ServiceOrderStatus } from "@/lib/services/service-orders";
 import { ServiceOrderStatusBadge } from "../service-order/service-order-status-badge";
 import {
-	useEmployeeOptions,
+	useDepartment,
+	useDepartmentOptions,
 	usePutStageOwners,
-	useSectors,
 	useStageOwners,
 } from "./store";
 
 const STATUSES = serviceOrderStatuses.options;
+const MODES: readonly StageAssigneeMode[] = ["pool", "leader", "employee"];
 const NONE = "none";
 
-function toDraft(owners: StageOwner[]) {
-	return STATUSES.map(
-		(status) =>
-			owners.find((owner) => owner.status === status) ?? {
-				status,
-				sectorId: null,
-				employeeId: null,
-			}
+const MODE_KEYS = {
+	pool: {
+		label: "departments.stages.modes.pool",
+		hint: "departments.stages.modes.poolHint",
+	},
+	leader: {
+		label: "departments.stages.modes.leader",
+		hint: "departments.stages.modes.leaderHint",
+	},
+	employee: {
+		label: "departments.stages.modes.employee",
+		hint: "departments.stages.modes.employeeHint",
+	},
+} as const;
+
+function StageRow({
+	status,
+	owner,
+	canEdit,
+	saving,
+	onChange,
+}: {
+	status: ServiceOrderStatus;
+	owner: StageOwner | undefined;
+	canEdit: boolean;
+	saving: boolean;
+	onChange: (owner: StageOwner | null) => void;
+}) {
+	const { t } = useTranslation();
+	const { data: departments } = useDepartmentOptions();
+	const { data: department } = useDepartment(owner?.departmentId ?? "");
+	const disabled = !canEdit || saving;
+	const employee =
+		department?.members.find((member) => member.id === owner?.employeeId) ??
+		null;
+
+	return (
+		<div className="grid gap-3 border-b py-4 last:border-0 md:grid-cols-[10rem_auto_1fr_1fr] md:items-start">
+			<ServiceOrderStatusBadge className="mt-2 w-fit" variant={status}>
+				{t(serviceOrderStatusKeys[status])}
+			</ServiceOrderStatusBadge>
+			<ArrowRight className="mt-2.5 hidden size-4 text-muted-foreground md:block" />
+			<div className="grid gap-1.5">
+				<span className="text-muted-foreground text-xs">
+					{t("departments.stages.department")}
+				</span>
+				<Select
+					disabled={disabled}
+					onValueChange={(value) =>
+						onChange(
+							value === NONE
+								? null
+								: {
+										status,
+										departmentId: value,
+										// Another department: its own pool until someone is picked.
+										assigneeMode:
+											owner?.assigneeMode === "employee"
+												? "pool"
+												: (owner?.assigneeMode ?? "pool"),
+										employeeId: null,
+									}
+						)
+					}
+					value={owner?.departmentId ?? NONE}
+				>
+					<SelectTrigger
+						aria-label={t("departments.stages.department")}
+						className="w-full"
+					>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={NONE}>{t("departments.stages.keep")}</SelectItem>
+						{departments.map((option) => (
+							<SelectItem key={option.id} value={option.id}>
+								{option.name}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+			<div className="grid gap-1.5">
+				<span className="text-muted-foreground text-xs">
+					{t("departments.stages.assignee")}
+				</span>
+				{owner ? (
+					<>
+						<Select
+							disabled={disabled}
+							onValueChange={(value) =>
+								onChange({
+									...owner,
+									assigneeMode: value as StageAssigneeMode,
+									employeeId: null,
+								})
+							}
+							value={owner.assigneeMode}
+						>
+							<SelectTrigger
+								aria-label={t("departments.stages.assignee")}
+								className="w-full"
+							>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{MODES.map((mode) => (
+									<SelectItem key={mode} value={mode}>
+										<span className="grid text-left">
+											<span>{t(MODE_KEYS[mode].label)}</span>
+											<span className="text-muted-foreground text-xs">
+												{t(MODE_KEYS[mode].hint)}
+											</span>
+										</span>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						{owner.assigneeMode === "leader" && !department?.leader && (
+							<p className="text-muted-foreground text-xs">
+								{t("departments.stages.noLeaderYet")}
+							</p>
+						)}
+						{owner.assigneeMode === "employee" && (
+							<EmployeePicker
+								disabled={disabled}
+								onChange={(picked) =>
+									onChange({ ...owner, employeeId: picked.id })
+								}
+								only={department?.members.map((member) => member.id) ?? []}
+								placeholder={t("departments.stages.pickEmployee")}
+								value={employee}
+							/>
+						)}
+					</>
+				) : (
+					<p className="pt-2 text-muted-foreground text-xs">
+						{t("departments.stages.keepHint")}
+					</p>
+				)}
+			</div>
+		</div>
 	);
 }
 
 /**
- * Who gets an order when it enters each stage: a sector's pool and,
- * optionally, one employee. Each change saves right away, like moving an
- * employee to a sector does.
+ * Which department receives a service order when it enters each stage, and
+ * who inside it. Each change saves right away.
  */
 export function StageOwners() {
 	const { t } = useTranslation();
-	const canEdit = useCatalogAbility().can(permissions.sectors.update);
+	const canEdit = useCatalogAbility().can(permissions.departments.update);
 	const { data: owners, isPending } = useStageOwners();
-	const { data: sectors = [] } = useSectors();
-	const { data: employees = [] } = useEmployeeOptions();
 	const save = usePutStageOwners();
 	const toastError = useApiErrorToast();
-	const [draft, setDraft] = useState<StageOwner[]>(() => toDraft([]));
 
-	useEffect(() => {
-		setDraft(toDraft(owners ?? []));
-	}, [owners]);
-
-	async function update(
-		status: StageOwner["status"],
-		change: Partial<StageOwner>
-	) {
-		const stages = draft.map((stage) =>
-			stage.status === status ? { ...stage, ...change } : stage
-		);
-		setDraft(stages);
+	async function change(status: ServiceOrderStatus, owner: StageOwner | null) {
+		// An employee-mode stage waits for its employee before saving.
+		if (owner?.assigneeMode === "employee" && !owner.employeeId) {
+			return;
+		}
+		const stages = [
+			...(owners ?? []).filter((stage) => stage.status !== status),
+			...(owner ? [owner] : []),
+		];
 		try {
 			await save.mutateAsync({ stages });
-			toast.success({ text: t("sectors.stages.saved") });
+			toast.success({ text: t("departments.stages.saved") });
 		} catch (error) {
-			setDraft(toDraft(owners ?? []));
 			toastError(error);
 		}
 	}
@@ -80,87 +209,16 @@ export function StageOwners() {
 	}
 
 	return (
-		<div className="grid grid-cols-[auto_1fr_1fr] items-center gap-x-3 gap-y-2 text-sm">
-			<span className="text-muted-foreground text-xs">
-				{t("sectors.stages.stage")}
-			</span>
-			<span className="text-muted-foreground text-xs">
-				{t("sectors.stages.sector")}
-			</span>
-			<span className="text-muted-foreground text-xs">
-				{t("sectors.stages.employee")}
-			</span>
-			{draft.map((stage) => (
-				<div className="contents" key={stage.status}>
-					<ServiceOrderStatusBadge variant={stage.status}>
-						{t(serviceOrderStatusKeys[stage.status])}
-					</ServiceOrderStatusBadge>
-					<Select
-						disabled={!canEdit || save.isPending}
-						onValueChange={(value) =>
-							update(stage.status, {
-								sectorId: value === NONE ? null : value,
-								// An employee of another sector can't stay on the stage.
-								employeeId: employees.some(
-									(employee) =>
-										employee.id === stage.employeeId &&
-										(value === NONE || employee.sectorId === value)
-								)
-									? stage.employeeId
-									: null,
-							})
-						}
-						value={stage.sectorId ?? NONE}
-					>
-						<SelectTrigger
-							aria-label={t("sectors.stages.sector")}
-							className="w-full"
-						>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value={NONE}>
-								{t("sectors.stages.noSector")}
-							</SelectItem>
-							{sectors.map((sector) => (
-								<SelectItem key={sector.id} value={sector.id}>
-									{sector.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select
-						disabled={!canEdit || save.isPending}
-						onValueChange={(value) =>
-							update(stage.status, {
-								employeeId: value === NONE ? null : value,
-							})
-						}
-						value={stage.employeeId ?? NONE}
-					>
-						<SelectTrigger
-							aria-label={t("sectors.stages.employee")}
-							className="w-full"
-						>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value={NONE}>
-								{t("sectors.stages.noEmployee")}
-							</SelectItem>
-							{employees
-								.filter(
-									(employee) =>
-										!stage.sectorId || employee.sectorId === stage.sectorId
-								)
-								.map((employee) => (
-									<SelectItem key={employee.id} value={employee.id}>
-										{employee.name}
-									</SelectItem>
-								))}
-						</SelectContent>
-					</Select>
-				</div>
+		<div>
+			{STATUSES.map((status) => (
+				<StageRow
+					canEdit={canEdit}
+					key={status}
+					onChange={(owner) => change(status, owner)}
+					owner={owners?.find((stage) => stage.status === status)}
+					saving={save.isPending}
+					status={status}
+				/>
 			))}
 		</div>
 	);

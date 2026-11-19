@@ -57,8 +57,20 @@ export const routeRules: RouteRule[] = [
 		permission: permissions.serviceOrders.read,
 	},
 	{
-		path: "/dashboard/:subdomain/sectors",
-		permission: permissions.sectors.read,
+		path: "/dashboard/:subdomain/departments",
+		permission: permissions.departments.read,
+	},
+	{
+		path: "/dashboard/:subdomain/departments/new",
+		permission: permissions.departments.create,
+	},
+	{
+		path: "/dashboard/:subdomain/departments/:id",
+		permission: permissions.departments.read,
+	},
+	{
+		path: "/dashboard/:subdomain/departments/:id/members/new",
+		permission: permissions.departments.update,
 	},
 	{
 		path: "/dashboard/:subdomain/service-orders/new",

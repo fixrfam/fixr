@@ -5,14 +5,14 @@ import { getTranslator } from "@/lib/i18n/server";
 
 type Params = Promise<{ subdomain: string; scope: string }>;
 
-/** "My sector" and "assigned to me": the same list and board, narrowed to the caller's pool. */
+/** "My department" and "assigned to me": the same list and board, narrowed to the caller's pool. */
 export default async function ServiceOrdersPoolPage({
 	params,
 }: {
 	params: Params;
 }) {
 	const { subdomain, scope } = await params;
-	if (scope !== "mine" && scope !== "sector") {
+	if (scope !== "mine" && scope !== "department") {
 		notFound();
 	}
 	const { t } = await getTranslator();
@@ -23,12 +23,12 @@ export default async function ServiceOrdersPoolPage({
 				description={t(
 					scope === "mine"
 						? "serviceOrders.pools.mineDescription"
-						: "serviceOrders.pools.sectorDescription"
+						: "serviceOrders.pools.departmentDescription"
 				)}
 				title={t(
 					scope === "mine"
 						? "serviceOrders.pools.mineTitle"
-						: "serviceOrders.pools.sectorTitle"
+						: "serviceOrders.pools.departmentTitle"
 				)}
 			/>
 

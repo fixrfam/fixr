@@ -11,8 +11,8 @@ import { server } from "@/test/msw/server";
 import { render } from "@/test/render";
 import { StageOwners } from "./stage-owners";
 
-const SECTORS_URL = apiUrl("/companies/fixr/sectors");
-const STAGES_URL = apiUrl("/companies/fixr/sectors/stage-owners");
+const DEPARTMENTS_URL = apiUrl("/companies/fixr/departments");
+const STAGES_URL = apiUrl("/companies/fixr/departments/stage-owners");
 
 function renderStages(role = "manager") {
 	render(
@@ -42,24 +42,53 @@ function renderStages(role = "manager") {
 	);
 }
 
+const bench = {
+	id: "bench",
+	name: "Bancada",
+	leaderId: "lia",
+	leader: { id: "lia", name: "Lia Líder", cpf: "52998224725" },
+	membersCount: 1,
+	createdAt: new Date().toISOString(),
+};
+
 beforeEach(() => {
 	setSessionCookie(fakeJwt());
 	server.use(
-		http.get(SECTORS_URL, () =>
+		http.get(DEPARTMENTS_URL, () =>
 			HttpResponse.json(
-				envelope([{ id: "bench", name: "Bancada", employees: [] }])
+				envelope({
+					records: [bench],
+					pagination: {
+						total_records: 1,
+						total_pages: 1,
+						current_page: 1,
+						next_page: null,
+						prev_page: null,
+					},
+				})
+			)
+		),
+		http.get(`${DEPARTMENTS_URL}/bench`, () =>
+			HttpResponse.json(
+				envelope({
+					...bench,
+					members: [
+						{ ...bench.leader, role: "technician", addedAt: bench.createdAt },
+					],
+				})
 			)
 		),
 		http.get(apiUrl("/companies/fixr/employees"), () =>
-			HttpResponse.json(envelope({ records: [] }))
+			HttpResponse.json(
+				envelope({ records: [], pagination: { total_records: 0 } })
+			)
 		)
 	);
 });
 
 describe("StageOwners", () => {
-	it("saves a stage as soon as its sector is picked", async () => {
-		let body: { stages: { status: string; sectorId: string | null }[] } | null =
-			null;
+	it("saves a stage to the department's pool as soon as the department is picked", async () => {
+		let body: { stages: unknown[] } | null = null;
 		server.use(
 			http.get(STAGES_URL, () => HttpResponse.json(envelope([]))),
 			http.put(STAGES_URL, async ({ request }) => {
@@ -70,27 +99,73 @@ describe("StageOwners", () => {
 		const user = userEvent.setup();
 		renderStages();
 
-		const [pendingSector] = await screen.findAllByRole("combobox", {
+		const [pendingDepartment] = await screen.findAllByRole("combobox", {
 			name: "Setor",
 		});
-		await user.click(pendingSector!);
+		await user.click(pendingDepartment!);
 		await user.click(await screen.findByRole("option", { name: "Bancada" }));
 
 		await waitFor(() =>
-			expect(body?.stages.find((stage) => stage.status === "pending")).toEqual({
-				status: "pending",
-				sectorId: "bench",
-				employeeId: null,
-			})
+			expect(body?.stages).toEqual([
+				{
+					status: "pending",
+					departmentId: "bench",
+					assigneeMode: "pool",
+					employeeId: null,
+				},
+			])
 		);
-		expect(screen.queryByRole("button", { name: /Salvar/ })).toBeNull();
 	});
 
-	it("shows what is saved and can't be changed without sectors:update", async () => {
+	it("sends a stage to the department's leader", async () => {
+		let body: { stages: unknown[] } | null = null;
 		server.use(
 			http.get(STAGES_URL, () =>
 				HttpResponse.json(
-					envelope([{ status: "fixing", sectorId: "bench", employeeId: null }])
+					envelope([
+						{
+							status: "fixing",
+							departmentId: "bench",
+							assigneeMode: "pool",
+							employeeId: null,
+						},
+					])
+				)
+			),
+			http.put(STAGES_URL, async ({ request }) => {
+				body = (await request.json()) as typeof body;
+				return HttpResponse.json(envelope(body?.stages ?? []));
+			})
+		);
+		const user = userEvent.setup();
+		renderStages();
+
+		await user.click(
+			await screen.findByRole("combobox", { name: "Responsável" })
+		);
+		await user.click(
+			await screen.findByRole("option", { name: /Líder do setor/ })
+		);
+
+		await waitFor(() =>
+			expect(body?.stages).toEqual([
+				expect.objectContaining({ status: "fixing", assigneeMode: "leader" }),
+			])
+		);
+	});
+
+	it("shows what is saved and can't be changed without departments:update", async () => {
+		server.use(
+			http.get(STAGES_URL, () =>
+				HttpResponse.json(
+					envelope([
+						{
+							status: "fixing",
+							departmentId: "bench",
+							assigneeMode: "pool",
+							employeeId: null,
+						},
+					])
 				)
 			)
 		);

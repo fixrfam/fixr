@@ -75,7 +75,7 @@ export function useChangeServiceOrderStatus(id: string) {
 	});
 }
 
-/** Hand the order to another sector or employee; lists and pools refresh. */
+/** Hand the order to another department or employee; lists and pools refresh. */
 export function useAssignServiceOrder(id: string) {
 	const subdomain = useSubdomain();
 	const invalidate = useInvalidateRepairs();

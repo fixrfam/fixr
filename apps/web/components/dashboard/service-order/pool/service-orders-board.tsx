@@ -7,6 +7,7 @@ import { toast } from "@pheralb/toast";
 import { UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { EmployeeChip } from "@/components/dashboard/employees/employee-chip";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import { useSearchInput } from "@/components/dashboard/parts/table/use-catalog-table";
@@ -28,14 +29,13 @@ import type {
 	ServiceOrderScope,
 	ServiceOrderStatus,
 } from "@/lib/services/service-orders";
-import { cn } from "@/lib/utils";
 import { ServiceOrderStatusBadge } from "../service-order-status-badge";
 import {
 	useMoveServiceOrder,
 	useOrderCode,
 	useServiceOrdersPage,
 } from "../store";
-import { SectorFilter, useSectorFilter } from "./sector-filter";
+import { DepartmentFilter, useDepartmentFilter } from "./department-filter";
 import { ViewToggle } from "./view-toggle";
 
 const STATUSES = serviceOrderStatuses.options;
@@ -74,9 +74,9 @@ function OrderCard({
 				<span className="font-semibold tabular-nums">
 					{orderCode(order.number)}
 				</span>
-				{order.sector && (
+				{order.department && (
 					<Badge className="truncate" variant="outline">
-						{order.sector.name}
+						{order.department.name}
 					</Badge>
 				)}
 			</div>
@@ -86,15 +86,14 @@ function OrderCard({
 			<span className="truncate text-muted-foreground">
 				{order.customer.name}
 			</span>
-			<span
-				className={cn(
-					"flex items-center gap-1 text-muted-foreground",
-					!order.assignee && "italic"
-				)}
-			>
-				<UserRound className="size-3" />
-				{order.assignee?.name ?? t("serviceOrders.board.unassigned")}
-			</span>
+			{order.assignee ? (
+				<EmployeeChip employee={order.assignee} size="sm" />
+			) : (
+				<span className="flex items-center gap-1 text-muted-foreground italic">
+					<UserRound className="size-3" />
+					{t("serviceOrders.board.unassigned")}
+				</span>
+			)}
 		</button>
 	);
 }
@@ -118,7 +117,7 @@ export function ServiceOrdersBoard({
 		permissions.serviceOrders.changeStatus
 	);
 	const move = useMoveServiceOrder();
-	const [sectorId] = useSectorFilter();
+	const [departmentId] = useDepartmentFilter();
 	const [q, setQ] = useState("");
 	const search = useSearchInput(q, setQ);
 
@@ -127,7 +126,7 @@ export function ServiceOrdersBoard({
 		perPage: BOARD_SIZE,
 		query: q,
 		scope,
-		sectorId: scope === "all" ? (sectorId ?? undefined) : undefined,
+		departmentId: scope === "all" ? (departmentId ?? undefined) : undefined,
 		sort: "newer",
 	});
 	const records = query.data?.records;
@@ -181,7 +180,7 @@ export function ServiceOrdersBoard({
 					value={search.input}
 				/>
 				<div className="flex items-center gap-3">
-					{scope === "all" && <SectorFilter />}
+					{scope === "all" && <DepartmentFilter />}
 					<ViewToggle />
 				</div>
 			</div>

@@ -64,9 +64,11 @@ export const validation: Translated<typeof source> = {
 		serialNumberMax: "O número de série excede {{count}} caracteres.",
 		notesMax: "As observações excedem {{count}} caracteres.",
 	},
-	sector: {
+	department: {
 		invalid: "Setor inválido.",
 		stageRepeated: "Cada etapa só pode aparecer uma vez.",
+		membersRequired: "Escolha ao menos um funcionário.",
+		stageEmployeeRequired: "Escolha o funcionário que recebe a ordem.",
 	},
 	serviceOrder: {
 		statusNoteMax: "A observação pode ter até {{count}} caracteres.",

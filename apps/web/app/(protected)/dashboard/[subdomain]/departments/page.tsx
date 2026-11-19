@@ -1,5 +1,5 @@
+import { DepartmentsPage } from "@/components/dashboard/departments/departments-page";
 import { Heading } from "@/components/dashboard/heading";
-import { SectorsPage } from "@/components/dashboard/sectors/sectors-page";
 import { getTranslator } from "@/lib/i18n/server";
 
 export default async function Page() {
@@ -8,10 +8,10 @@ export default async function Page() {
 	return (
 		<div className="space-y-4">
 			<Heading
-				description={t("sectors.page.description")}
-				title={t("sectors.page.title")}
+				description={t("departments.page.description")}
+				title={t("departments.page.title")}
 			/>
-			<SectorsPage />
+			<DepartmentsPage />
 		</div>
 	);
 }

@@ -3,6 +3,7 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { EmployeeChip } from "@/components/dashboard/employees/employee-chip";
 import type { ServiceOrderRow } from "@/lib/services/service-orders";
 import {
 	ActionsCell,
@@ -52,15 +53,23 @@ export function useColumns(subdomain: string): ColumnDef<ServiceOrderRow>[] {
 				),
 				meta: { label: t("serviceOrders.table.columns.category") },
 			}),
-			columnHelper.accessor((row) => row.assignee?.name ?? "—", {
+			columnHelper.display({
 				id: "technician",
 				header: t("serviceOrders.table.columns.technician"),
+				cell: ({ row }) =>
+					row.original.assignee ? (
+						<EmployeeChip employee={row.original.assignee} />
+					) : (
+						<span className="text-muted-foreground text-xs">
+							{t("serviceOrders.board.unassigned")}
+						</span>
+					),
 				meta: { label: t("serviceOrders.table.columns.technician") },
 			}),
-			columnHelper.accessor((row) => row.sector?.name ?? "—", {
-				id: "sector",
-				header: t("serviceOrders.table.columns.sector"),
-				meta: { label: t("serviceOrders.table.columns.sector") },
+			columnHelper.accessor((row) => row.department?.name ?? "—", {
+				id: "department",
+				header: t("serviceOrders.table.columns.department"),
+				meta: { label: t("serviceOrders.table.columns.department") },
 			}),
 			columnHelper.display({
 				id: "status",

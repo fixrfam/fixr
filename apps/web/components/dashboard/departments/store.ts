@@ -1,105 +1,174 @@
 "use client";
 
 import { permissions } from "@fixr/permissions";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { useSubdomain } from "@/components/dashboard/customers/store";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
+	type DepartmentDetail,
+	type DepartmentListParams,
+	departmentsApi,
 	employeeOptionsApi,
-	type Sector,
-	sectorsApi,
-} from "@/lib/services/sectors";
+} from "@/lib/services/departments";
 
-export const sectorKeys = {
-	list: (subdomain: string) => ["sectors", subdomain, "list"] as const,
+export const departmentKeys = {
+	all: (subdomain: string) => ["departments", subdomain] as const,
+	list: (subdomain: string, params: DepartmentListParams) =>
+		["departments", subdomain, "list", params] as const,
+	detail: (subdomain: string, id: string) =>
+		["departments", subdomain, "detail", id] as const,
 	stageOwners: (subdomain: string) =>
-		["sectors", subdomain, "stage-owners"] as const,
-	employees: (subdomain: string) =>
-		["sectors", subdomain, "employees"] as const,
+		["departments", subdomain, "stage-owners"] as const,
 };
 
-export function useSectors() {
+/** How many departments a picker or filter loads (a shop has a handful). */
+export const DEPARTMENT_OPTIONS_SIZE = 100;
+
+export function useDepartmentsPage(params: DepartmentListParams) {
 	const subdomain = useSubdomain();
 	return useQuery({
-		queryKey: sectorKeys.list(subdomain),
-		queryFn: () => sectorsApi.list(subdomain),
+		queryKey: departmentKeys.list(subdomain, params),
+		queryFn: () => departmentsApi.list(subdomain, params),
+		placeholderData: keepPreviousData,
+	});
+}
+
+/** Every department, by name, for selects and filters. */
+export function useDepartmentOptions() {
+	const query = useDepartmentsPage({
+		page: 1,
+		perPage: DEPARTMENT_OPTIONS_SIZE,
+		sort: "name",
+	});
+	return { ...query, data: query.data?.records ?? [] };
+}
+
+export function useDepartment(id: string) {
+	const subdomain = useSubdomain();
+	return useQuery({
+		queryKey: departmentKeys.detail(subdomain, id),
+		queryFn: () => departmentsApi.get(subdomain, id),
+		// Stages without a department ask for "": there's nothing to load.
+		enabled: Boolean(id),
 	});
 }
 
 export function useStageOwners() {
 	const subdomain = useSubdomain();
 	return useQuery({
-		queryKey: sectorKeys.stageOwners(subdomain),
-		queryFn: () => sectorsApi.stageOwners(subdomain),
+		queryKey: departmentKeys.stageOwners(subdomain),
+		queryFn: () => departmentsApi.stageOwners(subdomain),
 	});
 }
 
-/** Every employee of the company, for pickers; empty without `employees:read`. */
-export function useEmployeeOptions() {
+/** Employees matching a name or CPF; nothing without `employees:read`. */
+export function useEmployeeSearch(search: string) {
 	const subdomain = useSubdomain();
 	const canRead = useCatalogAbility().can(permissions.employees.read);
-	return useQuery({
-		queryKey: sectorKeys.employees(subdomain),
-		queryFn: () => employeeOptionsApi.list(subdomain),
+	const query = useQuery({
+		queryKey: ["employees", subdomain, "search", search.trim()],
+		queryFn: () => employeeOptionsApi.search(subdomain, search.trim()),
+		placeholderData: keepPreviousData,
 		enabled: canRead,
 	});
+	return { employees: query.data ?? [], loading: query.isFetching };
 }
 
 /**
- * A change to the sectors answers with the whole list. Orders show their
- * sector, and the "my sector" pool depends on it, so they refresh too.
+ * Departments show up in orders (their department), pools and the employees
+ * list, so a change refreshes all of them.
  */
-function useSectorsMutation<TArgs>(
-	request: (subdomain: string, args: TArgs) => Promise<Sector[]>
-) {
+function useInvalidateDepartments() {
 	const subdomain = useSubdomain();
 	const queryClient = useQueryClient();
+	return (detail?: DepartmentDetail) => {
+		if (detail) {
+			queryClient.setQueryData(
+				departmentKeys.detail(subdomain, detail.id),
+				detail
+			);
+		}
+		return Promise.all(
+			[
+				departmentKeys.all(subdomain),
+				["service-orders", subdomain],
+				["employees", subdomain],
+				["employeesData"],
+			].map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+		);
+	};
+}
+
+function useDepartmentMutation<TArgs, TResult>(
+	request: (subdomain: string, args: TArgs) => Promise<TResult>
+) {
+	const subdomain = useSubdomain();
+	const invalidate = useInvalidateDepartments();
 	return useMutation({
 		mutationFn: (args: TArgs) => request(subdomain, args),
-		onSuccess: (sectors) => {
-			queryClient.setQueryData(sectorKeys.list(subdomain), sectors);
-			return Promise.all([
-				queryClient.invalidateQueries({
-					queryKey: sectorKeys.employees(subdomain),
-				}),
-				queryClient.invalidateQueries({
-					queryKey: ["service-orders", subdomain],
-				}),
-			]);
-		},
+		onSuccess: (result) =>
+			invalidate(
+				result && typeof result === "object" && "members" in result
+					? (result as unknown as DepartmentDetail)
+					: undefined
+			),
 	});
 }
 
-export const useCreateSector = () =>
-	useSectorsMutation((subdomain, name: string) =>
-		sectorsApi.create(subdomain, { name })
+export const useCreateDepartment = () =>
+	useDepartmentMutation((subdomain, name: string) =>
+		departmentsApi.create(subdomain, { name })
 	);
 
-export const useRenameSector = () =>
-	useSectorsMutation((subdomain, { id, name }: { id: string; name: string }) =>
-		sectorsApi.rename(subdomain, id, { name })
+export const useUpdateDepartment = (id: string) =>
+	useDepartmentMutation(
+		(subdomain, values: { name?: string; leaderId?: string | null }) =>
+			departmentsApi.update(subdomain, id, values)
 	);
 
-export const useDeleteSector = () =>
-	useSectorsMutation((subdomain, id: string) =>
-		sectorsApi.remove(subdomain, id)
+export const useDeleteDepartment = () =>
+	useDepartmentMutation((subdomain, id: string) =>
+		departmentsApi.remove(subdomain, id)
 	);
 
-export const useSetEmployeeSector = () =>
-	useSectorsMutation(
+export const useAddDepartmentMembers = (id: string) =>
+	useDepartmentMutation((subdomain, employeeIds: string[]) =>
+		departmentsApi.addMembers(subdomain, id, { employeeIds })
+	);
+
+export const useRemoveDepartmentMember = (id: string) =>
+	useDepartmentMutation((subdomain, employeeId: string) =>
+		departmentsApi.removeMember(subdomain, id, employeeId)
+	);
+
+export const useSetEmployeeDepartments = () =>
+	useDepartmentMutation(
 		(
 			subdomain,
-			{ employeeId, sectorId }: { employeeId: string; sectorId: string | null }
-		) => sectorsApi.setEmployeeSector(subdomain, employeeId, sectorId)
+			{
+				employeeId,
+				departmentIds,
+			}: { employeeId: string; departmentIds: string[] }
+		) =>
+			departmentsApi.setEmployeeDepartments(
+				subdomain,
+				employeeId,
+				departmentIds
+			)
 	);
 
 export function usePutStageOwners() {
 	const subdomain = useSubdomain();
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (values: Parameters<typeof sectorsApi.putStageOwners>[1]) =>
-			sectorsApi.putStageOwners(subdomain, values),
+		mutationFn: (values: Parameters<typeof departmentsApi.putStageOwners>[1]) =>
+			departmentsApi.putStageOwners(subdomain, values),
 		onSuccess: (owners) =>
-			queryClient.setQueryData(sectorKeys.stageOwners(subdomain), owners),
+			queryClient.setQueryData(departmentKeys.stageOwners(subdomain), owners),
 	});
 }

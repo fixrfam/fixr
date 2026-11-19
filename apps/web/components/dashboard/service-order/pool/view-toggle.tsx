@@ -3,19 +3,48 @@
 import { useTranslation } from "@fixr/i18n/react";
 import { KanbanSquare, List } from "lucide-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const VIEWS = ["list", "board"] as const;
 
-/** `?view=board` or the list; kept in the URL so a pool reopens the way it was left. */
+const STORAGE_KEY = "fixr:service-orders:view";
+type View = (typeof VIEWS)[number];
+
+function readStoredView(): View {
+	try {
+		return localStorage.getItem(STORAGE_KEY) === "board" ? "board" : "list";
+	} catch {
+		return "list";
+	}
+}
+
+/**
+ * List or board. The URL (`?view=board`) wins; without it, the last view the
+ * viewer picked (kept in this browser), so moving between pools keeps it.
+ */
 export function useServiceOrdersView() {
-	return useQueryState(
+	const [param, setParam] = useQueryState(
 		"view",
-		parseAsStringLiteral(VIEWS)
-			.withDefault("list")
-			.withOptions({ history: "replace", clearOnDefault: true })
+		parseAsStringLiteral(VIEWS).withOptions({ history: "replace" })
 	);
+	const [stored, setStored] = useState<View>("list");
+	useEffect(() => {
+		setStored(readStoredView());
+	}, []);
+
+	const setView = (view: View) => {
+		try {
+			localStorage.setItem(STORAGE_KEY, view);
+		} catch {
+			// Private mode or blocked storage: the URL still holds it on this page.
+		}
+		setStored(view);
+		setParam(view === "list" ? null : view);
+	};
+
+	return [param ?? stored, setView] as const;
 }
 
 export function ViewToggle() {

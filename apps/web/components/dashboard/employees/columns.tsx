@@ -11,8 +11,9 @@ import {
 	PencilLine,
 	Trash2,
 } from "lucide-react";
-import type { z } from "zod";
+import { z } from "zod";
 import { Avatar } from "@/components/account/profile-avatar";
+import { EmployeeDepartments } from "@/components/dashboard/departments/employee-departments";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -32,6 +33,7 @@ export const dataSchema = employeeSelectSchema.extend({
 		avatarUrl: true,
 		createdAt: true,
 	}),
+	departments: z.array(z.object({ id: z.string(), name: z.string() })),
 });
 
 const REGEXES = {
@@ -82,6 +84,16 @@ export function buildColumns({
 					</div>
 				);
 			},
+		},
+		{
+			id: "departments",
+			header: t("employees.table.headers.departments"),
+			cell: ({ row }) => (
+				<EmployeeDepartments
+					departments={row.original.departments ?? []}
+					employee={row.original}
+				/>
+			),
 		},
 		{
 			accessorKey: "account.email",

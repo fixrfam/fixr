@@ -10,6 +10,7 @@ export const employees = {
 		columns: "Columns",
 		create: "Register employees",
 		headers: {
+			departments: "Departments",
 			name: "Employee",
 			role: "Role",
 			email: "Email",
@@ -35,5 +36,12 @@ export const employees = {
 		passwordDescription: "The employee's login password",
 		generate: "Generate",
 		submit: "Register",
+	},
+	picker: {
+		placeholder: "Pick an employee",
+		search: "Search by name or CPF...",
+		empty: "No employee found.",
+		create: "New employee",
+		createHint: "The employee you register is picked right away.",
 	},
 } as const;
