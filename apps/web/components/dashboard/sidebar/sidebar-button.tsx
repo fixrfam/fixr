@@ -61,9 +61,15 @@ export function SidebarButton({
 	}
 
 	const { labelKey, items } = data;
+	// A menu starts open when one of its pages is the current one.
+	const hasActive = items.some(
+		(item) =>
+			item.type === "route" &&
+			currentPath === `/dashboard/${params.subdomain}${item.href}`
+	);
 
 	return (
-		<Collapsible>
+		<Collapsible defaultOpen={hasActive}>
 			<CollapsibleTrigger asChild>
 				<div className="group flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-2xs text-secondary-foreground hover:bg-muted/50">
 					<div className="inline-flex items-center gap-2">

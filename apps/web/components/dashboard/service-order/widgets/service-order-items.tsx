@@ -248,8 +248,11 @@ export function ServiceOrderItems({
  */
 export function CreateEstimateButton({
 	serviceOrderId,
+	compact = false,
 }: {
 	serviceOrderId: string;
+	/** A small ghost button, for a card header. */
+	compact?: boolean;
 }) {
 	const { t } = useTranslation();
 	const { session } = useSession();
@@ -285,8 +288,9 @@ export function CreateEstimateButton({
 		<Button
 			disabled={create.isPending}
 			onClick={() => create.mutate()}
+			size={compact ? "sm" : "default"}
 			type="button"
-			variant="outline"
+			variant={compact ? "ghost" : "outline"}
 		>
 			{create.isPending ? (
 				<Loader2 className="size-3.5 animate-spin" />

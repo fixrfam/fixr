@@ -283,6 +283,19 @@ const SAMPLE_BODIES: Record<string, Record<string, unknown>> = {
 		testParameters: [],
 	},
 	"PATCH /companies/:subdomain/services/:serviceId": {},
+	"PATCH /companies/:subdomain/service-orders/:serviceOrderId/assignment": {
+		departmentId: null,
+		assigneeId: null,
+	},
+	"POST /companies/:subdomain/departments": { name: "Bancada" },
+	"PATCH /companies/:subdomain/departments/:departmentId": {},
+	"POST /companies/:subdomain/departments/:departmentId/members": {
+		employeeIds: [createId()],
+	},
+	"PUT /companies/:subdomain/departments/employees/:employeeId": {
+		departmentIds: [],
+	},
+	"PUT /companies/:subdomain/departments/stage-owners": { stages: [] },
 };
 
 const roles = Object.keys(roleAbilities) as EmployeeRole[];

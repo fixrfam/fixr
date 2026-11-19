@@ -49,7 +49,8 @@ import { generateRandomPassword } from "@/lib/utils/generate-random-password";
 export function NewEmployeeForm({
 	onSuccess,
 }: ComponentPropsWithoutRef<"form"> & {
-	onSuccess?: () => void;
+	/** Called with the new employee, so a picker can select it. */
+	onSuccess?: (created?: { id: string; name: string; cpf: string }) => void;
 }) {
 	const { t } = useTranslation();
 	const message = useMessage();
@@ -80,7 +81,7 @@ export function NewEmployeeForm({
 
 		try {
 			const { data: response, error } = await tryCatch<
-				AxiosResponse<ApiResponse>
+				AxiosResponse<ApiResponse<{ id: string; name: string; cpf: string }>>
 			>(axios.post(api(`/companies/${subdomain}/employees`), formatted));
 
 			if (error && error instanceof AxiosError) {
@@ -100,7 +101,7 @@ export function NewEmployeeForm({
 				description: feedback.description,
 			});
 
-			onSuccess?.();
+			onSuccess?.(response?.data.data ?? undefined);
 			queryClient.invalidateQueries({ queryKey: ["employeesData"] });
 		} finally {
 			setLoading(false);

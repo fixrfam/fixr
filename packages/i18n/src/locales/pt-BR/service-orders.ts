@@ -9,6 +9,52 @@ export const serviceOrders: Translated<typeof source> = {
 		newDescription:
 			"Preencha os campos abaixo para criar uma nova ordem de serviço.",
 	},
+	assignment: {
+		pickTheirDepartment:
+			"{{name}} não está neste setor. Escolha um dos setores dele.",
+		backToPool: "Voltar para o pool do setor",
+		title: "Responsável",
+		description:
+			"Quem está com a ordem agora. Cada etapa pode repassá-la automaticamente.",
+		department: "Setor",
+		assignee: "Funcionário",
+		noDepartment: "Sem setor",
+		noAssignee: "Pool do setor (ninguém ainda)",
+		reassign: "Reatribuir",
+		reassignTitle: "Reatribuir a ordem",
+		reassignDescription:
+			"Passe a ordem para outro setor ou funcionário. A mudança fica registrada no histórico.",
+		submit: "Reatribuir",
+		changed: "Ordem reatribuída!",
+		sameAsNow: "Escolha outro setor ou funcionário",
+		openedBy: "Aberta por",
+		history: "Histórico de atribuições",
+		noHistory: "Nunca foi reatribuída",
+		by: "por {{name}}",
+		byStage: "pelo padrão da etapa",
+		nobody: "ninguém",
+	},
+	views: {
+		label: "Visualização",
+		list: "Lista",
+		board: "Kanban",
+	},
+	pools: {
+		mineTitle: "Minhas ordens",
+		mineDescription: "As ordens pelas quais você é responsável agora",
+		departmentTitle: "Meus setores",
+		departmentDescription:
+			"O pool dos seus setores: ordens esperando alguém pegar e quem está com cada uma",
+		allDepartments: "Todos os setores",
+	},
+	board: {
+		empty: "Nenhuma ordem",
+		moved: "{{code}} movida para {{status}}",
+		moveFailed: "Não foi possível mover a ordem",
+		truncated:
+			"Mostrando as {{count}} ordens mais recentes. Use a lista para ver todas.",
+		unassigned: "Ninguém ainda",
+	},
 	statuses: {
 		pending: "Pendente",
 		diagnosing: "Em diagnóstico",
@@ -42,6 +88,7 @@ export const serviceOrders: Translated<typeof source> = {
 		stepOf: "Etapa {{step}} de {{total}}",
 	},
 	detail: {
+		fullScreen: "Tela cheia",
 		back: "Voltar",
 		title: "Ordem de serviço",
 		description: "Veja os detalhes completos da ordem de serviço abaixo",
@@ -150,7 +197,8 @@ export const serviceOrders: Translated<typeof source> = {
 			customer: "Cliente",
 			device: "Aparelho",
 			category: "Categoria",
-			technician: "Técnico",
+			technician: "Responsável",
+			department: "Setor",
 			status: "Status",
 			issue: "Defeito",
 			parts: "Peças",

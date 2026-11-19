@@ -34,6 +34,8 @@ The data returned is paginated. See the [pagination](/docs/#description/paginati
 						avatarUrl: true,
 						createdAt: true,
 					}),
+					/** The departments the employee is in, by name. */
+					departments: z.array(z.object({ id: z.string(), name: z.string() })),
 				})
 			),
 		}).describe("Presentations retrieved successfully."),
@@ -84,7 +86,7 @@ Rules:
 			error: null,
 			code: "create_employee_success",
 			message: "Employee created successfully.",
-			data: null,
+			data: z.object({ id: z.string(), name: z.string(), cpf: z.string() }),
 		}).describe("Employee was created and invitation email was sent."),
 		403: z
 			.union([

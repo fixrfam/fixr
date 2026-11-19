@@ -21,6 +21,11 @@ vi.mock("../../auth/repositories", () => ({
 vi.mock("../../companies/repositories", () => ({
 	CompaniesRepository: mocks.CompaniesRepository,
 }));
+vi.mock("../../departments/repositories", () => ({
+	DepartmentsRepository: {
+		queryEmployeesDepartments: async () => new Map(),
+	},
+}));
 vi.mock("../repositories", () => ({
 	EmployeesRepository: mocks.EmployeesRepository,
 }));

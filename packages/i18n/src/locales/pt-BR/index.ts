@@ -9,6 +9,7 @@ import { company } from "./company";
 import { customers } from "./customers";
 import { dashboard } from "./dashboard";
 import { dataTable } from "./data-table";
+import { departments } from "./departments";
 import { devices } from "./devices";
 import { emails } from "./emails";
 import { employees } from "./employees";
@@ -46,6 +47,7 @@ export const ptBR: Translated<typeof en> = {
 	permissions,
 	portal,
 	roles,
+	departments,
 	serviceOrders,
 	services,
 	suppliers,

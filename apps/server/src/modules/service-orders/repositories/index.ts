@@ -1,4 +1,5 @@
 import {
+	alias,
 	and,
 	db,
 	eq,
@@ -14,12 +15,15 @@ import {
 } from "@fixr/db/connection";
 import {
 	customers,
+	departmentMembers,
+	departments,
 	devices,
 	employees,
 	modelCategories,
 	modelMakers,
 	models,
 	parts,
+	serviceOrderAssignments,
 	serviceOrderHistory,
 	serviceOrderImages,
 	serviceOrderItems,
@@ -52,12 +56,17 @@ function endOfDay(date: Date) {
 	return end;
 }
 
+/** The employee responsible for an order now (`employees` is who opened it). */
+const assignees = alias(employees, "assignees");
+
 export const serviceOrdersListSelect = {
 	id: serviceOrders.id,
 	number: serviceOrders.number,
 	companyId: serviceOrders.companyId,
 	customerId: serviceOrders.customerId,
 	employeeId: serviceOrders.employeeId,
+	departmentId: serviceOrders.departmentId,
+	assigneeId: serviceOrders.assigneeId,
 	deviceId: serviceOrders.deviceId,
 	reportedDefect: serviceOrders.reportedDefect,
 	observations: serviceOrders.observations,
@@ -72,6 +81,8 @@ export const serviceOrdersListSelect = {
 		email: customers.email,
 	},
 	employee: { id: employees.id, name: employees.name },
+	department: { id: departments.id, name: departments.name },
+	assignee: { id: assignees.id, name: assignees.name, cpf: assignees.cpf },
 	device: {
 		id: devices.id,
 		imei: devices.imei,
@@ -102,6 +113,16 @@ export const serviceOrdersListJoins = [
 		type: "inner" as const,
 		table: employees,
 		on: eq(employees.id, serviceOrders.employeeId),
+	},
+	{
+		type: "left" as const,
+		table: departments,
+		on: eq(departments.id, serviceOrders.departmentId),
+	},
+	{
+		type: "left" as const,
+		table: assignees,
+		on: eq(assignees.id, serviceOrders.assigneeId),
 	},
 	{
 		type: "inner" as const,
@@ -152,6 +173,10 @@ export class ServiceOrdersRepository {
 		return device ?? null;
 	}
 
+	/**
+	 * @param viewer - the caller, for the `mine` (assigned to them) and
+	 * `department` (their department's pool) scopes
+	 */
 	static buildListFilter(
 		companyId: string,
 		filters: Pick<
@@ -159,18 +184,36 @@ export class ServiceOrdersRepository {
 			| "query"
 			| "deviceCategoryId"
 			| "employeeId"
+			| "scope"
+			| "departmentId"
 			| "status"
 			| "dateFrom"
 			| "dateTo"
-		>
+		>,
+		viewer?: { id: string; departmentIds: string[] }
 	) {
 		const conditions: SQL[] = [eq(serviceOrders.companyId, companyId)];
+
+		if (filters.scope === "mine" && viewer) {
+			conditions.push(eq(serviceOrders.assigneeId, viewer.id));
+		}
+		if (filters.scope === "department" && viewer) {
+			// No department, no pool: an employee outside every department sees nothing here.
+			conditions.push(
+				viewer.departmentIds.length > 0
+					? inArray(serviceOrders.departmentId, viewer.departmentIds)
+					: sql`false`
+			);
+		}
+		if (filters.departmentId) {
+			conditions.push(eq(serviceOrders.departmentId, filters.departmentId));
+		}
 
 		if (filters.deviceCategoryId) {
 			conditions.push(eq(models.categoryId, filters.deviceCategoryId));
 		}
 		if (filters.employeeId) {
-			conditions.push(eq(serviceOrders.employeeId, filters.employeeId));
+			conditions.push(eq(serviceOrders.assigneeId, filters.employeeId));
 		}
 		if (filters.status) {
 			conditions.push(eq(serviceOrders.status, filters.status));
@@ -241,11 +284,14 @@ export class ServiceOrdersRepository {
 		{
 			companyId,
 			employeeId,
+			departmentId,
 			customerId,
 			data,
 		}: {
 			companyId: string;
 			employeeId: string;
+			/** The opener's department, when they're in exactly one: the order starts there, assigned to them. */
+			departmentId: string | null;
 			customerId: string;
 			data: z.infer<typeof createServiceOrderSchema>;
 		}
@@ -258,6 +304,8 @@ export class ServiceOrdersRepository {
 				number,
 				customerId,
 				employeeId,
+				departmentId,
+				assigneeId: employeeId,
 				deviceId: data.deviceId,
 				reportedDefect: data.reportedDefect,
 				observations: data.observations ?? null,
@@ -360,6 +408,8 @@ export class ServiceOrdersRepository {
 			.from(serviceOrders)
 			.innerJoin(customers, eq(customers.id, serviceOrders.customerId))
 			.innerJoin(employees, eq(employees.id, serviceOrders.employeeId))
+			.leftJoin(departments, eq(departments.id, serviceOrders.departmentId))
+			.leftJoin(assignees, eq(assignees.id, serviceOrders.assigneeId))
 			.innerJoin(devices, eq(devices.id, serviceOrders.deviceId))
 			.innerJoin(models, eq(models.id, devices.modelId))
 			.innerJoin(modelMakers, eq(modelMakers.id, models.makerId))
@@ -376,7 +426,7 @@ export class ServiceOrdersRepository {
 			return null;
 		}
 
-		const [photos, history] = await Promise.all([
+		const [photos, history, assignments] = await Promise.all([
 			db
 				.select({
 					id: serviceOrderImages.id,
@@ -407,9 +457,133 @@ export class ServiceOrdersRepository {
 					sql`${serviceOrderHistory.fromStatus} IS NOT NULL`,
 					serviceOrderHistory.id
 				),
+			ServiceOrdersRepository.queryAssignmentHistory(serviceOrderId),
 		]);
 
-		return { ...serviceOrder, photos, history };
+		return { ...serviceOrder, photos, history, assignments };
+	}
+
+	/** Every reassignment of the order, oldest first, with the names of who and what. */
+	static async queryAssignmentHistory(serviceOrderId: string) {
+		const fromDepartment = alias(departments, "from_department");
+		const toDepartment = alias(departments, "to_department");
+		const fromAssignee = alias(employees, "from_assignee");
+		const toAssignee = alias(employees, "to_assignee");
+
+		return await db
+			.select({
+				id: serviceOrderAssignments.id,
+				createdAt: serviceOrderAssignments.createdAt,
+				fromDepartment: { id: fromDepartment.id, name: fromDepartment.name },
+				toDepartment: { id: toDepartment.id, name: toDepartment.name },
+				fromAssignee: { id: fromAssignee.id, name: fromAssignee.name },
+				toAssignee: { id: toAssignee.id, name: toAssignee.name },
+				employee: { id: employees.id, name: employees.name },
+			})
+			.from(serviceOrderAssignments)
+			.leftJoin(
+				fromDepartment,
+				eq(fromDepartment.id, serviceOrderAssignments.fromDepartmentId)
+			)
+			.leftJoin(
+				toDepartment,
+				eq(toDepartment.id, serviceOrderAssignments.toDepartmentId)
+			)
+			.leftJoin(
+				fromAssignee,
+				eq(fromAssignee.id, serviceOrderAssignments.fromAssigneeId)
+			)
+			.leftJoin(
+				toAssignee,
+				eq(toAssignee.id, serviceOrderAssignments.toAssigneeId)
+			)
+			.leftJoin(employees, eq(employees.id, serviceOrderAssignments.employeeId))
+			.where(eq(serviceOrderAssignments.serviceOrderId, serviceOrderId))
+			.orderBy(serviceOrderAssignments.createdAt, serviceOrderAssignments.id);
+	}
+
+	/** The order's department and assignee, locked until the transaction ends. */
+	static async queryAssignmentForUpdate(
+		tx: Transaction,
+		serviceOrderId: string
+	) {
+		const [serviceOrder] = await tx
+			.select({
+				departmentId: serviceOrders.departmentId,
+				assigneeId: serviceOrders.assigneeId,
+			})
+			.from(serviceOrders)
+			.where(eq(serviceOrders.id, serviceOrderId))
+			.limit(1)
+			.for("update");
+		return serviceOrder ?? null;
+	}
+
+	@InvalidateCache({ patterns: ["service-orders:*"] })
+	static async updateAssignment(
+		tx: Transaction,
+		serviceOrderId: string,
+		values: { departmentId: string | null; assigneeId: string | null }
+	) {
+		await tx
+			.update(serviceOrders)
+			.set(values)
+			.where(eq(serviceOrders.id, serviceOrderId));
+	}
+
+	/** Record a reassignment. Runs in the transaction that made it. */
+	static async insertAssignmentHistory(
+		tx: Transaction,
+		values: typeof serviceOrderAssignments.$inferInsert
+	) {
+		await tx.insert(serviceOrderAssignments).values(values);
+	}
+
+	/** A department of the company. */
+	static async queryDepartmentOfCompany(
+		departmentId: string,
+		companyId: string
+	) {
+		const [department] = await db
+			.select({ id: departments.id })
+			.from(departments)
+			.where(
+				and(
+					eq(departments.id, departmentId),
+					eq(departments.companyId, companyId)
+				)
+			)
+			.limit(1);
+		return department ?? null;
+	}
+
+	/** An employee of the company, with the departments they're in. */
+	static async queryEmployeeOfCompany(employeeId: string, companyId: string) {
+		const [employee] = await db
+			.select({ id: employees.id })
+			.from(employees)
+			.where(
+				and(eq(employees.id, employeeId), eq(employees.companyId, companyId))
+			)
+			.limit(1);
+		if (!employee) {
+			return null;
+		}
+		return {
+			...employee,
+			departmentIds: await ServiceOrdersRepository.queryEmployeeDepartmentIds(
+				employee.id
+			),
+		};
+	}
+
+	/** The departments an employee is in. */
+	static async queryEmployeeDepartmentIds(employeeId: string) {
+		const rows = await db
+			.select({ departmentId: departmentMembers.departmentId })
+			.from(departmentMembers)
+			.where(eq(departmentMembers.employeeId, employeeId));
+		return rows.map((row) => row.departmentId);
 	}
 
 	static async updateServiceOrder(

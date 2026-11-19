@@ -13,6 +13,7 @@ export const permissions: Translated<typeof source> = {
 		inventory: "Estoque",
 		logs: "Registros",
 		parts: "Peças",
+		departments: "Setores",
 		serviceOrders: "Ordens de Serviço",
 		services: "Serviços",
 		settings: "Configurações",

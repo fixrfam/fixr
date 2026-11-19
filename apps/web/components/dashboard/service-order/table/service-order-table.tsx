@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
+import type { ServiceOrderScope } from "@/lib/services/service-orders";
 import { cn } from "@/lib/utils";
+import {
+	DepartmentFilter,
+	useDepartmentFilter,
+} from "../pool/department-filter";
+import { ViewToggle } from "../pool/view-toggle";
 import { useServiceOrdersPage } from "../store";
 import { useColumns } from "./columns";
 import { TableToolbar } from "./toolbar";
@@ -32,22 +38,27 @@ const orderFilters = { status: parseAsStringLiteral(STATUSES) };
 
 interface Props {
 	subdomain: string;
+	/** Which pool: every order (default), the caller's department's or the caller's own. */
+	scope?: ServiceOrderScope;
 }
 
 /** The company's service orders, newest first, searched and filtered by the API. */
-export function ServiceOrdersTable({ subdomain }: Props) {
+export function ServiceOrdersTable({ subdomain, scope = "all" }: Props) {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const columns = useColumns(subdomain);
 	const { params, refine, setPagination, reset } =
 		useCatalogParams(orderFilters);
 	const search = useSearchInput(params.q, (q) => refine({ q }));
+	const [departmentId] = useDepartmentFilter();
 
 	const query = useServiceOrdersPage({
 		page: params.page,
 		perPage: params.perPage,
 		query: params.q,
 		status: params.status ?? undefined,
+		scope,
+		departmentId: scope === "all" ? (departmentId ?? undefined) : undefined,
 		sort: "newer",
 	});
 	useOutOfRangePage(query, params, setPagination);
@@ -95,7 +106,9 @@ export function ServiceOrdersTable({ subdomain }: Props) {
 						))}
 					</SelectContent>
 				</Select>
+				{scope === "all" && <DepartmentFilter />}
 				<DataTableViewOptions align="end" table={table} />
+				<ViewToggle />
 			</TableToolbar>
 			{query.isPending ? (
 				<Skeleton className="h-96 w-full rounded-md" />
