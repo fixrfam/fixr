@@ -11,7 +11,7 @@ export function DepartmentsPage() {
 	const { t } = useTranslation();
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-4">
 			<DepartmentsTable />
 			<ServiceOrderDetailsCard
 				description={t("departments.stages.description")}

@@ -6,6 +6,7 @@ export const dataTable = {
 	empty: "No results.",
 	pagination: {
 		rowsPerPage: "Rows per page",
+		showing: "Showing {{from}} to {{to}} of {{total}}",
 		page: "Page {{page}} of {{total}}",
 		first: "Go to first page",
 		previous: "Go to previous page",

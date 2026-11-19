@@ -78,6 +78,7 @@ export const departments: Translated<typeof en> = {
 		department: "Setor",
 		keep: "Sem padrão",
 		keepHint: "A ordem continua com quem está.",
+		stage: "Etapa",
 		assignee: "Responsável",
 		modes: {
 			pool: "Pool do setor",

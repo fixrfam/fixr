@@ -74,6 +74,7 @@ export const departments = {
 		department: "Department",
 		keep: "No default",
 		keepHint: "The order stays with whoever has it.",
+		stage: "Stage",
 		assignee: "Responsible",
 		modes: {
 			pool: "Department pool",

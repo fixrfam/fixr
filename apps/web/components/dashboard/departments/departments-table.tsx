@@ -62,11 +62,9 @@ export function DepartmentsTable() {
 				placeholder={t("departments.table.search")}
 				search={search.input}
 			>
+				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
 				<DataTableViewOptions align="end" table={table} />
 			</TableToolbar>
-			<div className="flex items-center justify-end">
-				<SortSelect onChange={(sort) => refine({ sort })} value={params.sort} />
-			</div>
 			{query.isPending ? (
 				<Skeleton className="h-64 w-full rounded-md" />
 			) : (

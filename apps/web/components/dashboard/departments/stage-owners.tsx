@@ -4,7 +4,7 @@ import { useTranslation } from "@fixr/i18n/react";
 import { permissions } from "@fixr/permissions";
 import { serviceOrderStatuses } from "@fixr/schemas/service-orders";
 import { toast } from "@pheralb/toast";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { EmployeePicker } from "@/components/dashboard/employees/employee-picker";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { serviceOrderStatusKeys } from "@/lib/i18n/labels";
 import type { StageAssigneeMode, StageOwner } from "@/lib/services/departments";
 import type { ServiceOrderStatus } from "@/lib/services/service-orders";
+import { cn } from "@/lib/utils";
 import { ServiceOrderStatusBadge } from "../service-order/service-order-status-badge";
 import {
 	useDepartment,
@@ -30,6 +31,11 @@ import {
 const STATUSES = serviceOrderStatuses.options;
 const MODES: readonly StageAssigneeMode[] = ["pool", "leader", "employee"];
 const NONE = "none";
+/**
+ * The header and every row are subgrids of one grid, so the stage column is as
+ * wide as the longest badge and the department column lines up on all rows.
+ */
+const ROW = "md:col-span-3 md:grid-cols-subgrid";
 
 const MODE_KEYS = {
 	pool: {
@@ -45,6 +51,30 @@ const MODE_KEYS = {
 		hint: "departments.stages.modes.employeeHint",
 	},
 } as const;
+
+/**
+ * Stretches from the stage badge to its department select. Solid when the
+ * stage sends the order somewhere, dashed when it keeps it where it is.
+ */
+function StageConnector({ active }: { active: boolean }) {
+	return (
+		<span
+			aria-hidden
+			className={cn(
+				"hidden min-w-8 flex-1 items-center md:flex",
+				active ? "text-muted-foreground" : "text-muted-foreground/40"
+			)}
+		>
+			<span
+				className={cn(
+					"flex-1 border-current border-t-2",
+					!active && "border-dashed"
+				)}
+			/>
+			<ChevronRight className="-ml-2.5 size-4 shrink-0" strokeWidth={2.5} />
+		</span>
+	);
+}
 
 function StageRow({
 	status,
@@ -68,13 +98,20 @@ function StageRow({
 		null;
 
 	return (
-		<div className="grid gap-3 border-b py-4 last:border-0 md:grid-cols-[10rem_auto_1fr_1fr] md:items-start">
-			<ServiceOrderStatusBadge className="mt-2 w-fit" variant={status}>
-				{t(serviceOrderStatusKeys[status])}
-			</ServiceOrderStatusBadge>
-			<ArrowRight className="mt-2.5 hidden size-4 text-muted-foreground md:block" />
+		<div
+			className={cn(
+				"grid gap-3 border-b py-3 last:border-0 md:items-start",
+				ROW
+			)}
+		>
+			<div className="flex h-9 items-center gap-2">
+				<ServiceOrderStatusBadge className="shrink-0" variant={status}>
+					{t(serviceOrderStatusKeys[status])}
+				</ServiceOrderStatusBadge>
+				<StageConnector active={Boolean(owner)} />
+			</div>
 			<div className="grid gap-1.5">
-				<span className="text-muted-foreground text-xs">
+				<span className="text-muted-foreground text-xs md:hidden">
 					{t("departments.stages.department")}
 				</span>
 				<Select
@@ -114,7 +151,7 @@ function StageRow({
 				</Select>
 			</div>
 			<div className="grid gap-1.5">
-				<span className="text-muted-foreground text-xs">
+				<span className="text-muted-foreground text-xs md:hidden">
 					{t("departments.stages.assignee")}
 				</span>
 				{owner ? (
@@ -134,7 +171,10 @@ function StageRow({
 								aria-label={t("departments.stages.assignee")}
 								className="w-full"
 							>
-								<SelectValue />
+								{/* Only the label: the hint makes the trigger two lines tall. */}
+								<SelectValue>
+									{t(MODE_KEYS[owner.assigneeMode].label)}
+								</SelectValue>
 							</SelectTrigger>
 							<SelectContent>
 								{MODES.map((mode) => (
@@ -167,7 +207,7 @@ function StageRow({
 						)}
 					</>
 				) : (
-					<p className="pt-2 text-muted-foreground text-xs">
+					<p className="flex h-9 items-center px-3 text-muted-foreground text-xs">
 						{t("departments.stages.keepHint")}
 					</p>
 				)}
@@ -209,7 +249,19 @@ export function StageOwners() {
 	}
 
 	return (
-		<div>
+		<div className="md:grid md:grid-cols-[max-content_minmax(0,1fr)_minmax(0,1fr)] md:gap-x-4">
+			<div
+				aria-hidden
+				className={cn(
+					"hidden border-b pb-2 font-medium text-muted-foreground text-xs md:grid",
+					ROW
+				)}
+			>
+				{/* Same left padding as the badge and the selects' text below. */}
+				<span className="px-2">{t("departments.stages.stage")}</span>
+				<span className="px-3">{t("departments.stages.department")}</span>
+				<span className="px-3">{t("departments.stages.assignee")}</span>
+			</div>
 			{STATUSES.map((status) => (
 				<StageRow
 					canEdit={canEdit}
