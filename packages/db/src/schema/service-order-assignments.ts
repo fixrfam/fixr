@@ -9,13 +9,20 @@ import {
 	varchar,
 } from "drizzle-orm/mysql-core";
 import { companies } from "./companies";
+import { departments } from "./departments";
 import { employees } from "./employees";
-import { sectors } from "./sectors";
 import { serviceOrderStatusValues, serviceOrders } from "./service-orders";
 
 /**
+ * Who gets an order when it enters a stage: the department's pool (nobody in
+ * particular), its leader, or one employee of the department.
+ */
+export const stageAssigneeModes = ["pool", "leader", "employee"] as const;
+
+/**
  * Who is responsible for each stage (status) of an order by default: when an
- * order enters the stage, it goes to this sector and, when set, employee.
+ * order enters the stage, it goes to this department, and to whoever
+ * `assigneeMode` says inside it.
  */
 export const serviceOrderStageOwners = mysqlTable(
 	"service_order_stage_owners",
@@ -27,10 +34,13 @@ export const serviceOrderStageOwners = mysqlTable(
 			.references(() => companies.id, { onDelete: "cascade" })
 			.notNull(),
 		status: mysqlEnum("status", serviceOrderStatusValues).notNull(),
-		sectorId: varchar("sector_id", { length: 25 }).references(
-			() => sectors.id,
-			{ onDelete: "set null" }
-		),
+		departmentId: varchar("department_id", { length: 25 })
+			.references(() => departments.id, { onDelete: "cascade" })
+			.notNull(),
+		assigneeMode: mysqlEnum("assignee_mode", stageAssigneeModes)
+			.default("pool")
+			.notNull(),
+		/** The employee when `assigneeMode` is `employee`; a member of the department. */
 		employeeId: varchar("employee_id", { length: 25 }).references(
 			() => employees.id,
 			{ onDelete: "set null" }
@@ -45,7 +55,7 @@ export const serviceOrderStageOwners = mysqlTable(
 );
 
 /**
- * Every change of an order's responsible sector or employee: who made it
+ * Every change of an order's responsible department or employee: who made it
  * (nobody when a stage's default did) and from what to what.
  */
 export const serviceOrderAssignments = mysqlTable(
@@ -57,12 +67,12 @@ export const serviceOrderAssignments = mysqlTable(
 		serviceOrderId: varchar("service_order_id", { length: 25 })
 			.references(() => serviceOrders.id, { onDelete: "cascade" })
 			.notNull(),
-		fromSectorId: varchar("from_sector_id", { length: 25 }).references(
-			() => sectors.id,
+		fromDepartmentId: varchar("from_department_id", { length: 25 }).references(
+			() => departments.id,
 			{ onDelete: "set null" }
 		),
-		toSectorId: varchar("to_sector_id", { length: 25 }).references(
-			() => sectors.id,
+		toDepartmentId: varchar("to_department_id", { length: 25 }).references(
+			() => departments.id,
 			{ onDelete: "set null" }
 		),
 		fromAssigneeId: varchar("from_assignee_id", { length: 25 }).references(

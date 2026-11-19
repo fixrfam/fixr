@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "9f1568b4-7a9c-4879-9432-489c1beb4339",
+  "id": "d0e0dce5-2024-45d9-bca8-e086a02ea504",
   "prevId": "467b3911-d0ac-44b2-a06f-2e66b2fc8b13",
   "tables": {
     "api_keys": {
@@ -356,6 +356,151 @@
       },
       "checkConstraint": {}
     },
+    "department_members": {
+      "name": "department_members",
+      "columns": {
+        "department_id": {
+          "name": "department_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "employee_id": {
+          "name": "employee_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "department_members_employee_idx": {
+          "name": "department_members_employee_idx",
+          "columns": ["employee_id"],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "department_members_department_id_departments_id_fk": {
+          "name": "department_members_department_id_departments_id_fk",
+          "tableFrom": "department_members",
+          "tableTo": "departments",
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "department_members_employee_id_employees_id_fk": {
+          "name": "department_members_employee_id_employees_id_fk",
+          "tableFrom": "department_members",
+          "tableTo": "employees",
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "department_members_department_id_employee_id_pk": {
+          "name": "department_members_department_id_employee_id_pk",
+          "columns": ["department_id", "employee_id"]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "departments": {
+      "name": "departments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "leader_id": {
+          "name": "leader_id",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "departments_company_id_companies_id_fk": {
+          "name": "departments_company_id_companies_id_fk",
+          "tableFrom": "departments",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "departments_leader_id_employees_id_fk": {
+          "name": "departments_leader_id_employees_id_fk",
+          "tableFrom": "departments",
+          "tableTo": "employees",
+          "columnsFrom": ["leader_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "departments_id": {
+          "name": "departments_id",
+          "columns": ["id"]
+        }
+      },
+      "uniqueConstraints": {
+        "departments_company_name_unique": {
+          "name": "departments_company_name_unique",
+          "columns": ["company_id", "name"]
+        }
+      },
+      "checkConstraint": {}
+    },
     "model_makers": {
       "name": "model_makers",
       "columns": {
@@ -604,13 +749,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "sector_id": {
-          "name": "sector_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
@@ -631,15 +769,6 @@
           "columnsFrom": ["company_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "employees_sector_id_sectors_id_fk": {
-          "name": "employees_sector_id_sectors_id_fk",
-          "tableFrom": "employees",
-          "tableTo": "sectors",
-          "columnsFrom": ["sector_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1979,73 +2108,6 @@
       },
       "checkConstraint": {}
     },
-    "sectors": {
-      "name": "sectors",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "company_id": {
-          "name": "company_id",
-          "type": "varchar(25)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(80)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "sectors_company_id_companies_id_fk": {
-          "name": "sectors_company_id_companies_id_fk",
-          "tableFrom": "sectors",
-          "tableTo": "companies",
-          "columnsFrom": ["company_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "sectors_id": {
-          "name": "sectors_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {
-        "sectors_company_name_unique": {
-          "name": "sectors_company_name_unique",
-          "columns": ["company_id", "name"]
-        }
-      },
-      "checkConstraint": {}
-    },
     "service_order_assignments": {
       "name": "service_order_assignments",
       "columns": {
@@ -2063,15 +2125,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "from_sector_id": {
-          "name": "from_sector_id",
+        "from_department_id": {
+          "name": "from_department_id",
           "type": "varchar(25)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "to_sector_id": {
-          "name": "to_sector_id",
+        "to_department_id": {
+          "name": "to_department_id",
           "type": "varchar(25)",
           "primaryKey": false,
           "notNull": false,
@@ -2124,20 +2186,20 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "service_order_assignments_from_sector_id_sectors_id_fk": {
-          "name": "service_order_assignments_from_sector_id_sectors_id_fk",
+        "service_order_assignments_from_department_id_departments_id_fk": {
+          "name": "service_order_assignments_from_department_id_departments_id_fk",
           "tableFrom": "service_order_assignments",
-          "tableTo": "sectors",
-          "columnsFrom": ["from_sector_id"],
+          "tableTo": "departments",
+          "columnsFrom": ["from_department_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "service_order_assignments_to_sector_id_sectors_id_fk": {
-          "name": "service_order_assignments_to_sector_id_sectors_id_fk",
+        "service_order_assignments_to_department_id_departments_id_fk": {
+          "name": "service_order_assignments_to_department_id_departments_id_fk",
           "tableFrom": "service_order_assignments",
-          "tableTo": "sectors",
-          "columnsFrom": ["to_sector_id"],
+          "tableTo": "departments",
+          "columnsFrom": ["to_department_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
@@ -2551,12 +2613,20 @@
           "notNull": true,
           "autoincrement": false
         },
-        "sector_id": {
-          "name": "sector_id",
+        "department_id": {
+          "name": "department_id",
           "type": "varchar(25)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
+        },
+        "assignee_mode": {
+          "name": "assignee_mode",
+          "type": "enum('pool','leader','employee')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pool'"
         },
         "employee_id": {
           "name": "employee_id",
@@ -2577,13 +2647,13 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "service_order_stage_owners_sector_id_sectors_id_fk": {
-          "name": "service_order_stage_owners_sector_id_sectors_id_fk",
+        "service_order_stage_owners_department_id_departments_id_fk": {
+          "name": "service_order_stage_owners_department_id_departments_id_fk",
           "tableFrom": "service_order_stage_owners",
-          "tableTo": "sectors",
-          "columnsFrom": ["sector_id"],
+          "tableTo": "departments",
+          "columnsFrom": ["department_id"],
           "columnsTo": ["id"],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "service_order_stage_owners_employee_id_employees_id_fk": {
@@ -2648,8 +2718,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "sector_id": {
-          "name": "sector_id",
+        "department_id": {
+          "name": "department_id",
           "type": "varchar(25)",
           "primaryKey": false,
           "notNull": false,
@@ -2709,9 +2779,9 @@
         }
       },
       "indexes": {
-        "service_orders_sector_idx": {
-          "name": "service_orders_sector_idx",
-          "columns": ["sector_id"],
+        "service_orders_department_idx": {
+          "name": "service_orders_department_idx",
+          "columns": ["department_id"],
           "isUnique": false
         },
         "service_orders_assignee_idx": {
@@ -2753,11 +2823,11 @@
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
-        "service_orders_sector_id_sectors_id_fk": {
-          "name": "service_orders_sector_id_sectors_id_fk",
+        "service_orders_department_id_departments_id_fk": {
+          "name": "service_orders_department_id_departments_id_fk",
           "tableFrom": "service_orders",
-          "tableTo": "sectors",
-          "columnsFrom": ["sector_id"],
+          "tableTo": "departments",
+          "columnsFrom": ["department_id"],
           "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
