@@ -34,7 +34,10 @@ export function getColumnPinningStyles<TData>({
 		right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
 		opacity: isPinned ? 0.97 : 1,
 		position: isPinned ? "sticky" : "relative",
-		background: isPinned ? "var(--background)" : "var(--background)",
+		// Only pinned cells paint their own background (they scroll over the
+		// others); the rest show the table's, so skeletons don't read every
+		// single-value cell as a solid chip.
+		background: isPinned ? "var(--background)" : undefined,
 		width: column.getSize(),
 		zIndex: isPinned ? 1 : undefined,
 	};
