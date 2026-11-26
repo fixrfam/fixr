@@ -1,5 +1,6 @@
+import { LOCALE_COOKIE } from "@fixr/i18n";
 import { HttpResponse, http } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { fakeJwt, setSessionCookie } from "@/test/jwt";
 import { apiUrl, envelope } from "@/test/msw/handlers";
 import { server } from "@/test/msw/server";
@@ -155,5 +156,41 @@ describe("axios client", () => {
 
 		expect(responses.map((r) => r.data.data.id)).toEqual(["a", "b", "c"]);
 		expect(refreshCalls).toBe(1);
+	});
+	describe("Accept-Language", () => {
+		afterEach(() => {
+			document.cookie = `${LOCALE_COOKIE}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+		});
+
+		function captureLanguage() {
+			let language: string | null = null;
+			server.use(
+				http.get(apiUrl("/companies"), ({ request }) => {
+					language = request.headers.get("accept-language");
+					return HttpResponse.json(envelope(null));
+				})
+			);
+			return () => language;
+		}
+
+		it("sends the locale picked in the app, so the API answers in it", async () => {
+			setSessionCookie(fakeJwt());
+			document.cookie = `${LOCALE_COOKIE}=pt-BR; path=/`;
+			const language = captureLanguage();
+
+			await axios.get("/companies");
+
+			expect(language()).toBe("pt-BR");
+		});
+
+		it("ignores a locale cookie the app doesn't ship", async () => {
+			setSessionCookie(fakeJwt());
+			document.cookie = `${LOCALE_COOKIE}=fr; path=/`;
+			const language = captureLanguage();
+
+			await axios.get("/companies");
+
+			expect(language()).not.toBe("fr");
+		});
 	});
 });
