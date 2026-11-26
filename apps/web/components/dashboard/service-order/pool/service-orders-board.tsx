@@ -243,13 +243,9 @@ export function ServiceOrdersBoard({
 												key={order.id}
 												value={order.id}
 											>
-												<KanbanItemHandle asChild cursor={canMove}>
-													<div>
-														<OrderCard
-															onOpen={() => open(order)}
-															order={order}
-														/>
-													</div>
+												{/* No asChild: the skeleton maps children into arrays, which Slot rejects. */}
+												<KanbanItemHandle cursor={canMove}>
+													<OrderCard onOpen={() => open(order)} order={order} />
 												</KanbanItemHandle>
 											</KanbanItem>
 										))}
