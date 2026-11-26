@@ -379,7 +379,11 @@ export async function buildApp(
 	}
 
 	await app.register(fastifyCors, {
-		origin: [env.FRONTEND_URL, `http://localhost:${env.NODE_PORT}`],
+		origin: [
+			env.FRONTEND_URL,
+			env.ADMIN_URL,
+			`http://localhost:${env.NODE_PORT}`,
+		],
 		credentials: true,
 	});
 
