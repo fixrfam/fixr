@@ -1,11 +1,12 @@
-export const whiteLogoUrl = "https://i.imgur.com/d3ZzTqA.png";
-
 /**
- * Where the email illustrations are served (the web app's `public/emails`).
- * Email clients don't render SVG, so these are PNGs rendered at 2x from the
- * sources in `packages/mail/illustrations`.
+ * Where the email assets are served (the web app's `public/emails`). Email
+ * clients don't render SVG, so they load PNGs: the logo, from
+ * `apps/web/public/TextLogo.svg` in Fixr blue, and the process drawn at the top
+ * of each email, from `packages/mail/illustrations/generate.ts`.
  */
-export const illustrationsUrl = "https://fixr.com.br/emails";
+export const emailAssetsUrl = "https://fixr.com.br/emails";
+
+export const logoUrl = `${emailAssetsUrl}/logo.png`;
 
 export type Illustration =
 	| "verification"
@@ -16,4 +17,4 @@ export type Illustration =
 	| "portal-access";
 
 export const illustrationUrl = (name: Illustration) =>
-	`${illustrationsUrl}/${name}.png`;
+	`${emailAssetsUrl}/process/${name}.png`;

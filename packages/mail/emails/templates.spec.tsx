@@ -81,7 +81,9 @@ describe("invite email", () => {
 	it("renders in Portuguese for a pt-BR recipient", async () => {
 		const html = await renderInvite({ ...props, locale: "pt-BR" });
 
-		expect(html).toContain(createTranslator("pt-BR").t("emails.invite.cta"));
+		expect(html).toContain(
+			createTranslator("pt-BR").t("emails.invite.cta", { app: "Fixr" })
+		);
 	});
 });
 
@@ -117,7 +119,9 @@ describe("estimate email", () => {
 	it("renders in Portuguese for a pt-BR recipient", async () => {
 		const html = await renderEstimate({ ...props, locale: "pt-BR" });
 
-		expect(html).toContain(createTranslator("pt-BR").t("emails.estimate.cta"));
+		expect(html).toContain(
+			createTranslator("pt-BR").t("emails.estimate.cta", { number: "0042" })
+		);
 	});
 });
 
@@ -140,6 +144,77 @@ describe("portal access email", () => {
 
 		expect(html).toContain(
 			createTranslator("pt-BR").t("emails.portalAccess.cta")
+		);
+	});
+});
+
+describe("every email", () => {
+	const renders = [
+		["verification", () => renderVerification(linkProps)],
+		["account deletion", () => renderDeletion(linkProps)],
+		["password reset", () => renderPasswordReset(linkProps)],
+		[
+			"invite",
+			() =>
+				renderInvite({
+					displayName: "João",
+					companyName: "Central",
+					appName: "Fixr",
+					password: "Gen3rated!Pw",
+					ctaUrl: "https://fixr.test/auth/login",
+				}),
+		],
+		[
+			"estimate",
+			() =>
+				renderEstimate({
+					customerName: "Maria",
+					companyName: "Central",
+					number: "0042",
+					device: "Galaxy S21",
+					total: "R$ 450,00",
+					validUntil: "23/11/2026",
+					ctaUrl: "https://fixr.test/estimate/tok3n",
+				}),
+		],
+		[
+			"portal access",
+			() =>
+				renderPortalAccess({
+					customerName: "Maria",
+					companyName: null,
+					ctaUrl: "https://fixr.test/portal/tok3n",
+				}),
+		],
+	] as const;
+
+	it.each(
+		renders
+	)("%s carries the logo and a plain link to its action", async (_name, render) => {
+		const html = await render();
+
+		expect(html).toContain("/emails/logo.png");
+		// The fallback sentence has an apostrophe, which the HTML escapes.
+		expect(html).toContain("open this link:");
+	});
+
+	it.each(
+		renders
+	)("%s opens on the drawing of its process", async (_name, render) => {
+		const html = await render();
+
+		expect(html).toMatch(/\/emails\/process\/[a-z-]+\.png/);
+		expect(html).not.toMatch(/\/emails\/(?!logo)[a-z-]+\.png/);
+		expect(html).not.toContain("Instrument Serif");
+	});
+});
+
+describe("password reset email", () => {
+	it("warns not to forward the link", async () => {
+		const html = await renderPasswordReset({ ...linkProps, locale: "pt-BR" });
+
+		expect(html).toContain(
+			createTranslator("pt-BR").t("emails.passwordReset.note")
 		);
 	});
 });

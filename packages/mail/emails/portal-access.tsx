@@ -1,18 +1,14 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
 import {
 	EmailButton,
+	EmailHeading,
 	EmailLayout,
+	EmailList,
 	EmailNote,
+	EmailText,
 } from "../components/email-layout";
 
 export interface EmailProps {
@@ -25,57 +21,50 @@ export interface EmailProps {
 	locale?: Locale;
 }
 
-/** A friendly welcome to the portal: what they can do there and the magic link. */
+/** The way into the customer portal, what is there and why it stays private. */
 export const PortalAccess = ({
 	customerName,
+	companyName,
 	ctaUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
-	/** Values are escaped: part of the copy carries inline markup. */
-	const { t } = createTranslator(locale, { escapeValues: true });
-	const perks = [
-		t("portal.access.perks.track"),
-		t("portal.access.perks.answer"),
-		t("portal.access.perks.shops"),
-	];
+	const { t } = createTranslator(locale);
+	const lead = companyName
+		? t("emails.portalAccess.lead", {
+				name: customerName,
+				company: companyName,
+			})
+		: t("emails.portalAccess.leadSelf", { name: customerName });
 
 	return (
 		<EmailLayout
+			company={companyName}
 			footer={t("emails.portalAccess.footer")}
 			illustration="portal-access"
 			preview={t("emails.portalAccess.preview")}
 		>
-			<Text
-				className="mb-0 text-[15px] text-muted"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.portalAccess.greeting", { name: customerName }),
-				}}
+			<EmailHeading>{t("emails.portalAccess.heading")}</EmailHeading>
+			<EmailText>{lead}</EmailText>
+			<EmailList
+				items={[
+					t("emails.portalAccess.item1"),
+					t("emails.portalAccess.item2"),
+					t("emails.portalAccess.item3"),
+				]}
+				title={t("emails.portalAccess.listTitle")}
 			/>
-			<Heading className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8">
-				{t("emails.portalAccess.heading")}
-			</Heading>
-			{perks.map((perk) => (
-				<Text className="my-1.5 text-[15px] leading-6" key={perk}>
-					<span style={{ color: "#10b981", fontWeight: 700 }}>✓</span>
-					&nbsp;&nbsp;
-					{perk}
-				</Text>
-			))}
-			<EmailButton href={ctaUrl}>{t("emails.portalAccess.cta")}</EmailButton>
-			<EmailNote>
-				<span
-					dangerouslySetInnerHTML={{ __html: t("emails.portalAccess.body") }}
-				/>{" "}
-				{t("emails.portalAccess.validity")}
-			</EmailNote>
+			<EmailButton fallback={t("emails.common.linkFallback")} href={ctaUrl}>
+				{t("emails.portalAccess.cta")}
+			</EmailButton>
+			<EmailNote>{t("emails.portalAccess.note")}</EmailNote>
 		</EmailLayout>
 	);
 };
 
 PortalAccess.PreviewProps = {
 	customerName: "Maria",
-	companyName: "Central Assistência",
-	ctaUrl: "http://localhost:3000/portal/token",
+	companyName: "CONTEEX",
+	ctaUrl: "https://fixr.com.br/portal/token",
 	locale: "pt-BR",
 } as EmailProps;
 

@@ -1,15 +1,14 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
-import { EmailButton, EmailLayout } from "../components/email-layout";
+import {
+	EmailButton,
+	EmailHeading,
+	EmailLayout,
+	EmailNote,
+	EmailText,
+} from "../components/email-layout";
 
 interface EmailProps {
 	displayName: string;
@@ -19,50 +18,40 @@ interface EmailProps {
 	locale?: Locale;
 }
 
-/** Confirms a new account: one step left, one button. */
+/** Confirms a new account: one click left. */
 export const VerificationEmail = ({
 	displayName,
 	appName,
 	verificationUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
-	const { t } = createTranslator(locale, { escapeValues: true });
+	const { t } = createTranslator(locale);
+	const values = { name: displayName, app: appName };
 
 	return (
 		<EmailLayout
-			footer={t("emails.verification.footer")}
+			footer={t("emails.verification.footer", values)}
 			illustration="verification"
-			preview={t("emails.verification.preview", { name: displayName })}
+			preview={t("emails.verification.preview")}
 		>
-			<Heading
-				className="mt-3 mb-2 font-semibold text-[24px] text-ink leading-8"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.verification.title", { name: displayName }),
-				}}
-			/>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.verification.greeting", { name: displayName }),
-				}}
-			/>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.verification.body", { app: appName }),
-				}}
-			/>
-			<EmailButton href={verificationUrl}>
+			<EmailHeading>{t("emails.verification.heading")}</EmailHeading>
+			<EmailText>{t("emails.verification.lead", values)}</EmailText>
+			<EmailButton
+				fallback={t("emails.common.linkFallback")}
+				href={verificationUrl}
+			>
 				{t("emails.verification.cta")}
 			</EmailButton>
+			<EmailNote>{t("emails.verification.note")}</EmailNote>
 		</EmailLayout>
 	);
 };
 
 VerificationEmail.PreviewProps = {
-	displayName: "alanturing",
+	displayName: "Ricardo",
 	appName: "Fixr",
 	verificationUrl: "https://fixr.com.br/auth/verify?token=abc",
+	locale: "pt-BR",
 } as EmailProps;
 
 export default VerificationEmail;
