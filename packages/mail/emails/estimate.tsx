@@ -1,19 +1,15 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
 import {
 	EmailButton,
+	EmailDetails,
+	EmailHeading,
 	EmailLayout,
 	EmailNote,
-	EmailSummary,
+	EmailSteps,
+	EmailText,
 } from "../components/email-layout";
 
 export interface EmailProps {
@@ -32,7 +28,7 @@ export interface EmailProps {
 	locale?: Locale;
 }
 
-/** Asks the customer to answer: the total and the deadline lead the email. */
+/** Asks the customer to answer: how much, until when, and what happens next. */
 export const Estimate = ({
 	customerName,
 	companyName,
@@ -43,62 +39,61 @@ export const Estimate = ({
 	ctaUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
-	/** Values are escaped: part of the copy carries inline markup. */
-	const { t } = createTranslator(locale, { escapeValues: true });
+	const { t } = createTranslator(locale);
+	const values = {
+		name: customerName,
+		company: companyName,
+		number,
+		device,
+		total,
+		date: validUntil,
+	};
 
 	return (
 		<EmailLayout
-			footer={t("emails.estimate.footer")}
+			company={companyName}
+			footer={t("emails.estimate.footer", values)}
 			illustration="estimate"
-			preview={t("emails.estimate.preview", { company: companyName, number })}
-			tone="action"
+			preview={t("emails.estimate.preview", values)}
 		>
-			<Text
-				className="mb-0 text-[15px] text-muted"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.estimate.greeting", { name: customerName }),
-				}}
-			/>
-			<Heading
-				className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.estimate.heading", { company: companyName }),
-				}}
-			/>
-			<EmailSummary
+			<EmailHeading>{t("emails.estimate.heading", values)}</EmailHeading>
+			<EmailText>{t("emails.estimate.lead", values)}</EmailText>
+			<EmailDetails
 				rows={[
+					{ label: t("emails.estimate.numberLabel"), value: `#${number}` },
+					{ label: t("emails.estimate.deviceLabel"), value: device },
+					{ label: t("emails.estimate.validUntilLabel"), value: validUntil },
 					{
 						label: t("emails.estimate.totalLabel"),
 						value: total,
 						strong: true,
 					},
-					{ label: t("emails.estimate.deviceLabel"), value: device },
-					{ label: t("emails.estimate.numberLabel"), value: `#${number}` },
-					{ label: t("emails.estimate.validUntilLabel"), value: validUntil },
 				]}
 			/>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.estimate.instructions", { date: validUntil }),
-				}}
+			<EmailSteps
+				steps={[
+					t("emails.estimate.step1"),
+					t("emails.estimate.step2", values),
+					t("emails.estimate.step3", values),
+				]}
+				title={t("emails.estimate.stepsTitle")}
 			/>
-			<EmailButton href={ctaUrl} tone="action">
-				{t("emails.estimate.cta")}
+			<EmailButton fallback={t("emails.common.linkFallback")} href={ctaUrl}>
+				{t("emails.estimate.cta", values)}
 			</EmailButton>
-			<EmailNote>{t("emails.estimate.portalHint")}</EmailNote>
+			<EmailNote>{t("emails.estimate.note", values)}</EmailNote>
 		</EmailLayout>
 	);
 };
 
 Estimate.PreviewProps = {
 	customerName: "Maria",
-	companyName: "Central Assistência",
+	companyName: "CONTEEX",
 	number: "0042",
-	device: "Samsung Galaxy S21",
-	total: "R$ 450,00",
-	validUntil: "23/11/2026",
-	ctaUrl: "http://localhost:3000/estimate/token",
+	device: "Samsung Galaxy S23",
+	total: "R$ 1.220,00",
+	validUntil: "26/12/2026",
+	ctaUrl: "https://fixr.com.br/estimate/token",
 	locale: "pt-BR",
 } as EmailProps;
 

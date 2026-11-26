@@ -27,9 +27,9 @@ describe("email senders", () => {
 	};
 
 	it.each([
-		["sendAccountVerificationEmail", "Verify your email, @maria!"],
-		["sendAccountDeletionEmail", "maria's account delete confirmation."],
-		["sendPasswordResetEmail", "Forgot your password, maria?"],
+		["sendAccountVerificationEmail", "Confirm your email on Fixr"],
+		["sendAccountDeletionEmail", "Confirm the deletion of your Fixr account"],
+		["sendPasswordResetEmail", "Reset your Fixr password"],
 	] as const)("%s sends rendered HTML to the recipient", async (sender, subject) => {
 		send.mockResolvedValue({ data: { id: "e1" }, error: null });
 
@@ -42,9 +42,9 @@ describe("email senders", () => {
 	});
 
 	it.each([
-		["sendAccountVerificationEmail", "Confirme seu email, @maria!"],
-		["sendAccountDeletionEmail", "Confirmação de exclusão da conta de maria."],
-		["sendPasswordResetEmail", "Esqueceu sua senha, maria?"],
+		["sendAccountVerificationEmail", "Confirme seu email no Fixr"],
+		["sendAccountDeletionEmail", "Confirme a exclusão da sua conta no Fixr"],
+		["sendPasswordResetEmail", "Redefina sua senha do Fixr"],
 	] as const)("%s writes the subject in the recipient's locale", async (sender, subject) => {
 		send.mockResolvedValue({ data: { id: "e1" }, error: null });
 
@@ -66,7 +66,7 @@ describe("email senders", () => {
 		});
 
 		expect(send.mock.calls[0]![0].html).toContain("Central");
-		expect(send.mock.calls[0]![0].subject).toContain("Welcome to Fixr");
+		expect(send.mock.calls[0]![0].subject).toBe("Central added you to Fixr");
 	});
 
 	it("sendInviteEmail follows the recipient's locale", async () => {
@@ -82,7 +82,7 @@ describe("email senders", () => {
 			locale: "pt-BR",
 		});
 
-		expect(send.mock.calls[0]![0].subject).toContain("Bem-vindo ao Fixr");
+		expect(send.mock.calls[0]![0].subject).toBe("Central te adicionou no Fixr");
 	});
 
 	it("sendEstimateEmail attaches the PDF and names the estimate in the subject", async () => {

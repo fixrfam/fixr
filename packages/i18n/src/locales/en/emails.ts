@@ -1,84 +1,95 @@
 /**
- * Transactional email copy. Rendered on the server with the recipient's
- * locale, so a few keys carry inline markup (`<b>`, `<i>`, `<br />`) to keep
- * the original emphasis. Interpolated values are escaped before they land in
- * the markup.
+ * Transactional email copy. Rendered on the server in the recipient's locale.
+ * Plain text only: the templates render it as React text, which escapes every
+ * interpolated value. The lead of each email says the point in its first
+ * sentence; the rest explains what happens next.
  */
 export const emails = {
-	header: {
-		docs: "Docs",
-		app: "App",
+	common: {
+		linkFallback: "If the button doesn't work, open this link:",
 	},
 	invite: {
-		subject: "🎉 Welcome to {{app}} – your access to the system",
-		preview: "{{name}}, your access to {{app}}!",
-		greeting: "Hi, <i>{{name}}</i>!",
-		heading: "<b>{{company}}</b> added you to {{app}}.",
-		body: "Your account was created <b>successfully</b>. You are now an <b>employee</b> of <b>{{company}}</b> and can use the platform to manage service orders, quotes and much more.",
-		instructions:
-			"To get in, <b>click the button below</b> and log in with <b>this email</b> and the <b>random password</b> shown here.",
-		cta: "Access",
-		passwordHint:
-			"Change the default password in your account settings after the first login.",
-		passwordLabel: "Your temporary password",
-		footer: "If you do not recognize this company, please ignore this email.",
+		subject: "{{company}} added you to {{app}}",
+		preview: "Your temporary password is inside. Sign in and change it.",
+		heading: "Welcome to the {{company}} team",
+		lead: "Hi {{name}}, {{company}} runs its repair shop on {{app}} and just gave you access. You sign in with this email and the temporary password below.",
+		passwordLabel: "Temporary password",
+		stepsTitle: "Your first five minutes",
+		step1: "Sign in with this email and the temporary password.",
+		step2: "Go to Account and pick a password only you know.",
+		step3:
+			"Open Service orders to see what is with you and with your department.",
+		cta: "Sign in to {{app}}",
+		note: "Nobody from {{company}} or {{app}} will ever ask for this password by phone or message.",
+		footer:
+			"You got this email because {{company}} added you to its team on {{app}}. If you don't know them, ignore it and nothing will happen.",
 	},
 	portalAccess: {
 		subject: "Your service orders at {{company}}",
 		subjectSelf: "Your link to follow your service orders",
-		preview: "Follow your service orders and estimates.",
-		greeting: "Hi, <i>{{name}}</i>!",
-		heading: "Follow your service orders.",
-		body: "Use the button below to see the status of your service orders and answer estimates. <b>Do not share this link</b>: it gives access to your history.",
-		cta: "See my service orders",
-		validity: "The link works for 30 days, on any device.",
-		footer: "If you did not expect this email, please ignore it.",
+		preview: "See where each repair stands without calling the shop.",
+		heading: "All your repairs in one place",
+		lead: "Hi {{name}}, the customer portal shows every device you left at {{company}}, from diagnosis to pickup, so you don't need to call to know how it's going.",
+		leadSelf:
+			"Hi {{name}}, here is the link you asked for. The customer portal shows every device you left at shops that use Fixr, from diagnosis to pickup.",
+		listTitle: "In the portal you can",
+		item1: "See which stage each service order is in",
+		item2: "Approve or decline estimates and download their PDFs",
+		item3: "Check the history and photos of your devices",
+		cta: "Open my portal",
+		note: "The link works for 30 days on any device and opens your history, so keep it to yourself.",
+		footer:
+			"You got this email because your access to the Fixr customer portal was requested. If it wasn't you, ignore it.",
 	},
 	estimate: {
 		subject: "Estimate #{{number}} from {{company}}",
-		preview: "{{company}} sent you estimate #{{number}}.",
-		greeting: "Hi, <i>{{name}}</i>!",
-		heading: "<b>{{company}}</b> sent you an estimate.",
-		body: "Estimate <b>#{{number}}</b> for your <b>{{device}}</b> totals <b>{{total}}</b>. The PDF is attached.",
-		instructions:
-			"Open the estimate to review the items and <b>approve or reject</b> it. It is valid until <b>{{date}}</b>.",
-		cta: "Review estimate",
+		preview: "{{total}} to repair your {{device}}. Valid until {{date}}.",
+		heading: "Your {{device}} has an estimate",
+		lead: "Hi {{name}}, {{company}} has looked at your {{device}} and the repair comes to {{total}}. Check what is included and answer by {{date}}.",
 		numberLabel: "Estimate",
 		deviceLabel: "Device",
-		totalLabel: "Total",
 		validUntilLabel: "Valid until",
-		portalHint:
-			"The button opens your area in the client portal, where you also follow the repair and see the PDF.",
-		footer: "If you did not request this estimate, please ignore this email.",
+		totalLabel: "Total",
+		stepsTitle: "What happens next",
+		step1: "You approve or decline through the link. No account needed.",
+		step2:
+			"If you approve, {{company}} starts the repair and you can follow each stage.",
+		step3:
+			"If you decline, you can leave a reason and {{company}} sees your answer right away.",
+		cta: "Answer estimate #{{number}}",
+		note: "The PDF with every item is attached. After {{date}}, ask {{company}} for a new estimate.",
+		footer:
+			"You got this email because {{company}} sent you an estimate through Fixr. If you didn't ask for one, ignore it.",
 	},
 	verification: {
-		subject: "Verify your email, @{{name}}!",
-		preview: "{{name}}, confirm your email!",
-		title: "<b>{{name}}</b>, your new account is just one step away.",
-		greeting: "Hey <b>{{name}}</b>!",
-		body: "You have registered a new account on {{app}}, click the button below to confirm your identity.",
-		cta: "Verify email",
-		footer: "If you have not registered, please ignore this email.",
+		subject: "Confirm your email on {{app}}",
+		preview: "One click and your account is ready.",
+		heading: "One click left",
+		lead: "Hi {{name}}, your {{app}} account is created. Confirm that this address is yours so you can start using it and get back in if you ever forget your password.",
+		cta: "Confirm my email",
+		note: "The link works once and only confirms this address.",
+		footer:
+			"You got this email because someone created a {{app}} account with this address. If it wasn't you, ignore it.",
 	},
 	passwordReset: {
-		subject: "Forgot your password, {{name}}?",
-		preview: "Password reset",
-		greeting: "Hi, <i>{{name}}</i>!",
-		heading: "Forgot your password? 🔒",
-		body: "We received a request to change the password of your {{app}} account.<br />If it was you, set a new password by clicking the button below:",
-		cta: "Reset my password",
-		warning: "To keep your account safe, do not forward this email to anyone.",
+		subject: "Reset your {{app}} password",
+		preview: "Choose a new password for your account.",
+		heading: "Let's change your password",
+		lead: "Hi {{name}}, we got a request to reset the password of your {{app}} account. If it was you, choose a new one with the button below.",
+		cta: "Choose a new password",
+		note: "The link works once. Don't forward this email: whoever has the link can change your password.",
 		footer:
-			"If you did not ask for this change, just ignore and delete this message.",
+			"If you didn't ask for this, ignore this email. Your password stays the same.",
 	},
 	accountDeletion: {
-		subject: "{{name}}'s account delete confirmation.",
-		preview: "{{name}}, confirm your account deletion.",
-		title: "Account deletion confirmation",
-		greeting: "Hey <b>{{name}}</b>.",
-		body: "You requested account deletion on {{app}}. By clicking the button below, your account will be <b>permanently deleted</b> with all associated data.",
-		irreversible: "<b>This action is irreversible.</b>",
-		cta: "Delete account",
-		footer: "If you have not requested deletion, please ignore this email.",
+		subject: "Confirm the deletion of your {{app}} account",
+		preview: "We need you to confirm before we delete anything.",
+		heading: "Confirm your account deletion",
+		lead: "Hi {{name}}, you asked to delete your {{app}} account. Before we erase anything, we need to make sure it was you.",
+		irreversible:
+			"Once you confirm, the account and all the data tied to it are erased right away. This can't be undone.",
+		cta: "Delete my account",
+		footer:
+			"If you didn't ask for this, ignore this email. Your account stays active.",
 	},
 } as const;

@@ -1,18 +1,13 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
 import {
 	EmailButton,
+	EmailHeading,
 	EmailLayout,
-	EmailNote,
+	EmailText,
+	EmailWarning,
 } from "../components/email-layout";
 
 interface EmailProps {
@@ -23,45 +18,30 @@ interface EmailProps {
 	locale?: Locale;
 }
 
-/** The most serious email: red accents, the warning before the button. */
+/** Confirms a permanent deletion: the consequence comes before the button. */
 export const AccountDeletionEmail = ({
 	displayName,
 	appName,
 	verificationUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
-	const { t } = createTranslator(locale, { escapeValues: true });
+	const { t } = createTranslator(locale);
+	const values = { name: displayName, app: appName };
 
 	return (
 		<EmailLayout
 			footer={t("emails.accountDeletion.footer")}
 			illustration="account-deletion"
-			preview={t("emails.accountDeletion.preview", { name: displayName })}
-			tone="danger"
+			preview={t("emails.accountDeletion.preview")}
 		>
-			<Text
-				className="mb-0 text-[15px] text-muted"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.accountDeletion.greeting", { name: displayName }),
-				}}
-			/>
-			<Heading className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8">
-				{t("emails.accountDeletion.title")}
-			</Heading>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.accountDeletion.body", { app: appName }),
-				}}
-			/>
-			<EmailNote tone="danger">
-				<span
-					dangerouslySetInnerHTML={{
-						__html: t("emails.accountDeletion.irreversible"),
-					}}
-				/>
-			</EmailNote>
-			<EmailButton href={verificationUrl} tone="danger">
+			<EmailHeading>{t("emails.accountDeletion.heading")}</EmailHeading>
+			<EmailText>{t("emails.accountDeletion.lead", values)}</EmailText>
+			<EmailWarning>{t("emails.accountDeletion.irreversible")}</EmailWarning>
+			<EmailButton
+				fallback={t("emails.common.linkFallback")}
+				href={verificationUrl}
+				tone="danger"
+			>
 				{t("emails.accountDeletion.cta")}
 			</EmailButton>
 		</EmailLayout>
@@ -69,9 +49,10 @@ export const AccountDeletionEmail = ({
 };
 
 AccountDeletionEmail.PreviewProps = {
-	displayName: "alanturing",
+	displayName: "Ricardo",
 	appName: "Fixr",
 	verificationUrl: "https://fixr.com.br/account/confirm-deletion?token=abc",
+	locale: "pt-BR",
 } as EmailProps;
 
 export default AccountDeletionEmail;

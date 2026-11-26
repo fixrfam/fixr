@@ -89,6 +89,7 @@ export const sendInviteEmail = async ({
 		appName,
 		subject: createTranslator(locale).t("emails.invite.subject", {
 			app: appName,
+			company: props.companyName,
 		}),
 		html: await renderInviteEmail({
 			appName,
@@ -108,7 +109,7 @@ export const sendAccountVerificationEmail = async ({
 		to,
 		appName,
 		subject: createTranslator(locale).t("emails.verification.subject", {
-			name: displayName,
+			app: appName,
 		}),
 		html: await renderVerificationEmail({
 			verificationUrl,
@@ -129,7 +130,7 @@ export const sendAccountDeletionEmail = async ({
 		to,
 		appName,
 		subject: createTranslator(locale).t("emails.accountDeletion.subject", {
-			name: displayName,
+			app: appName,
 		}),
 		html: await renderDeletionEmail({
 			verificationUrl,
@@ -150,7 +151,7 @@ export const sendPasswordResetEmail = async ({
 		to,
 		appName,
 		subject: createTranslator(locale).t("emails.passwordReset.subject", {
-			name: displayName,
+			app: appName,
 		}),
 		html: await renderPasswordResetEmail({
 			verificationUrl,

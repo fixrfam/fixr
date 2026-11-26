@@ -1,5 +1,6 @@
 import { cookieKey } from "@fixr/constants/cookies";
 import { env } from "@fixr/env/web";
+import { isLocale, LOCALE_COOKIE } from "@fixr/i18n";
 import axios, {
 	type AxiosError,
 	type AxiosRequestConfig,
@@ -43,6 +44,23 @@ axiosClient.interceptors.request.use(async (config) => {
 			.map((item) => `${item.name}=${item.value}`)
 			.join("; ");
 		config.headers.set("Cookie", cookiesString);
+	}
+
+	return config;
+});
+
+/**
+ * Client side, the locale cookie belongs to the web app's origin and never
+ * reaches the API, which then falls back on the browser's language. Sending
+ * the picked locale as `Accept-Language` keeps the emails and PDFs the API
+ * renders in the language the app is shown in.
+ */
+axiosClient.interceptors.request.use((config) => {
+	if (isClientSide()) {
+		const locale = parseCookies()[LOCALE_COOKIE];
+		if (isLocale(locale)) {
+			config.headers.set("Accept-Language", locale);
+		}
 	}
 
 	return config;

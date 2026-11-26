@@ -1,18 +1,13 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
 import {
 	EmailButton,
+	EmailHeading,
 	EmailLayout,
 	EmailNote,
+	EmailText,
 } from "../components/email-layout";
 
 interface EmailProps {
@@ -23,49 +18,40 @@ interface EmailProps {
 	locale?: Locale;
 }
 
-/** A security email: short, one action, and a reminder not to forward it. */
+/** Lets the owner of the account choose a new password. */
 export const PasswordReset = ({
 	displayName,
 	appName,
 	verificationUrl,
 	locale = defaultLocale,
 }: EmailProps) => {
-	const { t } = createTranslator(locale, { escapeValues: true });
+	const { t } = createTranslator(locale);
+	const values = { name: displayName, app: appName };
 
 	return (
 		<EmailLayout
 			footer={t("emails.passwordReset.footer")}
 			illustration="password-reset"
 			preview={t("emails.passwordReset.preview")}
-			tone="action"
 		>
-			<Text
-				className="mb-0 text-[15px] text-muted"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.passwordReset.greeting", { name: displayName }),
-				}}
-			/>
-			<Heading className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8">
-				{t("emails.passwordReset.heading")}
-			</Heading>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.passwordReset.body", { app: appName }),
-				}}
-			/>
-			<EmailButton href={verificationUrl} tone="action">
+			<EmailHeading>{t("emails.passwordReset.heading")}</EmailHeading>
+			<EmailText>{t("emails.passwordReset.lead", values)}</EmailText>
+			<EmailButton
+				fallback={t("emails.common.linkFallback")}
+				href={verificationUrl}
+			>
 				{t("emails.passwordReset.cta")}
 			</EmailButton>
-			<EmailNote>{t("emails.passwordReset.warning")}</EmailNote>
+			<EmailNote>{t("emails.passwordReset.note")}</EmailNote>
 		</EmailLayout>
 	);
 };
 
 PasswordReset.PreviewProps = {
-	displayName: "alanturing",
+	displayName: "Ricardo",
 	appName: "Fixr",
 	verificationUrl: "https://fixr.com.br/auth/forgot-password/token",
+	locale: "pt-BR",
 } as EmailProps;
 
 export default PasswordReset;

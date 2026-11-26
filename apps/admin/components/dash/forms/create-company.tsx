@@ -33,7 +33,7 @@ import PasswordInput from "@/components/ui/password-input";
 import { generateRandomPassword, tryCatch } from "@/lib/utils";
 
 export function CreateCompany() {
-	const { t } = useTranslation();
+	const { t, locale } = useTranslation();
 	const message = useMessage();
 	const [loading, setLoading] = useState(false);
 	const { getToken } = useAuth();
@@ -69,6 +69,8 @@ export function CreateCompany() {
 				axios.post(`${process.env.NEXT_PUBLIC_API_URL}/companies`, formatted, {
 					headers: {
 						Authorization: `Bearer ${token}`,
+						// The owner's invite email goes out in the panel's language.
+						"Accept-Language": locale,
 					},
 				})
 			);

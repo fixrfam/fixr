@@ -1,18 +1,15 @@
-/**
- * biome-ignore-all lint/security/noDangerouslySetInnerHtml: the copy comes
- * from our own catalogs and every interpolated value is escaped by the
- * translator, so the only markup that reaches the email is the emphasis the
- * design asks for.
- */
 import { createTranslator, defaultLocale, type Locale } from "@fixr/i18n";
-import { Heading, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 // biome-ignore lint/correctness/noUnusedImports: <Need that for the email to render :P>
 import React from "react";
 import {
 	EmailButton,
+	EmailCode,
+	EmailHeading,
 	EmailLayout,
 	EmailNote,
+	EmailSteps,
+	EmailText,
 } from "../components/email-layout";
 
 export interface EmailProps {
@@ -25,7 +22,7 @@ export interface EmailProps {
 	locale?: Locale;
 }
 
-/** Welcome to the team: the temporary password stands out, then the way in. */
+/** Welcome to the team: who added you, the temporary password, the way in. */
 export const Invite = ({
 	displayName,
 	appName,
@@ -34,61 +31,42 @@ export const Invite = ({
 	password,
 	locale = defaultLocale,
 }: EmailProps) => {
-	/** Values are escaped: part of the copy carries inline markup. */
-	const { t } = createTranslator(locale, { escapeValues: true });
+	const { t } = createTranslator(locale);
+	const values = { name: displayName, company: companyName, app: appName };
 
 	return (
 		<EmailLayout
-			footer={t("emails.invite.footer")}
+			company={companyName}
+			footer={t("emails.invite.footer", values)}
 			illustration="invite"
-			preview={t("emails.invite.preview", { name: displayName, app: appName })}
+			preview={t("emails.invite.preview")}
 		>
-			<Text
-				className="mb-0 text-[15px] text-muted"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.invite.greeting", { name: displayName }),
-				}}
+			<EmailHeading>{t("emails.invite.heading", values)}</EmailHeading>
+			<EmailText>{t("emails.invite.lead", values)}</EmailText>
+			<EmailCode label={t("emails.invite.passwordLabel")}>{password}</EmailCode>
+			<EmailSteps
+				steps={[
+					t("emails.invite.step1"),
+					t("emails.invite.step2"),
+					t("emails.invite.step3"),
+				]}
+				title={t("emails.invite.stepsTitle")}
 			/>
-			<Heading
-				className="mt-1 mb-2 font-semibold text-[24px] text-ink leading-8"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.invite.heading", {
-						company: companyName,
-						app: appName,
-					}),
-				}}
-			/>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{
-					__html: t("emails.invite.body", { company: companyName }),
-				}}
-			/>
-			<Text
-				className="text-[15px] leading-6"
-				dangerouslySetInnerHTML={{ __html: t("emails.invite.instructions") }}
-			/>
-			<Text className="mb-1 text-muted text-xs">
-				{t("emails.invite.passwordLabel")}
-			</Text>
-			<Text
-				className="mt-0 rounded-[12px] bg-[#f6f8fc] py-4 text-center font-bold text-[22px] text-ink tracking-wide"
-				style={{ fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" }}
-			>
-				{password}
-			</Text>
-			<EmailButton href={ctaUrl}>{t("emails.invite.cta")}</EmailButton>
-			<EmailNote>{t("emails.invite.passwordHint")}</EmailNote>
+			<EmailButton fallback={t("emails.common.linkFallback")} href={ctaUrl}>
+				{t("emails.invite.cta", values)}
+			</EmailButton>
+			<EmailNote>{t("emails.invite.note", values)}</EmailNote>
 		</EmailLayout>
 	);
 };
 
 Invite.PreviewProps = {
 	displayName: "Ricardo",
-	companyName: "Empresa",
+	companyName: "CONTEEX",
 	appName: "Fixr",
-	ctaUrl: "https://localhost:3000/auth/login",
+	ctaUrl: "https://fixr.com.br/auth/login",
 	password: "#}sPhzIvUj",
+	locale: "pt-BR",
 } as EmailProps;
 
 export default Invite;

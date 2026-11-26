@@ -2,81 +2,92 @@ import type { Translated } from "../../types";
 import type { emails as source } from "../en/emails";
 
 export const emails: Translated<typeof source> = {
-	header: {
-		docs: "Docs",
-		app: "App",
+	common: {
+		linkFallback: "Se o botão não funcionar, abra este link:",
 	},
 	invite: {
-		subject: "🎉 Bem-vindo ao {{app}} – Seu acesso ao sistema",
-		preview: "{{name}}, seu acesso ao {{app}}!",
-		greeting: "Olá, <i>{{name}}</i>!",
-		heading: "A <b>{{company}}</b> te adicionou no {{app}}.",
-		body: "Seu cadastro foi realizado com <b>sucesso</b>. Agora você é um <b>funcionário</b> da <b>{{company}}</b> e pode acessar a plataforma para gerenciar ordens de serviço, orçamentos e muito mais.",
-		instructions:
-			"Para acessar o sistema, <b>clique no botão abaixo</b> e faça login com <b>este email</b> e a <b>senha aleatória</b> de acesso.",
-		cta: "Acessar",
-		passwordHint:
-			"Altere a senha padrão no painel de conta após o primeiro acesso.",
-		passwordLabel: "Sua senha temporária",
-		footer: "Se você não reconhece essa empresa, por favor, ignore este email.",
+		subject: "{{company}} te adicionou no {{app}}",
+		preview:
+			"Sua senha temporária está aqui dentro. Entre e troque por uma sua.",
+		heading: "Boas-vindas à equipe da {{company}}",
+		lead: "Olá, {{name}}. A {{company}} organiza a assistência no {{app}} e acabou de liberar o seu acesso. Para entrar, use este email e a senha temporária abaixo.",
+		passwordLabel: "Senha temporária",
+		stepsTitle: "Seus primeiros cinco minutos",
+		step1: "Entre com este email e a senha temporária.",
+		step2: "Vá em Conta e escolha uma senha que só você saiba.",
+		step3:
+			"Abra Ordens de serviço para ver o que está com você e com o seu setor.",
+		cta: "Entrar no {{app}}",
+		note: "Ninguém da {{company}} ou do {{app}} vai pedir essa senha por telefone ou mensagem.",
+		footer:
+			"Você recebeu este email porque a {{company}} te adicionou à equipe no {{app}}. Se não conhece a empresa, ignore e nada vai acontecer.",
 	},
 	portalAccess: {
 		subject: "Suas ordens de serviço na {{company}}",
 		subjectSelf: "Seu link para acompanhar suas ordens de serviço",
-		preview: "Acompanhe suas ordens de serviço e orçamentos.",
-		greeting: "Olá, <i>{{name}}</i>!",
-		heading: "Acompanhe suas ordens de serviço.",
-		body: "Use o botão abaixo para ver o status das suas ordens de serviço e responder orçamentos. <b>Não compartilhe este link</b>: ele dá acesso ao seu histórico.",
-		cta: "Ver minhas ordens de serviço",
-		validity: "O link funciona por 30 dias, em qualquer aparelho.",
-		footer: "Se você não esperava este email, por favor, ignore-o.",
+		preview:
+			"Veja como está cada reparo sem precisar ligar para a assistência.",
+		heading: "Todos os seus reparos num só lugar",
+		lead: "Olá, {{name}}. O portal do cliente mostra cada aparelho que você deixou na {{company}}, do diagnóstico à retirada, para você não precisar ligar para saber como está.",
+		leadSelf:
+			"Olá, {{name}}. Aqui está o link que você pediu. O portal do cliente mostra cada aparelho que você deixou nas assistências que usam o Fixr, do diagnóstico à retirada.",
+		listTitle: "No portal você pode",
+		item1: "Ver em que etapa está cada ordem de serviço",
+		item2: "Aprovar ou recusar orçamentos e baixar os PDFs",
+		item3: "Consultar o histórico e as fotos dos seus aparelhos",
+		cta: "Abrir meu portal",
+		note: "O link vale por 30 dias em qualquer aparelho e abre o seu histórico, então guarde só para você.",
+		footer:
+			"Você recebeu este email porque o seu acesso ao portal do cliente do Fixr foi solicitado. Se não foi você, ignore.",
 	},
 	estimate: {
 		subject: "Orçamento #{{number}} da {{company}}",
-		preview: "A {{company}} enviou o orçamento #{{number}}.",
-		greeting: "Olá, <i>{{name}}</i>!",
-		heading: "A <b>{{company}}</b> te enviou um orçamento.",
-		body: "O orçamento <b>#{{number}}</b> do seu <b>{{device}}</b> ficou em <b>{{total}}</b>. O PDF está em anexo.",
-		instructions:
-			"Abra o orçamento para conferir os itens e <b>aprovar ou recusar</b>. Ele é válido até <b>{{date}}</b>.",
-		cta: "Ver orçamento",
+		preview: "{{total}} para consertar o seu {{device}}. Válido até {{date}}.",
+		heading: "Seu {{device}} já tem orçamento",
+		lead: "Olá, {{name}}. A {{company}} avaliou o seu {{device}} e o reparo fica em {{total}}. Confira o que está incluído e responda até {{date}}.",
 		numberLabel: "Orçamento",
 		deviceLabel: "Aparelho",
-		totalLabel: "Total",
 		validUntilLabel: "Válido até",
-		portalHint:
-			"O botão abre sua área no portal do cliente, onde você também acompanha o reparo e vê o PDF.",
-		footer: "Se você não pediu este orçamento, por favor, ignore este email.",
+		totalLabel: "Total",
+		stepsTitle: "Como funciona daqui para frente",
+		step1: "Você aprova ou recusa pelo link, sem precisar criar conta.",
+		step2:
+			"Se aprovar, a {{company}} começa o reparo e você acompanha cada etapa.",
+		step3:
+			"Se recusar, pode deixar um motivo e a {{company}} vê sua resposta na hora.",
+		cta: "Responder orçamento #{{number}}",
+		note: "O PDF com todos os itens segue em anexo. Depois de {{date}}, peça um novo orçamento à {{company}}.",
+		footer:
+			"Você recebeu este email porque a {{company}} te enviou um orçamento pelo Fixr. Se não pediu, ignore.",
 	},
 	verification: {
-		subject: "Confirme seu email, @{{name}}!",
-		preview: "{{name}}, confirme seu email!",
-		title: "<b>{{name}}</b>, sua nova conta está a um passo de distância.",
-		greeting: "Olá, <b>{{name}}</b>!",
-		body: "Você criou uma nova conta no {{app}}, clique no botão abaixo para confirmar sua identidade.",
-		cta: "Confirmar email",
-		footer: "Se não foi você quem criou a conta, ignore este email.",
+		subject: "Confirme seu email no {{app}}",
+		preview: "Um clique e sua conta está pronta.",
+		heading: "Falta só um clique",
+		lead: "Olá, {{name}}. Sua conta no {{app}} foi criada. Confirme que este endereço é seu para começar a usar e para conseguir voltar se um dia esquecer a senha.",
+		cta: "Confirmar meu email",
+		note: "O link funciona uma vez e só confirma este endereço.",
+		footer:
+			"Você recebeu este email porque alguém criou uma conta no {{app}} com este endereço. Se não foi você, ignore.",
 	},
 	passwordReset: {
-		subject: "Esqueceu sua senha, {{name}}?",
-		preview: "Redefinição de senha",
-		greeting: "Olá, <i>{{name}}</i>!",
-		heading: "Esqueceu sua senha? 🔒",
-		body: "Recebemos uma solicitação para alterar a senha da sua conta no {{app}}.<br />Se foi você, pode definir uma nova senha clicando no botão abaixo:",
-		cta: "Redefinir minha senha",
-		warning:
-			"Para manter sua conta segura, não encaminhe este e-mail a ninguém.",
-		footer:
-			"Se você não solicitou essa alteração, basta ignorar e excluir esta mensagem.",
+		subject: "Redefina sua senha do {{app}}",
+		preview: "Escolha uma nova senha para a sua conta.",
+		heading: "Vamos trocar sua senha",
+		lead: "Olá, {{name}}. Recebemos um pedido para redefinir a senha da sua conta no {{app}}. Se foi você, escolha uma nova pelo botão abaixo.",
+		cta: "Escolher nova senha",
+		note: "O link funciona uma vez. Não encaminhe este email: quem tiver o link consegue trocar a sua senha.",
+		footer: "Se não foi você, ignore este email. Sua senha continua a mesma.",
 	},
 	accountDeletion: {
-		subject: "Confirmação de exclusão da conta de {{name}}.",
-		preview: "{{name}}, confirme a exclusão da sua conta.",
-		title: "Confirmação de exclusão de conta",
-		greeting: "Olá, <b>{{name}}</b>.",
-		body: "Você solicitou a exclusão da sua conta no {{app}}. Ao clicar no botão abaixo, sua conta será <b>excluída permanentemente</b> junto com todos os dados associados.",
-		irreversible: "<b>Esta ação é irreversível.</b>",
-		cta: "Excluir conta",
-		footer: "Se você não solicitou a exclusão, por favor, ignore este email.",
+		subject: "Confirme a exclusão da sua conta no {{app}}",
+		preview: "Precisamos da sua confirmação antes de apagar qualquer coisa.",
+		heading: "Confirme a exclusão da sua conta",
+		lead: "Olá, {{name}}. Você pediu para excluir sua conta no {{app}}. Antes de apagar qualquer coisa, precisamos confirmar que foi você.",
+		irreversible:
+			"Ao confirmar, a conta e todos os dados ligados a ela são apagados na hora. Não dá para desfazer.",
+		cta: "Excluir minha conta",
+		footer:
+			"Se você não pediu isso, ignore este email. Sua conta continua ativa.",
 	},
 } as const;
