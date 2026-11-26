@@ -5,6 +5,52 @@ export const serviceOrders = {
 		newTitle: "Create a new service order",
 		newDescription: "Fill in the fields below to create a new service order.",
 	},
+	assignment: {
+		pickTheirDepartment:
+			"{{name}} isn't in this department. Pick one of theirs.",
+		backToPool: "Back to the department pool",
+		title: "Responsible",
+		description:
+			"Who has the order now. Each stage can hand it on automatically.",
+		department: "Department",
+		assignee: "Employee",
+		noDepartment: "No department",
+		noAssignee: "Department pool (nobody yet)",
+		reassign: "Reassign",
+		reassignTitle: "Reassign the order",
+		reassignDescription:
+			"Hand the order to another department or employee. The change is recorded in its history.",
+		submit: "Reassign",
+		changed: "Order reassigned!",
+		sameAsNow: "Pick another department or employee",
+		openedBy: "Opened by",
+		history: "Assignment history",
+		noHistory: "Never reassigned",
+		by: "by {{name}}",
+		byStage: "by the stage's default",
+		nobody: "nobody",
+	},
+	views: {
+		label: "View",
+		list: "List",
+		board: "Board",
+	},
+	pools: {
+		mineTitle: "Assigned to me",
+		mineDescription: "The orders you are responsible for now",
+		departmentTitle: "My departments",
+		departmentDescription:
+			"The pool of your departments: orders waiting for someone to take them, and who has each one",
+		allDepartments: "All departments",
+	},
+	board: {
+		empty: "No orders",
+		moved: "{{code}} moved to {{status}}",
+		moveFailed: "Could not move the order",
+		truncated:
+			"Showing the {{count}} most recent orders. Use the list to see them all.",
+		unassigned: "Nobody yet",
+	},
 	statuses: {
 		pending: "Pending",
 		diagnosing: "Diagnosing",
@@ -38,6 +84,7 @@ export const serviceOrders = {
 		stepOf: "Step {{step}} of {{total}}",
 	},
 	detail: {
+		fullScreen: "Full screen",
 		back: "Back",
 		title: "Service order",
 		description: "See the full details of the service order below",
@@ -145,7 +192,8 @@ export const serviceOrders = {
 			customer: "Customer",
 			device: "Device",
 			category: "Category",
-			technician: "Technician",
+			technician: "Responsible",
+			department: "Department",
 			status: "Status",
 			issue: "Issue",
 			parts: "Parts",

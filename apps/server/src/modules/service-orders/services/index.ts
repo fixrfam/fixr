@@ -4,6 +4,7 @@ import type { jwtPayload } from "@fixr/schemas/auth";
 import type {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -27,6 +28,7 @@ import {
 	serviceOrdersListJoins,
 	serviceOrdersListSelect,
 } from "../repositories";
+import { assignServiceOrder } from "./assign";
 import { moveServiceOrder } from "./move-status";
 
 export class ServiceOrdersService {
@@ -39,6 +41,8 @@ export class ServiceOrdersService {
 		sort,
 		deviceCategoryId,
 		employeeId,
+		scope,
+		departmentId,
 		status,
 		dateFrom,
 		dateTo,
@@ -65,14 +69,26 @@ export class ServiceOrdersService {
 				? desc(serviceOrdersTable.createdAt)
 				: asc(serviceOrdersTable.createdAt);
 
-		const filter = ServiceOrdersRepository.buildListFilter(companyId, {
-			query,
-			deviceCategoryId,
-			employeeId,
-			status,
-			dateFrom,
-			dateTo,
-		});
+		// "Mine" and "my department" are relative to the caller's employee record.
+		const viewer =
+			scope === "mine" || scope === "department"
+				? await ServiceOrdersService.resolveViewer(userJwt, companyId)
+				: undefined;
+
+		const filter = ServiceOrdersRepository.buildListFilter(
+			companyId,
+			{
+				query,
+				deviceCategoryId,
+				employeeId,
+				scope,
+				departmentId,
+				status,
+				dateFrom,
+				dateTo,
+			},
+			viewer
+		);
 
 		const [records, totalRecords] = await Promise.all([
 			getPaginatedRecords({
@@ -190,6 +206,7 @@ export class ServiceOrdersService {
 			const order = await ServiceOrdersRepository.create(tx, {
 				companyId,
 				employeeId: employee.id,
+				departmentId: await ServiceOrdersService.soleDepartment(employee.id),
 				customerId: device.customerId,
 				data,
 			});
@@ -243,6 +260,30 @@ export class ServiceOrdersService {
 			throw new AppError("SERVICE_ORDER_EMPLOYEE_NOT_FOUND");
 		}
 		return employee;
+	}
+
+	/** The caller's employee record and the departments they're in ("my departments"). */
+	private static async resolveViewer(
+		userJwt: z.infer<typeof jwtPayload>,
+		companyId: string
+	) {
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+		return {
+			id: employee.id,
+			departmentIds: await ServiceOrdersRepository.queryEmployeeDepartmentIds(
+				employee.id
+			),
+		};
+	}
+
+	/** The employee's department when they're in exactly one; otherwise none. */
+	private static async soleDepartment(employeeId: string) {
+		const departmentIds =
+			await ServiceOrdersRepository.queryEmployeeDepartmentIds(employeeId);
+		return departmentIds.length === 1 ? departmentIds[0]! : null;
 	}
 
 	/** Resolve the caller's company, refusing a subdomain that isn't theirs. */
@@ -385,6 +426,80 @@ export class ServiceOrdersService {
 				error: null,
 				code: "change_service_order_status_success",
 				message: "Service order status updated successfully.",
+				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
+			})
+		);
+	}
+
+	/**
+	 * Hand the order to another department and/or employee, recording who did
+	 * it. An employee must be a member of the department the order goes to;
+	 * with no department, the order goes to the employee's department when
+	 * they're in exactly one.
+	 */
+	static async assign({
+		userJwt,
+		subdomain,
+		serviceOrderId,
+		data,
+		response,
+	}: {
+		userJwt: z.infer<typeof jwtPayload>;
+		subdomain: string;
+		serviceOrderId: string;
+		data: z.infer<typeof assignServiceOrderSchema>;
+		response: FastifyReply;
+	}) {
+		const companyId = ServiceOrdersService.resolveCompanyId(userJwt, subdomain);
+		await ServiceOrdersService.assertOwnServiceOrder(serviceOrderId, companyId);
+		const employee = await ServiceOrdersService.resolveEmployee(
+			userJwt,
+			companyId
+		);
+
+		if (
+			data.departmentId &&
+			!(await ServiceOrdersRepository.queryDepartmentOfCompany(
+				data.departmentId,
+				companyId
+			))
+		) {
+			throw new AppError("SERVICE_ORDER_DEPARTMENT_NOT_FOUND");
+		}
+		const assignee = data.assigneeId
+			? await ServiceOrdersRepository.queryEmployeeOfCompany(
+					data.assigneeId,
+					companyId
+				)
+			: null;
+		if (data.assigneeId && !assignee) {
+			throw new AppError("SERVICE_ORDER_ASSIGNEE_NOT_FOUND");
+		}
+		if (
+			assignee &&
+			data.departmentId &&
+			!assignee.departmentIds.includes(data.departmentId)
+		) {
+			throw new AppError("SERVICE_ORDER_ASSIGNEE_NOT_IN_DEPARTMENT");
+		}
+		const soleDepartment =
+			assignee?.departmentIds.length === 1 ? assignee.departmentIds[0]! : null;
+
+		await inTransaction((tx) =>
+			assignServiceOrder(tx, {
+				serviceOrderId,
+				departmentId: data.departmentId ?? soleDepartment,
+				assigneeId: data.assigneeId,
+				employeeId: employee.id,
+			})
+		);
+
+		return response.status(200).send(
+			apiResponse({
+				status: 200,
+				error: null,
+				code: "assign_service_order_success",
+				message: "Service order reassigned successfully.",
 				data: await ServiceOrdersService.queryDetail(serviceOrderId, companyId),
 			})
 		);

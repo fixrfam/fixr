@@ -29,14 +29,27 @@ export function DataTablePagination<TData>({
   ...props
 }: DataTablePaginationProps<TData>) {
   const { t } = useTranslation();
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const total = table.getRowCount();
+  const from = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const to = Math.min((pageIndex + 1) * pageSize, total);
   return (
     <div
       className={cn(
-        "flex w-full flex-col-reverse items-center justify-end gap-4 overflow-auto p-1 sm:flex-row sm:gap-8",
+        "flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8",
         className,
       )}
       {...props}
     >
+      {/* Fills the left side, which was empty, with where the reader is. */}
+      <p className="whitespace-nowrap px-2 text-2xs text-muted-foreground tabular-nums">
+        {total > 0 &&
+          t("dataTable.pagination.showing", {
+            from: String(from),
+            to: String(to),
+            total: String(total),
+          })}
+      </p>
       <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
         <div className="flex items-center space-x-2">
           <p className="whitespace-nowrap font-medium text-2xs">

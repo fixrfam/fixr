@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslation } from "@fixr/i18n/react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { SAMPLE_PORTAL_ORDERS } from "@/lib/samples";
 import { PortalList, PortalServiceOrderRow } from "./portal-cards";
 import { PortalPageTitle } from "./portal-shell";
 import { usePortalServiceOrders } from "./store";
@@ -10,7 +11,7 @@ import { usePortalServiceOrders } from "./store";
 export function PortalServiceOrders() {
 	const { t } = useTranslation();
 	const { data, isPending } = usePortalServiceOrders();
-	const orders = data ?? [];
+	const orders = isPending ? SAMPLE_PORTAL_ORDERS : (data ?? []);
 	const groups = [
 		{
 			title: t("portal.list.active"),
@@ -28,24 +29,25 @@ export function PortalServiceOrders() {
 				description={t("portal.list.description")}
 				title={t("portal.list.title")}
 			/>
-			{isPending && <Skeleton className="h-44 rounded-2xl" />}
 			{!isPending && orders.length === 0 && (
 				<p className="py-12 text-center text-muted-foreground text-sm">
 					{t("portal.list.empty")}
 				</p>
 			)}
-			<div className="space-y-7">
-				{groups.map((group) => (
-					<section className="space-y-2.5" key={group.title}>
-						<h2 className="font-semibold text-sm">{group.title}</h2>
-						<PortalList>
-							{group.list.map((order) => (
-								<PortalServiceOrderRow key={order.id} order={order} />
-							))}
-						</PortalList>
-					</section>
-				))}
-			</div>
+			<Reveal id="portal-service-orders" loading={isPending}>
+				<div className="space-y-7">
+					{groups.map((group) => (
+						<section className="space-y-2.5" key={group.title}>
+							<h2 className="font-semibold text-sm">{group.title}</h2>
+							<PortalList>
+								{group.list.map((order) => (
+									<PortalServiceOrderRow key={order.id} order={order} />
+								))}
+							</PortalList>
+						</section>
+					))}
+				</div>
+			</Reveal>
 		</div>
 	);
 }

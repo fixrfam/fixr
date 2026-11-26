@@ -172,7 +172,7 @@ export function PortalShell({ children }: { children: ReactNode }) {
 					>
 						<Logo className={cn("size-7 shrink-0", home && "mb-6")} />
 						{me.isPending ? (
-							<Skeleton className="h-7 w-36 bg-white/15" />
+							<Skeleton className="h-7 w-36 [--skullet-base:rgb(255_255_255/0.15)]" />
 						) : (
 							<p
 								className={cn(

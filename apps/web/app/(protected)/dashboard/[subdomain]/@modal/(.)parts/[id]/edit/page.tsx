@@ -5,8 +5,9 @@ import { Puzzle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { NewPartForm } from "@/components/dashboard/parts/forms/new-part-form";
 import { usePart } from "@/components/dashboard/parts/store";
+import { Reveal } from "@/components/skeleton";
+import { FormShape } from "@/components/skeleton/shapes";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditPartModal() {
 	const router = useRouter();
@@ -17,10 +18,16 @@ export default function EditPartModal() {
 	let body = (
 		<p className="text-muted-foreground text-sm">{t("parts.page.notFound")}</p>
 	);
-	if (isPending) {
-		body = <Skeleton className="h-64 w-full" />;
-	} else if (part) {
-		body = <NewPartForm onSuccess={() => router.back()} part={part} />;
+	if (isPending || part) {
+		body = (
+			<Reveal id="part-form" loading={isPending}>
+				{part ? (
+					<NewPartForm onSuccess={() => router.back()} part={part} />
+				) : (
+					<FormShape fields={6} />
+				)}
+			</Reveal>
+		);
 	}
 
 	return (

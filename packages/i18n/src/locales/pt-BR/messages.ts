@@ -175,6 +175,40 @@ export const messages: Translated<typeof source> = {
 			title: "Fornecedor em uso",
 			description: "Mova ou remova as peças dele antes de excluir.",
 		},
+		service_order_department_not_found: {
+			title: "Setor não encontrado",
+			description: "Escolha um dos setores da empresa.",
+		},
+		service_order_assignee_not_found: {
+			title: "Funcionário não encontrado",
+			description: "Escolha um dos funcionários da empresa.",
+		},
+		department_not_found: {
+			title: "Setor não encontrado",
+			description: "Este setor não existe ou foi removido.",
+		},
+		department_name_conflict: {
+			title: "Setor já existe",
+			description: "Sua empresa já tem um setor com esse nome.",
+		},
+		department_employee_not_found: {
+			title: "Funcionário não encontrado",
+			description: "Este funcionário não faz parte da sua empresa.",
+		},
+		department_stage_owner_invalid: {
+			title: "Responsável inválido",
+			description:
+				"Uma etapa aponta para um setor que não existe mais, ou para um funcionário que não está nele.",
+		},
+		department_leader_not_member: {
+			title: "Fora do setor",
+			description: "O líder precisa ser um dos funcionários do setor.",
+		},
+		service_order_assignee_not_in_department: {
+			title: "Fora do setor",
+			description:
+				"Este funcionário não está no setor. Escolha um dos setores dele.",
+		},
 		supplier_not_found: {
 			title: "Fornecedor não encontrado",
 			description: "Este fornecedor não existe ou foi removido.",

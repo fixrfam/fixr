@@ -9,8 +9,9 @@ import {
 	ContactSection,
 	ItemsSection,
 } from "@/components/estimates/customer-estimate";
+import { Reveal } from "@/components/skeleton";
+import { CardShape } from "@/components/skeleton/shapes";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { PortalServiceOrder as Order } from "@/lib/services/portal";
 import { cn } from "@/lib/utils";
 import {
@@ -80,10 +81,12 @@ export function PortalServiceOrder({ id }: { id: string }) {
 
 	if (isPending) {
 		return (
-			<div className="space-y-4">
-				<Skeleton className="h-24 rounded-2xl" />
-				<Skeleton className="h-72 rounded-2xl" />
-			</div>
+			<Reveal id="portal-service-order" loading>
+				<div className="space-y-4">
+					<CardShape className="rounded-2xl" lines={2} />
+					<CardShape className="rounded-2xl" lines={5} />
+				</div>
+			</Reveal>
 		);
 	}
 
@@ -101,44 +104,47 @@ export function PortalServiceOrder({ id }: { id: string }) {
 		);
 	}
 
+	// Same element as while loading, so the skeleton reveals into it.
 	return (
-		<div>
-			<PortalBackLink
-				href="/portal/service-orders"
-				label={t("portal.detail.back")}
-			/>
-			<Hero order={order} />
-			<div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_18rem]">
-				<div className="min-w-0 space-y-7">
-					<Section title={t("portal.detail.reportedDefect")}>
-						<blockquote className="text-pretty border-l-2 pl-3 text-sm">
-							{order.reportedDefect}
-						</blockquote>
-					</Section>
-					<EstimatesSection order={order} />
-					{order.items.length > 0 ? (
-						<ItemsSection
-							estimate={itemsSummary(order.items)}
-							title={t("portal.detail.items")}
-						/>
-					) : (
-						<Section title={t("portal.detail.items")}>
-							<p className="text-muted-foreground text-sm">
-								{t("portal.detail.noItems")}
-							</p>
+		<Reveal id="portal-service-order" loading={false}>
+			<div>
+				<PortalBackLink
+					href="/portal/service-orders"
+					label={t("portal.detail.back")}
+				/>
+				<Hero order={order} />
+				<div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_18rem]">
+					<div className="min-w-0 space-y-7">
+						<Section title={t("portal.detail.reportedDefect")}>
+							<blockquote className="text-pretty border-l-2 pl-3 text-sm">
+								{order.reportedDefect}
+							</blockquote>
 						</Section>
-					)}
-				</div>
-				<div className="space-y-7">
-					<Section title={t("portal.detail.progress")}>
-						<div>
-							<PortalTimeline history={order.history} status={order.status} />
-						</div>
-					</Section>
-					<ContactSection company={order.company} />
+						<EstimatesSection order={order} />
+						{order.items.length > 0 ? (
+							<ItemsSection
+								estimate={itemsSummary(order.items)}
+								title={t("portal.detail.items")}
+							/>
+						) : (
+							<Section title={t("portal.detail.items")}>
+								<p className="text-muted-foreground text-sm">
+									{t("portal.detail.noItems")}
+								</p>
+							</Section>
+						)}
+					</div>
+					<div className="space-y-7">
+						<Section title={t("portal.detail.progress")}>
+							<div>
+								<PortalTimeline history={order.history} status={order.status} />
+							</div>
+						</Section>
+						<ContactSection company={order.company} />
+					</div>
 				</div>
 			</div>
-		</div>
+		</Reveal>
 	);
 }
 

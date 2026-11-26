@@ -21,12 +21,14 @@ import {
 	useOutOfRangePage,
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
+import { Reveal } from "@/components/skeleton";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { SAMPLE_MODELS } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { useModelColumns } from "./columns";
 import {
@@ -248,7 +250,7 @@ export function ModelsBrowser({
 	const rows = useMemo(() => query.data?.records ?? [], [query.data]);
 
 	const table = useCatalogTable({
-		data: rows,
+		data: query.isPending || waiting ? SAMPLE_MODELS : rows,
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -336,9 +338,7 @@ export function ModelsBrowser({
 			</div>
 			{footer}
 
-			{query.isPending || waiting ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="models-table" loading={query.isPending || waiting}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -348,7 +348,7 @@ export function ModelsBrowser({
 					onRowClick={(row) => onSelect(row.original)}
 					table={table}
 				/>
-			)}
+			</Reveal>
 		</div>
 	);
 }

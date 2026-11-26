@@ -225,6 +225,13 @@
       "when": 1793988899441,
       "tag": "0031_portal_estimate_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1795048294171,
+      "tag": "0032_department_assignments",
+      "breakpoints": true
     }
   ]
 }

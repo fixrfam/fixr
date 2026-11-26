@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 import { I18nProvider } from "@/components/i18n-provider";
+import { SkeletonProvider } from "@/components/skeleton/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { getLocale, getTranslator } from "@/lib/i18n/server";
@@ -54,7 +55,9 @@ export default async function PortalRootLayout({
 						disableTransitionOnChange
 						enableSystem
 					>
-						<QueryClientWrapper>{children}</QueryClientWrapper>
+						<SkeletonProvider>
+							<QueryClientWrapper>{children}</QueryClientWrapper>
+						</SkeletonProvider>
 						<ThemedToaster />
 					</ThemeProvider>
 				</I18nProvider>

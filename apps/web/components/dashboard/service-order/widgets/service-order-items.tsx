@@ -21,6 +21,7 @@ import {
 	useServicesPage,
 } from "@/components/dashboard/parts/store";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
+import { Reveal } from "@/components/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,8 +38,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/hooks/use-session";
+import { SAMPLE_ORDER_ITEMS } from "@/lib/samples";
 import { estimatesApi } from "@/lib/services/estimates";
 import {
 	type ServiceOrderItem,
@@ -151,12 +152,9 @@ export function ServiceOrderItems({
 }) {
 	const { t, format } = useTranslation();
 	const canEdit = useCanEditItems();
-	const { data, isPending, error } = useItems(serviceOrderId);
+	const query = useItems(serviceOrderId);
+	const { isPending, error } = query;
 	const { change, busy } = useItemChange(serviceOrderId);
-
-	if (isPending) {
-		return <Skeleton className="h-32 w-full" />;
-	}
 
 	if (error) {
 		// Orders that only exist in the mocked list have no id the API knows (400/404).
@@ -171,75 +169,88 @@ export function ServiceOrderItems({
 		);
 	}
 
+	// Errors returned above: no data means it is still loading.
+	const data = query.data ?? SAMPLE_ORDER_ITEMS;
+
 	return (
-		<div className="space-y-3">
-			{data.items.length === 0 ? (
-				<p className="text-2xs text-muted-foreground">
-					{t("serviceOrders.items.empty")}
-				</p>
-			) : (
-				<div className="grid gap-2">
-					{groupItems(data.items).map(({ item, parts }) => {
-						const rowProps = (line: ServiceOrderItem) => ({
-							canEdit,
-							disabled: busy,
-							item: line,
-							onQuantity: (quantity: number) =>
-								change.mutate({ kind: "quantity", itemId: line.id, quantity }),
-							onRemove: () =>
-								change.mutate({ kind: "remove", itemId: line.id }),
-						});
+		<Reveal id="service-order-items" loading={isPending}>
+			<div className="space-y-3">
+				{data.items.length === 0 ? (
+					<p className="text-2xs text-muted-foreground">
+						{t("serviceOrders.items.empty")}
+					</p>
+				) : (
+					<div className="grid gap-2">
+						{groupItems(data.items).map(({ item, parts }) => {
+							const rowProps = (line: ServiceOrderItem) => ({
+								canEdit,
+								disabled: busy,
+								item: line,
+								onQuantity: (quantity: number) =>
+									change.mutate({
+										kind: "quantity",
+										itemId: line.id,
+										quantity,
+									}),
+								onRemove: () =>
+									change.mutate({ kind: "remove", itemId: line.id }),
+							});
 
-						if (parts.length === 0) {
-							return <ItemRow key={item.id} {...rowProps(item)} />;
-						}
+							if (parts.length === 0) {
+								return <ItemRow key={item.id} {...rowProps(item)} />;
+							}
 
-						return (
-							<div className="rounded-md border bg-card" key={item.id}>
-								<ItemRow {...rowProps(item)} bare />
-								<ul
-									aria-label={t("serviceOrders.items.serviceParts", {
-										name: item.name,
-									})}
-									className="ml-4 border-l pb-1"
-								>
-									{parts.map((part) => (
-										<li key={part.id}>
-											<ItemRow {...rowProps(part)} bare nested />
-										</li>
-									))}
-								</ul>
-								<div className="flex justify-between border-t px-3 py-1.5 text-2xs text-muted-foreground">
-									<span>{t("serviceOrders.items.serviceWithParts")}</span>
-									<span className="font-medium text-foreground tabular-nums">
-										{format.currency(
-											sumTotals([item, ...parts].map((line) => line.total))
-										)}
-									</span>
+							return (
+								<div className="rounded-md border bg-card" key={item.id}>
+									<ItemRow {...rowProps(item)} bare />
+									<ul
+										aria-label={t("serviceOrders.items.serviceParts", {
+											name: item.name,
+										})}
+										className="ml-4 border-l pb-1"
+									>
+										{parts.map((part) => (
+											<li key={part.id}>
+												<ItemRow {...rowProps(part)} bare nested />
+											</li>
+										))}
+									</ul>
+									<div className="flex justify-between border-t px-3 py-1.5 text-2xs text-muted-foreground">
+										<span>{t("serviceOrders.items.serviceWithParts")}</span>
+										<span className="font-medium text-foreground tabular-nums">
+											{format.currency(
+												sumTotals([item, ...parts].map((line) => line.total))
+											)}
+										</span>
+									</div>
 								</div>
-							</div>
-						);
-					})}
-				</div>
-			)}
+							);
+						})}
+					</div>
+				)}
 
-			<dl className="space-y-1 border-t pt-3 text-2xs">
-				<div className="flex justify-between text-muted-foreground">
-					<dt>{t("serviceOrders.items.partsTotal")}</dt>
-					<dd className="tabular-nums">{format.currency(data.totals.parts)}</dd>
-				</div>
-				<div className="flex justify-between text-muted-foreground">
-					<dt>{t("serviceOrders.items.servicesTotal")}</dt>
-					<dd className="tabular-nums">
-						{format.currency(data.totals.services)}
-					</dd>
-				</div>
-				<div className="flex justify-between font-semibold text-sm">
-					<dt>{t("serviceOrders.items.total")}</dt>
-					<dd className="tabular-nums">{format.currency(data.totals.total)}</dd>
-				</div>
-			</dl>
-		</div>
+				<dl className="space-y-1 border-t pt-3 text-2xs">
+					<div className="flex justify-between text-muted-foreground">
+						<dt>{t("serviceOrders.items.partsTotal")}</dt>
+						<dd className="tabular-nums">
+							{format.currency(data.totals.parts)}
+						</dd>
+					</div>
+					<div className="flex justify-between text-muted-foreground">
+						<dt>{t("serviceOrders.items.servicesTotal")}</dt>
+						<dd className="tabular-nums">
+							{format.currency(data.totals.services)}
+						</dd>
+					</div>
+					<div className="flex justify-between font-semibold text-sm">
+						<dt>{t("serviceOrders.items.total")}</dt>
+						<dd className="tabular-nums">
+							{format.currency(data.totals.total)}
+						</dd>
+					</div>
+				</dl>
+			</div>
+		</Reveal>
 	);
 }
 
@@ -248,8 +259,11 @@ export function ServiceOrderItems({
  */
 export function CreateEstimateButton({
 	serviceOrderId,
+	compact = false,
 }: {
 	serviceOrderId: string;
+	/** A small ghost button, for a card header. */
+	compact?: boolean;
 }) {
 	const { t } = useTranslation();
 	const { session } = useSession();
@@ -285,8 +299,9 @@ export function CreateEstimateButton({
 		<Button
 			disabled={create.isPending}
 			onClick={() => create.mutate()}
+			size={compact ? "sm" : "default"}
 			type="button"
-			variant="outline"
+			variant={compact ? "ghost" : "outline"}
 		>
 			{create.isPending ? (
 				<Loader2 className="size-3.5 animate-spin" />

@@ -16,6 +16,7 @@ import {
 	useSearchInput,
 } from "@/components/dashboard/parts/table/use-catalog-table";
 import { DashLink } from "@/components/dashboard/service-order/dash-link";
+import { Reveal } from "@/components/skeleton";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
@@ -26,8 +27,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatCpf } from "@/lib/format";
+import { SAMPLE_DEVICES } from "@/lib/samples";
 import type { DeviceRow } from "@/lib/services/devices";
 import { cn } from "@/lib/utils";
 import { useSubdomain } from "../customers/store";
@@ -179,7 +180,7 @@ export function DevicesTable() {
 		onDelete: (device) => setDeleting(device.id),
 	});
 	const table = useCatalogTable({
-		data: query.data?.records ?? [],
+		data: query.isPending ? SAMPLE_DEVICES : (query.data?.records ?? []),
 		columns,
 		page: params.page,
 		perPage: params.perPage,
@@ -236,9 +237,7 @@ export function DevicesTable() {
 					</Button>
 				)}
 			</div>
-			{query.isPending ? (
-				<Skeleton className="h-96 w-full rounded-md" />
-			) : (
+			<Reveal id="devices-table" loading={query.isPending}>
 				<DataTable
 					aria-busy={query.isPlaceholderData}
 					className={cn(
@@ -247,7 +246,7 @@ export function DevicesTable() {
 					)}
 					table={table}
 				/>
-			)}
+			</Reveal>
 			<DeviceFormDialog onOpenChange={setCreating} open={creating} />
 			<DeviceFormDialog
 				device={editing}

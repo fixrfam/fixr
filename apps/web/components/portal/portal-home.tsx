@@ -4,7 +4,8 @@ import { useTranslation } from "@fixr/i18n/react";
 import { ChevronRight, PackageCheck, Smartphone } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { CardShape } from "@/components/skeleton/shapes";
 import { cn } from "@/lib/utils";
 import {
 	PortalEstimateFeature,
@@ -48,10 +49,12 @@ export function PortalHome() {
 
 	if (orders.isPending || estimates.isPending) {
 		return (
-			<div className="space-y-6">
-				<Skeleton className="h-20 rounded-2xl" />
-				<Skeleton className="h-44 rounded-2xl" />
-			</div>
+			<Reveal id="portal-home" loading>
+				<div className="space-y-4">
+					<CardShape className="rounded-2xl" lines={2} />
+					<CardShape className="rounded-2xl" lines={5} />
+				</div>
+			</Reveal>
 		);
 	}
 
@@ -81,107 +84,113 @@ export function PortalHome() {
 		},
 	];
 
+	// Same element as while loading, so the skeleton reveals into it.
 	return (
-		<div className="space-y-7">
-			<div>
-				<dl className="grid grid-cols-3 divide-x">
-					{stats.map((stat) => (
-						<div
-							className="flex flex-col-reverse px-3 first:pl-0"
-							key={stat.label}
-						>
-							<dt className="truncate text-muted-foreground text-xs">
-								{stat.label}
-							</dt>
-							<dd
-								className={cn("font-heading font-semibold text-3xl", stat.tone)}
+		<Reveal id="portal-home" loading={false}>
+			<div className="space-y-7">
+				<div>
+					<dl className="grid grid-cols-3 divide-x">
+						{stats.map((stat) => (
+							<div
+								className="flex flex-col-reverse px-3 first:pl-0"
+								key={stat.label}
 							>
-								{stat.value}
-							</dd>
-						</div>
-					))}
-				</dl>
-			</div>
-
-			{all.length === 0 && pending.length === 0 && (
-				<div className="flex flex-col items-center px-6 py-12 text-center">
-					<Smartphone className="size-8 text-muted-foreground" />
-					<p className="mt-4 font-semibold">{t("portal.home.emptyTitle")}</p>
-					<p className="mt-1 max-w-xs text-pretty text-muted-foreground text-sm">
-						{t("portal.home.emptyDescription")}
-					</p>
-				</div>
-			)}
-
-			{featured && (
-				<Section index={0} title={t("portal.home.pendingTitle")}>
-					<div className="space-y-3">
-						<PortalEstimateFeature estimate={featured} />
-						{otherPending.length > 0 && (
-							<PortalList>
-								{otherPending.map((estimate) => (
-									<PortalEstimateRow estimate={estimate} key={estimate.id} />
-								))}
-							</PortalList>
-						)}
-					</div>
-				</Section>
-			)}
-
-			{ready.length > 0 && (
-				<Section index={1} title={t("portal.home.readyTitle")}>
-					<PortalList>
-						{ready.map((order) => (
-							<li key={order.id}>
-								<Link
-									className="group flex items-center gap-3 px-4 py-3.5 transition-[background-color] duration-150 ease-out hover:bg-muted/50"
-									href={`/portal/service-orders/${order.id}`}
+								<dt className="truncate text-muted-foreground text-xs">
+									{stat.label}
+								</dt>
+								<dd
+									className={cn(
+										"font-heading font-semibold text-3xl",
+										stat.tone
+									)}
 								>
-									<PackageCheck className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-									<p className="min-w-0 flex-1 truncate text-sm">
-										{t("portal.home.readyDescription", {
-											device: order.deviceModel,
-											shop: order.company.name,
-										})}
-									</p>
-									<ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
-								</Link>
-							</li>
+									{stat.value}
+								</dd>
+							</div>
 						))}
-					</PortalList>
-				</Section>
-			)}
+					</dl>
+				</div>
 
-			{active.length > 0 && (
-				<Section
-					action={
-						<Link
-							className="whitespace-nowrap text-primary text-xs hover:underline"
-							href="/portal/service-orders"
-						>
-							{t("portal.home.seeAll")}
-						</Link>
-					}
-					index={2}
-					title={t("portal.home.activeTitle")}
-				>
-					<PortalList>
-						{active.map((order) => (
-							<PortalServiceOrderRow key={order.id} order={order} />
-						))}
-					</PortalList>
-				</Section>
-			)}
+				{all.length === 0 && pending.length === 0 && (
+					<div className="flex flex-col items-center px-6 py-12 text-center">
+						<Smartphone className="size-8 text-muted-foreground" />
+						<p className="mt-4 font-semibold">{t("portal.home.emptyTitle")}</p>
+						<p className="mt-1 max-w-xs text-pretty text-muted-foreground text-sm">
+							{t("portal.home.emptyDescription")}
+						</p>
+					</div>
+				)}
 
-			{recent.length > 0 && (
-				<Section index={3} title={t("portal.home.recentTitle")}>
-					<PortalList>
-						{recent.map((order) => (
-							<PortalServiceOrderRow key={order.id} order={order} />
-						))}
-					</PortalList>
-				</Section>
-			)}
-		</div>
+				{featured && (
+					<Section index={0} title={t("portal.home.pendingTitle")}>
+						<div className="space-y-3">
+							<PortalEstimateFeature estimate={featured} />
+							{otherPending.length > 0 && (
+								<PortalList>
+									{otherPending.map((estimate) => (
+										<PortalEstimateRow estimate={estimate} key={estimate.id} />
+									))}
+								</PortalList>
+							)}
+						</div>
+					</Section>
+				)}
+
+				{ready.length > 0 && (
+					<Section index={1} title={t("portal.home.readyTitle")}>
+						<PortalList>
+							{ready.map((order) => (
+								<li key={order.id}>
+									<Link
+										className="group flex items-center gap-3 px-4 py-3.5 transition-[background-color] duration-150 ease-out hover:bg-muted/50"
+										href={`/portal/service-orders/${order.id}`}
+									>
+										<PackageCheck className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+										<p className="min-w-0 flex-1 truncate text-sm">
+											{t("portal.home.readyDescription", {
+												device: order.deviceModel,
+												shop: order.company.name,
+											})}
+										</p>
+										<ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+									</Link>
+								</li>
+							))}
+						</PortalList>
+					</Section>
+				)}
+
+				{active.length > 0 && (
+					<Section
+						action={
+							<Link
+								className="whitespace-nowrap text-primary text-xs hover:underline"
+								href="/portal/service-orders"
+							>
+								{t("portal.home.seeAll")}
+							</Link>
+						}
+						index={2}
+						title={t("portal.home.activeTitle")}
+					>
+						<PortalList>
+							{active.map((order) => (
+								<PortalServiceOrderRow key={order.id} order={order} />
+							))}
+						</PortalList>
+					</Section>
+				)}
+
+				{recent.length > 0 && (
+					<Section index={3} title={t("portal.home.recentTitle")}>
+						<PortalList>
+							{recent.map((order) => (
+								<PortalServiceOrderRow key={order.id} order={order} />
+							))}
+						</PortalList>
+					</Section>
+				)}
+			</div>
+		</Reveal>
 	);
 }

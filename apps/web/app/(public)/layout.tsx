@@ -7,6 +7,7 @@ import { ApiDowntimeBanner } from "@/components/home/api-downtime-banner";
 import Footer from "@/components/home/layout/footer";
 import Header from "@/components/home/layout/header";
 import { I18nProvider } from "@/components/i18n-provider";
+import { SkeletonProvider } from "@/components/skeleton/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { getSession } from "@/lib/auth/utils";
@@ -79,12 +80,14 @@ export default async function RootLayout({
 							disableTransitionOnChange
 							enableSystem
 						>
-							<div className="min-h-screen items-center justify-items-center gap-16">
-								<ApiDowntimeBanner />
-								<Header hasPortalSession={hasPortalSession} />
-								{children}
-								<Footer className="z-2" />
-							</div>
+							<SkeletonProvider>
+								<div className="min-h-screen items-center justify-items-center gap-16">
+									<ApiDowntimeBanner />
+									<Header hasPortalSession={hasPortalSession} />
+									{children}
+									<Footer className="z-2" />
+								</div>
+							</SkeletonProvider>
 							<ThemedToaster />
 						</ThemeProvider>
 					</SessionProvider>

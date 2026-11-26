@@ -5,8 +5,9 @@ import { Wrench } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useServiceRow } from "@/components/dashboard/parts/store";
 import { ServiceDetails } from "@/components/dashboard/services/service-details";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { ResponsiveDialogDrawer } from "@/components/ui/responsive-dialog-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServiceDetailsModal() {
 	const { t } = useTranslation();
@@ -18,10 +19,16 @@ export default function ServiceDetailsModal() {
 			{t("services.page.notFound")}
 		</p>
 	);
-	if (isPending) {
-		body = <Skeleton className="h-64 w-full" />;
-	} else if (service) {
-		body = <ServiceDetails service={service} />;
+	if (isPending || service) {
+		body = (
+			<Reveal id="service-details" loading={isPending}>
+				{service ? (
+					<ServiceDetails service={service} />
+				) : (
+					<CardsShape cards={2} className="lg:grid-cols-1" />
+				)}
+			</Reveal>
+		);
 	}
 
 	return (

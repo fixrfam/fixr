@@ -5,7 +5,9 @@ import { toast } from "@pheralb/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiErrorToast } from "@/components/dashboard/parts/forms/api-feedback";
 import { CustomerEstimate } from "@/components/estimates/customer-estimate";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
+import { CardShape } from "@/components/skeleton/shapes";
+import { SAMPLE_PORTAL_ESTIMATES } from "@/lib/samples";
 import { portalApi } from "@/lib/services/portal";
 import { PortalEstimateRow, PortalList } from "./portal-cards";
 import { PortalBackLink } from "./portal-service-order";
@@ -16,7 +18,7 @@ import { portalKeys, usePortalEstimate, usePortalEstimates } from "./store";
 export function PortalEstimates() {
 	const { t } = useTranslation();
 	const { data, isPending } = usePortalEstimates();
-	const estimates = data ?? [];
+	const estimates = isPending ? SAMPLE_PORTAL_ESTIMATES : (data ?? []);
 	const isOpen = (e: (typeof estimates)[number]) =>
 		e.status === "sent" && !e.expired;
 	const groups = [
@@ -33,24 +35,25 @@ export function PortalEstimates() {
 				description={t("portal.estimates.description")}
 				title={t("portal.estimates.title")}
 			/>
-			{isPending && <Skeleton className="h-44 rounded-2xl" />}
 			{!isPending && estimates.length === 0 && (
 				<p className="py-12 text-center text-muted-foreground text-sm">
 					{t("portal.estimates.empty")}
 				</p>
 			)}
-			<div className="space-y-7">
-				{groups.map((group) => (
-					<section className="space-y-2.5" key={group.title}>
-						<h2 className="font-semibold text-sm">{group.title}</h2>
-						<PortalList>
-							{group.list.map((estimate) => (
-								<PortalEstimateRow estimate={estimate} key={estimate.id} />
-							))}
-						</PortalList>
-					</section>
-				))}
-			</div>
+			<Reveal id="portal-estimates" loading={isPending}>
+				<div className="space-y-7">
+					{groups.map((group) => (
+						<section className="space-y-2.5" key={group.title}>
+							<h2 className="font-semibold text-sm">{group.title}</h2>
+							<PortalList>
+								{group.list.map((estimate) => (
+									<PortalEstimateRow estimate={estimate} key={estimate.id} />
+								))}
+							</PortalList>
+						</section>
+					))}
+				</div>
+			</Reveal>
 		</div>
 	);
 }
@@ -95,10 +98,12 @@ export function PortalEstimate({ id }: { id: string }) {
 
 	if (isPending) {
 		return (
-			<div className="space-y-4">
-				<Skeleton className="h-48 rounded-2xl" />
-				<Skeleton className="h-64 rounded-2xl" />
-			</div>
+			<Reveal id="portal-estimate" loading>
+				<div className="space-y-4">
+					<CardShape className="rounded-2xl" lines={2} />
+					<CardShape className="rounded-2xl" lines={5} />
+				</div>
+			</Reveal>
 		);
 	}
 
@@ -116,20 +121,23 @@ export function PortalEstimate({ id }: { id: string }) {
 		);
 	}
 
+	// Same element as while loading, so the skeleton reveals into it.
 	return (
-		<CustomerEstimate
-			estimate={estimate}
-			header={
-				<PortalBackLink
-					href="/portal/estimates"
-					label={t("portal.estimates.back")}
-				/>
-			}
-			onApprove={() => answer.mutate({ approve: true })}
-			onReject={(reason) => answer.mutate({ approve: false, reason })}
-			pdfUrl={portalApi.estimatePdfUrl(id)}
-			pending={answer.isPending}
-			withBottomNav
-		/>
+		<Reveal id="portal-estimate" loading={false}>
+			<CustomerEstimate
+				estimate={estimate}
+				header={
+					<PortalBackLink
+						href="/portal/estimates"
+						label={t("portal.estimates.back")}
+					/>
+				}
+				onApprove={() => answer.mutate({ approve: true })}
+				onReject={(reason) => answer.mutate({ approve: false, reason })}
+				pdfUrl={portalApi.estimatePdfUrl(id)}
+				pending={answer.isPending}
+				withBottomNav
+			/>
+		</Reveal>
 	);
 }

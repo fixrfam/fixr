@@ -65,6 +65,12 @@ export const validation = {
 		serialNumberMax: "The serial number exceeds {{count}} characters.",
 		notesMax: "The notes exceed {{count}} characters.",
 	},
+	department: {
+		invalid: "Invalid department.",
+		stageRepeated: "Each stage can appear only once.",
+		membersRequired: "At least one employee.",
+		stageEmployeeRequired: "Pick the employee who receives the order.",
+	},
 	serviceOrder: {
 		statusNoteMax: "The note can have up to {{count}} characters.",
 		photosRequired: "Add at least one photo.",

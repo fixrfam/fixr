@@ -5,6 +5,7 @@ export const dataTable: Translated<typeof source> = {
 	empty: "Sem resultados.",
 	pagination: {
 		rowsPerPage: "Linhas por página",
+		showing: "Mostrando {{from}} a {{to}} de {{total}}",
 		page: "Página {{page}} de {{total}}",
 		first: "Ir para primeira página",
 		previous: "Ir para página anterior",

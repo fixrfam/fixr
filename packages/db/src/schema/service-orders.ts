@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+	index,
 	int,
 	mysqlEnum,
 	mysqlTable,
@@ -12,6 +13,7 @@ import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { companies } from "./companies";
 import { customers } from "./customers";
+import { departments } from "./departments";
 import { devices } from "./devices";
 import { employees } from "./employees";
 
@@ -50,6 +52,16 @@ export const serviceOrders = mysqlTable(
 		employeeId: varchar("employee_id", { length: 25 })
 			.references(() => employees.id, { onDelete: "restrict" })
 			.notNull(),
+		/** The department whose pool the order is in (follows its stage, or a reassignment). */
+		departmentId: varchar("department_id", { length: 25 }).references(
+			() => departments.id,
+			{ onDelete: "set null" }
+		),
+		/** The employee responsible for it now (`employeeId` is who opened it). */
+		assigneeId: varchar("assignee_id", { length: 25 }).references(
+			() => employees.id,
+			{ onDelete: "set null" }
+		),
 		/** The customer's device being repaired (its model, IMEI and status live there). */
 		deviceId: varchar("device_id", { length: 25 })
 			.references(() => devices.id, { onDelete: "restrict" })
@@ -64,6 +76,8 @@ export const serviceOrders = mysqlTable(
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [
+		index("service_orders_department_idx").on(table.departmentId),
+		index("service_orders_assignee_idx").on(table.assigneeId),
 		uniqueIndex("service_orders_company_number_idx").on(
 			table.companyId,
 			table.number

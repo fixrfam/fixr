@@ -5,13 +5,15 @@ import { permissions } from "@fixr/permissions";
 import { ArrowLeft, Wrench } from "lucide-react";
 import { Heading } from "@/components/dashboard/heading";
 import { useCatalogAbility } from "@/components/dashboard/parts/store";
+import { Reveal } from "@/components/skeleton";
+import { CardsShape } from "@/components/skeleton/shapes";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { ServiceOrderDetail } from "@/lib/services/service-orders";
 import { DashLink } from "./dash-link";
 import { ServiceOrderDetailsLayout } from "./layout";
 import { useOrderCode, useServiceOrder } from "./store";
 import { MoveStatusDialog } from "./widgets/move-status-dialog";
+import { ReassignDialog } from "./widgets/service-order-assignment";
 import { CreateEstimateButton } from "./widgets/service-order-items";
 
 /** The order's main actions, next to its title. */
@@ -21,6 +23,7 @@ export function ServiceOrderActions({ order }: { order: ServiceOrderDetail }) {
 	return (
 		<div className="flex flex-wrap gap-2">
 			<CreateEstimateButton serviceOrderId={order.id} />
+			<ReassignDialog order={order} />
 			{ability.can(permissions.serviceOrders.changeStatus) && (
 				<MoveStatusDialog order={order} />
 			)}
@@ -74,14 +77,18 @@ export function ServiceOrderDetails({
 				</div>
 			</div>
 
-			{query.isPending && <Skeleton className="h-96 w-full rounded-md" />}
-			{!(query.isPending || order) && (
+			{query.isPending || order ? (
+				<Reveal id="service-order-details" loading={query.isPending}>
+					{order ? (
+						<ServiceOrderDetailsLayout order={order} subdomain={subdomain} />
+					) : (
+						<CardsShape cards={6} />
+					)}
+				</Reveal>
+			) : (
 				<p className="text-muted-foreground text-sm">
 					{t("serviceOrders.detail.notFound")}
 				</p>
-			)}
-			{order && (
-				<ServiceOrderDetailsLayout order={order} subdomain={subdomain} />
 			)}
 		</div>
 	);

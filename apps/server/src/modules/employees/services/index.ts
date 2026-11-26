@@ -1,5 +1,5 @@
 import { APP_NAME } from "@fixr/constants/app";
-import { and, asc, desc, eq, like } from "@fixr/db/connection";
+import { and, asc, desc, eq, like, or } from "@fixr/db/connection";
 import {
 	employees as employeesTable,
 	users as usersTable,
@@ -23,6 +23,7 @@ import {
 import { apiResponse, paginatedData } from "../../../core/lib/response";
 import { AuthRepository } from "../../auth/repositories";
 import { CompaniesRepository } from "../../companies/repositories";
+import { DepartmentsRepository } from "../../departments/repositories";
 import { EmployeesRepository } from "../repositories";
 
 /** @description Employees business logic */
@@ -74,9 +75,14 @@ export class EmployeesService {
 				? desc(employeesTable.createdAt)
 				: asc(employeesTable.createdAt);
 
+		// CPFs are stored as digits, so "529.982" also finds "52998224725".
+		const cpfDigits = (query ?? "").replace(/\D/g, "");
 		const filter = and(
 			eq(employeesTable.companyId, company.id),
-			like(employeesTable.name, `%${query ?? ""}%`) //like "%%" to fetch all if there is no query
+			or(
+				like(employeesTable.name, `%${query ?? ""}%`), //like "%%" to fetch all if there is no query
+				...(cpfDigits ? [like(employeesTable.cpf, `%${cpfDigits}%`)] : [])
+			)
 		);
 
 		const [presentations, totalRecords] = (await Promise.all([
@@ -179,6 +185,11 @@ export class EmployeesService {
 				? page + 1
 				: null;
 
+		const departmentsByEmployee =
+			await DepartmentsRepository.queryEmployeesDepartments(
+				(presentations as { id: string }[]).map((employee) => employee.id)
+			);
+
 		return response.status(200).send(
 			apiResponse({
 				status: 200,
@@ -186,7 +197,10 @@ export class EmployeesService {
 				message: "Company employees successfully retrieved.",
 				code: "get_company_employees_success",
 				data: paginatedData({
-					records: presentations,
+					records: (presentations as { id: string }[]).map((employee) => ({
+						...employee,
+						departments: departmentsByEmployee.get(employee.id) ?? [],
+					})),
 					pagination: {
 						total_records: totalRecords,
 						total_pages,
@@ -268,7 +282,7 @@ export class EmployeesService {
 
 		const employeePassword = data.password ?? generateRandomPassword();
 
-		await EmployeesRepository.createEmployeeAndAccount({
+		const employeeId = await EmployeesRepository.createEmployeeAndAccount({
 			data: { ...data, password: employeePassword },
 			companyId: company.id,
 		});
@@ -294,7 +308,7 @@ export class EmployeesService {
 				error: null,
 				code: "create_employee_success",
 				message: "Employee created successfully.",
-				data: null,
+				data: { id: employeeId, name: data.name, cpf: data.cpf },
 			})
 		);
 	}

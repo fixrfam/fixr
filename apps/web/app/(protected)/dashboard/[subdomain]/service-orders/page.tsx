@@ -1,5 +1,5 @@
 import { Heading } from "@/components/dashboard/heading";
-import { ServiceOrdersTable } from "@/components/dashboard/service-order/service-order-table";
+import { ServiceOrdersView } from "@/components/dashboard/service-order/pool/service-orders-view";
 import { getTranslator } from "@/lib/i18n/server";
 
 type Params = Promise<{ subdomain: string }>;
@@ -20,7 +20,7 @@ export default async function ServiceOrdersPage({
 			/>
 
 			<div className="mt-5 rounded-xs">
-				<ServiceOrdersTable subdomain={subdomain} />
+				<ServiceOrdersView subdomain={subdomain} />
 			</div>
 		</div>
 	);

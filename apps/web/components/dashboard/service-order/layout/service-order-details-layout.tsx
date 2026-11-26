@@ -15,8 +15,10 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useTranslation } from "@fixr/i18n/react";
+import { permissions } from "@fixr/permissions";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useCatalogAbility } from "@/components/dashboard/parts/store";
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -81,9 +83,12 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 		useSensor(KeyboardSensor)
 	);
 
+	const canChangeStatus = useCatalogAbility().can(
+		permissions.serviceOrders.changeStatus
+	);
 	const cards = useMemo(
-		() => getCards(order, { t, format }, subdomain),
-		[order, t, format, subdomain]
+		() => getCards(order, { t, format }, subdomain, { canChangeStatus }),
+		[order, t, format, subdomain, canChangeStatus]
 	);
 
 	const renderCard = (cardId: CardId) => {
@@ -182,7 +187,7 @@ export function ServiceOrderDetailsLayout({ order, subdomain }: Props) {
 			sensors={sensors}
 		>
 			<div className="hidden gap-6 lg:block">
-				<ResizablePanelGroup autoSave={storageKey} className="min-w-6xl gap-6">
+				<ResizablePanelGroup autoSave={storageKey} className="min-w-0 gap-6">
 					<ResizablePanel defaultSize="55%" minSize="40%">
 						<SortableContext
 							items={layout.left}

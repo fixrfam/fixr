@@ -33,6 +33,10 @@ export const dashboard = {
 		models: "Models",
 		customerDevices: "Customer devices",
 		employees: "Employees",
+		allServiceOrders: "All",
+		myDepartment: "My departments",
+		myServiceOrders: "Assigned to me",
+		departments: "Departments",
 	},
 	account: {
 		manage: "Manage",

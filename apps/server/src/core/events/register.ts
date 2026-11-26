@@ -1,3 +1,4 @@
+import { registerDepartmentEffects } from "../../modules/departments/effects";
 import { registerDeviceEffects } from "../../modules/devices/effects";
 import { registerPortalEffects } from "../../modules/portal/effects";
 import { registerServiceOrderEffects } from "../../modules/service-orders/effects";
@@ -18,4 +19,5 @@ export function registerEffects() {
 	registerServiceOrderEffects(events);
 	registerDeviceEffects(events);
 	registerPortalEffects(events);
+	registerDepartmentEffects(events);
 }

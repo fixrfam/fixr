@@ -4,6 +4,7 @@ import { getCompanyNestedDataSchema } from "@fixr/schemas/companies";
 import {
 	addServiceOrderItemSchema,
 	addServiceOrderPhotosSchema,
+	assignServiceOrderSchema,
 	changeServiceOrderStatusSchema,
 	createServiceOrderSchema,
 	getServiceOrdersQuerySchema,
@@ -139,6 +140,33 @@ export function serviceOrdersRoutes(fastify: FastifyTypedInstance) {
 			const data = changeServiceOrderStatusSchema.parse(request.body);
 
 			await ServiceOrdersController.changeStatus({
+				userJwt,
+				subdomain,
+				serviceOrderId,
+				data,
+				response,
+			});
+		})
+	);
+
+	fastify.patch(
+		"/:serviceOrderId/assignment",
+		{
+			preHandler: [
+				authenticateEmployeeOrApiKey,
+				requirePermission(permissions.serviceOrders.assign),
+			],
+			schema: serviceOrdersDocs.assignServiceOrderSchema,
+		},
+		withErrorHandler(async (request, response) => {
+			const userJwt = request.user as z.infer<typeof userJWT>;
+			const { subdomain } = getCompanyNestedDataSchema.parse(request.params);
+			const { serviceOrderId } = serviceOrderIdParamsSchema.parse(
+				request.params
+			);
+			const data = assignServiceOrderSchema.parse(request.body);
+
+			await ServiceOrdersController.assign({
 				userJwt,
 				subdomain,
 				serviceOrderId,

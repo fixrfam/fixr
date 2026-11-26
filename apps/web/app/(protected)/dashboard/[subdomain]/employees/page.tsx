@@ -13,8 +13,9 @@ import {
 } from "@/components/dashboard/employees/columns";
 import { DataTable } from "@/components/dashboard/employees/data-table";
 import { Heading } from "@/components/dashboard/heading";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Reveal } from "@/components/skeleton";
 import { axios } from "@/lib/auth/axios";
+import { SAMPLE_EMPLOYEES } from "@/lib/samples";
 
 export default function EmployeesPage() {
 	const { t, format } = useTranslation();
@@ -37,22 +38,12 @@ export default function EmployeesPage() {
 				description={t("employees.page.description")}
 				title={t("employees.page.title")}
 			/>
-			{isPending ? (
-				<div className="mt-4 space-y-2">
-					<div className="flex w-full justify-between">
-						<div className="flex">
-							<Skeleton className="h-10 w-64" />
-						</div>
-						<div className="flex gap-2">
-							<Skeleton className="h-10 w-24" />
-							<Skeleton className="h-10 w-32" />
-						</div>
-					</div>
-					<Skeleton className="h-96 w-full rounded-md" />
-				</div>
-			) : (
-				<DataTable columns={columns} data={records} />
-			)}
+			<Reveal id="employees-table" loading={isPending}>
+				<DataTable
+					columns={columns}
+					data={isPending ? SAMPLE_EMPLOYEES : records}
+				/>
+			</Reveal>
 		</div>
 	);
 }
